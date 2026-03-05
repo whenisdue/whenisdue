@@ -86,54 +86,246 @@
     "lastVerifiedUtc": "2026-02-26T00:00:00Z",
     "notes": "Includes SSI (1st of month, paid early if weekend/holiday) and Social Security retirement/survivors/disability payments by birth-date Wednesday schedule.",
     "officialDates": [
-      { "month": "January", "date": "2024-12-31", "group": "SSI" },
-      { "month": "January", "date": "2025-01-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "January", "date": "2025-01-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "January", "date": "2025-01-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "February", "date": "2025-01-31", "group": "SSI" },
-      { "month": "February", "date": "2025-02-12", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "February", "date": "2025-02-19", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "February", "date": "2025-02-26", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "March", "date": "2025-02-28", "group": "SSI" },
-      { "month": "March", "date": "2025-03-12", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "March", "date": "2025-03-19", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "March", "date": "2025-03-26", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "April", "date": "2025-04-01", "group": "SSI" },
-      { "month": "April", "date": "2025-04-09", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "April", "date": "2025-04-16", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "April", "date": "2025-04-23", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "May", "date": "2025-05-01", "group": "SSI" },
-      { "month": "May", "date": "2025-05-14", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "May", "date": "2025-05-21", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "May", "date": "2025-05-28", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "June", "date": "2025-05-30", "group": "SSI" },
-      { "month": "June", "date": "2025-06-11", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "June", "date": "2025-06-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "June", "date": "2025-06-25", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "July", "date": "2025-07-01", "group": "SSI" },
-      { "month": "July", "date": "2025-07-09", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "July", "date": "2025-07-16", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "July", "date": "2025-07-23", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "August", "date": "2025-08-01", "group": "SSI" },
-      { "month": "August", "date": "2025-08-13", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "August", "date": "2025-08-20", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "August", "date": "2025-08-27", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "September", "date": "2025-08-29", "group": "SSI" },
-      { "month": "September", "date": "2025-09-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "September", "date": "2025-09-17", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "September", "date": "2025-09-24", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "October", "date": "2025-10-01", "group": "SSI" },
-      { "month": "October", "date": "2025-10-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "October", "date": "2025-10-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "October", "date": "2025-10-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "November", "date": "2025-10-31", "group": "SSI" },
-      { "month": "November", "date": "2025-11-12", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "November", "date": "2025-11-19", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "November", "date": "2025-11-26", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "December", "date": "2025-12-01", "group": "SSI" },
-      { "month": "December", "date": "2025-12-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "December", "date": "2025-12-17", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "December", "date": "2025-12-24", "group": "SS (4th Wed, DOB 21–31)" }
+      {
+        "month": "January",
+        "date": "2024-12-31",
+        "group": "SSI"
+      },
+      {
+        "month": "January",
+        "date": "2025-01-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "January",
+        "date": "2025-01-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "January",
+        "date": "2025-01-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "February",
+        "date": "2025-01-31",
+        "group": "SSI"
+      },
+      {
+        "month": "February",
+        "date": "2025-02-12",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "February",
+        "date": "2025-02-19",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "February",
+        "date": "2025-02-26",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "March",
+        "date": "2025-02-28",
+        "group": "SSI"
+      },
+      {
+        "month": "March",
+        "date": "2025-03-12",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "March",
+        "date": "2025-03-19",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "March",
+        "date": "2025-03-26",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "April",
+        "date": "2025-04-01",
+        "group": "SSI"
+      },
+      {
+        "month": "April",
+        "date": "2025-04-09",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "April",
+        "date": "2025-04-16",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "April",
+        "date": "2025-04-23",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "May",
+        "date": "2025-05-01",
+        "group": "SSI"
+      },
+      {
+        "month": "May",
+        "date": "2025-05-14",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "May",
+        "date": "2025-05-21",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "May",
+        "date": "2025-05-28",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "June",
+        "date": "2025-05-30",
+        "group": "SSI"
+      },
+      {
+        "month": "June",
+        "date": "2025-06-11",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "June",
+        "date": "2025-06-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "June",
+        "date": "2025-06-25",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "July",
+        "date": "2025-07-01",
+        "group": "SSI"
+      },
+      {
+        "month": "July",
+        "date": "2025-07-09",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "July",
+        "date": "2025-07-16",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "July",
+        "date": "2025-07-23",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "August",
+        "date": "2025-08-01",
+        "group": "SSI"
+      },
+      {
+        "month": "August",
+        "date": "2025-08-13",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "August",
+        "date": "2025-08-20",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "August",
+        "date": "2025-08-27",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "September",
+        "date": "2025-08-29",
+        "group": "SSI"
+      },
+      {
+        "month": "September",
+        "date": "2025-09-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "September",
+        "date": "2025-09-17",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "September",
+        "date": "2025-09-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "October",
+        "date": "2025-10-01",
+        "group": "SSI"
+      },
+      {
+        "month": "October",
+        "date": "2025-10-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "October",
+        "date": "2025-10-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "October",
+        "date": "2025-10-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "November",
+        "date": "2025-10-31",
+        "group": "SSI"
+      },
+      {
+        "month": "November",
+        "date": "2025-11-12",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "November",
+        "date": "2025-11-19",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "November",
+        "date": "2025-11-26",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "December",
+        "date": "2025-12-01",
+        "group": "SSI"
+      },
+      {
+        "month": "December",
+        "date": "2025-12-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "December",
+        "date": "2025-12-17",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "December",
+        "date": "2025-12-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      }
     ]
   },
   {
@@ -161,54 +353,246 @@
     "lastVerifiedUtc": "2026-02-26T00:00:00Z",
     "notes": "Includes SSI and Social Security payments by standard SSA schedule.",
     "officialDates": [
-      { "month": "January", "date": "2025-12-31", "group": "SSI" },
-      { "month": "January", "date": "2026-01-14", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "January", "date": "2026-01-21", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "January", "date": "2026-01-28", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "February", "date": "2026-01-30", "group": "SSI" },
-      { "month": "February", "date": "2026-02-11", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "February", "date": "2026-02-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "February", "date": "2026-02-25", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "March", "date": "2026-02-27", "group": "SSI" },
-      { "month": "March", "date": "2026-03-11", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "March", "date": "2026-03-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "March", "date": "2026-03-25", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "April", "date": "2026-04-01", "group": "SSI" },
-      { "month": "April", "date": "2026-04-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "April", "date": "2026-04-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "April", "date": "2026-04-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "May", "date": "2026-05-01", "group": "SSI" },
-      { "month": "May", "date": "2026-05-13", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "May", "date": "2026-05-20", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "May", "date": "2026-05-27", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "June", "date": "2026-06-01", "group": "SSI" },
-      { "month": "June", "date": "2026-06-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "June", "date": "2026-06-17", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "June", "date": "2026-06-24", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "July", "date": "2026-07-01", "group": "SSI" },
-      { "month": "July", "date": "2026-07-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "July", "date": "2026-07-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "July", "date": "2026-07-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "August", "date": "2026-07-31", "group": "SSI" },
-      { "month": "August", "date": "2026-08-12", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "August", "date": "2026-08-19", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "August", "date": "2026-08-26", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "September", "date": "2026-09-01", "group": "SSI" },
-      { "month": "September", "date": "2026-09-09", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "September", "date": "2026-09-16", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "September", "date": "2026-09-23", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "October", "date": "2026-10-01", "group": "SSI" },
-      { "month": "October", "date": "2026-10-14", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "October", "date": "2026-10-21", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "October", "date": "2026-10-28", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "November", "date": "2026-10-30", "group": "SSI" },
-      { "month": "November", "date": "2026-11-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "November", "date": "2026-11-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "November", "date": "2026-11-25", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "December", "date": "2026-12-01", "group": "SSI" },
-      { "month": "December", "date": "2026-12-09", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "December", "date": "2026-12-16", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "December", "date": "2026-12-23", "group": "SS (4th Wed, DOB 21–31)" }
+      {
+        "month": "January",
+        "date": "2025-12-31",
+        "group": "SSI"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-14",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-21",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-28",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "February",
+        "date": "2026-01-30",
+        "group": "SSI"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-11",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-25",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "March",
+        "date": "2026-02-27",
+        "group": "SSI"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-11",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-25",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "SSI"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "SSI"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-13",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-20",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-27",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "SSI"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-17",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "SSI"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "August",
+        "date": "2026-07-31",
+        "group": "SSI"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-12",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-19",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-26",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "SSI"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-09",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-16",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-23",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "SSI"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-14",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-21",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-28",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "November",
+        "date": "2026-10-30",
+        "group": "SSI"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-25",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "SSI"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-09",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-16",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-23",
+        "group": "SS (4th Wed, DOB 21–31)"
+      }
     ]
   },
   {
@@ -253,54 +637,246 @@
     "sourceUrl": "https://www.ssa.gov/pubs/EN-05-10031-2024.pdf",
     "lastVerifiedUtc": "2026-02-26T00:00:00Z",
     "officialDates": [
-      { "month": "January", "date": "2023-12-29", "group": "SSI" },
-      { "month": "January", "date": "2024-01-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "January", "date": "2024-01-17", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "January", "date": "2024-01-24", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "February", "date": "2024-02-01", "group": "SSI" },
-      { "month": "February", "date": "2024-02-14", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "February", "date": "2024-02-21", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "February", "date": "2024-02-28", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "March", "date": "2024-03-01", "group": "SSI" },
-      { "month": "March", "date": "2024-03-13", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "March", "date": "2024-03-20", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "March", "date": "2024-03-27", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "April", "date": "2024-04-01", "group": "SSI" },
-      { "month": "April", "date": "2024-04-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "April", "date": "2024-04-17", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "April", "date": "2024-04-24", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "May", "date": "2024-05-01", "group": "SSI" },
-      { "month": "May", "date": "2024-05-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "May", "date": "2024-05-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "May", "date": "2024-05-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "June", "date": "2024-05-31", "group": "SSI" },
-      { "month": "June", "date": "2024-06-12", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "June", "date": "2024-06-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "June", "date": "2024-06-26", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "July", "date": "2024-07-01", "group": "SSI" },
-      { "month": "July", "date": "2024-07-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "July", "date": "2024-07-17", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "July", "date": "2024-07-24", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "August", "date": "2024-08-01", "group": "SSI" },
-      { "month": "August", "date": "2024-08-14", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "August", "date": "2024-08-21", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "August", "date": "2024-08-28", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "September", "date": "2024-08-30", "group": "SSI" },
-      { "month": "September", "date": "2024-09-11", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "September", "date": "2024-09-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "September", "date": "2024-09-25", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "October", "date": "2024-10-01", "group": "SSI" },
-      { "month": "October", "date": "2024-10-09", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "October", "date": "2024-10-16", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "October", "date": "2024-10-23", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "November", "date": "2024-11-01", "group": "SSI" },
-      { "month": "November", "date": "2024-11-13", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "November", "date": "2024-11-20", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "November", "date": "2024-11-27", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "December", "date": "2024-11-29", "group": "SSI" },
-      { "month": "December", "date": "2024-12-11", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "December", "date": "2024-12-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "December", "date": "2024-12-24", "group": "SS (4th Wed, DOB 21–31)" }
+      {
+        "month": "January",
+        "date": "2023-12-29",
+        "group": "SSI"
+      },
+      {
+        "month": "January",
+        "date": "2024-01-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "January",
+        "date": "2024-01-17",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "January",
+        "date": "2024-01-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "February",
+        "date": "2024-02-01",
+        "group": "SSI"
+      },
+      {
+        "month": "February",
+        "date": "2024-02-14",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "February",
+        "date": "2024-02-21",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "February",
+        "date": "2024-02-28",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "March",
+        "date": "2024-03-01",
+        "group": "SSI"
+      },
+      {
+        "month": "March",
+        "date": "2024-03-13",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "March",
+        "date": "2024-03-20",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "March",
+        "date": "2024-03-27",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "April",
+        "date": "2024-04-01",
+        "group": "SSI"
+      },
+      {
+        "month": "April",
+        "date": "2024-04-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "April",
+        "date": "2024-04-17",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "April",
+        "date": "2024-04-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "May",
+        "date": "2024-05-01",
+        "group": "SSI"
+      },
+      {
+        "month": "May",
+        "date": "2024-05-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "May",
+        "date": "2024-05-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "May",
+        "date": "2024-05-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "June",
+        "date": "2024-05-31",
+        "group": "SSI"
+      },
+      {
+        "month": "June",
+        "date": "2024-06-12",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "June",
+        "date": "2024-06-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "June",
+        "date": "2024-06-26",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "July",
+        "date": "2024-07-01",
+        "group": "SSI"
+      },
+      {
+        "month": "July",
+        "date": "2024-07-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "July",
+        "date": "2024-07-17",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "July",
+        "date": "2024-07-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "August",
+        "date": "2024-08-01",
+        "group": "SSI"
+      },
+      {
+        "month": "August",
+        "date": "2024-08-14",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "August",
+        "date": "2024-08-21",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "August",
+        "date": "2024-08-28",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "September",
+        "date": "2024-08-30",
+        "group": "SSI"
+      },
+      {
+        "month": "September",
+        "date": "2024-09-11",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "September",
+        "date": "2024-09-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "September",
+        "date": "2024-09-25",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "October",
+        "date": "2024-10-01",
+        "group": "SSI"
+      },
+      {
+        "month": "October",
+        "date": "2024-10-09",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "October",
+        "date": "2024-10-16",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "October",
+        "date": "2024-10-23",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "November",
+        "date": "2024-11-01",
+        "group": "SSI"
+      },
+      {
+        "month": "November",
+        "date": "2024-11-13",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "November",
+        "date": "2024-11-20",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "November",
+        "date": "2024-11-27",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "December",
+        "date": "2024-11-29",
+        "group": "SSI"
+      },
+      {
+        "month": "December",
+        "date": "2024-12-11",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "December",
+        "date": "2024-12-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "December",
+        "date": "2024-12-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      }
     ]
   },
   {
@@ -314,54 +890,246 @@
     "sourceUrl": "https://www.ssa.gov/pubs/EN-05-10031-2023.pdf",
     "lastVerifiedUtc": "2026-02-26T00:00:00Z",
     "officialDates": [
-      { "month": "January", "date": "2022-12-30", "group": "SSI" },
-      { "month": "January", "date": "2023-01-11", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "January", "date": "2023-01-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "January", "date": "2023-01-25", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "February", "date": "2023-02-01", "group": "SSI" },
-      { "month": "February", "date": "2023-02-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "February", "date": "2023-02-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "February", "date": "2023-02-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "March", "date": "2023-03-01", "group": "SSI" },
-      { "month": "March", "date": "2023-03-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "March", "date": "2023-03-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "March", "date": "2023-03-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "April", "date": "2023-03-31", "group": "SSI" },
-      { "month": "April", "date": "2023-04-12", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "April", "date": "2023-04-19", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "April", "date": "2023-04-26", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "May", "date": "2023-05-01", "group": "SSI" },
-      { "month": "May", "date": "2023-05-10", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "May", "date": "2023-05-17", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "May", "date": "2023-05-24", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "June", "date": "2023-06-01", "group": "SSI" },
-      { "month": "June", "date": "2023-06-14", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "June", "date": "2023-06-21", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "June", "date": "2023-06-28", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "July", "date": "2023-06-30", "group": "SSI" },
-      { "month": "July", "date": "2023-07-12", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "July", "date": "2023-07-19", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "July", "date": "2023-07-26", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "August", "date": "2023-08-01", "group": "SSI" },
-      { "month": "August", "date": "2023-08-09", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "August", "date": "2023-08-16", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "August", "date": "2023-08-23", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "September", "date": "2023-09-01", "group": "SSI" },
-      { "month": "September", "date": "2023-09-13", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "September", "date": "2023-09-20", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "September", "date": "2023-09-27", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "October", "date": "2023-09-29", "group": "SSI" },
-      { "month": "October", "date": "2023-10-11", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "October", "date": "2023-10-18", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "October", "date": "2023-10-25", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "November", "date": "2023-11-01", "group": "SSI" },
-      { "month": "November", "date": "2023-11-08", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "November", "date": "2023-11-15", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "November", "date": "2023-11-22", "group": "SS (4th Wed, DOB 21–31)" },
-      { "month": "December", "date": "2023-12-01", "group": "SSI" },
-      { "month": "December", "date": "2023-12-13", "group": "SS (2nd Wed, DOB 1–10)" },
-      { "month": "December", "date": "2023-12-20", "group": "SS (3rd Wed, DOB 11–20)" },
-      { "month": "December", "date": "2023-12-27", "group": "SS (4th Wed, DOB 21–31)" }
+      {
+        "month": "January",
+        "date": "2022-12-30",
+        "group": "SSI"
+      },
+      {
+        "month": "January",
+        "date": "2023-01-11",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "January",
+        "date": "2023-01-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "January",
+        "date": "2023-01-25",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "February",
+        "date": "2023-02-01",
+        "group": "SSI"
+      },
+      {
+        "month": "February",
+        "date": "2023-02-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "February",
+        "date": "2023-02-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "February",
+        "date": "2023-02-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "March",
+        "date": "2023-03-01",
+        "group": "SSI"
+      },
+      {
+        "month": "March",
+        "date": "2023-03-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "March",
+        "date": "2023-03-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "March",
+        "date": "2023-03-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "April",
+        "date": "2023-03-31",
+        "group": "SSI"
+      },
+      {
+        "month": "April",
+        "date": "2023-04-12",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "April",
+        "date": "2023-04-19",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "April",
+        "date": "2023-04-26",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "May",
+        "date": "2023-05-01",
+        "group": "SSI"
+      },
+      {
+        "month": "May",
+        "date": "2023-05-10",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "May",
+        "date": "2023-05-17",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "May",
+        "date": "2023-05-24",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "June",
+        "date": "2023-06-01",
+        "group": "SSI"
+      },
+      {
+        "month": "June",
+        "date": "2023-06-14",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "June",
+        "date": "2023-06-21",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "June",
+        "date": "2023-06-28",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "July",
+        "date": "2023-06-30",
+        "group": "SSI"
+      },
+      {
+        "month": "July",
+        "date": "2023-07-12",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "July",
+        "date": "2023-07-19",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "July",
+        "date": "2023-07-26",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "August",
+        "date": "2023-08-01",
+        "group": "SSI"
+      },
+      {
+        "month": "August",
+        "date": "2023-08-09",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "August",
+        "date": "2023-08-16",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "August",
+        "date": "2023-08-23",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "September",
+        "date": "2023-09-01",
+        "group": "SSI"
+      },
+      {
+        "month": "September",
+        "date": "2023-09-13",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "September",
+        "date": "2023-09-20",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "September",
+        "date": "2023-09-27",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "October",
+        "date": "2023-09-29",
+        "group": "SSI"
+      },
+      {
+        "month": "October",
+        "date": "2023-10-11",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "October",
+        "date": "2023-10-18",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "October",
+        "date": "2023-10-25",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "November",
+        "date": "2023-11-01",
+        "group": "SSI"
+      },
+      {
+        "month": "November",
+        "date": "2023-11-08",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "November",
+        "date": "2023-11-15",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "November",
+        "date": "2023-11-22",
+        "group": "SS (4th Wed, DOB 21–31)"
+      },
+      {
+        "month": "December",
+        "date": "2023-12-01",
+        "group": "SSI"
+      },
+      {
+        "month": "December",
+        "date": "2023-12-13",
+        "group": "SS (2nd Wed, DOB 1–10)"
+      },
+      {
+        "month": "December",
+        "date": "2023-12-20",
+        "group": "SS (3rd Wed, DOB 11–20)"
+      },
+      {
+        "month": "December",
+        "date": "2023-12-27",
+        "group": "SS (4th Wed, DOB 21–31)"
+      }
     ]
   },
   {
@@ -404,18 +1172,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Payments are made on the first business day of the following month. If the first day is a weekend or federal holiday, payment is made on the last business day before the first.",
     "officialDates": [
-      { "month": "January", "date": "2024-02-01", "group": "VA Disability Compensation" },
-      { "month": "February", "date": "2024-03-01", "group": "VA Disability Compensation" },
-      { "month": "March", "date": "2024-04-01", "group": "VA Disability Compensation" },
-      { "month": "April", "date": "2024-05-01", "group": "VA Disability Compensation" },
-      { "month": "May", "date": "2024-05-31", "group": "VA Disability Compensation" },
-      { "month": "June", "date": "2024-07-01", "group": "VA Disability Compensation" },
-      { "month": "July", "date": "2024-08-01", "group": "VA Disability Compensation" },
-      { "month": "August", "date": "2024-08-30", "group": "VA Disability Compensation" },
-      { "month": "September", "date": "2024-10-01", "group": "VA Disability Compensation" },
-      { "month": "October", "date": "2024-11-01", "group": "VA Disability Compensation" },
-      { "month": "November", "date": "2024-11-29", "group": "VA Disability Compensation" },
-      { "month": "December", "date": "2024-12-31", "group": "VA Disability Compensation" }
+      {
+        "month": "January",
+        "date": "2024-02-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "February",
+        "date": "2024-03-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "March",
+        "date": "2024-04-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "April",
+        "date": "2024-05-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "May",
+        "date": "2024-05-31",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "June",
+        "date": "2024-07-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "July",
+        "date": "2024-08-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "August",
+        "date": "2024-08-30",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "September",
+        "date": "2024-10-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "October",
+        "date": "2024-11-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "November",
+        "date": "2024-11-29",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "December",
+        "date": "2024-12-31",
+        "group": "VA Disability Compensation"
+      }
     ]
   },
   {
@@ -430,18 +1246,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Payments are made on the first business day of the following month. If the first day is a weekend or federal holiday, payment is made on the last business day before the first.",
     "officialDates": [
-      { "month": "January", "date": "2025-01-31", "group": "VA Disability Compensation" },
-      { "month": "February", "date": "2025-02-28", "group": "VA Disability Compensation" },
-      { "month": "March", "date": "2025-04-01", "group": "VA Disability Compensation" },
-      { "month": "April", "date": "2025-05-01", "group": "VA Disability Compensation" },
-      { "month": "May", "date": "2025-05-30", "group": "VA Disability Compensation" },
-      { "month": "June", "date": "2025-07-01", "group": "VA Disability Compensation" },
-      { "month": "July", "date": "2025-08-01", "group": "VA Disability Compensation" },
-      { "month": "August", "date": "2025-08-29", "group": "VA Disability Compensation" },
-      { "month": "September", "date": "2025-10-01", "group": "VA Disability Compensation" },
-      { "month": "October", "date": "2025-10-31", "group": "VA Disability Compensation" },
-      { "month": "November", "date": "2025-12-01", "group": "VA Disability Compensation" },
-      { "month": "December", "date": "2025-12-31", "group": "VA Disability Compensation" }
+      {
+        "month": "January",
+        "date": "2025-01-31",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "February",
+        "date": "2025-02-28",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "March",
+        "date": "2025-04-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "April",
+        "date": "2025-05-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "May",
+        "date": "2025-05-30",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "June",
+        "date": "2025-07-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "July",
+        "date": "2025-08-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "August",
+        "date": "2025-08-29",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "September",
+        "date": "2025-10-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "October",
+        "date": "2025-10-31",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "November",
+        "date": "2025-12-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "December",
+        "date": "2025-12-31",
+        "group": "VA Disability Compensation"
+      }
     ]
   },
   {
@@ -456,18 +1320,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Payments are made on the first business day of the following month. If the first day is a weekend or federal holiday, payment is made on the last business day before the first.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-30", "group": "VA Disability Compensation" },
-      { "month": "February", "date": "2026-02-27", "group": "VA Disability Compensation" },
-      { "month": "March", "date": "2026-04-01", "group": "VA Disability Compensation" },
-      { "month": "April", "date": "2026-05-01", "group": "VA Disability Compensation" },
-      { "month": "May", "date": "2026-06-01", "group": "VA Disability Compensation" },
-      { "month": "June", "date": "2026-07-01", "group": "VA Disability Compensation" },
-      { "month": "July", "date": "2026-07-31", "group": "VA Disability Compensation" },
-      { "month": "August", "date": "2026-09-01", "group": "VA Disability Compensation" },
-      { "month": "September", "date": "2026-10-01", "group": "VA Disability Compensation" },
-      { "month": "October", "date": "2026-10-30", "group": "VA Disability Compensation" },
-      { "month": "November", "date": "2026-12-01", "group": "VA Disability Compensation" },
-      { "month": "December", "date": "2026-12-31", "group": "VA Disability Compensation" }
+      {
+        "month": "January",
+        "date": "2026-01-30",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-27",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "March",
+        "date": "2026-04-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "April",
+        "date": "2026-05-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "May",
+        "date": "2026-06-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "June",
+        "date": "2026-07-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-31",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "August",
+        "date": "2026-09-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "September",
+        "date": "2026-10-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-30",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "November",
+        "date": "2026-12-01",
+        "group": "VA Disability Compensation"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-31",
+        "group": "VA Disability Compensation"
+      }
     ]
   },
   {
@@ -524,42 +1436,186 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Pilot (Texas): USDA FNS issuance-rule reference. Benefits are made available on specific calendar days each month by case-number grouping.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "January", "date": "2026-01-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "January", "date": "2026-01-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "February", "date": "2026-02-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "February", "date": "2026-02-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "February", "date": "2026-02-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "March", "date": "2026-03-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "March", "date": "2026-03-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "March", "date": "2026-03-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "April", "date": "2026-04-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "April", "date": "2026-04-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "April", "date": "2026-04-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "May", "date": "2026-05-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "May", "date": "2026-05-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "May", "date": "2026-05-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "June", "date": "2026-06-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "June", "date": "2026-06-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "June", "date": "2026-06-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "July", "date": "2026-07-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "July", "date": "2026-07-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "July", "date": "2026-07-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "August", "date": "2026-08-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "August", "date": "2026-08-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "August", "date": "2026-08-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "September", "date": "2026-09-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "September", "date": "2026-09-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "September", "date": "2026-09-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "October", "date": "2026-10-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "October", "date": "2026-10-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "October", "date": "2026-10-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "November", "date": "2026-11-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "November", "date": "2026-11-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "November", "date": "2026-11-07", "group": "TX SNAP (case # ends 6–9)" },
-      { "month": "December", "date": "2026-12-01", "group": "TX SNAP (case # ends 0–3)" },
-      { "month": "December", "date": "2026-12-04", "group": "TX SNAP (case # ends 4–5)" },
-      { "month": "December", "date": "2026-12-07", "group": "TX SNAP (case # ends 6–9)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "TX SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-04",
+        "group": "TX SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-07",
+        "group": "TX SNAP (case # ends 6–9)"
+      }
     ]
   },
   {
@@ -574,126 +1630,606 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Pilot (California): USDA FNS issuance-rule reference. Benefits are made available over the first 10 days each month based on the last digit of the case number.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "January", "date": "2026-01-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "January", "date": "2026-01-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "January", "date": "2026-01-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "January", "date": "2026-01-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "January", "date": "2026-01-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "January", "date": "2026-01-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "January", "date": "2026-01-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "January", "date": "2026-01-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "January", "date": "2026-01-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "February", "date": "2026-02-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "February", "date": "2026-02-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "February", "date": "2026-02-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "February", "date": "2026-02-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "February", "date": "2026-02-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "February", "date": "2026-02-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "February", "date": "2026-02-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "February", "date": "2026-02-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "February", "date": "2026-02-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "February", "date": "2026-02-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "March", "date": "2026-03-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "March", "date": "2026-03-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "March", "date": "2026-03-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "March", "date": "2026-03-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "March", "date": "2026-03-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "March", "date": "2026-03-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "March", "date": "2026-03-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "March", "date": "2026-03-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "March", "date": "2026-03-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "March", "date": "2026-03-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "April", "date": "2026-04-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "April", "date": "2026-04-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "April", "date": "2026-04-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "April", "date": "2026-04-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "April", "date": "2026-04-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "April", "date": "2026-04-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "April", "date": "2026-04-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "April", "date": "2026-04-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "April", "date": "2026-04-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "April", "date": "2026-04-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "May", "date": "2026-05-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "May", "date": "2026-05-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "May", "date": "2026-05-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "May", "date": "2026-05-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "May", "date": "2026-05-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "May", "date": "2026-05-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "May", "date": "2026-05-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "May", "date": "2026-05-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "May", "date": "2026-05-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "May", "date": "2026-05-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "June", "date": "2026-06-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "June", "date": "2026-06-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "June", "date": "2026-06-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "June", "date": "2026-06-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "June", "date": "2026-06-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "June", "date": "2026-06-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "June", "date": "2026-06-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "June", "date": "2026-06-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "June", "date": "2026-06-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "June", "date": "2026-06-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "July", "date": "2026-07-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "July", "date": "2026-07-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "July", "date": "2026-07-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "July", "date": "2026-07-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "July", "date": "2026-07-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "July", "date": "2026-07-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "July", "date": "2026-07-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "July", "date": "2026-07-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "July", "date": "2026-07-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "July", "date": "2026-07-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "August", "date": "2026-08-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "August", "date": "2026-08-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "August", "date": "2026-08-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "August", "date": "2026-08-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "August", "date": "2026-08-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "August", "date": "2026-08-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "August", "date": "2026-08-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "August", "date": "2026-08-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "August", "date": "2026-08-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "August", "date": "2026-08-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "September", "date": "2026-09-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "September", "date": "2026-09-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "September", "date": "2026-09-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "September", "date": "2026-09-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "September", "date": "2026-09-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "September", "date": "2026-09-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "September", "date": "2026-09-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "September", "date": "2026-09-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "September", "date": "2026-09-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "September", "date": "2026-09-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "October", "date": "2026-10-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "October", "date": "2026-10-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "October", "date": "2026-10-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "October", "date": "2026-10-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "October", "date": "2026-10-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "October", "date": "2026-10-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "October", "date": "2026-10-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "October", "date": "2026-10-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "October", "date": "2026-10-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "October", "date": "2026-10-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "November", "date": "2026-11-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "November", "date": "2026-11-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "November", "date": "2026-11-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "November", "date": "2026-11-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "November", "date": "2026-11-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "November", "date": "2026-11-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "November", "date": "2026-11-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "November", "date": "2026-11-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "November", "date": "2026-11-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "November", "date": "2026-11-10", "group": "CA CalFresh (case # ends 0)" },
-      { "month": "December", "date": "2026-12-01", "group": "CA CalFresh (case # ends 1)" },
-      { "month": "December", "date": "2026-12-02", "group": "CA CalFresh (case # ends 2)" },
-      { "month": "December", "date": "2026-12-03", "group": "CA CalFresh (case # ends 3)" },
-      { "month": "December", "date": "2026-12-04", "group": "CA CalFresh (case # ends 4)" },
-      { "month": "December", "date": "2026-12-05", "group": "CA CalFresh (case # ends 5)" },
-      { "month": "December", "date": "2026-12-06", "group": "CA CalFresh (case # ends 6)" },
-      { "month": "December", "date": "2026-12-07", "group": "CA CalFresh (case # ends 7)" },
-      { "month": "December", "date": "2026-12-08", "group": "CA CalFresh (case # ends 8)" },
-      { "month": "December", "date": "2026-12-09", "group": "CA CalFresh (case # ends 9)" },
-      { "month": "December", "date": "2026-12-10", "group": "CA CalFresh (case # ends 0)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-10",
+        "group": "CA CalFresh (case # ends 0)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "CA CalFresh (case # ends 1)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-02",
+        "group": "CA CalFresh (case # ends 2)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-03",
+        "group": "CA CalFresh (case # ends 3)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-04",
+        "group": "CA CalFresh (case # ends 4)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-05",
+        "group": "CA CalFresh (case # ends 5)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-06",
+        "group": "CA CalFresh (case # ends 6)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-07",
+        "group": "CA CalFresh (case # ends 7)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-08",
+        "group": "CA CalFresh (case # ends 8)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-09",
+        "group": "CA CalFresh (case # ends 9)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-10",
+        "group": "CA CalFresh (case # ends 0)"
+      }
     ]
   },
   {
@@ -708,92 +2244,436 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Pilot (Connecticut): DSS changed issuance rules effective March 1, 2026. Jan–Feb use prior last-name rule; Mar–Dec use new Client ID last-2-digits rule (8-day spread).",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "CT SNAP (last name A–F)" },
-      { "month": "January", "date": "2026-01-02", "group": "CT SNAP (last name G–N)" },
-      { "month": "January", "date": "2026-01-03", "group": "CT SNAP (last name O–Z)" },
-      { "month": "February", "date": "2026-02-01", "group": "CT SNAP (last name A–F)" },
-      { "month": "February", "date": "2026-02-02", "group": "CT SNAP (last name G–N)" },
-      { "month": "February", "date": "2026-02-03", "group": "CT SNAP (last name O–Z)" },
-      { "month": "March", "date": "2026-03-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "March", "date": "2026-03-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "March", "date": "2026-03-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "March", "date": "2026-03-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "March", "date": "2026-03-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "March", "date": "2026-03-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "March", "date": "2026-03-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "March", "date": "2026-03-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "April", "date": "2026-04-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "April", "date": "2026-04-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "April", "date": "2026-04-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "April", "date": "2026-04-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "April", "date": "2026-04-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "April", "date": "2026-04-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "April", "date": "2026-04-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "April", "date": "2026-04-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "May", "date": "2026-05-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "May", "date": "2026-05-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "May", "date": "2026-05-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "May", "date": "2026-05-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "May", "date": "2026-05-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "May", "date": "2026-05-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "May", "date": "2026-05-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "May", "date": "2026-05-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "June", "date": "2026-06-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "June", "date": "2026-06-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "June", "date": "2026-06-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "June", "date": "2026-06-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "June", "date": "2026-06-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "June", "date": "2026-06-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "June", "date": "2026-06-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "June", "date": "2026-06-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "July", "date": "2026-07-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "July", "date": "2026-07-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "July", "date": "2026-07-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "July", "date": "2026-07-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "July", "date": "2026-07-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "July", "date": "2026-07-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "July", "date": "2026-07-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "July", "date": "2026-07-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "August", "date": "2026-08-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "August", "date": "2026-08-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "August", "date": "2026-08-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "August", "date": "2026-08-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "August", "date": "2026-08-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "August", "date": "2026-08-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "August", "date": "2026-08-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "August", "date": "2026-08-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "September", "date": "2026-09-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "September", "date": "2026-09-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "September", "date": "2026-09-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "September", "date": "2026-09-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "September", "date": "2026-09-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "September", "date": "2026-09-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "September", "date": "2026-09-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "September", "date": "2026-09-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "October", "date": "2026-10-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "October", "date": "2026-10-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "October", "date": "2026-10-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "October", "date": "2026-10-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "October", "date": "2026-10-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "October", "date": "2026-10-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "October", "date": "2026-10-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "October", "date": "2026-10-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "November", "date": "2026-11-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "November", "date": "2026-11-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "November", "date": "2026-11-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "November", "date": "2026-11-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "November", "date": "2026-11-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "November", "date": "2026-11-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "November", "date": "2026-11-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "November", "date": "2026-11-08", "group": "CT SNAP (client ID last 2 digits 88–99)" },
-      { "month": "December", "date": "2026-12-01", "group": "CT SNAP (client ID last 2 digits 00–12)" },
-      { "month": "December", "date": "2026-12-02", "group": "CT SNAP (client ID last 2 digits 13–24)" },
-      { "month": "December", "date": "2026-12-03", "group": "CT SNAP (client ID last 2 digits 25–37)" },
-      { "month": "December", "date": "2026-12-04", "group": "CT SNAP (client ID last 2 digits 38–49)" },
-      { "month": "December", "date": "2026-12-05", "group": "CT SNAP (client ID last 2 digits 50–62)" },
-      { "month": "December", "date": "2026-12-06", "group": "CT SNAP (client ID last 2 digits 63–74)" },
-      { "month": "December", "date": "2026-12-07", "group": "CT SNAP (client ID last 2 digits 75–87)" },
-      { "month": "December", "date": "2026-12-08", "group": "CT SNAP (client ID last 2 digits 88–99)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "CT SNAP (last name A–F)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-02",
+        "group": "CT SNAP (last name G–N)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-03",
+        "group": "CT SNAP (last name O–Z)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "CT SNAP (last name A–F)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-02",
+        "group": "CT SNAP (last name G–N)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-03",
+        "group": "CT SNAP (last name O–Z)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "CT SNAP (client ID last 2 digits 00–12)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-02",
+        "group": "CT SNAP (client ID last 2 digits 13–24)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-03",
+        "group": "CT SNAP (client ID last 2 digits 25–37)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-04",
+        "group": "CT SNAP (client ID last 2 digits 38–49)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-05",
+        "group": "CT SNAP (client ID last 2 digits 50–62)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-06",
+        "group": "CT SNAP (client ID last 2 digits 63–74)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-07",
+        "group": "CT SNAP (client ID last 2 digits 75–87)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-08",
+        "group": "CT SNAP (client ID last 2 digits 88–99)"
+      }
     ]
   },
   {
@@ -808,18 +2688,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are made available on the 1st calendar day of each month.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "AK SNAP (all households)" },
-      { "month": "February", "date": "2026-02-01", "group": "AK SNAP (all households)" },
-      { "month": "March", "date": "2026-03-01", "group": "AK SNAP (all households)" },
-      { "month": "April", "date": "2026-04-01", "group": "AK SNAP (all households)" },
-      { "month": "May", "date": "2026-05-01", "group": "AK SNAP (all households)" },
-      { "month": "June", "date": "2026-06-01", "group": "AK SNAP (all households)" },
-      { "month": "July", "date": "2026-07-01", "group": "AK SNAP (all households)" },
-      { "month": "August", "date": "2026-08-01", "group": "AK SNAP (all households)" },
-      { "month": "September", "date": "2026-09-01", "group": "AK SNAP (all households)" },
-      { "month": "October", "date": "2026-10-01", "group": "AK SNAP (all households)" },
-      { "month": "November", "date": "2026-11-01", "group": "AK SNAP (all households)" },
-      { "month": "December", "date": "2026-12-01", "group": "AK SNAP (all households)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "AK SNAP (all households)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "AK SNAP (all households)"
+      }
     ]
   },
   {
@@ -834,18 +2762,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are made available on the 1st calendar day of each month.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "ND SNAP (all households)" },
-      { "month": "February", "date": "2026-02-01", "group": "ND SNAP (all households)" },
-      { "month": "March", "date": "2026-03-01", "group": "ND SNAP (all households)" },
-      { "month": "April", "date": "2026-04-01", "group": "ND SNAP (all households)" },
-      { "month": "May", "date": "2026-05-01", "group": "ND SNAP (all households)" },
-      { "month": "June", "date": "2026-06-01", "group": "ND SNAP (all households)" },
-      { "month": "July", "date": "2026-07-01", "group": "ND SNAP (all households)" },
-      { "month": "August", "date": "2026-08-01", "group": "ND SNAP (all households)" },
-      { "month": "September", "date": "2026-09-01", "group": "ND SNAP (all households)" },
-      { "month": "October", "date": "2026-10-01", "group": "ND SNAP (all households)" },
-      { "month": "November", "date": "2026-11-01", "group": "ND SNAP (all households)" },
-      { "month": "December", "date": "2026-12-01", "group": "ND SNAP (all households)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "ND SNAP (all households)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "ND SNAP (all households)"
+      }
     ]
   },
   {
@@ -860,18 +2836,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are made available on the 1st calendar day of each month.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "RI SNAP (all households)" },
-      { "month": "February", "date": "2026-02-01", "group": "RI SNAP (all households)" },
-      { "month": "March", "date": "2026-03-01", "group": "RI SNAP (all households)" },
-      { "month": "April", "date": "2026-04-01", "group": "RI SNAP (all households)" },
-      { "month": "May", "date": "2026-05-01", "group": "RI SNAP (all households)" },
-      { "month": "June", "date": "2026-06-01", "group": "RI SNAP (all households)" },
-      { "month": "July", "date": "2026-07-01", "group": "RI SNAP (all households)" },
-      { "month": "August", "date": "2026-08-01", "group": "RI SNAP (all households)" },
-      { "month": "September", "date": "2026-09-01", "group": "RI SNAP (all households)" },
-      { "month": "October", "date": "2026-10-01", "group": "RI SNAP (all households)" },
-      { "month": "November", "date": "2026-11-01", "group": "RI SNAP (all households)" },
-      { "month": "December", "date": "2026-12-01", "group": "RI SNAP (all households)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "RI SNAP (all households)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "RI SNAP (all households)"
+      }
     ]
   },
   {
@@ -886,18 +2910,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are made available on the 1st calendar day of each month.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "VT SNAP (all households)" },
-      { "month": "February", "date": "2026-02-01", "group": "VT SNAP (all households)" },
-      { "month": "March", "date": "2026-03-01", "group": "VT SNAP (all households)" },
-      { "month": "April", "date": "2026-04-01", "group": "VT SNAP (all households)" },
-      { "month": "May", "date": "2026-05-01", "group": "VT SNAP (all households)" },
-      { "month": "June", "date": "2026-06-01", "group": "VT SNAP (all households)" },
-      { "month": "July", "date": "2026-07-01", "group": "VT SNAP (all households)" },
-      { "month": "August", "date": "2026-08-01", "group": "VT SNAP (all households)" },
-      { "month": "September", "date": "2026-09-01", "group": "VT SNAP (all households)" },
-      { "month": "October", "date": "2026-10-01", "group": "VT SNAP (all households)" },
-      { "month": "November", "date": "2026-11-01", "group": "VT SNAP (all households)" },
-      { "month": "December", "date": "2026-12-01", "group": "VT SNAP (all households)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "VT SNAP (all households)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "VT SNAP (all households)"
+      }
     ]
   },
   {
@@ -912,18 +2984,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are made available on the 5th calendar day of each month.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-05", "group": "NH SNAP (all households)" },
-      { "month": "February", "date": "2026-02-05", "group": "NH SNAP (all households)" },
-      { "month": "March", "date": "2026-03-05", "group": "NH SNAP (all households)" },
-      { "month": "April", "date": "2026-04-05", "group": "NH SNAP (all households)" },
-      { "month": "May", "date": "2026-05-05", "group": "NH SNAP (all households)" },
-      { "month": "June", "date": "2026-06-05", "group": "NH SNAP (all households)" },
-      { "month": "July", "date": "2026-07-05", "group": "NH SNAP (all households)" },
-      { "month": "August", "date": "2026-08-05", "group": "NH SNAP (all households)" },
-      { "month": "September", "date": "2026-09-05", "group": "NH SNAP (all households)" },
-      { "month": "October", "date": "2026-10-05", "group": "NH SNAP (all households)" },
-      { "month": "November", "date": "2026-11-05", "group": "NH SNAP (all households)" },
-      { "month": "December", "date": "2026-12-05", "group": "NH SNAP (all households)" }
+      {
+        "month": "January",
+        "date": "2026-01-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-05",
+        "group": "NH SNAP (all households)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-05",
+        "group": "NH SNAP (all households)"
+      }
     ]
   },
   {
@@ -938,18 +3058,66 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are made available on the 10th calendar day of each month.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-10", "group": "SD SNAP (all households)" },
-      { "month": "February", "date": "2026-02-10", "group": "SD SNAP (all households)" },
-      { "month": "March", "date": "2026-03-10", "group": "SD SNAP (all households)" },
-      { "month": "April", "date": "2026-04-10", "group": "SD SNAP (all households)" },
-      { "month": "May", "date": "2026-05-10", "group": "SD SNAP (all households)" },
-      { "month": "June", "date": "2026-06-10", "group": "SD SNAP (all households)" },
-      { "month": "July", "date": "2026-07-10", "group": "SD SNAP (all households)" },
-      { "month": "August", "date": "2026-08-10", "group": "SD SNAP (all households)" },
-      { "month": "September", "date": "2026-09-10", "group": "SD SNAP (all households)" },
-      { "month": "October", "date": "2026-10-10", "group": "SD SNAP (all households)" },
-      { "month": "November", "date": "2026-11-10", "group": "SD SNAP (all households)" },
-      { "month": "December", "date": "2026-12-10", "group": "SD SNAP (all households)" }
+      {
+        "month": "January",
+        "date": "2026-01-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-10",
+        "group": "SD SNAP (all households)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-10",
+        "group": "SD SNAP (all households)"
+      }
     ]
   },
   {
@@ -964,42 +3132,186 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are staggered across 3 calendar days each month based on the last digit of the case number.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "January", "date": "2026-01-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "January", "date": "2026-01-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "February", "date": "2026-02-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "February", "date": "2026-02-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "February", "date": "2026-02-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "March", "date": "2026-03-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "March", "date": "2026-03-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "March", "date": "2026-03-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "April", "date": "2026-04-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "April", "date": "2026-04-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "April", "date": "2026-04-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "May", "date": "2026-05-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "May", "date": "2026-05-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "May", "date": "2026-05-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "June", "date": "2026-06-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "June", "date": "2026-06-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "June", "date": "2026-06-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "July", "date": "2026-07-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "July", "date": "2026-07-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "July", "date": "2026-07-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "August", "date": "2026-08-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "August", "date": "2026-08-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "August", "date": "2026-08-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "September", "date": "2026-09-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "September", "date": "2026-09-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "September", "date": "2026-09-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "October", "date": "2026-10-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "October", "date": "2026-10-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "October", "date": "2026-10-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "November", "date": "2026-11-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "November", "date": "2026-11-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "November", "date": "2026-11-07", "group": "VA SNAP (case # ends 6–9)" },
-      { "month": "December", "date": "2026-12-01", "group": "VA SNAP (case # ends 0–3)" },
-      { "month": "December", "date": "2026-12-04", "group": "VA SNAP (case # ends 4–5)" },
-      { "month": "December", "date": "2026-12-07", "group": "VA SNAP (case # ends 6–9)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "VA SNAP (case # ends 0–3)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-04",
+        "group": "VA SNAP (case # ends 4–5)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-07",
+        "group": "VA SNAP (case # ends 6–9)"
+      }
     ]
   },
   {
@@ -1014,42 +3326,186 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are staggered across 3 calendar days each month based on the first letter of the last name.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "January", "date": "2026-01-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "January", "date": "2026-01-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "February", "date": "2026-02-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "February", "date": "2026-02-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "February", "date": "2026-02-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "March", "date": "2026-03-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "March", "date": "2026-03-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "March", "date": "2026-03-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "April", "date": "2026-04-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "April", "date": "2026-04-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "April", "date": "2026-04-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "May", "date": "2026-05-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "May", "date": "2026-05-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "May", "date": "2026-05-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "June", "date": "2026-06-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "June", "date": "2026-06-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "June", "date": "2026-06-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "July", "date": "2026-07-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "July", "date": "2026-07-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "July", "date": "2026-07-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "August", "date": "2026-08-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "August", "date": "2026-08-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "August", "date": "2026-08-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "September", "date": "2026-09-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "September", "date": "2026-09-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "September", "date": "2026-09-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "October", "date": "2026-10-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "October", "date": "2026-10-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "October", "date": "2026-10-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "November", "date": "2026-11-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "November", "date": "2026-11-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "November", "date": "2026-11-15", "group": "UT SNAP (last name P–Z)" },
-      { "month": "December", "date": "2026-12-05", "group": "UT SNAP (last name A–G)" },
-      { "month": "December", "date": "2026-12-11", "group": "UT SNAP (last name H–O)" },
-      { "month": "December", "date": "2026-12-15", "group": "UT SNAP (last name P–Z)" }
+      {
+        "month": "January",
+        "date": "2026-01-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-15",
+        "group": "UT SNAP (last name P–Z)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-05",
+        "group": "UT SNAP (last name A–G)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-11",
+        "group": "UT SNAP (last name H–O)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-15",
+        "group": "UT SNAP (last name P–Z)"
+      }
     ]
   },
   {
@@ -1064,54 +3520,246 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are staggered across 4 calendar days each month based on the first letter of the last name.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "January", "date": "2026-01-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "January", "date": "2026-01-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "January", "date": "2026-01-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "February", "date": "2026-02-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "February", "date": "2026-02-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "February", "date": "2026-02-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "February", "date": "2026-02-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "March", "date": "2026-03-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "March", "date": "2026-03-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "March", "date": "2026-03-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "March", "date": "2026-03-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "April", "date": "2026-04-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "April", "date": "2026-04-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "April", "date": "2026-04-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "April", "date": "2026-04-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "May", "date": "2026-05-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "May", "date": "2026-05-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "May", "date": "2026-05-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "May", "date": "2026-05-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "June", "date": "2026-06-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "June", "date": "2026-06-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "June", "date": "2026-06-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "June", "date": "2026-06-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "July", "date": "2026-07-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "July", "date": "2026-07-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "July", "date": "2026-07-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "July", "date": "2026-07-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "August", "date": "2026-08-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "August", "date": "2026-08-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "August", "date": "2026-08-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "August", "date": "2026-08-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "September", "date": "2026-09-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "September", "date": "2026-09-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "September", "date": "2026-09-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "September", "date": "2026-09-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "October", "date": "2026-10-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "October", "date": "2026-10-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "October", "date": "2026-10-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "October", "date": "2026-10-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "November", "date": "2026-11-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "November", "date": "2026-11-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "November", "date": "2026-11-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "November", "date": "2026-11-04", "group": "WY SNAP (last name S–Z)" },
-      { "month": "December", "date": "2026-12-01", "group": "WY SNAP (last name A–D)" },
-      { "month": "December", "date": "2026-12-02", "group": "WY SNAP (last name E–K)" },
-      { "month": "December", "date": "2026-12-03", "group": "WY SNAP (last name L–R)" },
-      { "month": "December", "date": "2026-12-04", "group": "WY SNAP (last name S–Z)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-04",
+        "group": "WY SNAP (last name S–Z)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "WY SNAP (last name A–D)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-02",
+        "group": "WY SNAP (last name E–K)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-03",
+        "group": "WY SNAP (last name L–R)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-04",
+        "group": "WY SNAP (last name S–Z)"
+      }
     ]
   },
   {
@@ -1126,78 +3774,430 @@
     "lastVerifiedUtc": "2026-02-27T00:00:00Z",
     "notes": "Phase 5 (Low-volatility expansion): USDA FNS issuance-rule reference. Benefits are staggered across 1st–5th based on the 7th digit of the case number; digits 0/6/7/8/9 issue on the 5th.",
     "officialDates": [
-      { "month": "January", "date": "2026-01-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "January", "date": "2026-01-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "January", "date": "2026-01-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "January", "date": "2026-01-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "January", "date": "2026-01-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "January", "date": "2026-01-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "February", "date": "2026-02-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "February", "date": "2026-02-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "February", "date": "2026-02-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "February", "date": "2026-02-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "February", "date": "2026-02-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "February", "date": "2026-02-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "March", "date": "2026-03-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "March", "date": "2026-03-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "March", "date": "2026-03-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "March", "date": "2026-03-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "March", "date": "2026-03-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "March", "date": "2026-03-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "April", "date": "2026-04-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "April", "date": "2026-04-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "April", "date": "2026-04-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "April", "date": "2026-04-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "April", "date": "2026-04-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "April", "date": "2026-04-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "May", "date": "2026-05-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "May", "date": "2026-05-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "May", "date": "2026-05-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "May", "date": "2026-05-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "May", "date": "2026-05-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "May", "date": "2026-05-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "June", "date": "2026-06-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "June", "date": "2026-06-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "June", "date": "2026-06-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "June", "date": "2026-06-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "June", "date": "2026-06-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "June", "date": "2026-06-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "July", "date": "2026-07-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "July", "date": "2026-07-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "July", "date": "2026-07-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "July", "date": "2026-07-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "July", "date": "2026-07-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "July", "date": "2026-07-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "August", "date": "2026-08-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "August", "date": "2026-08-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "August", "date": "2026-08-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "August", "date": "2026-08-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "August", "date": "2026-08-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "August", "date": "2026-08-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "September", "date": "2026-09-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "September", "date": "2026-09-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "September", "date": "2026-09-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "September", "date": "2026-09-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "September", "date": "2026-09-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "September", "date": "2026-09-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "October", "date": "2026-10-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "October", "date": "2026-10-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "October", "date": "2026-10-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "October", "date": "2026-10-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "October", "date": "2026-10-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "October", "date": "2026-10-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "November", "date": "2026-11-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "November", "date": "2026-11-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "November", "date": "2026-11-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "November", "date": "2026-11-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "November", "date": "2026-11-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "November", "date": "2026-11-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" },
-      { "month": "December", "date": "2026-12-01", "group": "NJ SNAP (7th digit = 1)" },
-      { "month": "December", "date": "2026-12-02", "group": "NJ SNAP (7th digit = 2)" },
-      { "month": "December", "date": "2026-12-03", "group": "NJ SNAP (7th digit = 3)" },
-      { "month": "December", "date": "2026-12-04", "group": "NJ SNAP (7th digit = 4)" },
-      { "month": "December", "date": "2026-12-05", "group": "NJ SNAP (7th digit = 5)" },
-      { "month": "December", "date": "2026-12-05", "group": "NJ SNAP (7th digit = 0/6/7/8/9)" }
+      {
+        "month": "January",
+        "date": "2026-01-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "January",
+        "date": "2026-01-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "February",
+        "date": "2026-02-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "March",
+        "date": "2026-03-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "April",
+        "date": "2026-04-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "May",
+        "date": "2026-05-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "June",
+        "date": "2026-06-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "July",
+        "date": "2026-07-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "August",
+        "date": "2026-08-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "September",
+        "date": "2026-09-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "October",
+        "date": "2026-10-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "November",
+        "date": "2026-11-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-01",
+        "group": "NJ SNAP (7th digit = 1)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-02",
+        "group": "NJ SNAP (7th digit = 2)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-03",
+        "group": "NJ SNAP (7th digit = 3)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-04",
+        "group": "NJ SNAP (7th digit = 4)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-05",
+        "group": "NJ SNAP (7th digit = 5)"
+      },
+      {
+        "month": "December",
+        "date": "2026-12-05",
+        "group": "NJ SNAP (7th digit = 0/6/7/8/9)"
+      }
     ]
+  },
+  {
+    "eventId": "gamescom-onl-2026",
+    "category": "gaming",
+    "slug": "gamescom-opening-night-live-2026",
+    "canonicalSlug": "gaming/gamescom-opening-night-live-2026",
+    "title": "Gamescom 2026: Opening Night Live",
+    "eventName": "Gamescom Opening Night Live",
+    "description": "The global kickoff showcase for Gamescom. Hosted by Geoff Keighley, this livestream features major AAA game reveals and trailers worldwide.",
+    "dateISO": "2026-08-25T18:00:00Z",
+    "statusLabel": "CONFIRMED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://www.gamescom.global"
+  },
+  {
+    "eventId": "blizzcon-2026",
+    "category": "gaming",
+    "slug": "blizzcon-2026",
+    "canonicalSlug": "gaming/blizzcon-2026",
+    "title": "BlizzCon 2026",
+    "eventName": "BlizzCon",
+    "description": "Blizzard Entertainment's premier in-person convention. Historically features major announcements for World of Warcraft, Diablo, Overwatch, and Hearthstone.",
+    "dateISO": "2026-09-12T16:00:00Z",
+    "statusLabel": "CONFIRMED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://blizzcon.com"
+  },
+  {
+    "eventId": "nintendo-direct-sept-2026",
+    "category": "gaming",
+    "slug": "nintendo-direct-september-2026",
+    "canonicalSlug": "gaming/nintendo-direct-september-2026",
+    "title": "Nintendo Direct (September 2026)",
+    "eventName": "September Nintendo Direct",
+    "description": "Based on historical scheduling patterns (Week 2-3 of September), this is the highly anticipated Q3 Nintendo Direct broadcast prediction window.",
+    "dateLine": "September 15-17, 2026 (Prediction Window)",
+    "statusLabel": "EXPECTED",
+    "eventType": "ANNOUNCEMENT"
+  },
+  {
+    "eventId": "steam-summer-sale-2026",
+    "category": "gaming",
+    "slug": "steam-summer-sale-2026",
+    "canonicalSlug": "gaming/steam-summer-sale-2026",
+    "title": "Steam Summer Sale 2026",
+    "eventName": "Steam Summer Sale",
+    "description": "Valve's massive mid-year PC gaming discount event. Typically launches at 10:00 AM Pacific Time.",
+    "dateISO": "2026-06-25T17:00:00Z",
+    "statusLabel": "EXPECTED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://steamdb.info/sales/"
+  },
+  {
+    "eventId": "lol-worlds-final-2026",
+    "category": "gaming",
+    "slug": "league-of-legends-worlds-final-2026",
+    "canonicalSlug": "gaming/league-of-legends-worlds-final-2026",
+    "title": "League of Legends Worlds 2026 Grand Final",
+    "eventName": "LoL Worlds Final",
+    "description": "The culminating championship match for League of Legends esports, taking place in New York City.",
+    "dateISO": "2026-11-14T12:00:00Z",
+    "statusLabel": "ANNOUNCED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://lolesports.com"
   }
 ]

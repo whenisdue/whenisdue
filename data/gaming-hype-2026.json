@@ -1,0 +1,66 @@
+[
+  {
+    "eventId": "gamescom-onl-2026",
+    "category": "gaming",
+    "slug": "gamescom-opening-night-live-2026",
+    "canonicalSlug": "gaming/gamescom-opening-night-live-2026",
+    "title": "Gamescom 2026: Opening Night Live",
+    "eventName": "Gamescom Opening Night Live",
+    "description": "The global kickoff showcase for Gamescom. Hosted by Geoff Keighley, this livestream features major AAA game reveals and trailers worldwide.",
+    "dateISO": "2026-08-25T18:00:00Z",
+    "statusLabel": "CONFIRMED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://www.gamescom.global"
+  },
+  {
+    "eventId": "blizzcon-2026",
+    "category": "gaming",
+    "slug": "blizzcon-2026",
+    "canonicalSlug": "gaming/blizzcon-2026",
+    "title": "BlizzCon 2026",
+    "eventName": "BlizzCon",
+    "description": "Blizzard Entertainment's premier in-person convention. Historically features major announcements for World of Warcraft, Diablo, Overwatch, and Hearthstone.",
+    "dateISO": "2026-09-12T16:00:00Z",
+    "statusLabel": "CONFIRMED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://blizzcon.com"
+  },
+  {
+    "eventId": "nintendo-direct-sept-2026",
+    "category": "gaming",
+    "slug": "nintendo-direct-september-2026",
+    "canonicalSlug": "gaming/nintendo-direct-september-2026",
+    "title": "Nintendo Direct (September 2026)",
+    "eventName": "September Nintendo Direct",
+    "description": "Based on historical scheduling patterns (Week 2-3 of September), this is the highly anticipated Q3 Nintendo Direct broadcast prediction window.",
+    "dateLine": "September 15-17, 2026 (Prediction Window)",
+    "statusLabel": "EXPECTED",
+    "eventType": "ANNOUNCEMENT"
+  },
+  {
+    "eventId": "steam-summer-sale-2026",
+    "category": "gaming",
+    "slug": "steam-summer-sale-2026",
+    "canonicalSlug": "gaming/steam-summer-sale-2026",
+    "title": "Steam Summer Sale 2026",
+    "eventName": "Steam Summer Sale",
+    "description": "Valve's massive mid-year PC gaming discount event. Typically launches at 10:00 AM Pacific Time.",
+    "dateISO": "2026-06-25T17:00:00Z",
+    "statusLabel": "EXPECTED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://steamdb.info/sales/"
+  },
+  {
+    "eventId": "lol-worlds-final-2026",
+    "category": "gaming",
+    "slug": "league-of-legends-worlds-final-2026",
+    "canonicalSlug": "gaming/league-of-legends-worlds-final-2026",
+    "title": "League of Legends Worlds 2026 Grand Final",
+    "eventName": "LoL Worlds Final",
+    "description": "The culminating championship match for League of Legends esports, taking place in New York City.",
+    "dateISO": "2026-11-14T12:00:00Z",
+    "statusLabel": "ANNOUNCED",
+    "eventType": "EVENT",
+    "sourceUrl": "https://lolesports.com"
+  }
+]
