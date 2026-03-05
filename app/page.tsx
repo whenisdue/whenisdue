@@ -66,9 +66,13 @@ export default async function Home() {
         </section>
       </div>
 
-      <footer className="mt-16 pt-8 border-t border-slate-100 flex justify-between items-center">
-        <Link href="/federal" className="text-sm font-medium text-slate-900 hover:underline">View Federal Hub →</Link>
-        <span className="text-xs text-slate-400">© 2026 WhenIsDue Authority</span>
+      <footer className="mt-16 pt-8 border-t border-gray-800 flex justify-between items-center">
+        {/* FIXED: Changed text-slate-900 to text-blue-400 for high visibility */}
+        <Link href="/federal" className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors">
+          View Federal Hub →
+        </Link>
+        {/* FIXED: Adjusted text to gray-500 to match the dark theme aesthetic */}
+        <span className="text-xs text-gray-500">© 2026 WhenIsDue Authority</span>
       </footer>
     </main>
   );
