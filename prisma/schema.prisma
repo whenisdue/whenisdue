@@ -8,32 +8,64 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ==========================================
+// THE DATA ENGINE (Federal & Gaming Content)
+// ==========================================
+
 model Series {
   id             String       @id @default(cuid())
-  seriesKey      String       @unique
+  seriesKey      String       @unique // e.g., "ssa-retirement"
+  category       String       @default("benefits") // "benefits" or "gaming"
   canonicalName  String
   entityName     String
   frequency      String
   occurrenceRule String
+  updatedAt      DateTime     @updatedAt // CRITICAL: Fixes sitemap "updatedAt" errors
   occurrences    Occurrence[]
 }
 
 model Occurrence {
   id                String   @id @default(cuid())
   date              DateTime
-  status            String
-  verificationProof String?
+  status            String   // "CONFIRMED", "EXPECTED", "ANNOUNCED"
+  verificationProof String?  // Links to .gov or official press release
   verifiedAt        DateTime @default(now())
   seriesId          String
-  series            Series   @relation(fields: [seriesId], references: [id])
+  series            Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// THE AUDIENCE ENGINE (Users & Preferences)
+// ==========================================
+
+model User {
+  id        String                  @id @default(cuid())
+  email     String?                 @unique // Optional for "Anonymous-first" push
+  createdAt DateTime                @default(now())
+  pushSubs  PushSubscription[]
+  topics    UserTopicSubscription[]
 }
 
 model PushSubscription {
   id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   endpoint  String   @unique
   p256dh    String
   auth      String
-  userAgent String?
+  status    String   @default("ACTIVE") // "ACTIVE", "UNSUBSCRIBED", "INVALID"
+  userAgent String?  // Diagnostic data to track device type
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model UserTopicSubscription {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topicKey   String  // e.g., "ssa-2026", "gamescom-2026"
+  wantsEmail Boolean @default(false)
+  wantsPush  Boolean @default(false)
+
+  @@unique([userId, topicKey]) // Prevents duplicate spam
 }
