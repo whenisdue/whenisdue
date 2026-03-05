@@ -1,0 +1,414 @@
+{
+  "schemaVersion": "snap_state_override_registry_v1",
+  "program": "SNAP",
+  "renderRules": {
+    "maxCards": 2,
+    "maxLinksPerCard": 3,
+    "failClosed": true
+  },
+  "states": {
+    "TX": {
+      "stateCode": "TX",
+      "label": "Texas",
+      "cards": [
+        {
+          "id": "SNAP_TX_STATE_OVERRIDE_V1",
+          "title": "Texas SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_TX_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_TX_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_TX_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_TX_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_TX_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_TX_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "CA": {
+      "stateCode": "CA",
+      "label": "California",
+      "cards": [
+        {
+          "id": "SNAP_CA_STATE_OVERRIDE_V1",
+          "title": "California CalFresh: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_CA_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_CA_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_CA_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_CA_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_CA_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_CA_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "CT": {
+      "stateCode": "CT",
+      "label": "Connecticut",
+      "cards": [
+        {
+          "id": "SNAP_CT_STATE_OVERRIDE_V1",
+          "title": "Connecticut SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_CT_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_CT_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_CT_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_CT_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_CT_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_CT_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "AK": {
+      "stateCode": "AK",
+      "label": "Alaska",
+      "cards": [
+        {
+          "id": "SNAP_AK_STATE_OVERRIDE_V1",
+          "title": "Alaska SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_AK_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_AK_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_AK_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_AK_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_AK_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_AK_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "ND": {
+      "stateCode": "ND",
+      "label": "North Dakota",
+      "cards": [
+        {
+          "id": "SNAP_ND_STATE_OVERRIDE_V1",
+          "title": "North Dakota SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_ND_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_ND_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_ND_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_ND_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_ND_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_ND_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "RI": {
+      "stateCode": "RI",
+      "label": "Rhode Island",
+      "cards": [
+        {
+          "id": "SNAP_RI_STATE_OVERRIDE_V1",
+          "title": "Rhode Island SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_RI_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_RI_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_RI_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_RI_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_RI_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_RI_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "VT": {
+      "stateCode": "VT",
+      "label": "Vermont",
+      "cards": [
+        {
+          "id": "SNAP_VT_STATE_OVERRIDE_V1",
+          "title": "Vermont SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_VT_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_VT_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_VT_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_VT_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_VT_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_VT_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "NH": {
+      "stateCode": "NH",
+      "label": "New Hampshire",
+      "cards": [
+        {
+          "id": "SNAP_NH_STATE_OVERRIDE_V1",
+          "title": "New Hampshire SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_NH_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_NH_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_NH_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_NH_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_NH_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_NH_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "SD": {
+      "stateCode": "SD",
+      "label": "South Dakota",
+      "cards": [
+        {
+          "id": "SNAP_SD_STATE_OVERRIDE_V1",
+          "title": "South Dakota SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_SD_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_SD_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_SD_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_SD_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_SD_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_SD_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "VA": {
+      "stateCode": "VA",
+      "label": "Virginia",
+      "cards": [
+        {
+          "id": "SNAP_VA_STATE_OVERRIDE_V1",
+          "title": "Virginia SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_VA_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_VA_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_VA_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_VA_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_VA_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_VA_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "UT": {
+      "stateCode": "UT",
+      "label": "Utah",
+      "cards": [
+        {
+          "id": "SNAP_UT_STATE_OVERRIDE_V1",
+          "title": "Utah SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_UT_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_UT_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_UT_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_UT_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_UT_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_UT_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "WY": {
+      "stateCode": "WY",
+      "label": "Wyoming",
+      "cards": [
+        {
+          "id": "SNAP_WY_STATE_OVERRIDE_V1",
+          "title": "Wyoming SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_WY_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_WY_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_WY_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_WY_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_WY_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_WY_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    },
+    "NJ": {
+      "stateCode": "NJ",
+      "label": "New Jersey",
+      "cards": [
+        {
+          "id": "SNAP_NJ_STATE_OVERRIDE_V1",
+          "title": "New Jersey SNAP: common reasons + official tools",
+          "priority": 10,
+          "links": [
+            {
+              "id": "SNAP_NJ_ISSUANCE_SCHEDULE",
+              "label": "Official monthly issuance schedule",
+              "provenanceKey": "SNAP_NJ_ISSUANCE_SCHEDULE",
+              "kind": "ISSUANCE_SCHEDULE"
+            },
+            {
+              "id": "SNAP_NJ_EBT_PORTAL",
+              "label": "Check EBT balance / account portal",
+              "provenanceKey": "SNAP_NJ_EBT_PORTAL",
+              "kind": "EBT_PORTAL"
+            },
+            {
+              "id": "SNAP_NJ_EBT_HELP",
+              "label": "Replace card / customer service info",
+              "provenanceKey": "SNAP_NJ_EBT_HELP",
+              "kind": "CUSTOMER_SERVICE"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

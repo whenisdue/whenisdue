@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://whenisdue.com/transparency/provenanceExport.schema.json",
+  "title": "WhenIsDue Provenance Export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAtUtc",
+    "scope",
+    "items"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "generatedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "program",
+        "jurisdiction",
+        "kind"
+      ],
+      "properties": {
+        "program": {
+          "type": "string",
+          "enum": [
+            "SSA",
+            "SSI",
+            "SSDI",
+            "SNAP",
+            "EBT",
+            "OTHER"
+          ]
+        },
+        "jurisdiction": {
+          "type": "string",
+          "description": "e.g., US, US-CT, US-CA"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "schedule",
+            "amount",
+            "policy",
+            "methodology",
+            "status"
+          ]
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "claim",
+          "derivation",
+          "sources"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "claim": {
+            "type": "string",
+            "description": "The deterministic statement being made."
+          },
+          "sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "url",
+                "publisher"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "publisher": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "retrievedAtUtc": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "derivation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "method"
+            ],
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "DIRECT_CITATION",
+                  "CALENDAR_SHIFT_RULE",
+                  "BUILD_REGISTRY_ANCHOR",
+                  "SERVER_COMPUTATION"
+                ]
+              },
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "event",
+                        "registry",
+                        "policy",
+                        "calendar",
+                        "override"
+                      ]
+                    },
+                    "ref": {
+                      "type": "string",
+                      "description": "e.g., events.json#SSA-2026-01, registry#ssaCalendar#05-10031-2026"
+                    }
+                  }
+                }
+              },
+              "explain": {
+                "type": "string",
+                "description": "Short deterministic explanation of how claim was derived."
+              }
+            }
+          },
+          "applicability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "effectiveFrom": {
+                "type": "string",
+                "format": "date"
+              },
+              "effectiveTo": {
+                "type": "string",
+                "format": "date"
+              },
+              "audience": {
+                "type": "string",
+                "enum": [
+                  "general",
+                  "beneficiaries",
+                  "caregivers",
+                  "caseworkers",
+                  "developers"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

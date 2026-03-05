@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "global": {
+    "state": "GREEN",
+    "activeRedConflict": false,
+    "quorumInvalidated": false,
+    "reason": "no_active_conflicts"
+  }
+}

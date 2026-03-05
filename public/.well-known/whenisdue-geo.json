@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "manifestId": "geo-core-v1",
+  "origin": "https://whenisdue.com",
+  "generatedAtUtc": "2026-03-03T00:00:00Z",
+  "endpoints": {
+    "trustSummaryUrlTemplate": "https://whenisdue.com/api/ai/trust-summary/{id}",
+    "proofBundleUrlTemplate": "https://whenisdue.com/api/ai/proof-bundle/{id}?profile={profile}&encoding={encoding}",
+    "explainUrlTemplate": "https://whenisdue.com/api/ai/explain/{id}",
+    "trustVerdictUrlTemplate": "https://whenisdue.com/verify/trustVerdict/{id}.json",
+    "quarantineUrl": "https://whenisdue.com/integrity/conflicts/quarantine.json",
+    "conflictsIndexUrl": "https://whenisdue.com/integrity/conflicts/index.json",
+    "gatewayCapabilitiesUrl": "https://whenisdue.com/.well-known/whenisdue-ai-gateway.json",
+    "gatewayPolicyUrl": "https://whenisdue.com/.well-known/ai-gateway-policy.json",
+    "aiRootManifestUrl": "https://whenisdue.com/ai/root/latest.json"
+  },
+  "geoRules": {
+    "htmlFirst": true,
+    "answerBlockRequired": true,
+    "noRelativeTime": true,
+    "timezoneDisclosureRequired": true,
+    "upgradePathsRequired": true
+  },
+  "scoreScale": {
+    "type": "INTEGER_PERCENT_0_100",
+    "min": 0,
+    "max": 100
+  },
+  "conflictCollapse": {
+    "rule": "IF_ACTIVE_CONFLICT_THEN_COLLAPSE",
+    "verdict": "CONFLICT",
+    "trustScore": 0,
+    "citeabilityScore": 0,
+    "reasonRefType": "SHA256"
+  },
+  "signature": {
+    "alg": "Ed25519",
+    "kid": "did:web:whenisdue.com:hub-key-v1",
+    "value": "base64_dummy_signature_for_manifest_here_xyz123"
+  }
+}

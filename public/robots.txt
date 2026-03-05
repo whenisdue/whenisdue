@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Allow Search Grounding but Block Foundation Training for Gemini/OpenAI
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+# Allow AI Search surfacing
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://whenisdue.com/sitemap.xml

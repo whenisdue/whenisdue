@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "1.0.0",
+  "site": {
+    "name": "WhenIsDue",
+    "canonicalHost": "whenisdue.com",
+    "timezone": "UTC",
+    "policy": "Deterministic, fail-closed, provenance-first."
+  },
+  "docs": {
+    "humanReadable": "/methodology",
+    "whitepaper": "/transparency/whitepaper",
+    "endpoints": {
+      "publicMethodologyLedger": "/transparency/publicMethodologyLedger.json",
+      "guardStatusManifest": "/transparency/guardStatusManifest.json",
+      "provenanceExportSchema": "/transparency/provenanceExport.schema.json"
+    }
+  },
+  "releaseCadence": {
+    "principle": "Build-time enforcement; no live guessing.",
+    "logPolicy": "Append-only; entries never edited. If a correction is required, publish a new entry referencing the prior entry id."
+  },
+  "entries": [
+    {
+      "id": "2026-02-20-phase0-origin",
+      "datePublished": "2026-02-20",
+      "title": "Project integrity baseline established",
+      "type": "policy",
+      "summary": "Established deterministic posture: dates and explanations must be sourced; no speculative language in YMYL surfaces.",
+      "artifacts": [
+        {
+          "name": "Methodology page",
+          "path": "/methodology",
+          "kind": "documentation"
+        }
+      ],
+      "guardsAffected": []
+    },
+    {
+      "id": "2026-02-27-phase6-panic-proof",
+      "datePublished": "2026-02-27",
+      "title": "Phase 6: Panic-Proof Verification Layer (SNAP + SSA)",
+      "type": "architecture",
+      "summary": "Deployed deterministic anomaly taxonomy. Explanations for benefit delays require strict provenance. Outage claims strictly gated behind official runtime notices.",
+      "artifacts": [
+        {
+          "name": "anomalyCatalog",
+          "path": "/data/anomalyCatalog.*.json",
+          "kind": "registry"
+        },
+        {
+          "name": "provenanceRegistry",
+          "path": "/data/provenanceRegistry.json",
+          "kind": "registry"
+        }
+      ],
+      "guardsAffected": [
+        "AnomalyGuard"
+      ]
+    },
+    {
+      "id": "2026-02-28-phase7-drift-guard",
+      "datePublished": "2026-02-28",
+      "title": "Phase 7: Drift Guard (Dates & Calendars)",
+      "type": "architecture",
+      "summary": "Implemented build-fail deterministic monitoring for SSA calendar anchors and SNAP state-level manual updates.",
+      "artifacts": [
+        {
+          "name": "driftSignalRegistry",
+          "path": "/data/driftSignalRegistry.json",
+          "kind": "registry"
+        },
+        {
+          "name": "DeterministicBuildFailPolicy",
+          "path": "/policy/DeterministicBuildFailPolicy.ts",
+          "kind": "policy"
+        }
+      ],
+      "guardsAffected": [
+        "DriftGuard",
+        "AnomalyGuard"
+      ]
+    },
+    {
+      "id": "2026-02-28-phase8-amount-drift",
+      "datePublished": "2026-02-28",
+      "title": "Phase 8: Amount Drift Guard",
+      "type": "architecture",
+      "summary": "Expanded drift guard to cover amount-altering policy anchors (Medicare Part B, TOP offsets, SNAP SUA reviews) to neutralize 'amount shock' panic.",
+      "artifacts": [
+        {
+          "name": "amountDriftSignalRegistry",
+          "path": "/data/amountDriftSignalRegistry.json",
+          "kind": "registry"
+        },
+        {
+          "name": "AmountDriftBuildFailPolicy",
+          "path": "/policy/AmountDriftBuildFailPolicy.ts",
+          "kind": "policy"
+        },
+        {
+          "name": "PanicProofCopy additions",
+          "path": "/copy/PanicProofCopy.ts",
+          "kind": "copy"
+        }
+      ],
+      "guardsAffected": [
+        "AmountDriftGuard",
+        "AnomalyGuard"
+      ]
+    },
+    {
+      "id": "2026-02-28-phase9-transparency-layer",
+      "datePublished": "2026-02-28",
+      "title": "Phase 9: Institutional Transparency Layer",
+      "type": "transparency",
+      "summary": "Published public, read-only, machine-readable audit artifacts: methodology ledger, guard status manifest, and provenance export schema.",
+      "artifacts": [
+        {
+          "name": "publicMethodologyLedger.json",
+          "path": "/transparency/publicMethodologyLedger.json",
+          "kind": "public-audit"
+        },
+        {
+          "name": "guardStatusManifest.json",
+          "path": "/transparency/guardStatusManifest.json",
+          "kind": "public-audit"
+        },
+        {
+          "name": "provenanceExport.schema.json",
+          "path": "/transparency/provenanceExport.schema.json",
+          "kind": "public-audit"
+        },
+        {
+          "name": "Transparency Whitepaper",
+          "path": "/transparency/whitepaper",
+          "kind": "documentation"
+        }
+      ],
+      "guardsAffected": []
+    }
+  ]
+}

@@ -1,0 +1,385 @@
+{
+  "schemaVersion": "2026-02-amount-drift-guard.v1",
+  "purpose": "Build-fail registry for deterministic monitoring of benefit amount formula changes (SSA/SSI/SSDI + SNAP). No live scraping. No speculation.",
+  "lastHumanReviewPolicy": {
+    "principle": "Fail closed when a material amount-rule anchor is missing. Human review required to update URLs/provenance keys and (if needed) explanatory copy.",
+    "notes": [
+      "This registry does not attempt to compute benefit amounts.",
+      "This registry provides provenance-linked anchors that define the rule sources for common 'amount shock' causes.",
+      "If new SNAP states are added to events.json, this registry must be extended for those states or the build fails."
+    ]
+  },
+  "ssa": {
+    "requiredAnchors": [
+      {
+        "id": "SSA_TOP_TREASURY_OFFSET",
+        "label": "Treasury Offset Program (TOP) offsets from Social Security payments",
+        "provenanceKey": "SSA_TOP_TREASURY_OFFSET",
+        "url": "https://www.ssa.gov/OP_Home/cfr20/404/404-1820.htm",
+        "whyItMatters": "Offsets can reduce net payments; commonly misinterpreted as a payment error or outage."
+      },
+      {
+        "id": "SSA_MEDICARE_PARTB_PREMIUMS",
+        "label": "Medicare Part B premiums withheld from Social Security benefits",
+        "provenanceKey": "SSA_MEDICARE_PARTB_PREMIUMS",
+        "url": "https://www.ssa.gov/benefits/medicare/",
+        "whyItMatters": "Annual premium changes can reduce the net check even when gross benefits rise."
+      },
+      {
+        "id": "CMS_PARTB_PREMIUM_RATES",
+        "label": "CMS: Medicare Part B premium rates (annual updates)",
+        "provenanceKey": "CMS_PARTB_PREMIUM_RATES",
+        "url": "https://www.medicare.gov/basics/costs/medicare-costs",
+        "whyItMatters": "Grounds the amount withheld in official rate tables."
+      },
+      {
+        "id": "SSA_IRMAA_MEDICARE_ADJUSTMENT",
+        "label": "IRMAA: Income-Related Monthly Adjustment Amount (Medicare premium surcharges)",
+        "provenanceKey": "SSA_IRMAA_MEDICARE_ADJUSTMENT",
+        "url": "https://www.ssa.gov/benefits/medicare/medicare-premiums.html",
+        "whyItMatters": "Higher-income beneficiaries may see net reductions due to surcharges."
+      },
+      {
+        "id": "SSA_COLA_POLICY",
+        "label": "COLA policy and application to benefits",
+        "provenanceKey": "SSA_COLA_POLICY",
+        "url": "https://www.ssa.gov/cola/",
+        "whyItMatters": "Explains why changes occur at year boundaries and why net may differ."
+      },
+      {
+        "id": "SSA_OVERPAYMENT_RECOVERY",
+        "label": "Overpayment recovery and withholding policy",
+        "provenanceKey": "SSA_OVERPAYMENT_RECOVERY",
+        "url": "https://www.ssa.gov/benefits/retirement/planner/claiming.html",
+        "whyItMatters": "Withholding for recovery can reduce checks; users often interpret as missing funds."
+      }
+    ],
+    "uiBannerPolicy": {
+      "renderWhen": [
+        "ctx.amountFriction?.ssa === true"
+      ],
+      "copyKey": "SSA_AMOUNT_SHOCK",
+      "mustInclude": [
+        "Not an outage",
+        "Common deterministic causes list",
+        "Official provenance links",
+        "No individualized amount promises"
+      ]
+    }
+  },
+  "snap": {
+    "requiredPerStateAnchorTypes": [
+      "SUA",
+      "DEDUCTIONS",
+      "SYSTEM"
+    ],
+    "stateDefaults": {
+      "notes": [
+        "SUA anchors should point to the state DSS/HHS policy/manual page that defines Standard Utility Allowances or deduction rules.",
+        "DEDUCTIONS anchors should ground shelter/utility/internet deduction logic or related federal/state policy pages.",
+        "SYSTEM anchors should point to the state’s system modernization / program guidance page where recalculation or EDBC changes are documented (if applicable)."
+      ]
+    },
+    "states": {
+      "TX": {
+        "label": "Texas",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_TX_SUA_RULES",
+            "provenanceKey": "SNAP_TX_SUA_RULES",
+            "url": "https://www.hhs.texas.gov/handbooks/texas-works-handbook"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_TX_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_TX_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_TX_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_TX_SYSTEM_NOTICES",
+            "url": "https://www.yourtexasbenefits.com/"
+          }
+        ]
+      },
+      "CA": {
+        "label": "California",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_CA_SUA_RULES",
+            "provenanceKey": "SNAP_CA_SUA_RULES",
+            "url": "https://www.cdss.ca.gov/inforesources/calfresh"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_CA_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_CA_DEDUCTIONS_POLICY",
+            "url": "https://www.cdss.ca.gov/inforesources/calfresh"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_CA_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_CA_SYSTEM_NOTICES",
+            "url": "https://calhhs.ca.gov/calsaws/"
+          }
+        ]
+      },
+      "CT": {
+        "label": "Connecticut",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_CT_SUA_RULES",
+            "provenanceKey": "SNAP_CT_SUA_RULES",
+            "url": "https://portal.ct.gov/dss/snap/supplemental-nutrition-assistance-program"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_CT_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_CT_DEDUCTIONS_POLICY",
+            "url": "https://portal.ct.gov/dss/snap/supplemental-nutrition-assistance-program"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_CT_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_CT_SYSTEM_NOTICES",
+            "url": "https://portal.ct.gov/dss"
+          }
+        ]
+      },
+      "VA": {
+        "label": "Virginia",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_VA_SUA_RULES",
+            "provenanceKey": "SNAP_VA_SUA_RULES",
+            "url": "https://www.dss.virginia.gov/benefit/"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_VA_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_VA_DEDUCTIONS_POLICY",
+            "url": "https://www.dss.virginia.gov/benefit/snap.cgi"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_VA_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_VA_SYSTEM_NOTICES",
+            "url": "https://www.dss.virginia.gov/"
+          }
+        ]
+      },
+      "AK": {
+        "label": "Alaska",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_AK_SUA_RULES",
+            "provenanceKey": "SNAP_AK_SUA_RULES",
+            "url": "https://health.alaska.gov/dpa/Pages/food/default.aspx"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_AK_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_AK_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_AK_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_AK_SYSTEM_NOTICES",
+            "url": "https://alaskaconnect.alaska.gov/"
+          }
+        ]
+      },
+      "ND": {
+        "label": "North Dakota",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_ND_SUA_RULES",
+            "provenanceKey": "SNAP_ND_SUA_RULES",
+            "url": "https://www.hhs.nd.gov/services/food-assistance-snap"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_ND_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_ND_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_ND_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_ND_SYSTEM_NOTICES",
+            "url": "https://www.hhs.nd.gov/"
+          }
+        ]
+      },
+      "RI": {
+        "label": "Rhode Island",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_RI_SUA_RULES",
+            "provenanceKey": "SNAP_RI_SUA_RULES",
+            "url": "https://dhs.ri.gov/programs-and-services/food-assistance"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_RI_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_RI_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_RI_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_RI_SYSTEM_NOTICES",
+            "url": "https://dhs.ri.gov/"
+          }
+        ]
+      },
+      "VT": {
+        "label": "Vermont",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_VT_SUA_RULES",
+            "provenanceKey": "SNAP_VT_SUA_RULES",
+            "url": "https://dcf.vermont.gov/esd/benefits/snap"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_VT_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_VT_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_VT_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_VT_SYSTEM_NOTICES",
+            "url": "https://dcf.vermont.gov/"
+          }
+        ]
+      },
+      "NH": {
+        "label": "New Hampshire",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_NH_SUA_RULES",
+            "provenanceKey": "SNAP_NH_SUA_RULES",
+            "url": "https://www.dhhs.nh.gov/programs-services/food-assistance/supplemental-nutrition-assistance-program-snap"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_NH_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_NH_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_NH_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_NH_SYSTEM_NOTICES",
+            "url": "https://www.dhhs.nh.gov/"
+          }
+        ]
+      },
+      "SD": {
+        "label": "South Dakota",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_SD_SUA_RULES",
+            "provenanceKey": "SNAP_SD_SUA_RULES",
+            "url": "https://dss.sd.gov/economicassistance/snap/"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_SD_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_SD_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_SD_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_SD_SYSTEM_NOTICES",
+            "url": "https://dss.sd.gov/"
+          }
+        ]
+      },
+      "UT": {
+        "label": "Utah",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_UT_SUA_RULES",
+            "provenanceKey": "SNAP_UT_SUA_RULES",
+            "url": "https://jobs.utah.gov/customereducation/services/foodstamps.html"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_UT_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_UT_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_UT_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_UT_SYSTEM_NOTICES",
+            "url": "https://jobs.utah.gov/"
+          }
+        ]
+      },
+      "WY": {
+        "label": "Wyoming",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_WY_SUA_RULES",
+            "provenanceKey": "SNAP_WY_SUA_RULES",
+            "url": "https://health.wyo.gov/publichealth/snap/"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_WY_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_WY_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_WY_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_WY_SYSTEM_NOTICES",
+            "url": "https://health.wyo.gov/"
+          }
+        ]
+      },
+      "NJ": {
+        "label": "New Jersey",
+        "anchors": [
+          {
+            "type": "SUA",
+            "id": "SNAP_NJ_SUA_RULES",
+            "provenanceKey": "SNAP_NJ_SUA_RULES",
+            "url": "https://www.nj.gov/humanservices/njsnap/"
+          },
+          {
+            "type": "DEDUCTIONS",
+            "id": "SNAP_NJ_DEDUCTIONS_POLICY",
+            "provenanceKey": "SNAP_NJ_DEDUCTIONS_POLICY",
+            "url": "https://www.fns.usda.gov/snap/recipient/eligibility"
+          },
+          {
+            "type": "SYSTEM",
+            "id": "SNAP_NJ_SYSTEM_NOTICES",
+            "provenanceKey": "SNAP_NJ_SYSTEM_NOTICES",
+            "url": "https://www.nj.gov/humanservices/"
+          }
+        ]
+      }
+    }
+  }
+}

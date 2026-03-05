@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "snap_override_completeness_v1",
+  "program": "SNAP",
+  "enforcementMode": "FAIL_BUILD",
+  "eventsParsing": {
+    "programDetection": {
+      "allowCategories": [
+        "federal"
+      ],
+      "eventIdPrefixes": [
+        "snap-"
+      ],
+      "canonicalSlugContains": [
+        "/snap/",
+        "/federal/snap/",
+        "federal/snap"
+      ]
+    },
+    "stateExtraction": {
+      "preferredFields": [
+        "stateCode",
+        "state",
+        "usState"
+      ],
+      "regexCandidates": [
+        "(?:^|[^a-zA-Z])snap[-_/](?<state>[a-z]{2})(?:[-_/]|$)",
+        "(?:^|/)snap/(?<state>[a-z]{2})(?:/|$)",
+        "(?:^|[^a-zA-Z])snap[-_/](?<stateName>texas|california|connecticut|alaska|north[-_ ]?dakota|rhode[-_ ]?island|vermont|new[-_ ]?hampshire|south[-_ ]?dakota|virginia|utah|wyoming|new[-_ ]?jersey)(?:[-_/]|$)"
+      ]
+    }
+  },
+  "explicitlyExcluded": [],
+  "strictness": {
+    "failIfLedgerHasStateWithoutOverrides": true,
+    "failIfOverrideHasUnknownState": false,
+    "failIfAnyOverrideLinkMissingProvenance": true
+  },
+  "baselineLedgerStatesAtCreation": [
+    "TX",
+    "CA",
+    "CT",
+    "AK",
+    "ND",
+    "RI",
+    "VT",
+    "NH",
+    "SD",
+    "VA",
+    "UT",
+    "WY",
+    "NJ"
+  ],
+  "notes": [
+    "Future-proof: expected SNAP states are computed from events.json at build time.",
+    "baselineLedgerStatesAtCreation is informational only; it does not constrain future states."
+  ]
+}

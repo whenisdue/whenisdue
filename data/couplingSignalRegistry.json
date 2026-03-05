@@ -1,0 +1,130 @@
+{
+  "registryVersion": "1.0.0",
+  "lastIntegratedUtc": "2026-02-28T10:38:44.984909Z",
+  "enforcementMode": "FAIL_CLOSED",
+  "couplings": [
+    {
+      "couplingId": "ssa_cola_snap_recalc",
+      "programsInvolved": [
+        "SSA_RSDI",
+        "SNAP"
+      ],
+      "explanationTier": "essential",
+      "provenanceUrls": [
+        "https://www.ecfr.gov/current/title-7/subtitle-B/chapter-II/subchapter-C/part-273/section-273.12",
+        "https://www.ecfr.gov/current/title-7/subtitle-B/chapter-II/subchapter-C/part-273/section-273.13",
+        "https://www.fns.usda.gov/snap/eligibility",
+        "https://www.ssa.gov/cola/"
+      ],
+      "citationLabel": "7 CFR 273.12 & 273.13; USDA-FNS SNAP guidance; SSA COLA",
+      "effectiveDateNotes": "Annual COLA effective January; SNAP recalc timing varies by state mass change cadence.",
+      "reviewCadence": "annual",
+      "requiredAnchors": [
+        "ecfr",
+        "usda_fns",
+        "ssa"
+      ],
+      "riskTag": "amount_shock_via_coupling"
+    },
+    {
+      "couplingId": "ssa_medicare_partb_withholding",
+      "programsInvolved": [
+        "SSA_RSDI",
+        "MEDICARE"
+      ],
+      "explanationTier": "essential",
+      "provenanceUrls": [
+        "https://www.ssa.gov/benefits/medicare/",
+        "https://www.medicare.gov/basics/costs/medicare-costs"
+      ],
+      "citationLabel": "SSA Medicare Withholding Policy; CMS Part B Costs",
+      "effectiveDateNotes": "Updated annually in January; can trigger net decrease if premium outpaces COLA.",
+      "reviewCadence": "annual",
+      "requiredAnchors": [
+        "ssa",
+        "medicare_gov"
+      ],
+      "riskTag": "amount_shock_net_decrease"
+    },
+    {
+      "couplingId": "ssa_irmaa_two_year_lookback",
+      "programsInvolved": [
+        "SSA_RSDI",
+        "MEDICARE"
+      ],
+      "explanationTier": "technical",
+      "provenanceUrls": [
+        "https://www.ssa.gov/benefits/medicare/medicare-premiums.html"
+      ],
+      "citationLabel": "SSA IRMAA Guidelines",
+      "effectiveDateNotes": "Based on tax returns from 2 years prior; notices sent late Nov/early Dec.",
+      "reviewCadence": "annual",
+      "requiredAnchors": [
+        "ssa"
+      ],
+      "riskTag": "amount_shock_high_income"
+    },
+    {
+      "couplingId": "ssi_in_kind_support_ism",
+      "programsInvolved": [
+        "SSI",
+        "SNAP",
+        "HOUSING"
+      ],
+      "explanationTier": "contextual",
+      "provenanceUrls": [
+        "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1130",
+        "https://www.ssa.gov/ssi/text-living-ussi.htm"
+      ],
+      "citationLabel": "20 CFR 416.1130; SSA SSI Living Arrangements",
+      "effectiveDateNotes": "Triggered by changes in living arrangement or receipt of food/shelter help.",
+      "reviewCadence": "legislative_trigger",
+      "requiredAnchors": [
+        "ecfr",
+        "ssa"
+      ],
+      "riskTag": "amount_shock_one_third"
+    },
+    {
+      "couplingId": "hud_income_total_tenant_payment",
+      "programsInvolved": [
+        "HUD_SECTION_8",
+        "SSA_RSDI",
+        "SSI"
+      ],
+      "explanationTier": "contextual",
+      "provenanceUrls": [
+        "https://www.ecfr.gov/current/title-24/subtitle-A/part-5/subpart-F/section-5.628",
+        "https://www.hud.gov/program_offices/public_indian_housing/programs/hcv"
+      ],
+      "citationLabel": "24 CFR 5.628 (Total Tenant Payment); HUD HCV program overview",
+      "effectiveDateNotes": "Rent recalculated after verified income changes and at annual recertification.",
+      "reviewCadence": "annual",
+      "requiredAnchors": [
+        "ecfr",
+        "hud"
+      ],
+      "riskTag": "coupling_rent_shock"
+    },
+    {
+      "couplingId": "ssa_overpayment_recovery_withholding",
+      "programsInvolved": [
+        "SSA_RSDI",
+        "SSI"
+      ],
+      "explanationTier": "essential",
+      "provenanceUrls": [
+        "https://secure.ssa.gov/poms.nsf/lnx/0202210030",
+        "https://www.ssa.gov/overpayments/"
+      ],
+      "citationLabel": "SSA POMS GN 02210.030; SSA Overpayment Policy",
+      "effectiveDateNotes": "Varies by case; default rate often 10% for SSI or 100% for RSDI unless negotiated.",
+      "reviewCadence": "legislative_trigger",
+      "requiredAnchors": [
+        "ssa_poms",
+        "ssa"
+      ],
+      "riskTag": "amount_shock_withholding"
+    }
+  ]
+}

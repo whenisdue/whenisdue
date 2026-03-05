@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "updatedAtUtc": "2026-03-02T12:00:00Z",
+  "mirrors": [
+    { "mirrorId": "did:web:us-east.whenisdue.com", "baseUrl": "/", "region": "US-EAST" },
+    { "mirrorId": "did:web:us-west.whenisdue.com", "baseUrl": "/dummy-offline/", "region": "US-WEST" },
+    { "mirrorId": "did:web:eu-central.whenisdue.com", "baseUrl": "/", "region": "EU-CENTRAL" },
+    { "mirrorId": "did:web:apac-tokyo.whenisdue.com", "baseUrl": "/", "region": "APAC" }
+  ]
+}

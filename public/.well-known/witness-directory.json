@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "lastUpdatedUtc": "2026-03-02T12:00:00Z",
+  "witnesses": [
+    {
+      "witnessId": "did:web:witness-1.whenisdue.com",
+      "status": "ACTIVE",
+      "keys": [{ "kid": "key-1", "publicKey": "aaaabbbbccccddddeeeeffff00001111" }]
+    },
+    {
+      "witnessId": "did:web:witness-2.whenisdue.com",
+      "status": "PROBATION",
+      "keys": [{ "kid": "key-2", "publicKey": "11112222333344445555666677778888" }]
+    },
+    {
+      "witnessId": "did:web:witness-3-rogue.whenisdue.com",
+      "status": "ACTIVE",
+      "keys": [{ "kid": "key-3", "publicKey": "99998888777766665555444433332222" }]
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-02-28",
+  "notes": [
+    "This file is a deterministic build-time drift signal ledger. It is NOT used for runtime scraping.",
+    "Any update must be reviewed by a human and accompanied by provenanceRegistry updates where applicable."
+  ],
+  "ssa": {
+    "calendarAnchors": [
+      {
+        "year": 2025,
+        "publicationId": "05-10031-2025",
+        "title": "Schedule of Social Security Benefit Payments - 2025",
+        "url": "https://www.ssa.gov/pubs/EN-05-10031-2025.pdf",
+        "publisher": "SSA",
+        "required": true
+      },
+      {
+        "year": 2026,
+        "publicationId": "05-10031-2026",
+        "title": "Schedule of Social Security Benefit Payments - 2026",
+        "url": "https://www.ssa.gov/pubs/EN-05-10031-2026.pdf",
+        "publisher": "SSA",
+        "required": true
+      },
+      {
+        "year": 2027,
+        "publicationId": "05-10031-2027",
+        "title": "Schedule of Social Security Benefit Payments - 2027",
+        "url": "https://www.ssa.gov/pubs/EN-05-10031-2027.pdf",
+        "publisher": "SSA",
+        "required": true
+      }
+    ],
+    "integrityRules": {
+      "publicationIdPattern": "^05-10031-(19|20)\\d{2}$",
+      "urlMustMatch": "^https://www\\.ssa\\.gov/pubs/EN-05-10031-(19|20)\\d{2}\\.pdf$"
+    }
+  },
+  "snap": {
+    "stateSignals": {
+      "CT": {
+        "riskTier": "HIGH",
+        "policyAnchors": [
+          {
+            "title": "Changes to SNAP benefit issuance schedule beginning March 1, 2026",
+            "url": "https://portal.ct.gov/dss/snap/changes-to-snap-benefit-issuance-schedule-beginning-march-1-2026",
+            "type": "ISSUANCE_LOGIC_CHANGE",
+            "required": true
+          }
+        ],
+        "monitoringHints": [
+          "Look for any update that changes sorting variable or issuance window range."
+        ]
+      },
+      "TX": {
+        "riskTier": "HIGH",
+        "policyAnchors": [
+          {
+            "title": "Form H1184 Benefit Issuance (Texas HHSC) - distribution dates by EDG last 2 digits",
+            "url": "https://www.hhs.texas.gov/sites/default/files/documents/laws-regulations/forms/h1184-s.pdf",
+            "type": "ISSUANCE_SCHEDULE_REFERENCE",
+            "required": true
+          }
+        ],
+        "monitoringHints": [
+          "Texas has a known dual-track (grandfathered) issuance environment; watch for handbook updates that redefine cohort boundaries or issuance table."
+        ]
+      },
+      "CA": {
+        "riskTier": "HIGH",
+        "policyAnchors": [
+          {
+            "title": "CalFresh policy resources (CDSS) - All County Letters / program changes",
+            "url": "https://www.cdss.ca.gov/inforesources/calfresh",
+            "type": "PROGRAM_POLICY_PORTAL",
+            "required": true
+          }
+        ],
+        "monitoringHints": [
+          "Monitor statewide system migrations (CalSAWS) and any ACL referencing issuance cadence or supplemental issuance rules."
+        ]
+      },
+      "VA": {
+        "riskTier": "HIGH",
+        "policyAnchors": [
+          {
+            "title": "VDSS SNAP Policy Manual - Transmittals (PDF index)",
+            "url": "https://www.dss.virginia.gov/files/division/bp/fs/manuals/snap/Transmittal.pdf",
+            "type": "POLICY_TRANSMITTALS",
+            "required": true
+          }
+        ],
+        "monitoringHints": [
+          "Watch for emergency funding/shutdown contingencies and transmittals altering issuance cadence or supplements."
+        ]
+      }
+    },
+    "integrityRules": {
+      "stateCodePattern": "^[A-Z]{2}$",
+      "requiredRiskTiersForDriftReadiness": [
+        "HIGH"
+      ]
+    }
+  }
+}

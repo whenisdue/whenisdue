@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "logId": "whenisdue.com/v1",
+  "quorumPolicy": {
+    "mode": "WEIGHTED",
+    "thresholdWeight": 0.67
+  },
+  "keys": []
+}

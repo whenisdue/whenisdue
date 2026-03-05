@@ -1,0 +1,229 @@
+{
+  "SNAP_STATE_CASE_STATUS_GUIDANCE": {
+    "url": "https://www.fns.usda.gov/snap/state-directory",
+    "publisher": "USDA Food and Nutrition Service (FNS)"
+  },
+  "SNAP_STATE_REPORT_A_MOVE": {
+    "url": "https://www.fns.usda.gov/snap/state-directory",
+    "publisher": "USDA Food and Nutrition Service (FNS)"
+  },
+  "SNAP_FRAUD_AND_SKIMMING_GUIDANCE": {
+    "url": "https://www.fns.usda.gov/snap/stolen-benefits",
+    "publisher": "USDA Food and Nutrition Service (FNS)"
+  },
+  "SSA_PAYMENT_SCHEDULE_PDF": {
+    "url": "https://www.ssa.gov/pubs/EN-05-10031-2025.pdf",
+    "publisher": "Social Security Administration (SSA)"
+  },
+  "SSA_DIRECT_EXPRESS_GUIDANCE": {
+    "url": "https://www.fiscal.treasury.gov/directexpress/",
+    "publisher": "U.S. Department of the Treasury, Bureau of the Fiscal Service"
+  },
+  "SSA_UPDATE_DIRECT_DEPOSIT_GUIDANCE": {
+    "url": "https://www.ssa.gov/manage-benefits/update-direct-deposit",
+    "publisher": "Social Security Administration (SSA)"
+  },
+  "SSA_OVERPAYMENT_RECOVERY_GUIDANCE": {
+    "url": "https://www.ssa.gov/manage-benefits/resolve-overpayment",
+    "publisher": "Social Security Administration (SSA)"
+  },
+  "OFFICIAL_NOTICE_RUNTIME_ONLY": {
+    "url": "",
+    "publisher": "Runtime-only (official notice injected)"
+  },
+  "SNAP_AK_EBT_HELP": {
+    "label": "Alaska EBT help / replace card / contacts",
+    "publisher": "Alaska Department of Health",
+    "url": "https://health.alaska.gov/en/services/division-of-public-assistance-dpa-services/snap-nutrition-assistance/"
+  },
+  "SNAP_AK_EBT_PORTAL": {
+    "label": "Alaska EBT portal / balance tools",
+    "publisher": "Alaska Department of Health",
+    "url": "https://cardholder.ebtedge.com/"
+  },
+  "SNAP_AK_ISSUANCE_SCHEDULE": {
+    "label": "Alaska SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_CA_EBT_HELP": {
+    "label": "California EBT help / replace card / contacts",
+    "publisher": "California Department of Social Services",
+    "url": "https://www.cdss.ca.gov/ebt-card"
+  },
+  "SNAP_CA_EBT_PORTAL": {
+    "label": "California EBT portal / balance tools",
+    "publisher": "California Department of Social Services",
+    "url": "https://www.ebt.ca.gov/"
+  },
+  "SNAP_CA_ISSUANCE_SCHEDULE": {
+    "label": "California SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_CT_EBT_HELP": {
+    "label": "Connecticut EBT help / replace card / contacts",
+    "publisher": "Connecticut Department of Social Services",
+    "url": "https://portal.ct.gov/dss/snap/supplemental-nutrition-assistance-program---snap"
+  },
+  "SNAP_CT_EBT_PORTAL": {
+    "label": "Connecticut EBT portal / balance tools",
+    "publisher": "Connecticut Department of Social Services",
+    "url": "https://www.connectebt.com/"
+  },
+  "SNAP_CT_ISSUANCE_SCHEDULE": {
+    "label": "Connecticut SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_ND_EBT_HELP": {
+    "label": "North Dakota EBT help / replace card / contacts",
+    "publisher": "North Dakota Health and Human Services",
+    "url": "https://www.hhs.nd.gov/food-programs/ebt"
+  },
+  "SNAP_ND_EBT_PORTAL": {
+    "label": "North Dakota EBT portal / balance tools",
+    "publisher": "North Dakota Health and Human Services",
+    "url": "https://www.hhs.nd.gov/food-programs/ebt"
+  },
+  "SNAP_ND_ISSUANCE_SCHEDULE": {
+    "label": "North Dakota SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_NH_EBT_HELP": {
+    "label": "New Hampshire EBT help / replace card / contacts",
+    "publisher": "New Hampshire Department of Health and Human Services",
+    "url": "https://www.dhhs.nh.gov/programs-services/food-meals/supplemental-nutrition-assistance-program-snap"
+  },
+  "SNAP_NH_EBT_PORTAL": {
+    "label": "New Hampshire EBT portal / balance tools",
+    "publisher": "New Hampshire Department of Health and Human Services",
+    "url": "https://www.ebtedge.com/"
+  },
+  "SNAP_NH_ISSUANCE_SCHEDULE": {
+    "label": "New Hampshire SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_NJ_EBT_HELP": {
+    "label": "New Jersey EBT help / replace card / contacts",
+    "publisher": "New Jersey Department of Human Services",
+    "url": "https://www.nj.gov/humanservices/njsnap/"
+  },
+  "SNAP_NJ_EBT_PORTAL": {
+    "label": "New Jersey EBT portal / balance tools",
+    "publisher": "New Jersey Department of Human Services",
+    "url": "https://www.njfamiliesfirst.com/"
+  },
+  "SNAP_NJ_ISSUANCE_SCHEDULE": {
+    "label": "New Jersey SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_RI_EBT_HELP": {
+    "label": "Rhode Island EBT help / replace card / contacts",
+    "publisher": "Rhode Island Department of Human Services",
+    "url": "https://dhs.ri.gov/programs-and-services/supplemental-nutrition-assistance-program-snap/ebt-card-information"
+  },
+  "SNAP_RI_EBT_PORTAL": {
+    "label": "Rhode Island EBT portal / balance tools",
+    "publisher": "Rhode Island Department of Human Services",
+    "url": "https://www.ebtedge.com/"
+  },
+  "SNAP_RI_ISSUANCE_SCHEDULE": {
+    "label": "Rhode Island SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_SD_EBT_HELP": {
+    "label": "South Dakota EBT help / replace card / contacts",
+    "publisher": "South Dakota Department of Social Services",
+    "url": "https://dss.sd.gov/economicassistance/snap/"
+  },
+  "SNAP_SD_EBT_PORTAL": {
+    "label": "South Dakota EBT portal / balance tools",
+    "publisher": "South Dakota Department of Social Services",
+    "url": "https://www.ebtedge.com/"
+  },
+  "SNAP_SD_ISSUANCE_SCHEDULE": {
+    "label": "South Dakota SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_TX_EBT_HELP": {
+    "label": "Texas EBT help / replace card / contacts",
+    "publisher": "Texas Health and Human Services",
+    "url": "https://www.hhs.texas.gov/services/financial/lone-star-card"
+  },
+  "SNAP_TX_EBT_PORTAL": {
+    "label": "Texas EBT portal / balance tools",
+    "publisher": "Texas Health and Human Services",
+    "url": "https://www.yourtexasbenefits.com/"
+  },
+  "SNAP_TX_ISSUANCE_SCHEDULE": {
+    "label": "Texas SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_UT_EBT_HELP": {
+    "label": "Utah EBT help / replace card / contacts",
+    "publisher": "Utah Department of Workforce Services",
+    "url": "https://jobs.utah.gov/customereducation/services/foodstamps/index.html"
+  },
+  "SNAP_UT_EBT_PORTAL": {
+    "label": "Utah EBT portal / balance tools",
+    "publisher": "Utah Department of Workforce Services",
+    "url": "https://www.connectebt.com/"
+  },
+  "SNAP_UT_ISSUANCE_SCHEDULE": {
+    "label": "Utah SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_VA_EBT_HELP": {
+    "label": "Virginia EBT help / replace card / contacts",
+    "publisher": "Virginia Department of Social Services",
+    "url": "https://www.dss.virginia.gov/benefit/snap.cgi"
+  },
+  "SNAP_VA_EBT_PORTAL": {
+    "label": "Virginia EBT portal / balance tools",
+    "publisher": "Virginia Department of Social Services",
+    "url": "https://www.connectebt.com/"
+  },
+  "SNAP_VA_ISSUANCE_SCHEDULE": {
+    "label": "Virginia SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_VT_EBT_HELP": {
+    "label": "Vermont EBT help / replace card / contacts",
+    "publisher": "Vermont Department for Children and Families",
+    "url": "https://outside.vermont.gov/dept/DCF/Shared%20Documents/Benefits/EBT-Brochure.pdf"
+  },
+  "SNAP_VT_EBT_PORTAL": {
+    "label": "Vermont EBT portal / balance tools",
+    "publisher": "Vermont Department for Children and Families",
+    "url": "https://cardholder.ebtedge.com/"
+  },
+  "SNAP_VT_ISSUANCE_SCHEDULE": {
+    "label": "Vermont SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  },
+  "SNAP_WY_EBT_HELP": {
+    "label": "Wyoming EBT help / replace card / contacts",
+    "publisher": "Wyoming Department of Family Services",
+    "url": "https://dfs.wyo.gov/assistance-programs/food-assistance/supplemental-nutrition-assistance-program-snap/snap-how-do-i-get-my-benefits/"
+  },
+  "SNAP_WY_EBT_PORTAL": {
+    "label": "Wyoming EBT portal / balance tools",
+    "publisher": "Wyoming Department of Family Services",
+    "url": "https://www.ebtedge.com/"
+  },
+  "SNAP_WY_ISSUANCE_SCHEDULE": {
+    "label": "Wyoming SNAP monthly issuance schedule (USDA)",
+    "publisher": "USDA Food and Nutrition Service (FNS)",
+    "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf"
+  }
+}

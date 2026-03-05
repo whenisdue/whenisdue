@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Series {
+  id             String       @id @default(cuid())
+  seriesKey      String       @unique
+  canonicalName  String
+  entityName     String
+  frequency      String
+  occurrenceRule String
+  occurrences    Occurrence[]
+}
+
+model Occurrence {
+  id                String   @id @default(cuid())
+  date              DateTime
+  status            String
+  verificationProof String?
+  verifiedAt        DateTime @default(now())
+  seriesId          String
+  series            Series   @relation(fields: [seriesId], references: [id])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

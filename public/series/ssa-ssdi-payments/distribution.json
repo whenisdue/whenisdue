@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "seriesKey": "ssa-ssdi-payments",
+  "windowModel": "DAY_OF_YEAR",
+  "samples": [
+    {
+      "recordId": "ssdi-2024-01",
+      "isoUtc": "2024-01-03T08:00:00Z",
+      "coord": 3
+    },
+    {
+      "recordId": "ssdi-2024-02",
+      "isoUtc": "2024-02-03T08:00:00Z",
+      "coord": 34
+    },
+    {
+      "recordId": "ssdi-2024-03",
+      "isoUtc": "2024-03-03T08:00:00Z",
+      "coord": 63
+    },
+    {
+      "recordId": "ssdi-2024-04",
+      "isoUtc": "2024-04-03T08:00:00Z",
+      "coord": 94
+    },
+    {
+      "recordId": "ssdi-2024-05",
+      "isoUtc": "2024-05-03T08:00:00Z",
+      "coord": 124
+    },
+    {
+      "recordId": "ssdi-2024-06",
+      "isoUtc": "2024-06-03T08:00:00Z",
+      "coord": 155
+    },
+    {
+      "recordId": "ssdi-2025-01",
+      "isoUtc": "2025-01-03T08:00:00Z",
+      "coord": 3
+    },
+    {
+      "recordId": "ssdi-2025-02",
+      "isoUtc": "2025-02-03T08:00:00Z",
+      "coord": 34
+    },
+    {
+      "recordId": "ssdi-2026-03",
+      "isoUtc": "2026-03-03T08:00:00Z",
+      "coord": 62
+    }
+  ],
+  "distribution": {
+    "n": 9,
+    "p10": 3,
+    "p50": 62,
+    "p90": 130,
+    "range": {
+      "min": 3,
+      "max": 155
+    }
+  },
+  "derivedClaims": [
+    {
+      "claimId": "clm_ssdi_base_pattern",
+      "text": "Historically, SSDI payments occur consistently around the 3rd of the month.",
+      "refs": [
+        "ssdi-2024-01",
+        "ssdi-2024-02",
+        "ssdi-2024-03",
+        "ssdi-2024-04",
+        "ssdi-2024-05"
+      ]
+    },
+    {
+      "claimId": "clm_methodology_statement",
+      "text": "Method: HISTORICAL_DISTRIBUTION_ONLY. Claims below summarize observed past occurrences. No external prediction model is used.",
+      "refs": []
+    }
+  ],
+  "signature": {
+    "alg": "Ed25519",
+    "kid": "did:web:whenisdue.com:hub-key-v1",
+    "value": "base64_dummy_signature_generated_by_kms==="
+  }
+}

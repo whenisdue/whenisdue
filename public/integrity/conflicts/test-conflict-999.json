@@ -1,0 +1,16 @@
+{
+  "conflictId": "test-conflict-999",
+  "conflictType": "EQUIVOCATION",
+  "severity": "RED",
+  "canonicalConflictHash": "sha256:1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff",
+  "sthA": {
+    "treeSize": 100,
+    "rootHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "signature": "sigA"
+  },
+  "sthB": {
+    "treeSize": 100,
+    "rootHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "signature": "sigB"
+  }
+}

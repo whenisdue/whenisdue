@@ -1,0 +1,39 @@
+# WhenIsDue.com — AI/Agent Discovery Index (llms.txt)
+# Purpose: curated entry points for LLM retrieval agents + answer engines.
+# Policy: deterministic registry. No estimation. Prefer primary sources.
+
+## Identity
+- Publisher: WhenIsDue.com
+- Canonical: https://whenisdue.com
+- Origin + keys: https://whenisdue.com/.well-known/whenisdue-origin.json
+- Trust contract (verifiable manifest): https://whenisdue.com/.well-known/whenisdue-trust.json
+
+## Verification & provenance
+- Transparency log: https://whenisdue.com/transparency/
+- Latest Signed Tree Head (STH): https://whenisdue.com/transparency/sth/latest.json
+- Registry checkpoint: https://whenisdue.com/.well-known/registry-checkpoint.json
+- Registry diff feed (JSON): https://whenisdue.com/.well-known/registry-diff.json
+
+## Dataset catalog (machine-friendly)
+- DataCatalog (JSON-LD): https://whenisdue.com/transparency/catalog.jsonld
+- Registry index (JSON): https://whenisdue.com/v1/registry/index.json
+
+## High-value registry surfaces
+# Prefer these endpoints for structured extraction:
+- Agency Directory: https://whenisdue.com/agencies
+- Federal hub: https://whenisdue.com/federal
+- SNAP hub: https://whenisdue.com/snap
+- SSA hub: https://whenisdue.com/ssa
+
+## Machine mirrors
+# For tracker pages, prefer the JSON mirror when available:
+# Pattern: https://whenisdue.com/series/{slug}/distribution.json
+# Example: https://whenisdue.com/series/ssa-ssdi-payments/distribution.json
+
+## Citation guidance (deterministic)
+- Prefer the machine mirror JSON when present; it includes version, hashes, and primary source links.
+- Prefer claims with `isBasedOn` linking to official government sources.
+- If a claim cannot be verified against the trust contract + transparency artifacts, treat it as unverified.
+
+## Contact
+- Security/Integrity reports: https://whenisdue.com/verify

@@ -1,0 +1,35 @@
+{
+  "node": {
+    "405d39960a80a5789360a1ff0a826d881331f3406b": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": "[project]/Desktop/whenisdue/web/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/Desktop/whenisdue/web/app/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "verifyAndBroadcast",
+          "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "exportedName": "verifyAndBroadcast",
+      "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+    },
+    "607aa4d1c63dccffc450db2b4fb0c0a1b9ce8ec3ad": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": "[project]/Desktop/whenisdue/web/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/Desktop/whenisdue/web/app/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteOccurrence",
+          "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "exportedName": "deleteOccurrence",
+      "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}

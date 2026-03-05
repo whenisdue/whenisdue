@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "program": "SSA",
+  "maxCards": 5,
+  "buckets": [
+    {
+      "key": "SSA_BANK_POSTING_VARIANCE",
+      "program": "SSA",
+      "title": "Bank posting time can vary during the day",
+      "description": "Even on the scheduled payment date, deposits can appear at different times depending on the bank or card program. Many post overnight, but some post later in the morning or afternoon.",
+      "severity": "info",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SSA_EARLY_DEPOSIT_NOT_GUARANTEED",
+      "program": "SSA",
+      "title": "“Early deposit” timing is not guaranteed",
+      "description": "Some banks advertise early access to deposits, but that timing is controlled by the bank—not the benefit program. The official schedule reflects the program’s payment date, not a bank’s early-availability policy.",
+      "severity": "info",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SSA_DIRECT_EXPRESS_OR_PAYCARD_TIMING",
+      "program": "SSA",
+      "title": "Direct Express or pay card posting windows can differ",
+      "description": "If you receive benefits through a card program, posting and balance display timing can differ from traditional banks. Use the card program’s official guidance for balance and posting behavior.",
+      "severity": "info",
+      "requiresProvenance": true,
+      "provenanceKey": "SSA_DIRECT_EXPRESS_GUIDANCE"
+    },
+    {
+      "key": "SSA_SSI_WEEKEND_HOLIDAY_ADJUSTMENT_CONFUSION",
+      "program": "SSA",
+      "title": "SSI weekend/holiday adjustments can shift the deposit date",
+      "description": "SSI is generally paid on the 1st. If the 1st falls on a weekend or federal holiday, payment is typically issued on the prior business day. This can make a deposit appear “early” compared to the calendar date.",
+      "severity": "info",
+      "requiresProvenance": true,
+      "provenanceKey": "SSA_PAYMENT_SCHEDULE_PDF"
+    },
+    {
+      "key": "SSA_BIRTHDATE_WEDNESDAY_GROUP_CONFUSION",
+      "program": "SSA",
+      "title": "Your Wednesday group depends on your birth date range",
+      "description": "For many Social Security payments, the schedule uses the second, third, or fourth Wednesday based on birth date range (1–10, 11–20, 21–31). Confusing the group can make it feel “late” when it is not.",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "provenanceKey": "SSA_PAYMENT_SCHEDULE_PDF"
+    },
+    {
+      "key": "SSA_ACCOUNT_OR_ADDRESS_CHANGE_PROCESSING",
+      "program": "SSA",
+      "title": "Recent bank or address changes can affect processing",
+      "description": "If you recently changed direct deposit details or updated your address, processing and confirmation timelines can vary. Use official guidance for updating information and expected processing windows.",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "provenanceKey": "SSA_UPDATE_DIRECT_DEPOSIT_GUIDANCE"
+    },
+    {
+      "key": "SSA_WITHHOLDING_OR_OVERPAYMENT_RECOVERY",
+      "program": "SSA",
+      "title": "Withholding or overpayment recovery can change the amount you see",
+      "description": "Some payments are reduced due to withholding or recovery actions. This can look like a “missing” deposit if you are expecting a prior amount. Use official guidance for notices, deductions, and recovery actions.",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "provenanceKey": "SSA_OVERPAYMENT_RECOVERY_GUIDANCE"
+    },
+    {
+      "key": "SSA_REPRESENTATIVE_PAYEE_TIMING",
+      "program": "SSA",
+      "title": "Representative payee distribution can add timing variability",
+      "description": "If a representative payee receives funds on your behalf, the payee’s internal distribution timing can add delay beyond the program’s payment date.",
+      "severity": "warning",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SSA_OFFICIAL_NOTICE_RUNTIME_ONLY",
+      "program": "SSA",
+      "title": "Official service notice (if one is published)",
+      "description": "If SSA publishes a time-stamped official service notice, we will show it here with a direct link. If you do not see an official notice card, we are not asserting one exists.",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "runtimeOnly": true,
+      "provenanceKey": "OFFICIAL_NOTICE_RUNTIME_ONLY"
+    }
+  ]
+}

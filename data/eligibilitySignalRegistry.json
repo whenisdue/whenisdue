@@ -1,0 +1,158 @@
+{
+  "registryId": "eligibilitySignalRegistry",
+  "version": "0.1.0",
+  "lastVerifiedUtc": "2026-02-28T00:00:00Z",
+  "notes": [
+    "SNAP-first MVP. Deterministic, page-context + UTC-window interceptor.",
+    "Fail-closed: registry entries render only when scope matches page context AND nowUtc is within activeWindowUtc.",
+    "No user case data. No inference. No personalization. Cohorts are page-selected (program/jurisdiction pages).",
+    "UI copy is template-driven via uiBlockId. This registry provides only safe parameters and citations."
+  ],
+  "enums": {
+    "pageKinds": [
+      "schedule",
+      "explainer",
+      "troubleshooting"
+    ],
+    "confidenceLabels": [
+      "CONFIRMED",
+      "EXPECTED"
+    ],
+    "reasonBuckets": [
+      "RECERTIFICATION_WINDOW",
+      "WAIVER_EXPIRATION",
+      "WORK_REQUIREMENT_UPDATE",
+      "ADDRESS_MAIL_RETURNED",
+      "SYSTEM_OUTAGE_OFFICIAL",
+      "SHUTDOWN_APPROPRIATIONS_CONTEXT"
+    ],
+    "uiBlockIds": [
+      "BANNER_RECERT_WINDOW",
+      "BANNER_ABAWD_WAIVER_CONTEXT",
+      "BANNER_WORK_REQ_CONTEXT",
+      "BANNER_OFFICIAL_OUTAGE_CONTEXT",
+      "BANNER_SHUTDOWN_CONTEXT"
+    ]
+  },
+  "entries": [
+    {
+      "eligibilitySignalId": "snap_recertification_window_mar_2026_us",
+      "program": "snap",
+      "confidenceLabel": "EXPECTED",
+      "reasonBucket": "RECERTIFICATION_WINDOW",
+      "uiBlockId": "BANNER_RECERT_WINDOW",
+      "scope": {
+        "pagePrograms": [
+          "snap"
+        ],
+        "pageKinds": [
+          "schedule",
+          "troubleshooting"
+        ],
+        "jurisdictions": [
+          "US"
+        ]
+      },
+      "activeWindowUtc": {
+        "startUtc": "2026-03-01T00:00:00Z",
+        "endUtc": "2026-04-01T00:00:00Z"
+      },
+      "params": {
+        "monthLabel": "March 2026",
+        "whatToDoUrl": "https://www.fns.usda.gov/snap/recipient/eligibility",
+        "ruleRef": "7 CFR 273.14 (Periodic reporting and recertification)"
+      },
+      "sources": [
+        {
+          "title": "SNAP Eligibility (Recipient / Household responsibilities)",
+          "publisher": "USDA Food and Nutrition Service",
+          "sourceUrl": "https://www.fns.usda.gov/snap/recipient/eligibility",
+          "lastVerifiedUtc": "2026-02-28T00:00:00Z"
+        },
+        {
+          "title": "7 CFR § 273.14 — Periodic reporting and recertification",
+          "publisher": "eCFR (Government Publishing Office)",
+          "sourceUrl": "https://www.ecfr.gov/current/title-7/subtitle-B/chapter-II/subchapter-C/part-273/section-273.14",
+          "lastVerifiedUtc": "2026-02-28T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "eligibilitySignalId": "snap_abawd_waiver_context_2026_us",
+      "program": "snap",
+      "confidenceLabel": "CONFIRMED",
+      "reasonBucket": "WAIVER_EXPIRATION",
+      "uiBlockId": "BANNER_ABAWD_WAIVER_CONTEXT",
+      "scope": {
+        "pagePrograms": [
+          "snap"
+        ],
+        "pageKinds": [
+          "explainer",
+          "troubleshooting"
+        ],
+        "jurisdictions": [
+          "US"
+        ]
+      },
+      "activeWindowUtc": {
+        "startUtc": "2026-01-01T00:00:00Z",
+        "endUtc": "2027-01-01T00:00:00Z"
+      },
+      "params": {
+        "waiverInfoUrl": "https://www.fns.usda.gov/snap/abawd",
+        "ruleRef": "7 CFR 273.24 (Time limit for ABAWDs; waivers/exemptions handled by states)"
+      },
+      "sources": [
+        {
+          "title": "Able-Bodied Adults Without Dependents (ABAWD)",
+          "publisher": "USDA Food and Nutrition Service",
+          "sourceUrl": "https://www.fns.usda.gov/snap/abawd",
+          "lastVerifiedUtc": "2026-02-28T00:00:00Z"
+        },
+        {
+          "title": "7 CFR § 273.24 — Time limit for ABAWDs",
+          "publisher": "eCFR (Government Publishing Office)",
+          "sourceUrl": "https://www.ecfr.gov/current/title-7/subtitle-B/chapter-II/subchapter-C/part-273/section-273.24",
+          "lastVerifiedUtc": "2026-02-28T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "eligibilitySignalId": "snap_shutdown_context_generic_2026_us",
+      "program": "snap",
+      "confidenceLabel": "EXPECTED",
+      "reasonBucket": "SHUTDOWN_APPROPRIATIONS_CONTEXT",
+      "uiBlockId": "BANNER_SHUTDOWN_CONTEXT",
+      "scope": {
+        "pagePrograms": [
+          "snap"
+        ],
+        "pageKinds": [
+          "schedule",
+          "explainer",
+          "troubleshooting"
+        ],
+        "jurisdictions": [
+          "US"
+        ]
+      },
+      "activeWindowUtc": {
+        "startUtc": "2026-02-01T00:00:00Z",
+        "endUtc": "2026-12-31T23:59:59Z"
+      },
+      "params": {
+        "shutdownInfoUrl": "https://www.fns.usda.gov/snap/qa-shutdown",
+        "note": "Only keep this entry enabled if you have an official, current anchor page or press release confirming SNAP operational posture during a funding lapse."
+      },
+      "sources": [
+        {
+          "title": "SNAP and Government Shutdown (Q&A / program guidance)",
+          "publisher": "USDA Food and Nutrition Service",
+          "sourceUrl": "https://www.fns.usda.gov/snap/qa-shutdown",
+          "lastVerifiedUtc": "2026-02-28T00:00:00Z"
+        }
+      ]
+    }
+  ]
+}

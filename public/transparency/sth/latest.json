@@ -1,0 +1,7 @@
+{
+  "origin": "whenisdue.com/v1",
+  "treeSize": 100,
+  "rootHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "timestamp": "2026-03-02T12:00:00Z",
+  "signature": "dummy-signature-data"
+}

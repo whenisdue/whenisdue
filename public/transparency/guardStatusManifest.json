@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAtUtc": "2026-02-28T00:00:00Z",
+  "environment": {
+    "name": "build",
+    "note": "This manifest is published from the build pipeline. It reports guard configurations and integrity anchors, not runtime telemetry."
+  },
+  "guards": [
+    {
+      "id": "anomalyGuard",
+      "displayName": "Anomaly Guard",
+      "mode": "fail-closed",
+      "checks": [
+        {
+          "id": "snapCompleteness",
+          "cliFlag": "--snapCompleteness",
+          "description": "Ensures every SNAP state detected in events ledger is covered by overrides/exclusions/provenance.",
+          "inputs": [
+            {
+              "kind": "ledger",
+              "path": "/data/events.json"
+            },
+            {
+              "kind": "config",
+              "path": "/data/overrideCompleteness.snap.json"
+            }
+          ],
+          "outputs": [
+            {
+              "kind": "buildResult",
+              "field": "pass|fail"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "driftGuard",
+      "displayName": "Drift Guard (Dates)",
+      "mode": "fail-closed",
+      "checks": [
+        {
+          "id": "ssaCalendarIntegrity",
+          "cliFlag": "--ssaCalendarIntegrity",
+          "description": "Validates SSA calendar anchors (publication stamps / schedule baselines) match registry; build fails if anchors drift.",
+          "inputs": [
+            {
+              "kind": "ledger",
+              "path": "/data/events.json"
+            },
+            {
+              "kind": "registry",
+              "path": "/data/driftSignalRegistry.json"
+            }
+          ],
+          "outputs": [
+            {
+              "kind": "buildResult",
+              "field": "pass|fail"
+            }
+          ]
+        },
+        {
+          "id": "snapDriftReadiness",
+          "cliFlag": "--snapDriftReadiness",
+          "description": "Validates high-risk SNAP states have manual transmittal anchors pinned in registry.",
+          "inputs": [
+            {
+              "kind": "ledger",
+              "path": "/data/events.json"
+            },
+            {
+              "kind": "registry",
+              "path": "/data/driftSignalRegistry.json"
+            }
+          ],
+          "outputs": [
+            {
+              "kind": "buildResult",
+              "field": "pass|fail"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "amountDriftGuard",
+      "displayName": "Amount Drift Guard",
+      "mode": "fail-closed",
+      "checks": [
+        {
+          "id": "ssaAmountIntegrity",
+          "cliFlag": "--ssaAmountIntegrity",
+          "description": "Validates SSA amount anchors (Part B, IRMAA, TOP offsets/formulas) are pinned in the amount drift registry.",
+          "inputs": [
+            {
+              "kind": "ledger",
+              "path": "/data/events.json"
+            },
+            {
+              "kind": "registry",
+              "path": "/data/amountDriftSignalRegistry.json"
+            }
+          ],
+          "outputs": [
+            {
+              "kind": "buildResult",
+              "field": "pass|fail"
+            }
+          ]
+        },
+        {
+          "id": "snapAmountDriftReadiness",
+          "cliFlag": "--snapAmountDriftReadiness",
+          "description": "Validates SNAP amount anchors (SUA, deductions, state policy pages) are pinned in the amount drift registry.",
+          "inputs": [
+            {
+              "kind": "ledger",
+              "path": "/data/events.json"
+            },
+            {
+              "kind": "registry",
+              "path": "/data/amountDriftSignalRegistry.json"
+            }
+          ],
+          "outputs": [
+            {
+              "kind": "buildResult",
+              "field": "pass|fail"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "publicContracts": {
+    "noInferenceClaim": "This site does not guess. If required anchors are missing or outdated, builds fail and pages cannot publish.",
+    "whatThisIsNot": [
+      "Not a real-time outage monitor.",
+      "Not a guarantee of individual eligibility or payment amounts.",
+      "Not a substitute for official agency determinations."
+    ]
+  }
+}

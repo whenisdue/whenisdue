@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "program": "SNAP",
+  "maxCards": 5,
+  "buckets": [
+    {
+      "key": "SNAP_TIME_OF_DAY_VARIANCE",
+      "program": "SNAP",
+      "title": "Posting time can vary during the day",
+      "description": "Even on the scheduled issuance date, funds may appear at different times depending on the state processor and the EBT contractor. It is common for balances to update overnight or later in the morning.",
+      "severity": "info",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SNAP_BALANCE_APP_LAG",
+      "program": "SNAP",
+      "title": "Your balance app or portal can be delayed",
+      "description": "Some balance apps and online portals show cached data. A refresh, log out/in, or checking again later can help. If available, use your state's official balance channel.",
+      "severity": "info",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SNAP_RETAILER_POS_DECLINE",
+      "program": "SNAP",
+      "title": "A store checkout (POS) issue can look like “no benefits”",
+      "description": "Sometimes a retailer's card reader (POS) cannot complete EBT transactions even when funds are available. Trying another lane/store or checking your balance through an official channel can help confirm.",
+      "severity": "info",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SNAP_MIXED_BASKET_ISSUE",
+      "program": "SNAP",
+      "title": "A mixed basket can cause a decline",
+      "description": "If a transaction includes non-eligible items, a checkout configuration can decline the entire attempt. Separating eligible food items into a separate transaction often resolves this.",
+      "severity": "info",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SNAP_REPLACEMENT_OR_NEW_CARD_DELAY",
+      "program": "SNAP",
+      "title": "Replacement or new cards can take time to activate",
+      "description": "If you recently received a replacement or new EBT card, there can be an activation or PIN reset window before normal purchases work. Follow your card instructions or your state's official EBT guidance.",
+      "severity": "warning",
+      "requiresProvenance": false
+    },
+    {
+      "key": "SNAP_RECERT_OR_CASE_CHANGE",
+      "program": "SNAP",
+      "title": "Recertification or case changes can affect availability",
+      "description": "After recertification, renewals, verification requests, or other case updates, the benefit amount or timing can change. Check your state's official case status guidance for what to do next.",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "provenanceKey": "SNAP_STATE_CASE_STATUS_GUIDANCE"
+    },
+    {
+      "key": "SNAP_ADDRESS_OR_COUNTY_MOVE",
+      "program": "SNAP",
+      "title": "A move can change processing and timing",
+      "description": "Moving to a new address or county can change which office processes your case and may change issuance timing during the transition. Use your state's official guidance for reporting a move.",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "provenanceKey": "SNAP_STATE_REPORT_A_MOVE"
+    },
+    {
+      "key": "SNAP_SKIMMING_OR_FRAUD",
+      "program": "SNAP",
+      "title": "Skimming or fraud can reduce your available balance",
+      "description": "EBT skimming can result in unauthorized transactions. If you see purchases you did not make, follow official fraud steps immediately (change PIN and contact the official EBT line).",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "provenanceKey": "SNAP_FRAUD_AND_SKIMMING_GUIDANCE"
+    },
+    {
+      "key": "SNAP_OFFICIAL_NOTICE_RUNTIME_ONLY",
+      "program": "SNAP",
+      "title": "Official service notice (if one is published)",
+      "description": "If your state agency publishes a time-stamped official service notice, we will show it here with a direct link. If you do not see an official notice card, we are not asserting one exists.",
+      "severity": "warning",
+      "requiresProvenance": true,
+      "runtimeOnly": true,
+      "provenanceKey": "OFFICIAL_NOTICE_RUNTIME_ONLY"
+    }
+  ]
+}

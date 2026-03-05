@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "epoch": 1,
+  "lastUpdateUtc": "2026-03-02T12:00:00Z",
+  "witnesses": {
+    "did:web:witness-1.whenisdue.com": { "currentWeight": 1.0, "signedCheckpoints": 100, "missedCheckpoints": 0 },
+    "did:web:witness-2.whenisdue.com": { "currentWeight": 0.5, "signedCheckpoints": 50, "missedCheckpoints": 10 },
+    "did:web:witness-3-rogue.whenisdue.com": { "currentWeight": 1.0, "signedCheckpoints": 90, "missedCheckpoints": 2 }
+  }
+}

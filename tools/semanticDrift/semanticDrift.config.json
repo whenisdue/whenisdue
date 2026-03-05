@@ -1,0 +1,30 @@
+{
+  "specVersion": "whenisdue-semantic-drift-guard-v1",
+  "watchFiles": [
+    "data/events.json",
+    "data/couplingSignalRegistry.json",
+    "data/eligibilitySignalRegistry.json"
+  ],
+  "safeEditFields": [
+    "statusLabel",
+    "confidenceScore",
+    "lastVerifiedUtc",
+    "sourceUrl",
+    "notes"
+  ],
+  "semanticCriticalFields": [
+    "eventId",
+    "dateISO",
+    "dueAt",
+    "officialDates"
+  ],
+  "semanticVersionField": "semanticVersion",
+  "requireMajorBumpOnSemanticChange": true,
+  "externalAnchorCheck": {
+    "enabled": false,
+    "timeoutMs": 5000,
+    "userAgent": "WhenIsDue-DriftGuard/1.0",
+    "maxBytes": 5000000,
+    "failClosedOnFetchError": false
+  }
+}
