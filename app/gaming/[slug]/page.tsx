@@ -3,6 +3,9 @@ import path from "node:path";
 import { notFound } from "next/navigation";
 import { Headphones, Gamepad2, MonitorPlay, AlertCircle, ShieldCheck } from "lucide-react";
 
+import CountdownEngine from "@/components/countdown/CountdownEngine";
+import NotifyMeForm from "@/components/countdown/NotifyMeForm";
+
 // ISR: Cache this page at the edge, revalidate every 60 seconds
 export const revalidate = 60;
 
@@ -78,30 +81,13 @@ export default async function GamingEventPage({ params }: { params: { slug: stri
 
           {/* 2. The CLS-Safe Video Frame & Countdown Area */}
           <div className="rounded-2xl border border-zinc-800 bg-black overflow-hidden relative aspect-video flex flex-col items-center justify-center">
-            {/* NOTE: The Client-Side Countdown & Notify Form will mount here */}
-            <div className="text-center p-8 z-10">
+            {/* The Client-Side Countdown & Notify Form mount here */}
+            <div className="text-center p-8 z-10 w-full">
               <div className="text-purple-500 font-mono text-xl mb-2 uppercase tracking-widest">T-Minus</div>
-              <div className="text-5xl md:text-7xl font-black text-white tabular-nums mb-8">
-                {evt.dateISO ? "00:00:00:00" : "TBA"}
-              </div>
               
-              {/* GDPR-Safe Email Capture Mockup */}
-              <div className="max-w-md mx-auto bg-zinc-900/80 backdrop-blur border border-zinc-800 p-6 rounded-xl">
-                <h3 className="font-bold text-white mb-2">Don't miss it.</h3>
-                <p className="text-zinc-400 text-sm mb-4">Get a reminder 5 minutes before the stream goes live.</p>
-                <div className="flex gap-2">
-                  <input type="email" placeholder="you@example.com" className="bg-zinc-950 border border-zinc-700 rounded-lg px-4 py-2 flex-grow text-white focus:outline-none focus:border-purple-500" />
-                  <button className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">
-                    Notify Me
-                  </button>
-                </div>
-                <div className="mt-3 flex items-start gap-2 text-left">
-                  <input type="checkbox" className="mt-1" required />
-                  <span className="text-[10px] text-zinc-500 leading-tight">
-                    Notify me when this stream goes live. I can unsubscribe anytime.
-                  </span>
-                </div>
-              </div>
+              <CountdownEngine dateISO={evt.dateISO} />
+              <NotifyMeForm topicKey={evt.slug} />
+
             </div>
             
             {/* Background grid for aesthetics */}
