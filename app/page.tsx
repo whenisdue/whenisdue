@@ -1,80 +1,107 @@
 import Link from "next/link";
-import { Landmark, Gamepad2, ArrowRight, ShieldCheck } from "lucide-react";
+import { Landmark, Gamepad2, ArrowRight, Clock, CalendarDays } from "lucide-react";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="min-h-[80vh] flex flex-col justify-center">
-      {/* 1. The Multi-Intent Hero */}
-      <section className="text-center mb-16 px-6">
-        <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white">
-          VERIFIED AUTHORITY<span className="text-blue-500">.</span>
-        </h1>
-        <p className="mt-4 text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          The WhenIsDue Engine tracks official distribution cadences and announcement windows for high-impact federal and digital events.
-        </p>
-      </section>
-
-      {/* 2. The Two Doors (Intent Split) */}
-      <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto w-full px-6">
-        
-        {/* DOOR 1: FEDERAL & BENEFITS */}
-        <Link 
-          href="/federal" 
-          className="group relative overflow-hidden rounded-3xl border border-gray-800 bg-zinc-950 p-8 transition-all hover:border-blue-500/50 hover:bg-zinc-900"
-        >
-          <div className="flex flex-col h-full">
-            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
-              <Landmark className="h-6 w-6" />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-3">Federal & Benefits</h2>
-            <p className="text-gray-400 text-sm leading-relaxed mb-8">
-              Authoritative tracking for Social Security, VA Disability, and SSI payment schedules. Verified via Treasury ACH release patterns.
-            </p>
-            <div className="mt-auto flex items-center gap-2 text-sm font-bold text-blue-400">
-              View Schedules <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </div>
-          {/* Subtle Visual Accent */}
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <ShieldCheck className="h-24 w-24 text-blue-500" />
-          </div>
-        </Link>
-
-        {/* DOOR 2: GAMING & TECH HYPE */}
-        <Link 
-          href="/gaming" 
-          className="group relative overflow-hidden rounded-3xl border border-gray-800 bg-zinc-950 p-8 transition-all hover:border-purple-500/50 hover:bg-zinc-900"
-        >
-          <div className="flex flex-col h-full">
-            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
-              <Gamepad2 className="h-6 w-6" />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-3">Gaming & Tech Hype</h2>
-            <p className="text-gray-400 text-sm leading-relaxed mb-8">
-              The master calendar for Gamescom, Nintendo Directs, and Steam sales. Countdown to major reveals and launch windows.
-            </p>
-            <div className="mt-auto flex items-center gap-2 text-sm font-bold text-purple-400">
-              View Event Calendar <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </div>
-          {/* Subtle Visual Accent */}
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Gamepad2 className="h-24 w-24 text-purple-500" />
-          </div>
-        </Link>
-
-      </div>
-
-      {/* 3. The "Anti-Panic" Trust Bar */}
-      <section className="mt-20 border-t border-gray-900 pt-12 text-center px-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-emerald-400">
-          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          Engine Status: Optimal
+    <main className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-20">
+      
+      {/* HERO SECTION */}
+      <section className="pt-20 pb-16 px-4 max-w-5xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 font-mono mb-8 uppercase tracking-widest">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Live Event & Payment Tracking
         </div>
-        <p className="mt-4 text-[10px] text-gray-600 uppercase tracking-widest">
-          Independent Verification • Zero-Trust Data Pipeline • 2026 Distribution Accuracy: 99.4%
+        
+        <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6">
+          Know Exactly When <br className="hidden md:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+            It Happens.
+          </span>
+        </h1>
+        
+        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+          Accurate countdowns and official schedules for Social Security payments, VA benefits, gaming reveals, and seasonal digital sales.
         </p>
+
+        {/* IMMEDIATE UTILITY: "Next Up" Live Examples */}
+        <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto mb-16 text-left">
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-blue-400 text-sm font-bold uppercase tracking-widest mb-2">
+                <Landmark className="w-4 h-4" /> Federal
+              </div>
+              <h3 className="text-xl font-bold text-white">Next SSI Payment</h3>
+              <p className="text-zinc-500 text-sm mt-1">Expected: Friday, Feb 27, 2026</p>
+            </div>
+            <div className="mt-6 flex items-baseline gap-2">
+              <span className="text-3xl font-black tabular-nums text-white">14</span>
+              <span className="text-sm text-zinc-500 uppercase tracking-widest">Days Away</span>
+            </div>
+          </div>
+
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-purple-400 text-sm font-bold uppercase tracking-widest mb-2">
+                <Gamepad2 className="w-4 h-4" /> Gaming
+              </div>
+              <h3 className="text-xl font-bold text-white">Steam Summer Sale</h3>
+              <p className="text-zinc-500 text-sm mt-1">Expected: Late June 2026</p>
+            </div>
+            <div className="mt-6 flex items-baseline gap-2">
+              <span className="text-3xl font-black tabular-nums text-white">112</span>
+              <span className="text-sm text-zinc-500 uppercase tracking-widest">Days Away</span>
+            </div>
+          </div>
+        </div>
       </section>
+
+      {/* CATEGORY PORTALS */}
+      <section className="px-4 max-w-5xl mx-auto">
+        <h2 className="text-center text-sm font-bold uppercase tracking-widest text-zinc-600 mb-8">
+          Select Your Tracking Hub
+        </h2>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Federal Hub Card */}
+          <Link href="/federal" className="group relative bg-zinc-950 border border-zinc-800 rounded-3xl p-8 hover:border-blue-500/50 transition-colors overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Landmark className="w-32 h-32" />
+            </div>
+            <div className="bg-blue-500/10 w-12 h-12 rounded-xl flex items-center justify-center mb-6 border border-blue-500/20">
+              <CalendarDays className="w-6 h-6 text-blue-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
+              Federal & Benefits
+            </h2>
+            <p className="text-zinc-400 leading-relaxed mb-8 max-w-sm">
+              Check exact deposit dates for Social Security, VA Disability, and SSI. See how weekends and federal holidays affect your payment schedule.
+            </p>
+            <div className="flex items-center text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+              View Payment Schedules <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Gaming Hub Card */}
+          <Link href="/gaming" className="group relative bg-zinc-950 border border-zinc-800 rounded-3xl p-8 hover:border-purple-500/50 transition-colors overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Gamepad2 className="w-32 h-32" />
+            </div>
+            <div className="bg-purple-500/10 w-12 h-12 rounded-xl flex items-center justify-center mb-6 border border-purple-500/20">
+              <Clock className="w-6 h-6 text-purple-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors">
+              Gaming & Tech Events
+            </h2>
+            <p className="text-zinc-400 leading-relaxed mb-8 max-w-sm">
+              Live countdowns to major reveals, Gamescom, Nintendo Directs, and digital storefront sales. Get notified exactly when streams go live.
+            </p>
+            <div className="flex items-center text-sm font-bold text-white group-hover:text-purple-400 transition-colors">
+              View Event Calendar <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        </div>
+      </section>
+
     </main>
   );
 }
