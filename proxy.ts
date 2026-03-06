@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Adapted to target /[category]/[slug] routing correctly.
  */
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;
 
   const res = NextResponse.next();
