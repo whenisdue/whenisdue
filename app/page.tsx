@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Landmark, Gamepad2, ArrowRight, Clock, CalendarDays } from "lucide-react";
 

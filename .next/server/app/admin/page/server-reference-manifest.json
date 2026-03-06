@@ -1,0 +1,35 @@
+{
+  "node": {
+    "40c6a6085510efc4497c5d0f0dc19607fd3d37f37f": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": 89329,
+          "async": false,
+          "exportedName": "verifyAndBroadcast",
+          "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "exportedName": "verifyAndBroadcast",
+      "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+    },
+    "60b8227c4d7c18ab971de44cdc7fa9dad9af0ca96d": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": 89329,
+          "async": false,
+          "exportedName": "deleteOccurrence",
+          "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "exportedName": "deleteOccurrence",
+      "filename": "Desktop/whenisdue/web/app/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}

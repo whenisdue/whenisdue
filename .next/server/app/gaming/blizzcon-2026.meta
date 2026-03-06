@@ -1,0 +1,17 @@
+{
+  "status": 404,
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/gaming/layout,_N_T_/gaming/[slug]/layout,_N_T_/gaming/[slug]/page,_N_T_/gaming/blizzcon-2026"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/gaming/$d$slug/__PAGE__",
+    "/gaming/$d$slug",
+    "/gaming",
+    "/_index",
+    "/_head"
+  ]
+}

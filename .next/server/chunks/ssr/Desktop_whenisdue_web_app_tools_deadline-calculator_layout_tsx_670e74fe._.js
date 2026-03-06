@@ -1,0 +1,3 @@
+module.exports=[1254,a=>{"use strict";var b=a.i(49042);function c({children:a}){return(0,b.jsx)(b.Fragment,{children:a})}a.s(["default",()=>c,"metadata",0,{title:"When Should I Start? | WhenIsDue Tools",description:"Enter your deadline and how long the work takes — get the start date.",alternates:{canonical:"/tools/deadline-calculator"}}])}];
+
+//# sourceMappingURL=Desktop_whenisdue_web_app_tools_deadline-calculator_layout_tsx_670e74fe._.js.map

@@ -199,3 +199,53 @@ model EmailCampaignRecipient {
   @@index([batchId, status])
   @@index([normalizedEmail])
 }
+
+enum Category {
+  FEDERAL
+  GAMING
+  SHOPPING
+  TECH
+}
+
+enum EventStatus {
+  CONFIRMED
+  EXPECTED
+  TBA
+}
+
+model Event {
+  id              String      @id @default(cuid())
+  
+  // Basic identity
+  title           String
+  slug            String      @unique
+  
+  // Category vertical
+  category        Category
+  
+  // Event timing
+  dueAt           DateTime?
+  expectedAt      DateTime?
+  
+  // Recurring event series
+  seriesKey       String?
+  
+  // Status
+  status          EventStatus @default(EXPECTED)
+  
+  // Homepage grid flag
+  trending        Boolean     @default(false)
+  
+  // SEO
+  seoTitle        String?
+  seoDescription  String?
+  keywords        String?
+  
+  // Source verification
+  sourceUrl       String?
+  lastVerified    DateTime?
+  
+  // Metadata
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}

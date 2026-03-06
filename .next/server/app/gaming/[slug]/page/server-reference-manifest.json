@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60b83148903c0ee375d2368b81a7b349688968fdac": {
+      "workers": {
+        "app/gaming/[slug]/page": {
+          "moduleId": 81182,
+          "async": false,
+          "exportedName": "subscribeToEvent",
+          "filename": "Desktop/whenisdue/web/app/actions/subscribe.ts"
+        }
+      },
+      "layer": {
+        "app/gaming/[slug]/page": "action-browser"
+      },
+      "exportedName": "subscribeToEvent",
+      "filename": "Desktop/whenisdue/web/app/actions/subscribe.ts"
+    }
+  },
+  "edge": {}
+}

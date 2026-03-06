@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60b83148903c0ee375d2368b81a7b349688968fdac": {
+      "workers": {
+        "app/federal/[seriesKey]/page": {
+          "moduleId": 57534,
+          "async": false,
+          "exportedName": "subscribeToEvent",
+          "filename": "Desktop/whenisdue/web/app/actions/subscribe.ts"
+        }
+      },
+      "layer": {
+        "app/federal/[seriesKey]/page": "action-browser"
+      },
+      "exportedName": "subscribeToEvent",
+      "filename": "Desktop/whenisdue/web/app/actions/subscribe.ts"
+    }
+  },
+  "edge": {}
+}
