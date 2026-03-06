@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ShieldCheck, Calendar, AlertTriangle, ExternalLink, Info, CheckCircle2 } from "lucide-react";
+import FederalNotifyMeForm from "@/components/benefits/FederalNotifyMeForm";
 
 // ISR: Cache this page at the edge, revalidate every 1 hour (benefit dates rarely change intraday)
 export const revalidate = 3600;
@@ -158,18 +159,10 @@ export default async function BenefitSeriesPage({ params }: { params: { seriesKe
           <p className="text-slate-600 mb-6 max-w-lg mx-auto">
             Get free email alerts when payment dates shift for weekends, holidays, or schedule updates.
           </p>
-          <form className="max-w-md mx-auto flex gap-2">
-            <input type="email" placeholder="you@example.com" className="flex-grow px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg transition-colors">
-              Send Alerts
-            </button>
-          </form>
-          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
-            <ShieldCheck className="w-4 h-4 text-slate-400" />
-            <span>We never ask for SSN or banking info. Unsubscribe anytime.</span>
-          </div>
-        </section>
 
+          <FederalNotifyMeForm topicKey={params.seriesKey} />
+                    
+        </section>
         {/* COMPONENT: Affiliate Disclosure & Offers */}
         <section className="border-t border-slate-200 pt-10">
           <h2 className="text-xl font-bold text-slate-900 mb-2">Want your deposit earlier?</h2>
