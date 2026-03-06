@@ -69,3 +69,133 @@ model UserTopicSubscription {
 
   @@unique([userId, topicKey]) // Prevents duplicate spam
 }
+
+enum CampaignStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
+enum BatchStatus {
+  QUEUED
+  PROCESSING
+  SENT
+  PARTIAL
+  FAILED
+}
+
+enum RecipientStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum TriggerSource {
+  CRON
+  MANUAL
+  RETRY
+}
+
+model EmailCampaign {
+  id                 String         @id @default(cuid())
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  key                String?        // e.g. "tomorrow-alerts-2026-03-07"
+  triggerSource      TriggerSource
+  status             CampaignStatus @default(QUEUED)
+
+  templateKey        String
+  templateVersion    Int            @default(1)
+  subject            String
+  payload            Json
+
+  totalRecipients    Int            @default(0)
+  batchSize          Int            @default(100)
+  totalBatches       Int            @default(0)
+
+  queuedBatches      Int            @default(0)
+  processedBatches   Int            @default(0)
+  sentCount          Int            @default(0)
+  failedCount        Int            @default(0)
+  skippedCount       Int            @default(0)
+
+  startedAt          DateTime?
+  completedAt        DateTime?
+  failedAt           DateTime?
+  lastError          String?
+
+  dedupeKey          String?        @unique
+
+  batches            EmailCampaignBatch[]
+  recipients         EmailCampaignRecipient[]
+
+  @@index([status, createdAt])
+  @@index([templateKey, createdAt])
+}
+
+model EmailCampaignBatch {
+  id                 String       @id @default(cuid())
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  campaignId         String
+  campaign           EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  batchIndex         Int
+  status             BatchStatus  @default(QUEUED)
+
+  idempotencyKey     String       @unique
+
+  offsetStart        Int
+  offsetEndExclusive Int
+  recipientCount     Int
+
+  attemptCount       Int          @default(0)
+  processedAt        DateTime?
+  lastError          String?
+
+  qstashMessageId    String?
+  qstashNotBefore    DateTime?
+
+  recipients         EmailCampaignRecipient[]
+
+  @@unique([campaignId, batchIndex])
+  @@index([campaignId, status])
+}
+
+model EmailCampaignRecipient {
+  id                 String          @id @default(cuid())
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  campaignId         String
+  campaign           EmailCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  batchId            String?
+  batch              EmailCampaignBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
+  userId             String?
+  email              String
+  normalizedEmail    String
+
+  subject            String?
+  payload            Json?
+
+  status             RecipientStatus @default(PENDING)
+  sendAttemptCount   Int             @default(0)
+
+  resendEmailId      String?
+  sentAt             DateTime?
+  failedAt           DateTime?
+  lastError          String?
+
+  dedupeKey          String          @unique
+
+  @@index([campaignId, status])
+  @@index([batchId, status])
+  @@index([normalizedEmail])
+}
