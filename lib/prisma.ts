@@ -1,12 +1,29 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+const prismaClientSingleton = () => {
+  return new PrismaClient().$extends({
+    query: {
+      event: {
+        async findMany({ args, query }) {
+          // Global "95% Safety" Filter: Never show archived events to the public
+          args.where = { ...args.where, isArchived: false };
+          return query(args);
+        },
+        async findFirst({ args, query }) {
+          args.where = { ...args.where, isArchived: false };
+          return query(args);
+        },
+      },
+    },
+  });
+};
 
-// This ensures we don't create multiple connections to your DB during development
-export const prisma = 
-  globalForPrisma.prisma || 
-  new PrismaClient({
-    log: ['error'],
-  })
+// Explicitly tell TypeScript this global variable is allowed
+declare global {
+  var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>;
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Use this "publicPrisma" for all user-facing queries
+export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;

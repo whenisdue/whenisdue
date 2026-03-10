@@ -2630,7 +2630,8 @@ const tree = [
                             type: `image/x-icon`
                         }
                     ]
-            ]
+            ],
+            manifest: "/manifest.webmanifest"
         },
         "layout": [
             __TURBOPACK__layout__$23$1__,

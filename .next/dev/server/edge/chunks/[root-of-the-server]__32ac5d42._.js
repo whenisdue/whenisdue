@@ -22,30 +22,41 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$next$2f$dist$2f$esm$2f$api$2f$server$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/Desktop/whenisdue/web/node_modules/next/dist/esm/api/server.js [middleware-edge] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Desktop/whenisdue/web/node_modules/next/dist/esm/server/web/exports/index.js [middleware-edge] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$jose$2f$dist$2f$webapi$2f$jwt$2f$verify$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Desktop/whenisdue/web/node_modules/jose/dist/webapi/jwt/verify.js [middleware-edge] (ecmascript)");
 ;
-function middleware(req) {
-    const { pathname, origin } = req.nextUrl;
-    const res = __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].next();
-    // Always expose trust manifest (lightweight, safe for all pages)
-    res.headers.append("Link", `<${origin}/.well-known/whenisdue-trust.json>; rel="describedby"; type="application/json"`);
-    const pathParts = pathname.split("/").filter(Boolean);
-    // Detect tracker pages which use the /[category]/[slug] pattern
-    if (pathParts.length === 2) {
-        const slug = pathParts[1];
-        // Machine mirror for tracker page
-        const mirrorUrl = `${origin}/v1/api/tracker/${slug}.json`;
-        res.headers.append("Link", `<${mirrorUrl}>; rel="alternate"; type="application/json"`);
+;
+const SESSION_COOKIE = 'admin_session';
+function getSessionSecret() {
+    const secret = process.env.ADMIN_SESSION_SECRET;
+    if (!secret) throw new Error('Missing ADMIN_SESSION_SECRET');
+    return new TextEncoder().encode(secret);
+}
+async function isAuthenticated(request) {
+    const token = request.cookies.get(SESSION_COOKIE)?.value;
+    if (!token) return false;
+    try {
+        await (0, __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$jose$2f$dist$2f$webapi$2f$jwt$2f$verify$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["jwtVerify"])(token, getSessionSecret());
+        return true;
+    } catch  {
+        return false;
     }
-    return res;
+}
+async function middleware(request) {
+    const { pathname } = request.nextUrl;
+    // We only care about protecting /admin routes
+    const isAdminRoute = pathname.startsWith('/admin');
+    const isLoginRoute = pathname === '/admin/login';
+    if (!isAdminRoute) return __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].next();
+    if (isLoginRoute) return __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].next();
+    const ok = await isAuthenticated(request);
+    if (ok) return __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].next();
+    // Bounce unauthenticated users
+    const loginUrl = new URL('/admin/login', request.url);
+    return __TURBOPACK__imported__module__$5b$project$5d2f$Desktop$2f$whenisdue$2f$web$2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$exports$2f$index$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].redirect(loginUrl);
 }
 const config = {
     matcher: [
-        /*
-     * Apply to all non-static routes except:
-     * - /_next
-     * - /api
-     * - static assets (.json, .txt, .png, etc.)
-     */ "/((?!_next|api|.*\\..*).*)"
+        '/admin/:path*'
     ]
 };
 }),

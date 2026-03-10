@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
 }
 
 datasource db {
@@ -9,243 +10,257 @@ datasource db {
 }
 
 // ==========================================
-// THE DATA ENGINE (Federal & Gaming Content)
+// ENUMS
 // ==========================================
 
-model Series {
-  id             String       @id @default(cuid())
-  seriesKey      String       @unique // e.g., "ssa-retirement"
-  category       String       @default("benefits") // "benefits" or "gaming"
-  canonicalName  String
-  entityName     String
-  frequency      String
-  occurrenceRule String
-  updatedAt      DateTime     @updatedAt // CRITICAL: Fixes sitemap "updatedAt" errors
-  occurrences    Occurrence[]
-}
-
-model Occurrence {
-  id                String   @id @default(cuid())
-  date              DateTime
-  status            String   // "CONFIRMED", "EXPECTED", "ANNOUNCED"
-  verificationProof String?  // Links to .gov or official press release
-  verifiedAt        DateTime @default(now())
-  seriesId          String
-  series            Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
-}
-
-// ==========================================
-// THE AUDIENCE ENGINE (Users & Preferences)
-// ==========================================
-
-model User {
-  id        String                  @id @default(cuid())
-  email     String?                 @unique // Optional for "Anonymous-first" push
-  createdAt DateTime                @default(now())
-  pushSubs  PushSubscription[]
-  topics    UserTopicSubscription[]
-}
-
-model PushSubscription {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  endpoint  String   @unique
-  p256dh    String
-  auth      String
-  status    String   @default("ACTIVE") // "ACTIVE", "UNSUBSCRIBED", "INVALID"
-  userAgent String?  // Diagnostic data to track device type
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UserTopicSubscription {
-  id         String  @id @default(cuid())
-  userId     String
-  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topicKey   String  // e.g., "ssa-2026", "gamescom-2026"
-  wantsEmail Boolean @default(false)
-  wantsPush  Boolean @default(false)
-
-  @@unique([userId, topicKey]) // Prevents duplicate spam
-}
-
-enum CampaignStatus {
-  QUEUED
-  RUNNING
-  COMPLETED
-  FAILED
-  CANCELED
-}
-
-enum BatchStatus {
-  QUEUED
-  PROCESSING
-  SENT
-  PARTIAL
-  FAILED
-}
-
-enum RecipientStatus {
-  PENDING
-  SENT
-  FAILED
-  SKIPPED
-}
-
-enum TriggerSource {
-  CRON
-  MANUAL
-  RETRY
-}
-
-model EmailCampaign {
-  id                 String         @id @default(cuid())
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-
-  key                String?        // e.g. "tomorrow-alerts-2026-03-07"
-  triggerSource      TriggerSource
-  status             CampaignStatus @default(QUEUED)
-
-  templateKey        String
-  templateVersion    Int            @default(1)
-  subject            String
-  payload            Json
-
-  totalRecipients    Int            @default(0)
-  batchSize          Int            @default(100)
-  totalBatches       Int            @default(0)
-
-  queuedBatches      Int            @default(0)
-  processedBatches   Int            @default(0)
-  sentCount          Int            @default(0)
-  failedCount        Int            @default(0)
-  skippedCount       Int            @default(0)
-
-  startedAt          DateTime?
-  completedAt        DateTime?
-  failedAt           DateTime?
-  lastError          String?
-
-  dedupeKey          String?        @unique
-
-  batches            EmailCampaignBatch[]
-  recipients         EmailCampaignRecipient[]
-
-  @@index([status, createdAt])
-  @@index([templateKey, createdAt])
-}
-
-model EmailCampaignBatch {
-  id                 String       @id @default(cuid())
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-
-  campaignId         String
-  campaign           EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  batchIndex         Int
-  status             BatchStatus  @default(QUEUED)
-
-  idempotencyKey     String       @unique
-
-  offsetStart        Int
-  offsetEndExclusive Int
-  recipientCount     Int
-
-  attemptCount       Int          @default(0)
-  processedAt        DateTime?
-  lastError          String?
-
-  qstashMessageId    String?
-  qstashNotBefore    DateTime?
-
-  recipients         EmailCampaignRecipient[]
-
-  @@unique([campaignId, batchIndex])
-  @@index([campaignId, status])
-}
-
-model EmailCampaignRecipient {
-  id                 String          @id @default(cuid())
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-
-  campaignId         String
-  campaign           EmailCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  batchId            String?
-  batch              EmailCampaignBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
-
-  userId             String?
-  email              String
-  normalizedEmail    String
-
-  subject            String?
-  payload            Json?
-
-  status             RecipientStatus @default(PENDING)
-  sendAttemptCount   Int             @default(0)
-
-  resendEmailId      String?
-  sentAt             DateTime?
-  failedAt           DateTime?
-  lastError          String?
-
-  dedupeKey          String          @unique
-
-  @@index([campaignId, status])
-  @@index([batchId, status])
-  @@index([normalizedEmail])
-}
-
-enum Category {
+enum EventCategory {
   FEDERAL
   GAMING
   SHOPPING
   TECH
+  OTHER
+}
+
+enum EventDateStatus {
+  EXACT
+  TBA
+  TBD_MONTH
+  TBD_QUARTER
+  TBD_YEAR
+}
+
+enum RecurrenceType {
+  NONE
+  MONTHLY_FIXED_DAY
+  MONTHLY_NTH_WEEKDAY
+  MANUAL_DATES
 }
 
 enum EventStatus {
+  ANNOUNCED
   CONFIRMED
-  EXPECTED
-  TBA
+  LIVE
+  COMPLETED
+}
+
+enum SubmissionStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  DUPLICATE
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED_RETRYABLE
+  FAILED_FINAL
+  INVALID_ENDPOINT
+}
+
+// ==========================================
+// THE DATA ENGINE
+// ==========================================
+
+model EventSeries {
+  id             String        @id @default(cuid())
+  title          String
+  slugBase       String        @unique
+  category       EventCategory
+  description    String?
+  isFeatured     Boolean       @default(false)
+  priorityWeight Int           @default(5)
+  heroQuestion   String?
+  status         EventStatus   @default(CONFIRMED)
+  sourceName     String?
+  sourceUrl      String?
+
+  recurrenceType         RecurrenceType @default(NONE)
+  dayOfMonth             Int?
+  nthWeek                Int?
+  weekday                Int?
+  startMonth             DateTime?
+  endMonth               DateTime?
+  autoAdjustBusinessDay  Boolean        @default(false)
+  generateCount          Int?
+  isActive               Boolean        @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events    Event[]
 }
 
 model Event {
-  id              String      @id @default(cuid())
-  
-  // Basic identity
-  title           String
-  slug            String      @unique
-  
-  // Category vertical
-  category        Category
-  
-  // Event timing
-  dueAt           DateTime?
-  expectedAt      DateTime?
-  
-  // Recurring event series
-  seriesKey       String?
-  
-  // Status
-  status          EventStatus @default(EXPECTED)
-  
-  // Homepage grid flag
-  trending        Boolean     @default(false)
-  
-  // SEO
-  seoTitle        String?
-  seoDescription  String?
-  keywords        String?
-  
-  // Source verification
-  sourceUrl       String?
-  lastVerified    DateTime?
-  
-  // Metadata
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id       String       @id @default(cuid())
+  seriesId String?
+  series   EventSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  slug     String        @unique
+  title    String
+  category EventCategory
+
+  dueAt      DateTime?
+  timeZone   String?
+  dateStatus EventDateStatus @default(EXACT)
+
+  displayYear    Int?
+  displayMonth   Int?
+  displayQuarter Int?
+  dateLabel      String?
+
+  trending    Boolean @default(false)
+  isGenerated Boolean @default(false)
+  isDetached  Boolean @default(false)
+
+  seoTitle       String?
+  seoDescription String?
+  keywords       String?
+  sourceUrl      String?
+  lastVerified   DateTime?
+
+  shortSummary     String?
+  whatToExpect     String?
+  whereToWatch     String?
+  expectedDuration String?
+  targetAudience   String?
+
+  isArchived  Boolean         @default(false)
+  clickStat   EventClickStat?
+  titleSearch String?         @map("titleSearch") // Generated by SQL Migration
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dateStatus, dueAt])
+  @@index([dueAt])
+  @@index([seriesId, dueAt])
+}
+
+model EventClickStat {
+  id            String    @id @default(cuid())
+  eventId       String    @unique
+  totalClicks   Int       @default(0)
+  clickCount1h  Int       @default(0)
+  clickCount24h Int       @default(0)
+  lastClickAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([clickCount1h])
+  @@index([clickCount24h])
+  @@index([lastClickAt])
+}
+
+// ==========================================
+// REQUEST & MODERATION ENGINE
+// ==========================================
+
+model EventSubmission {
+  id              String           @id @default(cuid())
+  status          SubmissionStatus @default(PENDING)
+  submittedTitle  String
+  submittedDate   String?
+  submittedSource String?
+  submitterIpHash String?
+  userAgent       String?
+  honeypot        String?
+  reviewerNotes   String?
+  duplicateOfId   String?
+  titleSearch     String?          @map("titleSearch") // Generated by SQL Migration
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+// ==========================================
+// NOTIFICATION ENGINE
+// ==========================================
+
+model NotificationDelivery {
+  id                   String              @id @default(cuid())
+  eventId              String
+  channel              NotificationChannel
+  recipientFingerprint String
+  status               DeliveryStatus      @default(PENDING)
+  attemptCount         Int                 @default(0)
+  dedupeKey            String              @unique
+  errorLog             String?
+  providerMessageId    String?
+  scheduledFor         DateTime
+  sentAt               DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([status, scheduledFor])
+  @@index([eventId])
+}
+
+model PushSubscription {
+  id           String   @id @default(cuid())
+  userId       String?
+  endpoint     String   @unique
+  p256dh       String
+  auth         String
+  isValid      Boolean  @default(true)
+  failureCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model UserTopicSubscription {
+  id        String @id @default(cuid())
+  userId    String
+  topicKey  String
+  wantsEmail Boolean @default(false)
+  wantsPush  Boolean @default(false)
+
+  @@unique([userId, topicKey])
+}
+
+// ==========================================
+// SECURITY & ANALYTICS
+// ==========================================
+
+model IpRateLimit {
+  ipHash       String
+  routeKey     String
+  windowStart  DateTime
+  requestCount Int      @default(0)
+  lastSeenAt   DateTime @default(now())
+
+  @@id([ipHash, routeKey, windowStart])
+  @@index([lastSeenAt])
+}
+
+model PageStat {
+  id              String   @id @default(cuid())
+  routePath       String   @unique
+  slug            String?
+  pageViews       Int      @default(0)
+  uniquePageViews Int      @default(0)
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+}
+
+model PageViewDedup {
+  id         String   @id @default(cuid())
+  dedupeKey  String   @unique
+  routePath  String
+  visitorId  String
+  bucketDate String
+  createdAt  DateTime @default(now())
+
+  @@index([routePath, bucketDate])
 }

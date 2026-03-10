@@ -1,52 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
+import { jwtVerify } from 'jose'
 
-/**
- * Phase 14 — AI/Agent Discovery Headers
- *
- * Adds:
- * - rel="alternate" → machine mirror JSON endpoint
- * - rel="describedby" → trust manifest
- *
- * Adapted to target /[category]/[slug] routing correctly.
- */
+const SESSION_COOKIE = 'admin_session'
 
-export function proxy(req: NextRequest) {
-  const { pathname, origin } = req.nextUrl;
+function getSessionSecret() {
+  const secret = process.env.ADMIN_SESSION_SECRET
+  if (!secret) throw new Error('Missing ADMIN_SESSION_SECRET')
+  return new TextEncoder().encode(secret)
+}
 
-  const res = NextResponse.next();
+async function isAuthenticated(request: NextRequest) {
+  const token = request.cookies.get(SESSION_COOKIE)?.value
+  if (!token) return false
 
-  // Always expose trust manifest (lightweight, safe for all pages)
-  res.headers.append(
-    "Link",
-    `<${origin}/.well-known/whenisdue-trust.json>; rel="describedby"; type="application/json"`
-  );
-
-  const pathParts = pathname.split("/").filter(Boolean);
-
-  // Detect tracker pages which use the /[category]/[slug] pattern
-  if (pathParts.length === 2) {
-    const slug = pathParts[1];
-
-    // Machine mirror for tracker page
-    const mirrorUrl = `${origin}/v1/api/tracker/${slug}.json`;
-
-    res.headers.append(
-      "Link",
-      `<${mirrorUrl}>; rel="alternate"; type="application/json"`
-    );
+  try {
+    await jwtVerify(token, getSessionSecret())
+    return true
+  } catch {
+    return false
   }
+}
 
-  return res;
+// FIX: Next.js 16 requires this to be exported as "proxy"
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  const isAdminRoute = pathname.startsWith('/admin')
+  const isLoginRoute = pathname === '/admin/login'
+
+  if (!isAdminRoute) return NextResponse.next()
+  if (isLoginRoute) return NextResponse.next()
+
+  const ok = await isAuthenticated(request)
+  if (ok) return NextResponse.next()
+
+  const loginUrl = new URL('/admin/login', request.url)
+  return NextResponse.redirect(loginUrl)
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Apply to all non-static routes except:
-     * - /_next
-     * - /api
-     * - static assets (.json, .txt, .png, etc.)
-     */
-    "/((?!_next|api|.*\\..*).*)",
-  ],
-};
+  matcher: ['/admin/:path*'],
+}

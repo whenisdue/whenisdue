@@ -1,6 +1,7 @@
 import Script from 'next/script'
 import { Providers } from "./providers"
 import './globals.css'
+import GlobalRequestButton from "@/components/GlobalRequestButton";
 
 export const metadata = {
   title: 'WhenIsDue | Authority Verification Engine',
@@ -27,25 +28,25 @@ export default function RootLayout({
         {/* PostHog Providers Wrapper */}
         <Providers>
           <nav className="border-b border-gray-800 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-  <div className="max-w-5xl mx-auto px-8 h-16 flex items-center justify-between">
-    <div className="flex items-center gap-8">
-      {/* FIXED: Changed href from /agencies to / and added hover:text-white */}
-      <a href="/" className="text-xl font-black tracking-tighter text-white hover:text-blue-400 transition-colors">
-        WHENISDUE<span className="text-blue-500">.</span>
-      </a>
-      <div className="hidden md:flex gap-6 text-sm font-medium text-gray-400">
-        <a href="/agencies" className="hover:text-white transition-colors">Directory</a>
-        <a href="/series/ssa-ssdi-payments" className="hover:text-white transition-colors">Sample Series</a>
-      </div>
-    </div>
-    {/* v1.0.0 Tag */}
-    <div className="flex items-center gap-4">
-      <span className="text-[10px] font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded">
-        v1.0.0-PROTOTYPE
-      </span>
-    </div>
-  </div>
-</nav>
+            <div className="max-w-5xl mx-auto px-8 h-16 flex items-center justify-between">
+              <div className="flex items-center gap-8">
+                {/* FIXED: Changed href from /agencies to / and added hover:text-white */}
+                <a href="/" className="text-xl font-black tracking-tighter text-white hover:text-blue-400 transition-colors">
+                  WHENISDUE<span className="text-blue-500">.</span>
+                </a>
+                <div className="hidden md:flex gap-6 text-sm font-medium text-gray-400">
+                  <a href="/agencies" className="hover:text-white transition-colors">Directory</a>
+                  <a href="/series/ssa-ssdi-payments" className="hover:text-white transition-colors">Sample Series</a>
+                </div>
+              </div>
+              {/* v1.0.0 Tag */}
+              <div className="flex items-center gap-4">
+                <span className="text-[10px] font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded">
+                  v1.0.0-PROTOTYPE
+                </span>
+              </div>
+            </div>
+          </nav>
 
           <div className="flex-grow">
             {children}
@@ -72,6 +73,10 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+
+          {/* --- FLOATING REQUEST BUTTON --- */}
+          <GlobalRequestButton />
+          
         </Providers>
       </body>
     </html>

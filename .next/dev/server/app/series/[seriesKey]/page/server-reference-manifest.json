@@ -1,4 +1,20 @@
 {
-  "node": {},
+  "node": {
+    "401529dec1a1165f02445252ca38b65c2e7b827677": {
+      "workers": {
+        "app/series/[seriesKey]/page": {
+          "moduleId": "[project]/Desktop/whenisdue/web/.next-internal/server/app/series/[seriesKey]/page/actions.js { ACTIONS_MODULE0 => \"[project]/Desktop/whenisdue/web/app/actions/requests.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "submitEventRequest",
+          "filename": "Desktop/whenisdue/web/app/actions/requests.ts"
+        }
+      },
+      "layer": {
+        "app/series/[seriesKey]/page": "action-browser"
+      },
+      "exportedName": "submitEventRequest",
+      "filename": "Desktop/whenisdue/web/app/actions/requests.ts"
+    }
+  },
   "edge": {}
 }

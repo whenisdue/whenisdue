@@ -1,8 +1,6 @@
-[00:00:01.146] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:01.254] Server  LOG     ✓ Ready in 992ms
-[00:52:02.399] Server  LOG       Reload env: .env.local
-[00:52:40.089] Server  LOG       Reload env: .env.local
-[00:53:07.791] Server  LOG       Reload env: .env.local
-[00:55:28.350] Server  LOG       Reload env: .env.local
-[01:03:21.123] Server  LOG       Reload env: .env
-[01:03:22.239] Server  LOG       Reload env: .env
+[00:00:00.867] Server  LOG     ✓ Ready in 675ms
+[00:00:04.619] Server  WARN    ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+[00:00:04.898] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:07.329] Browser WARN    AdSense head tag doesn't support data-nscript attribute.
+[00:00:16.446] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:16.591] Browser WARN    AdSense head tag doesn't support data-nscript attribute.

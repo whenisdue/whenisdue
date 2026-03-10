@@ -4,6 +4,14 @@
     {
       "path": "/api/cron/benefits-tomorrow",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/reset-velocity",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/notify",
+      "schedule": "0 * * * *"
     }
   ]
 }
