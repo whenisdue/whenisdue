@@ -1,6 +1,0 @@
-User-Agent: *
-Allow: /
-Allow: /gaming
-Allow: /tools
-
-Sitemap: http://localhost:3000/sitemap.xml

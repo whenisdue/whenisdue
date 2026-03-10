@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/esguerra/Desktop/whenisdue/web/components/LastUpdated.tsx"],"sourcesContent":["\"use client\";\n\nimport { useEffect, useState } from \"react\";\n\nexport default function LastUpdated() {\n  const [seconds, setSeconds] = useState(0);\n\n  useEffect(() => {\n    const interval = setInterval(() => {\n      setSeconds((s) => s + 1);\n    }, 1000);\n\n    return () => clearInterval(interval);\n  }, []);\n\n  if (seconds < 60) {\n    return (\n      <span className=\"text-[10px] text-zinc-500 font-mono tracking-wider uppercase\">\n        Updated just now\n      </span>\n    );\n  }\n\n  const minutes = Math.floor(seconds / 60);\n\n  return (\n    <span className=\"text-[10px] text-zinc-500 font-mono tracking-wider uppercase\">\n      Updated {minutes}m ago\n    </span>\n  );\n}"],"names":[],"mappings":";;;;;AAEA;AAFA;;;AAIe,SAAS;IACtB,MAAM,CAAC,SAAS,WAAW,GAAG,IAAA,gPAAQ,EAAC;IAEvC,IAAA,iPAAS,EAAC;QACR,MAAM,WAAW,YAAY;YAC3B,WAAW,CAAC,IAAM,IAAI;QACxB,GAAG;QAEH,OAAO,IAAM,cAAc;IAC7B,GAAG,EAAE;IAEL,IAAI,UAAU,IAAI;QAChB,qBACE,6QAAC;YAAK,WAAU;sBAA+D;;;;;;IAInF;IAEA,MAAM,UAAU,KAAK,KAAK,CAAC,UAAU;IAErC,qBACE,6QAAC;QAAK,WAAU;;YAA+D;YACpE;YAAQ;;;;;;;AAGvB"}}]
-}

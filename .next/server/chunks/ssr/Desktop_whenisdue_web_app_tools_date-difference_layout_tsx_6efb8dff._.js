@@ -1,3 +1,0 @@
-module.exports=[4640,a=>{"use strict";var b=a.i(49042);function c({children:a}){return(0,b.jsx)(b.Fragment,{children:a})}a.s(["default",()=>c,"metadata",0,{title:"Date Difference Engine | WhenIsDue Tools",description:"Compare two dates and see the gap in days, weeks, hours, and minutes.",alternates:{canonical:"/tools/date-difference"}}])}];
-
-//# sourceMappingURL=Desktop_whenisdue_web_app_tools_date-difference_layout_tsx_6efb8dff._.js.map

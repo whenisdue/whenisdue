@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///Users/esguerra/Desktop/whenisdue/web/app/api/admin/stats/route.ts"],"sourcesContent":["import { NextResponse } from 'next/server';\nimport { PrismaClient } from '@prisma/client';\n\nconst prisma = new PrismaClient();\n\nexport async function GET() {\n  try {\n    // Count only users who haven't revoked permission\n    const count = await prisma.pushSubscription.count({\n      where: { status: 'ACTIVE' }\n    });\n\n    return NextResponse.json({ activeSubscribers: count });\n  } catch (error) {\n    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });\n  }\n}"],"names":[],"mappings":";;;;AAAA;AACA;;;AAEA,MAAM,SAAS,IAAI,qOAAY;AAExB,eAAe;IACpB,IAAI;QACF,kDAAkD;QAClD,MAAM,QAAQ,MAAM,OAAO,gBAAgB,CAAC,KAAK,CAAC;YAChD,OAAO;gBAAE,QAAQ;YAAS;QAC5B;QAEA,OAAO,+KAAY,CAAC,IAAI,CAAC;YAAE,mBAAmB;QAAM;IACtD,EAAE,OAAO,OAAO;QACd,OAAO,+KAAY,CAAC,IAAI,CAAC;YAAE,OAAO;QAAwB,GAAG;YAAE,QAAQ;QAAI;IAC7E;AACF"}}]
-}
