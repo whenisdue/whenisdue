@@ -10,7 +10,8 @@
     "validate": "tsx ../scripts/validate.ts",
     "ci:eligibility-registry": "npx ts-node scripts/ci/validateEligibilitySignalRegistry.ts",
     "build:checkpoint": "npx ts-node ../scripts/CheckpointBuilder.ts",
-    "build:diff": "npx ts-node ../scripts/DiffFeedGenerator.ts"
+    "build:diff": "npx ts-node ../scripts/DiffFeedGenerator.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
