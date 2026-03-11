@@ -2,7 +2,6 @@ import { Analytics } from "@vercel/analytics/react"
 import Script from 'next/script'
 import { Providers } from "./providers"
 import './globals.css'
-import GlobalRequestButton from "@/components/GlobalRequestButton";
 
 export const metadata = {
   title: 'WhenIsDue | Independent Benefit Schedule Reference',
@@ -73,7 +72,6 @@ export default function RootLayout({
             </div>
           </footer>
 
-          <GlobalRequestButton />
           <Analytics />
           
         </Providers>
