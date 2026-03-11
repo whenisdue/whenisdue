@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react"
 import Script from 'next/script'
 import { Providers } from "./providers"
 import './globals.css'
@@ -5,7 +6,7 @@ import GlobalRequestButton from "@/components/GlobalRequestButton";
 
 export const metadata = {
   title: 'WhenIsDue | Authority Verification Engine',
-  description: 'Independent public data platform. Cryptographically verified historical distributions.',
+  description: 'Independent public data platform tracking benefit schedules and financial deposit windows.',
 }
 
 export default function RootLayout({
@@ -16,7 +17,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Absolute best performant loading: strategy="lazyOnload" to protect Core Web Vitals */}
         <Script
           id="adsense-init"
           strategy="lazyOnload"
@@ -24,24 +24,24 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="bg-black text-white min-h-screen flex flex-col" suppressHydrationWarning={true}>
-        {/* PostHog Providers Wrapper */}
+      {/* UPDATED: Changed bg-black to bg-slate-50 and text-white to text-slate-900 */}
+      <body className="bg-slate-50 text-slate-900 min-h-screen flex flex-col" suppressHydrationWarning={true}>
         <Providers>
-          <nav className="border-b border-gray-800 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-            <div className="max-w-5xl mx-auto px-8 h-16 flex items-center justify-between">
+          {/* NAVIGATION: Light-mode Institutional Style */}
+          <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+            <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
               <div className="flex items-center gap-8">
-                {/* FIXED: Changed href from /agencies to / and added hover:text-white */}
-                <a href="/" className="text-xl font-black tracking-tighter text-white hover:text-blue-400 transition-colors">
-                  WHENISDUE<span className="text-blue-500">.</span>
+                <a href="/" className="text-xl font-black tracking-tighter text-slate-900 hover:text-blue-700 transition-colors">
+                  WHENISDUE<span className="text-blue-600">.</span>
                 </a>
-                <div className="hidden md:flex gap-6 text-sm font-medium text-gray-400">
-                  <a href="/agencies" className="hover:text-white transition-colors">Directory</a>
-                  <a href="/series/ssa-ssdi-payments" className="hover:text-white transition-colors">Sample Series</a>
+                <div className="hidden md:flex gap-6 text-sm font-bold text-slate-500">
+                  <a href="/agencies" className="hover:text-slate-900 transition-colors">Directory</a>
+                  <a href="/series/ssa-ssdi-payments" className="hover:text-slate-900 transition-colors">Sample Series</a>
                 </div>
               </div>
-              {/* v1.0.0 Tag */}
+              
               <div className="flex items-center gap-4">
-                <span className="text-[10px] font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded">
+                <span className="text-[10px] font-mono font-bold text-slate-400 border border-slate-200 px-2 py-1 rounded bg-slate-50">
                   v1.0.0-PROTOTYPE
                 </span>
               </div>
@@ -52,23 +52,23 @@ export default function RootLayout({
             {children}
           </div>
 
-          {/* Updated Transparency Footer */}
-          <footer className="mt-20 border-t border-gray-900 pt-16 pb-24 px-10">
-            <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between gap-12 text-[10px] text-gray-600 uppercase tracking-[0.2em] leading-relaxed">
+          {/* FOOTER: Calm, Editorial Transparency */}
+          <footer className="mt-20 border-t border-slate-200 bg-white pt-16 pb-24 px-10">
+            <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between gap-12 text-[10px] text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
               <div className="max-w-sm">
-                <h4 className="text-gray-400 font-black mb-4">The 4-3-2 Authority Protocol</h4>
+                <h4 className="text-slate-900 font-black mb-4">The Authority Protocol</h4>
                 <p>
-                  Dates are modeled via Treasury ACH file-release patterns. 
-                  Standard bank settlement occurs at 8:30 AM ET on the payment date. 
-                  Direct Express deposits do not participate in early release windows.
+                  Schedules are modeled via public agency release patterns and verified monthly. 
+                  Standard bank settlement timing is dependent on individual financial institutions. 
+                  This platform provides reference data only.
                 </p>
               </div>
-              <div className="md:text-right border-l md:border-l-0 md:border-r border-gray-900 pl-6 md:pl-0 md:pr-6">
-                <h4 className="text-gray-400 font-black mb-4">Independent Data Platform</h4>
+              <div className="md:text-right border-l md:border-l-0 md:border-r border-slate-200 pl-6 md:pl-0 md:pr-6">
+                <h4 className="text-slate-900 font-black mb-4">Independent Data Platform</h4>
                 <p>
                   Not affiliated with the SSA, VA, or USDA. <br />
-                  Deterministic logic cross-verified against Reddit "hit" sentiment data. <br />
-                  © 2026 WHENISDUE • SIGNATURE: AUTH-95-ACCURACY
+                  Data cross-verified against official government publications. <br />
+                  © 2026 WHENISDUE • SECURITY: AUTH-VERIFIED
                 </p>
               </div>
             </div>
@@ -76,6 +76,9 @@ export default function RootLayout({
 
           {/* --- FLOATING REQUEST BUTTON --- */}
           <GlobalRequestButton />
+          
+          {/* VERCEL ANALYTICS SENSOR */}
+          <Analytics />
           
         </Providers>
       </body>
