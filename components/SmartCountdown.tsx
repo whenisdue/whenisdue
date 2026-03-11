@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { CheckCircle2 } from "lucide-react";
 
 interface SmartCountdownProps {
   dueAt: string;
-  urgent?: boolean;
 }
 
-export default function SmartCountdown({ dueAt, urgent = false }: SmartCountdownProps) {
+export default function SmartCountdown({ dueAt }: SmartCountdownProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 1 });
 
@@ -36,43 +36,36 @@ export default function SmartCountdown({ dueAt, urgent = false }: SmartCountdown
     return () => clearInterval(timer);
   }, [dueAt]);
 
-  // Prevents hydration mismatch errors in Next.js
   if (!isMounted) {
     return (
-      <div className="h-8 w-32 bg-zinc-900 animate-pulse rounded-md mt-2"></div>
+      <div className="h-12 w-48 bg-slate-100 animate-pulse rounded-md mt-2"></div>
     );
   }
 
-  // Event is happening now
+  // INSTITUTIONAL ZERO-STATE: Payment Issued & Bank Processing Reassurance
   if (timeLeft.total <= 0) {
     return (
-      <div className="inline-flex items-center mt-2">
-        <span className="px-3 py-1.5 rounded bg-emerald-500/20 text-emerald-400 font-bold tracking-widest uppercase shadow-[0_0_15px_rgba(16,185,129,0.2)] animate-pulse">
-          Live Now
-        </span>
+      <div className="flex flex-col gap-3 py-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-800 rounded-md text-sm font-bold uppercase tracking-widest border border-blue-200 self-start">
+          <CheckCircle2 className="w-4 h-4" />
+          Payment Issued
+        </div>
+        <p className="text-sm font-medium text-slate-600 leading-relaxed max-w-[260px]">
+          The scheduled payment date has passed. Your financial institution may take additional time (often 24-48 hours) to post the deposit to your available balance.
+        </p>
       </div>
     );
   }
 
-  // The new, highly-readable side-by-side layout
   const TimeBlock = ({ value, label }: { value: number; label: string }) => {
-    // Drop the "s" if the value is exactly 1 (e.g., "1 Day" instead of "1 Days")
     const displayLabel = value === 1 ? label.slice(0, -1) : label;
     
     return (
-      <div className="flex items-baseline gap-1.5">
-        <span 
-          className={`text-2xl font-bold tabular-nums tracking-tight ${
-            urgent ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'text-white'
-          }`}
-        >
+      <div className="flex items-baseline gap-2">
+        <span className="text-3xl md:text-4xl font-black tabular-nums tracking-tight text-slate-900">
           {value}
         </span>
-        <span 
-          className={`text-xl font-medium ${
-            urgent ? 'text-emerald-500/80' : 'text-zinc-400'
-          }`}
-        >
+        <span className="text-sm md:text-base font-bold text-slate-500 uppercase tracking-widest">
           {displayLabel}
         </span>
       </div>
@@ -80,25 +73,20 @@ export default function SmartCountdown({ dueAt, urgent = false }: SmartCountdown
   };
 
   return (
-    <div className="flex items-center gap-3 mt-1">
-      {/* Dynamic Display Logic based on how close the event is */}
+    <div className="flex items-center gap-4 mt-2">
       {timeLeft.days > 14 ? (
-        // Far away: Just show Days
         <TimeBlock value={timeLeft.days} label="Days" />
       ) : timeLeft.days > 0 ? (
-        // Less than 2 weeks: Show Days + Hours
         <>
           <TimeBlock value={timeLeft.days} label="Days" />
           <TimeBlock value={timeLeft.hours} label="Hours" />
         </>
       ) : timeLeft.hours > 0 ? (
-        // Less than 24 hours: Show Hours + Minutes
         <>
           <TimeBlock value={timeLeft.hours} label="Hours" />
           <TimeBlock value={timeLeft.minutes} label="Minutes" />
         </>
       ) : (
-        // Less than 1 hour: Show Minutes + Seconds (High urgency)
         <>
           <TimeBlock value={timeLeft.minutes} label="Minutes" />
           <TimeBlock value={timeLeft.seconds} label="Seconds" />
