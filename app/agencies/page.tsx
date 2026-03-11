@@ -1,74 +1,142 @@
-import React from 'react';
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { Building2, Clock, CheckCircle2, AlertCircle, ChevronRight, FileText } from "lucide-react";
+import EventTimeDisplay from "@/components/EventTimeDisplay";
 
-const agencies = [
-  {
-    name: "Social Security Administration",
-    slug: "ssa",
-    description: "United States federal agency that administers Social Security.",
-    activeSeries: [
-      { name: "SSDI Payments", key: "ssa-ssdi-payments" },
-      { name: "SSI Payments", key: "ssa-ssi-payments" }
-    ],
-    status: "VERIFIED_SOURCE"
-  },
-  {
-    name: "Internal Revenue Service",
-    slug: "irs",
-    description: "U.S. government agency responsible for tax collection.",
-    activeSeries: [
-      { name: "Tax Refund Windows", key: "irs-refunds" }
-    ],
-    status: "PENDING_AUDIT"
-  }
-];
+export const dynamic = 'force-dynamic';
 
-export default function AgencyDirectory() {
+export default async function AgenciesDirectory() {
+  
+  // Fetch all relevant institutional events
+  const events = await prisma.event.findMany({
+    where: { 
+      isArchived: false,
+      category: { in: ["FEDERAL", "STATE", "TAX", "MARKETS"] } 
+    },
+    orderBy: { dueAt: 'asc' },
+    include: { series: true }
+  });
+
   return (
-    <main className="min-h-screen bg-black text-white p-8 font-sans">
-      <header className="max-w-5xl mx-auto mb-12 border-b border-gray-800 pb-8">
-        <h1 className="text-4xl font-extrabold mb-4">Agency Directory</h1>
-        <p className="text-gray-400 text-lg">
-          Browsing all verified data sources and organizations currently tracked by the WhenIsDue Authority Engine.
-        </p>
-      </header>
-
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {agencies.map((agency) => (
-          <div key={agency.slug} className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-gray-600 transition-colors">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-white">{agency.name}</h2>
-              <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
-                agency.status === 'VERIFIED_SOURCE' ? 'text-green-400 border-green-900 bg-green-950' : 'text-amber-400 border-amber-900 bg-amber-950'
-              }`}>
-                {agency.status}
-              </span>
-            </div>
-            
-            <p className="text-gray-400 mb-6 text-sm leading-relaxed">
-              {agency.description}
-            </p>
-
-            <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Monitored Series</h3>
-              <div className="flex flex-wrap gap-2">
-                {agency.activeSeries.map((series) => (
-                  <a 
-                    key={series.key}
-                    href={`/series/${series.key}`}
-                    className="bg-black border border-gray-700 hover:bg-gray-800 text-blue-400 text-xs py-2 px-3 rounded-md transition-all"
-                  >
-                    {series.name} →
-                  </a>
-                ))}
-              </div>
-            </div>
+    <main className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24">
+      
+      {/* 1. BREADCRUMBS & INDEPENDENCE DISCLOSURE */}
+      <div className="bg-white border-b border-slate-200 pt-4 pb-4">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
+             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Independent Reference Site • Not affiliated with any government agency
+             </span>
           </div>
-        ))}
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <Link href="/" className="hover:text-blue-700 transition-colors">Home</Link>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-900">Program Directory</span>
+          </div>
+        </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto mt-20 pt-8 border-t border-gray-800 text-center text-gray-600 text-sm">
-        <p>© 2026 WhenIsDue Authority Engine • Zero-Trust Verified</p>
-      </footer>
+      {/* 2. CATEGORY HEADER */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6 pt-10 pb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <Building2 className="w-8 h-8 text-blue-600" />
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+            Program Directory
+          </h1>
+        </div>
+        <p className="text-lg text-slate-600 max-w-2xl leading-relaxed">
+          Index of scheduled payment dates, benefit windows, and financial events. Select a program below to view specific disbursement details and settlement timelines.
+        </p>
+      </div>
+
+      {/* 3. INSTITUTIONAL DATA TABLE */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          
+          {/* Table Header (Hidden on small mobile for clean stacking) */}
+          <div className="hidden md:grid grid-cols-12 gap-4 bg-slate-50 border-b border-slate-200 px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+            <div className="col-span-5">Program / Schedule</div>
+            <div className="col-span-3">Next Expected Date</div>
+            <div className="col-span-2">Status</div>
+            <div className="col-span-2 text-right">Jurisdiction</div>
+          </div>
+
+          {/* Table Rows */}
+          <div className="divide-y divide-slate-100">
+            {events.map((event) => {
+              const status = event.dueAt ? (event.category === "FEDERAL" || event.series?.priorityWeight! > 8 ? "CONFIRMED" : "ESTIMATED") : "PENDING";
+              
+              return (
+                <Link 
+                  key={event.id} 
+                  href={`/${event.category.toLowerCase()}/${event.slug}`}
+                  className="block group hover:bg-blue-50/50 transition-colors px-6 py-5 md:py-6"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:items-center">
+                    
+                    {/* Program Name */}
+                    <div className="col-span-1 md:col-span-5">
+                      <div className="flex items-start gap-3">
+                        <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5 group-hover:text-blue-500 transition-colors" />
+                        <div>
+                          <h2 className="text-lg font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-snug mb-1">
+                            {event.title}
+                          </h2>
+                          <div className="text-xs font-medium text-slate-500 flex items-center gap-2">
+                            <span>Source: {event.series?.sourceName || "Official Agency"}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Next Date */}
+                    <div className="col-span-1 md:col-span-3 md:pl-2">
+                      <span className="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Next Date</span>
+                      {event.dueAt ? (
+                        <div className="text-base font-bold text-slate-700">
+                          {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(event.dueAt)}
+                        </div>
+                      ) : (
+                        <span className="text-sm font-medium text-slate-400">Pending Release</span>
+                      )}
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-span-1 md:col-span-2">
+                      <span className="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Status</span>
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-widest border ${
+                        status === 'CONFIRMED' ? "bg-green-50 text-green-800 border-green-200" :
+                        status === 'ESTIMATED' ? "bg-slate-100 text-slate-700 border-slate-300" :
+                        "bg-amber-50 text-amber-800 border-amber-200"
+                      }`}>
+                        {status === 'CONFIRMED' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                        {status}
+                      </div>
+                    </div>
+
+                    {/* Jurisdiction & Arrow */}
+                    <div className="col-span-1 md:col-span-2 flex items-center justify-between md:justify-end">
+                      <span className="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest">Jurisdiction</span>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-bold text-slate-500">{event.category}</span>
+                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-colors hidden md:block" />
+                      </div>
+                    </div>
+
+                  </div>
+                </Link>
+              );
+            })}
+            
+            {events.length === 0 && (
+              <div className="px-6 py-12 text-center text-slate-500">
+                No active schedules found.
+              </div>
+            )}
+          </div>
+          
+        </div>
+      </div>
     </main>
   );
 }

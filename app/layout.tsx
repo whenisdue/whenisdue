@@ -5,8 +5,8 @@ import './globals.css'
 import GlobalRequestButton from "@/components/GlobalRequestButton";
 
 export const metadata = {
-  title: 'WhenIsDue | Authority Verification Engine',
-  description: 'Independent public data platform tracking benefit schedules and financial deposit windows.',
+  title: 'WhenIsDue | Independent Benefit Schedule Reference',
+  description: 'Independent public information platform tracking benefit schedules and financial deposit windows.',
 }
 
 export default function RootLayout({
@@ -24,7 +24,6 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      {/* UPDATED: Changed bg-black to bg-slate-50 and text-white to text-slate-900 */}
       <body className="bg-slate-50 text-slate-900 min-h-screen flex flex-col" suppressHydrationWarning={true}>
         <Providers>
           {/* NAVIGATION: Light-mode Institutional Style */}
@@ -36,13 +35,13 @@ export default function RootLayout({
                 </a>
                 <div className="hidden md:flex gap-6 text-sm font-bold text-slate-500">
                   <a href="/agencies" className="hover:text-slate-900 transition-colors">Directory</a>
-                  <a href="/series/ssa-ssdi-payments" className="hover:text-slate-900 transition-colors">Sample Series</a>
+                  {/* QUARANTINED: Sample Series link removed until the database is seeded */}
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
-                <span className="text-[10px] font-mono font-bold text-slate-400 border border-slate-200 px-2 py-1 rounded bg-slate-50">
-                  v1.0.0-PROTOTYPE
+                <span className="text-[10px] font-mono font-bold text-slate-500 border border-slate-200 px-2 py-1 rounded bg-slate-50">
+                  PUBLIC REFERENCE
                 </span>
               </div>
             </div>
@@ -56,28 +55,25 @@ export default function RootLayout({
           <footer className="mt-20 border-t border-slate-200 bg-white pt-16 pb-24 px-10">
             <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between gap-12 text-[10px] text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
               <div className="max-w-sm">
-                <h4 className="text-slate-900 font-black mb-4">The Authority Protocol</h4>
+                <h4 className="text-slate-900 font-black mb-4">Our Verification Process</h4>
                 <p>
-                  Schedules are modeled via public agency release patterns and verified monthly. 
-                  Standard bank settlement timing is dependent on individual financial institutions. 
+                  Information is compiled from official agency publications and verified regularly. 
+                  Standard bank processing times may vary by financial institution. 
                   This platform provides reference data only.
                 </p>
               </div>
               <div className="md:text-right border-l md:border-l-0 md:border-r border-slate-200 pl-6 md:pl-0 md:pr-6">
                 <h4 className="text-slate-900 font-black mb-4">Independent Data Platform</h4>
                 <p>
-                  Not affiliated with the SSA, VA, or USDA. <br />
-                  Data cross-verified against official government publications. <br />
-                  © 2026 WHENISDUE • SECURITY: AUTH-VERIFIED
+                  Not affiliated with the SSA, VA, USDA, or any government agency. <br />
+                  Data checked against official government sources. <br />
+                  © 2026 WHENISDUE • INDEPENDENT RESOURCE
                 </p>
               </div>
             </div>
           </footer>
 
-          {/* --- FLOATING REQUEST BUTTON --- */}
           <GlobalRequestButton />
-          
-          {/* VERCEL ANALYTICS SENSOR */}
           <Analytics />
           
         </Providers>

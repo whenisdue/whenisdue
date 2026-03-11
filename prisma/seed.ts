@@ -1,223 +1,81 @@
-import { PrismaClient, EventCategory, EventDateStatus } from "@prisma/client";
+import { PrismaClient, EventCategory, EventDateStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// The 50-State Multiplier Array
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", 
+  "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", 
+  "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", 
+  "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", 
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", 
+  "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", 
+  "Washington", "West Virginia", "Wisconsin", "Wyoming"
+];
+
 async function main() {
-  console.log("Sweeping old events (preserving Audience data)...");
-  // We only delete Events and Series, we leave Users and Campaigns alone!
+  console.log("Sweeping old events to prepare for Phase 4...");
   await prisma.event.deleteMany();
   await prisma.eventSeries.deleteMany();
 
-  console.log("Seeding hardened events...");
+  console.log('Seeding Phase 4: Programmatic SEO Authority Hubs...');
 
-  // We are using a mix of hardcoded 2026 dates and dynamic offsets
-  // so your "Happening Soon" and "This Week" UI sections populate perfectly.
-  const now = Date.now();
-
-  const events = [
-    // ======================
-    // FEDERAL EVENTS
-    // ======================
-    {
-      title: "SSI Payment Schedule 2026",
-      slug: "ssi-payment-schedule-2026",
-      category: EventCategory.FEDERAL,
-      dueAt: new Date(now + 4 * 24 * 60 * 60 * 1000), // 4 days from now
-      timeZone: "America/New_York",
-      dateStatus: EventDateStatus.EXACT,
-      trending: true,
-      seoTitle: "SSI Payment Schedule 2026 | Exact Deposit Dates",
-      seoDescription: "See the exact SSI payment schedule for 2026 including early payments due to weekends and federal holidays.",
-      sourceUrl: "https://www.ssa.gov/pubs/EN-05-10031-2025.pdf",
-      lastVerified: new Date(),
+  // 1. Create the Master Series (Now with title, slugBase, and category!)
+  const snapSeries = await prisma.eventSeries.create({
+    data: {
+      title: 'SNAP / EBT State Deposit Schedules',
+      slugBase: 'snap-ebt-state-schedules',
+      category: EventCategory.STATE,
+      sourceName: 'USDA & State Health Departments',
+      priorityWeight: 10,
     },
-    {
-      title: "VA Disability Payment Schedule 2026",
-      slug: "va-disability-payment-schedule-2026",
-      category: EventCategory.FEDERAL,
-      dueAt: new Date(now + 12 * 60 * 60 * 1000), // ~12 hours from now (Will trigger TODAY/LIVE logic)
-      timeZone: "America/New_York",
-      dateStatus: EventDateStatus.EXACT,
-      trending: true,
-      seoTitle: "VA Disability Payment Schedule 2026",
-      seoDescription: "Check the VA disability payment schedule and when deposits arrive.",
-      sourceUrl: "https://www.va.gov",
-      lastVerified: new Date(),
-    },
-    {
-      title: "Social Security Payment Schedule 2026",
-      slug: "social-security-payment-schedule-2026",
-      category: EventCategory.FEDERAL,
-      dueAt: new Date("2026-03-11T14:00:00Z"),
-      timeZone: "America/New_York",
-      dateStatus: EventDateStatus.EXACT,
-      trending: true,
-      seoTitle: "Social Security Payment Dates 2026",
-      seoDescription: "Official Social Security payment schedule and direct deposit dates.",
-      sourceUrl: "https://www.ssa.gov",
-      lastVerified: new Date(),
-    },
-    {
-      title: "SSA Retirement Payment Schedule 2026",
-      slug: "ssa-retirement-payment-schedule-2026",
-      category: EventCategory.FEDERAL,
-      dueAt: new Date("2026-04-11T14:00:00Z"),
-      timeZone: "America/New_York",
-      dateStatus: EventDateStatus.EXACT,
-      trending: false,
-      seoTitle: "SSA Retirement Payment Schedule 2026",
-      seoDescription: "Monthly Social Security retirement payment dates.",
-      sourceUrl: "https://www.ssa.gov",
-      lastVerified: new Date(),
-    },
-
-    // ======================
-    // GAMING EVENTS
-    // ======================
-    {
-      title: "Steam Summer Sale 2026",
-      slug: "steam-summer-sale-2026",
-      category: EventCategory.GAMING,
-      dueAt: null, // Notice the TBA logic!
-      timeZone: null,
-      dateStatus: EventDateStatus.TBD_MONTH,
-      displayMonth: 6,
-      displayYear: 2026,
-      dateLabel: "Expected June 2026",
-      trending: true,
-      seoTitle: "Steam Summer Sale 2026 Countdown",
-      seoDescription: "Countdown timer and expected start date for the Steam Summer Sale.",
-      sourceUrl: "https://store.steampowered.com",
-      lastVerified: new Date(),
-    },
-    {
-      title: "Nintendo Direct June 2026",
-      slug: "nintendo-direct-june-2026",
-      category: EventCategory.GAMING,
-      dueAt: null, 
-      timeZone: null,
-      dateStatus: EventDateStatus.TBD_MONTH,
-      displayMonth: 6,
-      displayYear: 2026,
-      dateLabel: "June 2026",
-      trending: true,
-      seoTitle: "Nintendo Direct June 2026 Countdown",
-      seoDescription: "Expected Nintendo Direct broadcast window and countdown timer.",
-      sourceUrl: "https://www.nintendo.com/nintendo-direct",
-      lastVerified: new Date(),
-    },
-    {
-      title: "Fortnite Chapter 7 Season 1",
-      slug: "fortnite-chapter-7-season-1",
-      category: EventCategory.GAMING,
-      dueAt: new Date(now + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-      timeZone: "UTC",
-      dateStatus: EventDateStatus.EXACT,
-      trending: true,
-      seoTitle: "Fortnite Chapter 7 Season 1 Countdown",
-      seoDescription: "Countdown until the next Fortnite season launch.",
-      sourceUrl: "https://www.epicgames.com",
-      lastVerified: new Date(),
-    },
-    {
-      title: "Gamescom Opening Night Live 2026",
-      slug: "gamescom-opening-night-live-2026",
-      category: EventCategory.GAMING,
-      dueAt: new Date("2026-08-25T18:00:00Z"),
-      timeZone: "Europe/Berlin",
-      dateStatus: EventDateStatus.EXACT,
-      trending: false,
-      seoTitle: "Gamescom Opening Night Live 2026 Countdown",
-      seoDescription: "Countdown to the Gamescom Opening Night Live presentation.",
-      sourceUrl: "https://www.gamescom.global",
-      lastVerified: new Date(),
-    },
-
-    // ======================
-    // SHOPPING EVENTS
-    // ======================
-    {
-      title: "Black Friday 2026",
-      slug: "black-friday-2026",
-      category: EventCategory.SHOPPING,
-      dueAt: new Date("2026-11-27T05:00:00Z"),
-      timeZone: "America/New_York",
-      dateStatus: EventDateStatus.EXACT,
-      trending: true,
-      seoTitle: "Black Friday 2026 Countdown",
-      seoDescription: "Countdown timer for Black Friday 2026 deals.",
-      sourceUrl: "https://www.nrf.com",
-      lastVerified: new Date(),
-    },
-    {
-      title: "Amazon Prime Day 2026",
-      slug: "amazon-prime-day-2026",
-      category: EventCategory.SHOPPING,
-      dueAt: null,
-      timeZone: null,
-      dateStatus: EventDateStatus.TBD_MONTH,
-      displayMonth: 7,
-      displayYear: 2026,
-      dateLabel: "July 2026",
-      trending: true,
-      seoTitle: "Amazon Prime Day 2026 Countdown",
-      seoDescription: "Countdown until Amazon Prime Day deals begin.",
-      sourceUrl: "https://www.amazon.com",
-      lastVerified: new Date(),
-    },
-    {
-      title: "Cyber Monday 2026",
-      slug: "cyber-monday-2026",
-      category: EventCategory.SHOPPING,
-      dueAt: new Date("2026-11-30T05:00:00Z"),
-      timeZone: "America/New_York",
-      dateStatus: EventDateStatus.EXACT,
-      trending: false,
-      seoTitle: "Cyber Monday 2026 Countdown",
-      seoDescription: "Countdown to Cyber Monday online sales.",
-      sourceUrl: "https://www.nrf.com",
-      lastVerified: new Date(),
-    },
-
-    // ======================
-    // TECH EVENTS
-    // ======================
-    {
-      title: "Apple Event September 2026",
-      slug: "apple-event-september-2026",
-      category: EventCategory.TECH,
-      dueAt: null,
-      timeZone: null,
-      dateStatus: EventDateStatus.TBD_MONTH,
-      displayMonth: 9,
-      displayYear: 2026,
-      dateLabel: "September 2026",
-      trending: true,
-      seoTitle: "Apple Event September 2026 Countdown",
-      seoDescription: "Countdown to the annual Apple September keynote.",
-      sourceUrl: "https://www.apple.com",
-      lastVerified: new Date(),
-    },
-    {
-      title: "WWDC Keynote 2026",
-      slug: "wwdc-2026-keynote",
-      category: EventCategory.TECH,
-      dueAt: new Date("2026-06-08T17:00:00Z"),
-      timeZone: "America/Los_Angeles",
-      dateStatus: EventDateStatus.EXACT,
-      trending: true,
-      seoTitle: "WWDC 2026 Keynote Countdown",
-      seoDescription: "Countdown until Apple's Worldwide Developers Conference keynote.",
-      sourceUrl: "https://developer.apple.com/wwdc",
-      lastVerified: new Date(),
-    },
-  ];
-
-  await prisma.event.createMany({
-    data: events,
   });
 
-  console.log(`Database seeded successfully with ${events.length} events.`);
+  // 2. Programmatically generate 50 unique State pages (The "Spokes")
+  console.log(`Generating ${US_STATES.length} state-specific SNAP schedules...`);
+  
+  for (const state of US_STATES) {
+    await prisma.event.create({
+      data: {
+        title: `${state} SNAP Deposit Schedule 2026`,
+        slug: `snap-deposit-schedule-${state.toLowerCase().replace(/\s+/g, '-')}-2026`,
+        category: EventCategory.STATE, 
+        dueAt: new Date('2026-04-01T04:00:00Z'),
+        timeZone: 'America/New_York',
+        dateStatus: EventDateStatus.EXACT,
+        isArchived: false,
+        seriesId: snapSeries.id,
+        whatToExpect: `In ${state}, SNAP benefits are distributed onto EBT cards based on the state's specific alphabetical or case-number rolling schedule. Funds typically post between midnight and 6:00 AM local time on your assigned day.`,
+        targetAudience: `Registered households participating in the ${state} SNAP program. Check your local agency portal to confirm your exact case number distribution day.`,
+      },
+    });
+  }
+
+  // 3. Add High-Volume National Hubs (IRS & SSI)
+  const ssiSeries = await prisma.eventSeries.create({
+    data: { 
+      title: 'SSI Payment Calendar',
+      slugBase: 'ssi-payment-calendar',
+      category: EventCategory.FEDERAL,
+      sourceName: 'Social Security Administration', 
+      priorityWeight: 9 
+    },
+  });
+
+  await prisma.event.create({
+    data: {
+      title: 'SSI Payment Schedule - April 2026',
+      slug: 'ssi-payment-schedule-april-2026',
+      category: EventCategory.FEDERAL,
+      dueAt: new Date('2026-04-01T04:00:00Z'),
+      dateStatus: EventDateStatus.EXACT,
+      seriesId: ssiSeries.id,
+      whatToExpect: 'SSI payments are universally distributed on the 1st of the month. If the 1st falls on a weekend, payments are issued on the preceding business day.',
+      targetAudience: 'Supplemental Security Income recipients.',
+    },
+  });
+
+  console.log('✅ Programmatic SEO database seeded successfully.');
 }
 
 main()

@@ -3,6 +3,7 @@ import { Landmark, Building2, FileText, LineChart, ArrowRight, BellRing } from "
 import { prisma } from "@/lib/prisma";
 import StickyNextEvent from "@/components/StickyNextEvent";
 import EventTimeDisplay from "@/components/EventTimeDisplay";
+import SearchBar from "@/components/SearchBar";
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,13 @@ export default async function HomePage() {
     include: { series: true, clickStat: true } 
   });
 
+  // Format events for the SearchBar (keeping the payload lightweight)
+  const searchEvents = allActiveEvents.map((e: any) => ({
+    title: e.title,
+    slug: e.slug,
+    category: e.category
+  }));
+
   const trendingEvents = allActiveEvents
     .map((event: any) => {
       const priority = event.series?.priorityWeight ?? 5;
@@ -70,7 +78,20 @@ export default async function HomePage() {
       </div>
 
       <div className="pt-8">
-        
+
+        {/* --- PHASE 3: NEW SEARCH-FIRST DISCOVERY SECTION --- */}
+        <section className="max-w-5xl mx-auto px-4 mb-10">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-2">
+              Find your benefit schedule
+            </h2>
+            <p className="text-slate-600 font-medium">
+              Search federal, state, and tax payment dates.
+            </p>
+          </div>
+          <SearchBar events={searchEvents} />
+        </section>
+
         {/* The Reference Record Hero */}
         {topEvent && (
           <StickyNextEvent 
@@ -85,7 +106,7 @@ export default async function HomePage() {
         )}
 
         {/* Structured Context: Categories */}
-        <section className="max-w-5xl mx-auto px-4 mb-16">
+        <section className="max-w-5xl mx-auto px-4 mb-16 mt-12">
           <div className="flex items-center gap-2 mb-6 border-b border-slate-200 pb-3">
              <Landmark className="w-5 h-5 text-slate-700" />
              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Upcoming by Category</h2>
