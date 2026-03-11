@@ -1,61 +1,54 @@
-import { groupOfficialDates, OfficialDate } from "../lib/schedule";
+import { Info } from "lucide-react";
 
-interface ScheduleTableProps {
-  dates: OfficialDate[];
-}
+// Define the shape of our JSON data
+type ScheduleData = {
+  headers: string[];
+  rows: { identifier: string; date: string }[];
+  footerNote?: string;
+};
 
-export default function ScheduleTable({ dates }: ScheduleTableProps) {
-  const groupedDates = groupOfficialDates(dates);
-
-  if (groupedDates.length === 0) {
-    return (
-      <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-600">
-        Official schedule has not been published yet.
-      </div>
-    );
-  }
+export default function ScheduleTable({ data }: { data: ScheduleData | null | undefined }) {
+  if (!data || !data.headers || !data.rows) return null;
 
   return (
-    <div className="space-y-8 mt-12 border-t border-slate-200 pt-8">
-      <h3 className="text-2xl font-bold text-slate-900 border-b pb-2">Complete Payment Calendar</h3>
-      
-      <div className="grid gap-8 md:grid-cols-2">
-        {groupedDates.map((group) => (
-          <div key={group.month} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-            <table className="w-full text-left text-sm">
-              <caption className="sr-only">{group.month} Payment Schedule</caption>
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-semibold text-slate-800">{group.month}</th>
-                  <th scope="col" className="px-5 py-3 font-semibold text-slate-800 text-right">Date</th>
+    <div className="mt-8">
+      <h2 className="text-xl font-bold text-slate-900 mb-4">Official Deposit Schedule</h2>
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[300px]">
+            <thead>
+              <tr className="bg-slate-100 border-b border-slate-200">
+                {data.headers.map((header, i) => (
+                  <th key={i} scope="col" className="p-4 text-sm font-extrabold text-slate-700 uppercase tracking-wider">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {data.rows.map((row, i) => (
+                <tr key={i} className="hover:bg-blue-50 transition-colors group">
+                  <td className="p-4 text-base font-semibold text-slate-700 group-hover:text-blue-900">
+                    {row.identifier}
+                  </td>
+                  <td className="p-4 text-base font-bold text-slate-900 group-hover:text-blue-900">
+                    {row.date}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {group.items.map((item, idx) => {
-                  const dateObj = new Date(item.date);
-                  const formattedDate = dateObj.toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    timeZone: 'UTC'
-                  });
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-                  return (
-                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-5 py-4 font-medium text-slate-700">{item.group}</td>
-                      <td className="px-5 py-4 text-right">
-                        <span className="text-slate-600 bg-slate-100 px-3 py-1 rounded-md border border-slate-200 inline-block text-center whitespace-nowrap">
-                          {formattedDate}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        {data.footerNote && (
+          <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-start gap-3">
+            <Info className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+            <p className="text-sm font-medium text-slate-600 leading-relaxed">
+              {data.footerNote}
+            </p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

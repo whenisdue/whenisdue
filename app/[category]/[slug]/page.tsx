@@ -1,9 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { ShieldCheck, MapPin, Clock, FileText, AlertCircle, Info, CheckCircle2 } from "lucide-react";
+import { MapPin, Clock, AlertCircle, Info, CheckCircle2 } from "lucide-react";
 import EventTimeDisplay from "@/components/EventTimeDisplay";
 import SmartCountdown from "@/components/SmartCountdown";
 import Link from "next/link";
+
+// Import our new Deep Data UI Components
+import ScheduleTable from "@/components/ScheduleTable";
+import VisibleFAQ from "@/components/VisibleFAQ";
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +36,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
-      // 1. Breadcrumb Navigation
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
@@ -41,10 +44,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
           { "@type": "ListItem", "position": 3, "name": event.title, "item": `https://whenisdue.com/${event.category.toLowerCase()}/${event.slug}` }
         ]
       },
-      // 2. Government Service
       {
         "@type": "GovernmentService",
-        "name": event.series?.title || event.title, // <-- FIXED: Changed .name to .title
+        "name": event.series?.title || event.title,
         "provider": {
           "@type": "GovernmentOrganization",
           "name": event.series?.sourceName || "Official Agency"
@@ -54,7 +56,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
           "name": "United States"
         }
       },
-      // 3. Dataset (Structured schedule facts)
       {
         "@type": "Dataset",
         "name": `${event.title} - Schedule Data`,
@@ -65,7 +66,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
         },
         "dateModified": event.lastVerified ? event.lastVerified.toISOString() : new Date().toISOString()
       },
-      // 4. FAQ Page (Featured Snippet target)
       {
         "@type": "FAQPage",
         "mainEntity": [
@@ -119,16 +119,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
 
       <div className="max-w-4xl mx-auto px-4 pt-8">
         
-        {event.category === "FEDERAL" || event.category === "STATE" ? (
-          <div className="mb-6 bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
-            <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-            <p className="text-sm font-medium text-blue-900 leading-relaxed">
-              <strong>Notice:</strong> Disbursement times can vary by financial institution. While funds are typically released by the Treasury at midnight, your bank may take up to 24-48 hours to post the deposit to your available balance.
-            </p>
-          </div>
-        ) : null}
-
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mb-8">
+        {/* HERO SECTION */}
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mb-10">
           <div className="p-8 md:p-12">
             
             <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-6">
@@ -170,6 +162,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
             </div>
           </div>
 
+          {/* SOURCE METADATA FOOTER */}
           <div className="bg-slate-50 border-t border-slate-200 px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-sm font-medium text-slate-600">
               <div className="flex items-center gap-2">
@@ -183,27 +176,37 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* =========================================
+            THE NEW ANSWER-FIRST UX HIERARCHY 
+            ========================================= */}
+        
+        <div className="max-w-3xl">
           
-          <div className="bg-white border border-slate-200 rounded-xl p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-bold text-slate-900">Disbursement Details</h2>
-            </div>
-            <p className="text-slate-600 leading-relaxed">
-              {event.whatToExpect || "Disbursements are processed according to the official federal and state calendars. Electronic direct deposits typically clear faster than mailed paper checks."}
+          {/* 1. Rule Explanation */}
+          {event.whatToExpect && (
+            <p className="text-xl text-slate-800 leading-relaxed font-medium mb-2">
+              {event.whatToExpect}
             </p>
-          </div>
+          )}
 
-          <div className="bg-white border border-slate-200 rounded-xl p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-lg font-bold text-slate-900">Eligibility & Verification</h2>
+          {/* 2. Schedule Table Component */}
+          <ScheduleTable data={event.scheduleRules as any} />
+
+          {/* 3. Reassurance / Processing Window */}
+          {(event.category === "FEDERAL" || event.category === "STATE") && (
+            <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-6 flex items-start gap-4">
+              <Info className="w-6 h-6 text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-lg font-bold text-blue-900 mb-1">When deposits usually appear</h3>
+                <p className="text-base text-blue-800 leading-relaxed">
+                  Disbursement times can vary by financial institution. While the state sends payments early, your bank may take up to 24 hours to post the deposit to your available balance.
+                </p>
+              </div>
             </div>
-            <p className="text-slate-600 leading-relaxed">
-              {event.targetAudience || "This schedule applies to registered beneficiaries. Please ensure your banking information is up to date with your respective agency portal to avoid delays."}
-            </p>
-          </div>
+          )}
+
+          {/* 4. Visible FAQ Component */}
+          <VisibleFAQ faqs={event.faqData as any} />
 
         </div>
 
