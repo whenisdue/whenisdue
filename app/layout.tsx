@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import Script from 'next/script'
 import { Providers } from "./providers"
 import './globals.css'
@@ -6,6 +7,9 @@ import './globals.css'
 export const metadata = {
   title: 'WhenIsDue | Independent Benefit Schedule Reference',
   description: 'Independent public information platform tracking benefit schedules and financial deposit windows.',
+  verification: {
+    google: '41a30e1a7a52d0f8', // Backup Google Verification Hash
+  }
 }
 
 export default function RootLayout({
@@ -72,7 +76,10 @@ export default function RootLayout({
             </div>
           </footer>
 
+          {/* Layer 1: Global Behavioral Analytics */}
           <Analytics />
+          {/* Layer 2: Core Web Vitals & Speed Monitoring */}
+          <SpeedInsights />
           
         </Providers>
       </body>

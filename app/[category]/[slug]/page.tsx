@@ -4,6 +4,7 @@ import { MapPin, Clock, AlertCircle, Info, CheckCircle2 } from "lucide-react";
 import EventTimeDisplay from "@/components/EventTimeDisplay";
 import SmartCountdown from "@/components/SmartCountdown";
 import Link from "next/link";
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 
 // Import our new Deep Data UI Components
 import ScheduleTable from "@/components/ScheduleTable";
@@ -93,6 +94,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24">
       
+      {/* SILENT BEHAVIORAL TRACKER */}
+      <AnalyticsTracker 
+        stateName={event.title} 
+        programName={event.category} 
+      />
+
       {/* INVISIBLE SEO SCHEMA FOR GOOGLE & AI */}
       <script
         type="application/ld+json"
@@ -189,8 +196,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
             </p>
           )}
 
-          {/* 2. Schedule Table Component */}
-          <ScheduleTable data={event.scheduleRules as any} />
+          {/* 2. Schedule Table Component - Tagged for Analytics Tracker */}
+          <div id="schedule-table">
+            <ScheduleTable data={event.scheduleRules as any} />
+          </div>
 
           {/* 3. Reassurance / Processing Window */}
           {(event.category === "FEDERAL" || event.category === "STATE") && (
