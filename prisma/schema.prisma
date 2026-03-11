@@ -271,3 +271,86 @@ model PageViewDedup {
 
   @@index([routePath, bucketDate])
 }
+
+// ==========================================
+// PATH B: THE NOTIFICATION ENGINE
+// ==========================================
+
+enum Channel {
+  EMAIL
+  SMS
+}
+
+enum SubStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  PAUSED
+  OUTDATED
+}
+
+model Subscriber {
+  id            String   @id @default(cuid())
+  channel       Channel
+  
+  // Security: contactValue will be encrypted at the application layer.
+  // contactHash is a SHA-256 hash used for safe deduplication/lookups.
+  contactValue  String   
+  contactHash   String   @unique 
+  
+  // Timezone-aware delivery (e.g., "America/New_York")
+  timezone      String   @default("America/New_York") 
+  
+  createdAt     DateTime @default(now())
+
+  subscriptions Subscription[]
+  tokens        VerificationToken[]
+}
+
+model Subscription {
+  id              String    @id @default(cuid())
+  subscriberId    String
+  subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  
+  // The Rule (Program-Agnostic)
+  state           String    // e.g., "Texas"
+  program         String    // e.g., "SNAP"
+  ruleGroup       String    // e.g., "SSN ending in 4"
+  
+  status          SubStatus @default(PENDING_VERIFICATION)
+  ruleVersion     Int       @default(1)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  outbox          NotificationOutbox[]
+}
+
+// Double Opt-In Security
+model VerificationToken {
+  id           String   @id @default(cuid())
+  subscriberId String
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  
+  token        String   @unique // 6-digit OTP for SMS, or CUID for Email
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
+
+// The Idempotent Delivery Ledger (Prevents double-texting)
+model NotificationOutbox {
+  id              String   @id @default(cuid())
+  subscriptionId  String
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  // Unique constraint prevents duplicate jobs (e.g., "sub123_mar2026")
+  dedupeKey       String   @unique 
+  
+  status          String   @default("PENDING") // PENDING, SENT, FAILED
+  sendAt          DateTime // The exact UTC time this should fire
+  
+  providerMsgId   String?  // Twilio or Resend receipt ID
+  lastError       String?
+  
+  createdAt       DateTime @default(now())
+  sentAt          DateTime?
+}
