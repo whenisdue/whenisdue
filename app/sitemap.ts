@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://whenisdue.com';
+const BASE_URL = 'https://www.whenisdue.com';
 
 // Ensure the sitemap revalidates every hour to catch new programmatic events
 export const revalidate = 3600;
