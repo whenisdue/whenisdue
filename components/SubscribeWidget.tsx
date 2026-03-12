@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell, Smartphone, Mail, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react'
+import { Bell, Mail, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react'
 import { subscribeUser } from '@/app/actions/subscribe'
 
 interface SubscribeWidgetProps {
@@ -13,7 +13,8 @@ interface SubscribeWidgetProps {
 
 export default function SubscribeWidget({ stateName, programName, ruleGroup }: SubscribeWidgetProps) {
   const router = useRouter();
-  const [channel, setChannel] = useState<'SMS' | 'EMAIL'>('SMS');
+  // Hardcoded to EMAIL for now while SMS is pending approval
+  const [channel] = useState<'EMAIL'>('EMAIL');
   const [contactValue, setContactValue] = useState('');
   const [hasConsent, setHasConsent] = useState(false);
   const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS'>('IDLE');
@@ -34,13 +35,8 @@ export default function SubscribeWidget({ stateName, programName, ruleGroup }: S
     });
     
     if (result.success) {
-      if (channel === 'SMS') {
-        // Send SMS users directly to the OTP entry form
-        router.push(`/verify?sub=${result.subscriptionId}`);
-      } else {
-        // Email users just see the success message telling them to check their inbox
-        setStatus('SUCCESS'); 
-      }
+      // Email users just see the success message telling them to check their inbox
+      setStatus('SUCCESS'); 
     } else {
       setStatus('IDLE');
       alert(result.error || "Something went wrong. Please try again.");
@@ -71,7 +67,7 @@ export default function SubscribeWidget({ stateName, programName, ruleGroup }: S
         </div>
         <div>
           <h3 className="text-lg font-black text-slate-900">Stop checking this page</h3>
-          <p className="text-sm font-medium text-slate-500">Get a reminder 24 hours before your payment drops.</p>
+          <p className="text-sm font-medium text-slate-500">Get an email reminder 24 hours before your payment drops.</p>
         </div>
       </div>
 
@@ -79,48 +75,23 @@ export default function SubscribeWidget({ stateName, programName, ruleGroup }: S
       <form onSubmit={handleSubmit} className="p-5 md:p-8">
         
         {/* The "Rule Recap" (Crucial for Trust) */}
-        <div className="mb-6 inline-flex items-center gap-2 bg-blue-50 text-blue-800 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded border border-blue-100">
+        <div className="mb-6 inline-flex flex-wrap items-center gap-2 bg-blue-50 text-blue-800 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded border border-blue-100">
           <span>Targeting:</span>
           <span className="text-blue-600">•</span>
           <span>{stateName} {programName}</span>
           <span className="text-blue-600">•</span>
-          <span>{ruleGroup}</span>
-        </div>
-
-        {/* Channel Selection */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <button
-            type="button"
-            onClick={() => setChannel('SMS')}
-            className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-bold text-sm transition-colors border ${
-              channel === 'SMS' 
-                ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            <Smartphone className="w-4 h-4" /> Text Message
-          </button>
-          <button
-            type="button"
-            onClick={() => setChannel('EMAIL')}
-            className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-bold text-sm transition-colors border ${
-              channel === 'EMAIL' 
-                ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            <Mail className="w-4 h-4" /> Email Alert
-          </button>
+          <span className="truncate max-w-[200px] sm:max-w-none">{ruleGroup}</span>
         </div>
 
         {/* Input */}
         <div className="mb-6">
-          <label className="block text-sm font-bold text-slate-700 mb-2">
+          <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+            <Mail className="w-4 h-4 text-slate-400" />
             Where should we send the reminder?
           </label>
           <input 
-            type={channel === 'SMS' ? 'tel' : 'email'}
-            placeholder={channel === 'SMS' ? '(555) 123-4567' : 'you@example.com'}
+            type="email"
+            placeholder="you@example.com"
             required
             value={contactValue}
             onChange={(e) => setContactValue(e.target.value)}
@@ -139,8 +110,8 @@ export default function SubscribeWidget({ stateName, programName, ruleGroup }: S
           />
           <label htmlFor="tcpa-consent" className="text-xs text-slate-500 leading-relaxed cursor-pointer">
             <span className="font-bold text-slate-700 block mb-1">I want these reminders.</span>
-            By checking this box, you agree to receive automated {channel === 'SMS' ? 'text messages' : 'emails'} about schedule updates. 
-            Message frequency varies. {channel === 'SMS' && 'Msg & data rates may apply. Reply STOP to unsubscribe.'} No marketing.
+            By checking this box, you agree to receive automated emails about schedule updates. 
+            Message frequency varies. No marketing.
           </label>
         </div>
 
