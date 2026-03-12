@@ -9,6 +9,7 @@ import AnalyticsTracker from '@/components/AnalyticsTracker'
 // Import our new Deep Data UI Components
 import ScheduleTable from "@/components/ScheduleTable";
 import VisibleFAQ from "@/components/VisibleFAQ";
+import  SubscribeWidget  from "@/components/SubscribeWidget";
 
 export const dynamic = 'force-dynamic';
 
@@ -169,11 +170,23 @@ export default async function EventDetailPage({ params }: { params: Promise<{ ca
             </div>
           </div>
 
+          {/* THE UTILITY: Subscribe box moved "Above the Fold" */}
+          <div className="px-8 md:px-12 pb-8">
+            <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+              <h3 className="text-lg font-bold text-blue-900 mb-1">Get Benefit Reminders</h3>
+              <p className="text-sm text-blue-800 mb-5">Never miss a deposit. We'll email you 24 hours before your {event.category} benefits arrive.</p>
+              <SubscribeWidget stateName={event.title} programName={event.category} ruleGroup={event.slug} />
+            </div>
+          </div>
+
           {/* SOURCE METADATA FOOTER */}
           <div className="bg-slate-50 border-t border-slate-200 px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-sm font-medium text-slate-600">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900">Source:</span> {event.series?.sourceName || "Official Agency Record"}
+                <span className="font-bold text-slate-900">Source:</span> 
+                <a href="https://www.fns.usda.gov/sites/default/files/resource-files/Monthly-Issuance-Schedule-All-States.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline transition-colors">
+                  {event.series?.sourceName || "Official Agency Record"}
+                </a>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-slate-400" />
