@@ -1,11 +1,20 @@
 import { Resend } from 'resend';
 import twilio from 'twilio';
 
-// REINFORCED INITIALIZATION: This ensures the key is found even if Vercel is being picky
-const apiKey = process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY;
+/**
+ * REINFORCED API KEY PICKUP
+ * We check three different common naming conventions to ensure 
+ * the Server Action doesn't "miss" the key.
+ */
+const apiKey = process.env.RESEND_API_KEY || 
+               process.env.NEXT_PUBLIC_RESEND_API_KEY || 
+               process.env.VERCEL_RESEND_API_KEY;
 
+// This log will show up in your Vercel logs to tell us if it found the key
 if (!apiKey) {
-  console.error("[CRITICAL ERROR] RESEND_API_KEY is missing from environment variables.");
+  console.error("[CRITICAL] Resend API Key is missing from ALL environment slots.");
+} else {
+  console.log(`[AUTH] Resend Key detected (starts with: ${apiKey.substring(0, 5)}...)`);
 }
 
 const resend = new Resend(apiKey);
