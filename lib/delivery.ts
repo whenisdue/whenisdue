@@ -2,28 +2,10 @@ import { Resend } from 'resend';
 import twilio from 'twilio';
 
 /**
- * REINFORCED API KEY PICKUP
- * We check three different common naming conventions to ensure 
- * the Server Action doesn't "miss" the key.
+ * We move the key retrieval inside the function to ensure 
+ * Vercel Server Actions pull the fresh environment variable 
+ * every time the button is clicked.
  */
-const apiKey = process.env.RESEND_API_KEY || 
-               process.env.NEXT_PUBLIC_RESEND_API_KEY || 
-               process.env.VERCEL_RESEND_API_KEY;
-
-// This log will show up in your Vercel logs to tell us if it found the key
-if (!apiKey) {
-  console.error("[CRITICAL] Resend API Key is missing from ALL environment slots.");
-} else {
-  console.log(`[AUTH] Resend Key detected (starts with: ${apiKey.substring(0, 5)}...)`);
-}
-
-const resend = new Resend(apiKey);
-
-// Initialize the SMS Client (safely checking for env vars)
-const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
-  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-  : null;
-
 export async function sendVerificationMessage(
   channel: 'SMS' | 'EMAIL',
   contactValue: string,
@@ -32,10 +14,21 @@ export async function sendVerificationMessage(
 ) {
   try {
     if (channel === 'EMAIL') {
+      // PULL KEY AT EXECUTION TIME
+      const apiKey = process.env.RESEND_API_KEY;
+
+      if (!apiKey) {
+        console.error("[DELIVERY ERROR] RESEND_API_KEY is missing from the environment.");
+        throw new Error("Internal Configuration Error: Missing API Key");
+      }
+
+      const resend = new Resend(apiKey);
       const baseUrl = 'https://whenisdue.com';
       const verifyLink = `${baseUrl}/verify?token=${tokenStr}&sub=${subscriptionId}`;
 
-      await resend.emails.send({
+      console.log(`[DELIVERY] Contacting Resend for ${contactValue}...`);
+
+      const { data, error } = await resend.emails.send({
         from: 'WhenIsDue <admin@whenisdue.com>', 
         to: contactValue,
         subject: 'Confirm your payment reminder subscription',
@@ -52,15 +45,22 @@ export async function sendVerificationMessage(
           </div>
         `,
       });
+
+      if (error) {
+        console.error("[RESEND API ERROR]", error);
+        throw new Error(error.message);
+      }
       
-      console.log(`[DELIVERY] Email verification sent to ${contactValue}`);
+      console.log(`[DELIVERY] Email verification sent successfully:`, data);
       
     } else if (channel === 'SMS') {
+      // LOG ONLY UNTIL TWILIO IS FIXED
       console.log(`[DELIVERY BYPASS] SMS requested for ${contactValue}, but Twilio is currently disabled.`);
       return; 
     }
   } catch (error) {
     console.error(`[DELIVERY ERROR] Failed to send ${channel} verification:`, error);
+    // This allows the front-end to stop the "Securing..." spinner and show the error
     throw error;
   }
 }
