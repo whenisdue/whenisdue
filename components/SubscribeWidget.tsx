@@ -66,8 +66,8 @@ export default function SubscribeWidget({ stateName, programName, ruleGroup }: S
           <Bell className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-lg font-black text-slate-900">Stop checking this page</h3>
-          <p className="text-sm font-medium text-slate-500">Get an email reminder 24 hours before your payment drops.</p>
+          <h3 className="text-lg font-black text-slate-900">Set Up Email Alerts</h3>
+          <p className="text-sm font-medium text-slate-500">Get notified 24 hours before your payment drops.</p>
         </div>
       </div>
 
