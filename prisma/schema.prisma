@@ -73,17 +73,17 @@ enum DeliveryStatus {
 // ==========================================
 
 model EventSeries {
-  id             String        @id @default(cuid())
-  title          String
-  slugBase       String        @unique
-  category       EventCategory
-  description    String?
-  isFeatured     Boolean       @default(false)
-  priorityWeight Int           @default(5)
-  heroQuestion   String?
-  status         EventStatus   @default(CONFIRMED)
-  sourceName     String?
-  sourceUrl      String?
+  id                  String         @id @default(cuid())
+  title               String
+  slugBase            String         @unique
+  category            EventCategory
+  description         String?
+  isFeatured          Boolean        @default(false)
+  priorityWeight      Int            @default(5)
+  heroQuestion        String?
+  status              EventStatus    @default(CONFIRMED)
+  sourceName          String?
+  sourceUrl           String?
 
   recurrenceType        RecurrenceType @default(NONE)
   dayOfMonth            Int?
@@ -273,7 +273,7 @@ model PageViewDedup {
 }
 
 // ==========================================
-// PATH B: THE NOTIFICATION ENGINE
+// PATH B: THE PROGRAMMATIC NOTIFICATION ENGINE
 // ==========================================
 
 enum Channel {
@@ -294,7 +294,7 @@ model Subscriber {
   
   // Security: contactValue will be encrypted at the application layer.
   // contactHash is a SHA-256 hash used for safe deduplication/lookups.
-  contactValue  String   
+  contactValue  String   @unique
   contactHash   String   @unique 
   
   // Timezone-aware delivery (e.g., "America/New_York")
@@ -307,50 +307,89 @@ model Subscriber {
 }
 
 model Subscription {
-  id              String    @id @default(cuid())
+  id              String     @id @default(cuid())
   subscriberId    String
   subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
   
   // The Rule (Program-Agnostic)
-  state           String    // e.g., "Texas"
-  program         String    // e.g., "SNAP"
-  ruleGroup       String    // e.g., "SSN ending in 4"
+  state           String     // e.g., "Texas"
+  program         String     // e.g., "SNAP"
+  ruleGroup       String     // e.g., "SSN ending in 4" (Legacy backward compatibility)
   
-  status          SubStatus @default(PENDING_VERIFICATION)
-  ruleVersion     Int       @default(1)
+  // RESEARCH APPLIED: Data Minimization. We only store the exact isolated digits needed.
+  identifierValue String?    // e.g., "07" or "A"
   
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  status          SubStatus  @default(PENDING_VERIFICATION)
+  isActive        Boolean    @default(true)
+  ruleVersion     Int        @default(1)
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   outbox          NotificationOutbox[]
 }
 
+// RESEARCH APPLIED: Canonical RulePack Schema
+model ScheduleRule {
+  id              String         @id @default(cuid())
+  state           String
+  program         String
+  ruleType        String         // e.g., "DIGIT_RANGE_BUCKET", "SINGLE_DIGIT_SEQUENCE"
+  identifierKind  String         // e.g., "case_last_digit", "edg_last_two_digits"
+  
+  // Storing the actual math/logic in JSON format so the engine can interpret it without code changes
+  logicPayload    Json           
+  
+  // RESEARCH APPLIED: Explicit holiday/weekend handling rules
+  calendarPolicy  Json           
+  
+  events          PaymentEvent[] 
+}
+
+// RESEARCH APPLIED: Forecast Instances
+model PaymentEvent {
+  id               String       @id @default(cuid())
+  scheduleRuleId   String
+  month            String       // e.g., '2026-03'
+  depositDate      DateTime     
+  identifierMatch  String       // e.g., '04'
+
+  rule             ScheduleRule @relation(fields: [scheduleRuleId], references: [id])
+
+  // RESEARCH APPLIED: Batch 2, Tab 1 (B-Tree Indexing Strategy)
+  // Index 1: The "Page Index" (Optimized for full-month schedule page loads)
+  @@index([scheduleRuleId, month, depositDate, identifierMatch])
+
+  // Index 2: The "Precise Lookup Index" (Optimized for instant search dropdowns)
+  @@index([scheduleRuleId, identifierMatch, month])
+}
+
 // Double Opt-In Security
 model VerificationToken {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   subscriberId String
   subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
   
-  token        String   @unique // 6-digit OTP for SMS, or CUID for Email
+  token        String     @unique // 6-digit OTP for SMS, or CUID for Email
   expiresAt    DateTime
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
 }
 
 // The Idempotent Delivery Ledger (Prevents double-texting)
 model NotificationOutbox {
-  id              String   @id @default(cuid())
+  id              String       @id @default(cuid())
   subscriptionId  String
   subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
   
   // Unique constraint prevents duplicate jobs (e.g., "sub123_mar2026")
-  dedupeKey       String   @unique 
+  dedupeKey       String       @unique 
   
-  status          String   @default("PENDING") // PENDING, SENT, FAILED
-  sendAt          DateTime // The exact UTC time this should fire
+  status          String       @default("PENDING") // PENDING, SENT, FAILED
+  sendAt          DateTime     // The exact UTC time this should fire
   
-  providerMsgId   String?  // Twilio or Resend receipt ID
+  providerMsgId   String?      // Twilio or Resend receipt ID
   lastError       String?
   
-  createdAt       DateTime @default(now())
+  createdAt       DateTime     @default(now())
   sentAt          DateTime?
 }

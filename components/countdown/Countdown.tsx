@@ -58,10 +58,15 @@ function diffParts(nowMs: number, targetMs: number): Parts {
 }
 
 export default function Countdown({ targetIso }: { targetIso: string }) {
-  // Heartbeat (drives all time calculations)
-  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  // 1. Initialize with 0 to prevent SSR Hydration errors
+  const [nowMs, setNowMs] = useState<number>(0);
+  const [mounted, setMounted] = useState(false);
 
+  // 2. Only start tracking time AFTER the component mounts on the client
   useEffect(() => {
+    setMounted(true);
+    setNowMs(Date.now()); // Set the real time immediately on mount
+    
     const id = window.setInterval(() => setNowMs(Date.now()), 250);
     return () => window.clearInterval(id);
   }, []);
@@ -72,25 +77,22 @@ export default function Countdown({ targetIso }: { targetIso: string }) {
   }, [targetIso]);
 
   const parts = useMemo(() => {
-    if (!targetDate) return null;
+    // 3. Don't calculate parts until we have a real client-side time
+    if (!targetDate || !mounted) return null;
     return diffParts(nowMs, targetDate.getTime());
-  }, [nowMs, targetDate]);
+  }, [nowMs, targetDate, mounted]);
 
-  if (!targetDate || !parts) {
+  // If we aren't mounted or don't have parts yet, show a clean loading state
+  if (!mounted || !targetDate || !parts) {
     return (
       <div className="min-h-[164px] flex flex-col justify-center">
         <div className="text-5xl font-semibold tracking-tight">—</div>
-        <div className="mt-3 text-sm opacity-75">Computing…</div>
+        <div className="mt-3 text-sm opacity-75">Computing...</div>
       </div>
     );
   }
 
-  const days = Number.isFinite(parts.days) ? toInt(parts.days, 0) : 0;
-  const hours = Number.isFinite(parts.hours) ? toInt(parts.hours, 0) : 0;
-  const minutes = Number.isFinite(parts.minutes) ? toInt(parts.minutes, 0) : 0;
-  const seconds = Number.isFinite(parts.seconds) ? toInt(parts.seconds, 0) : 0;
-
-  const safeDays = parts.isPast ? 0 : days;
+  const safeDays = parts.isPast ? 0 : parts.days;
 
   return (
     <div className="min-h-[164px] flex flex-col justify-center">
@@ -100,22 +102,16 @@ export default function Countdown({ targetIso }: { targetIso: string }) {
         <span className="opacity-90">{plural(safeDays, "day")}</span>
       </div>
 
-      {/* Secondary answer: spelled-out countdown (responsive to avoid awkward wraps) */}
+      {/* Secondary answer: spelled-out countdown */}
       <div
         className="mt-4 text-2xl sm:text-3xl font-medium tracking-tight opacity-90 tabular-nums"
-        aria-label={`${hours} ${plural(hours, "hour")}, ${minutes} ${plural(
-          minutes,
-          "minute"
-        )}, ${seconds} ${plural(seconds, "second")}`}
+        aria-label={`${parts.hours} ${plural(parts.hours, "hour")}, ${parts.minutes} ${plural(parts.minutes, "minute")}, ${parts.seconds} ${plural(parts.seconds, "second")}`}
       >
-        {/* Mobile: compact */}
         <span className="sm:hidden whitespace-nowrap">
-          {hours}h {minutes}m {seconds}s
+          {parts.hours}h {parts.minutes}m {parts.seconds}s
         </span>
-        {/* Desktop: spelled-out */}
         <span className="hidden sm:inline">
-          {hours} {plural(hours, "hour")}, {minutes} {plural(minutes, "minute")}, {seconds}{" "}
-          {plural(seconds, "second")}
+          {parts.hours} {plural(parts.hours, "hour")}, {parts.minutes} {plural(parts.minutes, "minute")}, {parts.seconds} {plural(parts.seconds, "second")}
         </span>
       </div>
 
