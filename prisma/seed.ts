@@ -1,141 +1,157 @@
 import { PrismaClient } from '@prisma/client';
-
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Clearing old schedule rules...');
+  console.log("Nuking old rules for clean slate...");
   await prisma.paymentEvent.deleteMany();
   await prisma.scheduleRule.deleteMany();
 
-  console.log('Seeding Programmatic Logic Engine with Full Caseworker Sequences...');
-
-  // ==========================================
-  // ALABAMA SNAP (Full 20-Bucket Sequence)
-  // ==========================================
-  await prisma.scheduleRule.create({
-    data: {
-      state: 'AL',
-      program: 'SNAP',
-      ruleType: 'DIGIT_RANGE_BUCKET',
-      identifierKind: 'case_last_two_digits',
-      logicPayload: {
-        bucketMap: [
-          { lookupMin: 0, lookupMax: 4, depositDay: 4 },
-          { lookupMin: 5, lookupMax: 9, depositDay: 5 },
-          { lookupMin: 10, lookupMax: 14, depositDay: 6 },
-          { lookupMin: 15, lookupMax: 19, depositDay: 7 },
-          { lookupMin: 20, lookupMax: 24, depositDay: 8 },
-          { lookupMin: 25, lookupMax: 29, depositDay: 9 },
-          { lookupMin: 30, lookupMax: 34, depositDay: 10 },
-          { lookupMin: 35, lookupMax: 39, depositDay: 11 },
-          { lookupMin: 40, lookupMax: 44, depositDay: 12 },
-          { lookupMin: 45, lookupMax: 49, depositDay: 13 },
-          { lookupMin: 50, lookupMax: 54, depositDay: 14 },
-          { lookupMin: 55, lookupMax: 59, depositDay: 15 },
-          { lookupMin: 60, lookupMax: 64, depositDay: 16 },
-          { lookupMin: 65, lookupMax: 69, depositDay: 17 },
-          { lookupMin: 70, lookupMax: 74, depositDay: 18 },
-          { lookupMin: 75, lookupMax: 79, depositDay: 19 },
-          { lookupMin: 80, lookupMax: 84, depositDay: 20 },
-          { lookupMin: 85, lookupMax: 89, depositDay: 21 },
-          { lookupMin: 90, lookupMax: 94, depositDay: 22 },
-          { lookupMin: 95, lookupMax: 99, depositDay: 23 }
-        ]
-      },
-      calendarPolicy: {
-        weekendHandling: "no_shift",
-        holidayHandling: "no_shift"
-      }
+  const rules = [
+    // --- ORIGINAL TRIO ---
+    {
+      state: "AL", program: "SNAP", ruleType: "DIGIT_RANGE", identifierKind: "case_last_two_digits",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: Array.from({ length: 20 }, (_, i) => ({ min: i * 5, max: (i * 5) + 4, day: i + 4 })),
+      source: "https://dhr.alabama.gov/food-assistance/"
+    },
+    {
+      state: "FL", program: "SNAP", ruleType: "DIGIT_RANGE", identifierKind: "case_transformed_two_digit",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: [
+        { min: 0, max: 3, day: 1 }, { min: 4, max: 6, day: 2 }, { min: 7, max: 10, day: 3 },
+        { min: 11, max: 13, day: 4 }, { min: 14, max: 17, day: 5 }, { min: 18, max: 20, day: 6 },
+        { min: 21, max: 24, day: 7 }, { min: 25, max: 27, day: 8 }, { min: 28, max: 31, day: 9 },
+        { min: 32, max: 34, day: 10 }, { min: 35, max: 38, day: 11 }, { min: 39, max: 41, day: 12 },
+        { min: 42, max: 45, day: 13 }, { min: 46, max: 48, day: 14 }, { min: 49, max: 53, day: 15 },
+        { min: 54, max: 57, day: 16 }, { min: 58, max: 60, day: 17 }, { min: 61, max: 64, day: 18 },
+        { min: 65, max: 67, day: 19 }, { min: 68, max: 71, day: 20 }, { min: 72, max: 74, day: 21 },
+        { min: 75, max: 78, day: 22 }, { min: 79, max: 81, day: 23 }, { min: 82, max: 85, day: 24 },
+        { min: 86, max: 88, day: 25 }, { min: 89, max: 92, day: 26 }, { min: 93, max: 95, day: 27 },
+        { min: 96, max: 99, day: 28 }
+      ],
+      source: "https://www.myflfamilies.com/services/public-assistance/supplemental-nutrition-assistance-program-snap"
+    },
+    {
+      state: "GA", program: "SNAP", ruleType: "DIGIT_RANGE", identifierKind: "client_id_last_two",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: Array.from({ length: 10 }, (_, i) => ({ min: i * 10, max: (i * 10) + 9, day: (i * 2) + 5 })),
+      source: "https://dfcs.georgia.gov/snap-food-stamps"
+    },
+    // --- BATCH 1 & 2 EXPANSION ---
+    {
+      state: "CA", program: "SNAP", ruleType: "SINGLE_DIGIT", identifierKind: "case_number_last_digit",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: [
+        { min: 1, max: 1, day: 1 }, { min: 2, max: 2, day: 2 }, { min: 3, max: 3, day: 3 },
+        { min: 4, max: 4, day: 4 }, { min: 5, max: 5, day: 5 }, { min: 6, max: 6, day: 6 },
+        { min: 7, max: 7, day: 7 }, { min: 8, max: 8, day: 8 }, { min: 9, max: 9, day: 9 },
+        { min: 0, max: 0, day: 10 }
+      ],
+      source: "https://www.ebtproject.ca.gov/Clients/benefitsavailable.html"
+    },
+    {
+      state: "TX", program: "SNAP", ruleType: "DIGIT_RANGE", identifierKind: "edg_last_two_digits",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: [
+        { min: 0, max: 3, day: 1 }, { min: 4, max: 6, day: 2 }, { min: 7, max: 10, day: 3 },
+        { min: 11, max: 13, day: 4 }, { min: 14, max: 17, day: 5 }, { min: 18, max: 20, day: 6 },
+        { min: 21, max: 24, day: 7 }, { min: 25, max: 27, day: 8 }, { min: 28, max: 31, day: 9 },
+        { min: 32, max: 34, day: 10 }, { min: 35, max: 38, day: 11 }, { min: 39, max: 41, day: 12 },
+        { min: 42, max: 45, day: 13 }, { min: 46, max: 49, day: 14 }, { min: 50, max: 53, day: 15 },
+        { min: 54, max: 57, day: 16 }, { min: 58, max: 60, day: 17 }, { min: 61, max: 64, day: 18 },
+        { min: 65, max: 67, day: 19 }, { min: 68, max: 71, day: 20 }, { min: 72, max: 74, day: 21 },
+        { min: 75, max: 78, day: 22 }, { min: 79, max: 81, day: 23 }, { min: 82, max: 85, day: 24 },
+        { min: 86, max: 88, day: 25 }, { min: 89, max: 92, day: 26 }, { min: 93, max: 95, day: 27 },
+        { min: 96, max: 99, day: 28 }
+      ],
+      source: "https://www.hhs.texas.gov/handbooks/texas-works-handbook/b-250-ebt-benefit-issuance"
+    },
+    {
+      state: "NY", program: "SNAP", ruleType: "SINGLE_DIGIT", identifierKind: "case_number_last_digit",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: [
+        { min: 0, max: 1, day: 1 }, { min: 2, max: 2, day: 2 }, { min: 3, max: 3, day: 3 },
+        { min: 4, max: 4, day: 4 }, { min: 5, max: 5, day: 5 }, { min: 6, max: 6, day: 6 },
+        { min: 7, max: 7, day: 7 }, { min: 8, max: 8, day: 8 }, { min: 9, max: 9, day: 9 }
+      ],
+      source: "https://otda.ny.gov/programs/snap/"
+    },
+    {
+      state: "TN", program: "SNAP", ruleType: "DIGIT_RANGE", identifierKind: "ssn_last_two_digits",
+      calendarPolicy: { weekend: "SHIFT_PREVIOUS", holiday: "SHIFT_PREVIOUS" },
+      buckets: Array.from({ length: 20 }, (_, i) => ({ min: i * 5, max: (i * 5) + 4, day: i + 1 })),
+      source: "https://www.tn.gov/content/dam/tn/human-services/documents/SNAP%20Issuance%20Schedule.pdf"
+    },
+    {
+      state: "OH", program: "SNAP", ruleType: "SINGLE_DIGIT", identifierKind: "case_number_last_digit",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: Array.from({ length: 10 }, (_, i) => ({ min: i, max: i, day: (i * 2) + 2 })),
+      source: "https://benefits.ohio.gov"
+    },
+    {
+      state: "NC", program: "SNAP", ruleType: "SINGLE_DIGIT", identifierKind: "ssn_last_digit",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: [
+        { min: 1, max: 1, day: 3 }, { min: 2, max: 2, day: 5 }, { min: 3, max: 3, day: 7 },
+        { min: 4, max: 4, day: 9 }, { min: 5, max: 5, day: 11 }, { min: 6, max: 6, day: 13 },
+        { min: 7, max: 7, day: 15 }, { min: 8, max: 8, day: 17 }, { min: 9, max: 9, day: 19 },
+        { min: 0, max: 0, day: 21 }
+      ],
+      source: "https://www.ncdhhs.gov/divisions/social-services/food-and-nutrition-services-snap"
+    },
+    {
+      state: "VA", program: "SNAP", ruleType: "DIGIT_RANGE", identifierKind: "case_number_last_digit",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: [{ min: 0, max: 3, day: 1 }, { min: 4, max: 5, day: 4 }, { min: 6, max: 9, day: 7 }],
+      source: "https://www.dss.virginia.gov/benefit/snap.cgi"
+    },
+    {
+      state: "AZ", program: "SNAP", ruleType: "ALPHABETICAL", identifierKind: "last_name_initial",
+      calendarPolicy: { weekend: "SHIFT_NEXT", holiday: "SHIFT_NEXT" },
+      buckets: [
+        { min: "A", max: "B", day: 1 }, { min: "C", max: "D", day: 2 }, { min: "E", max: "F", day: 3 },
+        { min: "G", max: "H", day: 4 }, { min: "I", max: "J", day: 5 }, { min: "K", max: "L", day: 6 },
+        { min: "M", max: "N", day: 7 }, { min: "O", max: "P", day: 8 }, { min: "Q", max: "R", day: 9 },
+        { min: "S", max: "T", day: 10 }, { min: "U", max: "V", day: 11 }, { min: "W", max: "X", day: 12 },
+        { min: "Y", max: "Z", day: 13 }
+      ],
+      source: "https://des.az.gov/services/basic-needs/food/nutrition-assistance/faqs"
+    },
+    {
+      state: "MI", program: "SNAP", ruleType: "SINGLE_DIGIT", identifierKind: "recipient_id_last_digit",
+      calendarPolicy: { weekend: "SHIFT_PREVIOUS", holiday: "SHIFT_PREVIOUS" },
+      buckets: Array.from({ length: 10 }, (_, i) => ({ min: i, max: i, day: (i * 2) + 3 })),
+      source: "https://www.michigan.gov/mdhhs"
+    },
+    {
+      state: "IN", program: "SNAP", ruleType: "ALPHABETICAL", identifierKind: "last_name_initial",
+      calendarPolicy: { weekend: "NO_SHIFT", holiday: "NO_SHIFT" },
+      buckets: [
+        { min: "A", max: "B", day: 5 }, { min: "C", max: "D", day: 7 }, { min: "E", max: "G", day: 9 },
+        { min: "H", max: "I", day: 11 }, { min: "J", max: "L", day: 13 }, { min: "M", max: "N", day: 15 },
+        { min: "O", max: "R", day: 17 }, { min: "S", max: "S", day: 19 }, { min: "T", max: "V", day: 21 },
+        { min: "W", max: "Z", day: 23 }
+      ],
+      source: "https://www.in.gov/fssa/dfr/snap-food-assistance/"
     }
-  });
+  ];
 
-  // ==========================================
-  // FLORIDA SNAP (Full 28-Bucket Sequence)
-  // ==========================================
-  await prisma.scheduleRule.create({
-    data: {
-      state: 'FL',
-      program: 'SNAP',
-      ruleType: 'POSITIONAL_DIGIT_SEQUENCE',
-      identifierKind: 'case_transformed_two_digit', 
-      logicPayload: {
-        bucketMap: [
-          { lookupMin: 0, lookupMax: 3, depositDay: 1 },
-          { lookupMin: 4, lookupMax: 6, depositDay: 2 },
-          { lookupMin: 7, lookupMax: 10, depositDay: 3 },
-          { lookupMin: 11, lookupMax: 13, depositDay: 4 },
-          { lookupMin: 14, lookupMax: 17, depositDay: 5 },
-          { lookupMin: 18, lookupMax: 20, depositDay: 6 },
-          { lookupMin: 21, lookupMax: 24, depositDay: 7 },
-          { lookupMin: 25, lookupMax: 27, depositDay: 8 },
-          { lookupMin: 28, lookupMax: 31, depositDay: 9 },
-          { lookupMin: 32, lookupMax: 34, depositDay: 10 },
-          { lookupMin: 35, lookupMax: 38, depositDay: 11 },
-          { lookupMin: 39, lookupMax: 41, depositDay: 12 },
-          { lookupMin: 42, lookupMax: 45, depositDay: 13 },
-          { lookupMin: 46, lookupMax: 48, depositDay: 14 },
-          { lookupMin: 49, lookupMax: 53, depositDay: 15 },
-          { lookupMin: 54, lookupMax: 57, depositDay: 16 },
-          { lookupMin: 58, lookupMax: 60, depositDay: 17 },
-          { lookupMin: 61, lookupMax: 64, depositDay: 18 },
-          { lookupMin: 65, lookupMax: 67, depositDay: 19 },
-          { lookupMin: 68, lookupMax: 71, depositDay: 20 },
-          { lookupMin: 72, lookupMax: 74, depositDay: 21 },
-          { lookupMin: 75, lookupMax: 78, depositDay: 22 },
-          { lookupMin: 79, lookupMax: 81, depositDay: 23 },
-          { lookupMin: 82, lookupMax: 85, depositDay: 24 },
-          { lookupMin: 86, lookupMax: 88, depositDay: 25 },
-          { lookupMin: 89, lookupMax: 92, depositDay: 26 },
-          { lookupMin: 93, lookupMax: 95, depositDay: 27 },
-          { lookupMin: 96, lookupMax: 99, depositDay: 28 }
-        ]
-      },
-      calendarPolicy: {
-        weekendHandling: "no_shift",
-        holidayHandling: "no_shift"
+  for (const r of rules) {
+    await prisma.scheduleRule.create({
+      data: {
+        state: r.state,
+        program: r.program,
+        ruleType: r.ruleType,
+        identifierKind: r.identifierKind,
+        logicPayload: { bucketMap: r.buckets },
+        calendarPolicy: r.calendarPolicy,
+        sourceUrl: r.source
       }
-    }
-  });
-
-  // ==========================================
-  // GEORGIA SNAP (Full 10-Bucket Sequence)
-  // RESEARCH APPLIED: Batch 1, Topics 13-17
-  // ==========================================
-  await prisma.scheduleRule.create({
-    data: {
-      state: 'GA',
-      program: 'SNAP',
-      ruleType: 'DIGIT_RANGE_BUCKET',
-      identifierKind: 'client_id_last_two',
-      logicPayload: {
-        bucketMap: [
-          { lookupMin: 0, lookupMax: 9, depositDay: 5 },
-          { lookupMin: 10, lookupMax: 19, depositDay: 7 },
-          { lookupMin: 20, lookupMax: 29, depositDay: 9 },
-          { lookupMin: 30, lookupMax: 39, depositDay: 11 },
-          { lookupMin: 40, lookupMax: 49, depositDay: 13 },
-          { lookupMin: 50, lookupMax: 59, depositDay: 15 },
-          { lookupMin: 60, lookupMax: 69, depositDay: 17 },
-          { lookupMin: 70, lookupMax: 79, depositDay: 19 },
-          { lookupMin: 80, lookupMax: 89, depositDay: 21 },
-          { lookupMin: 90, lookupMax: 99, depositDay: 23 }
-        ]
-      },
-      calendarPolicy: {
-        weekendHandling: "no_shift",
-        holidayHandling: "no_shift"
-      }
-    }
-  });
-
-  console.log('✅ Rules seeded successfully!');
+    });
+  }
+  console.log("✅ 13-State Caseworker-Grade Seed Complete.");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });

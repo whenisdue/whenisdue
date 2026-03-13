@@ -1,69 +1,84 @@
-// RESEARCH APPLIED: Topic 42 (Safeguards against timezone/date rollover mistakes)
-// RESEARCH APPLIED: Topic 30 (February Leap-Year handling clamped to actual month)
-
 import { PrismaClient } from '@prisma/client';
-
-// Instantiate a clean, raw connection
 const prisma = new PrismaClient();
 
-async function predictAll() {
-  console.log("Wiping old predictions (Bypassing row locks)...");
-  
-  // Use raw SQL TRUNCATE to instantly wipe the table and clear out any dangling Prisma locks
-  await prisma.$executeRawUnsafe(`TRUNCATE TABLE "PaymentEvent" CASCADE;`);
+const HOLIDAYS_2026 = [
+  "2026-01-01", "2026-01-19", "2026-02-16", "2026-05-25", "2026-06-19",
+  "2026-07-03", "2026-09-07", "2026-10-12", "2026-11-11", "2026-11-26", "2026-12-25"
+];
 
+function isBusinessDay(date: Date) {
+  const day = date.getUTCDay();
+  if (day === 0 || day === 6) return false;
+  const iso = date.toISOString().split('T')[0];
+  return !HOLIDAYS_2026.includes(iso);
+}
+
+function adjustDate(date: Date, policy: string): Date {
+  let result = new Date(date);
+  if (policy === "NO_SHIFT") return result;
+
+  // SHIFT PREVIOUS: Move backward until we hit a business day
+  if (policy === "SHIFT_PREVIOUS") {
+    while (!isBusinessDay(result)) {
+      result.setUTCDate(result.getUTCDate() - 1);
+    }
+  }
+
+  // SHIFT NEXT: Move forward until we hit a business day
+  if (policy === "SHIFT_NEXT") {
+    while (!isBusinessDay(result)) {
+      result.setUTCDate(result.getUTCDate() + 1);
+    }
+  }
+
+  return result;
+}
+
+async function predict() {
+  console.log("Emptying existing PaymentEvents...");
+  await prisma.paymentEvent.deleteMany();
+  
   const rules = await prisma.scheduleRule.findMany();
+  console.log(`Found ${rules.length} states to process.`);
 
   for (const rule of rules) {
-    const payload = rule.logicPayload as any;
+    const { bucketMap } = rule.logicPayload as any;
+    const policy = (rule.calendarPolicy as any).weekend || "NO_SHIFT";
 
-    // Safety check: skip if the state doesn't have a bucket map yet
-    if (!payload || !payload.bucketMap) {
-      console.log(`Skipping ${rule.state}: No bucket map found.`);
-      continue;
-    }
+    console.log(`Processing ${rule.state}...`);
 
-    console.log(`Generating UTC-Safe Caseworker dates for ${rule.state}...`);
-
-    // Loop through every single case-ending sequence (00-99 coverage)
-    for (const bucket of payload.bucketMap) {
+    for (const bucket of bucketMap) {
       for (let month = 0; month < 12; month++) {
+        // Construct the nominal date safely
+        let d = new Date(Date.UTC(2026, month, bucket.day));
         
-        // 1. Compute the nominal date explicitly in UTC Noon to prevent timezone drift
-        const predictedDate = new Date(Date.UTC(2026, month, bucket.depositDay, 12, 0, 0));
-
-        // 2. The February Leap-Year Safeguard (Topic 30) - Must use UTC methods!
-        // If JS rolled February 30th into March 2nd, we clamp it back to the last day of Feb.
-        if (predictedDate.getUTCMonth() !== month) {
-          predictedDate.setUTCDate(0); 
+        // Topic 40 Fix: If day 31 doesn't exist in June, it rolls to July 1st. 
+        // We force it back to the last day of the intended month.
+        if (d.getUTCMonth() !== month) {
+          d = new Date(Date.UTC(2026, month + 1, 0));
         }
 
-        // Format the strings for DB insertion
-        const monthString = `2026-${String(month + 1).padStart(2, '0')}`;
-        const fromStr = String(bucket.lookupMin).padStart(2, '0');
-        const toStr = String(bucket.lookupMax).padStart(2, '0');
+        const finalDate = adjustDate(d, policy);
+        
+        // Handle both numeric and alphabetical labels
+        const label = typeof bucket.min === 'string' 
+          ? `${bucket.min} - ${bucket.max}` 
+          : `${String(bucket.min).padStart(2, '0')} - ${String(bucket.max).padStart(2, '0')}`;
 
-        // 3. Create the exact event
         await prisma.paymentEvent.create({
           data: {
             scheduleRuleId: rule.id,
-            month: monthString,
-            depositDate: predictedDate,
-            identifierMatch: `${fromStr}-${toStr}` 
+            month: `2026-${String(month + 1).padStart(2, '0')}`,
+            depositDate: finalDate,
+            identifierMatch: label
           }
         });
       }
     }
   }
-  console.log("✅ 2026 Prediction Engine Complete (Strict UTC Rollover Destroyed).");
+  console.log("✅ 2026 Forecast Generated Successfully.");
 }
 
-predictAll()
-  .catch((e) => {
-    console.error("Engine failed:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    // Force the connection to close so the script actually exits in the terminal
-    await prisma.$disconnect();
-  });
+predict()
+  .catch(e => console.error(e))
+  .finally(() => prisma.$disconnect());

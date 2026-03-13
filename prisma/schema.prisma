@@ -73,17 +73,17 @@ enum DeliveryStatus {
 // ==========================================
 
 model EventSeries {
-  id                  String         @id @default(cuid())
-  title               String
-  slugBase            String         @unique
-  category            EventCategory
-  description         String?
-  isFeatured          Boolean        @default(false)
-  priorityWeight      Int            @default(5)
-  heroQuestion        String?
-  status              EventStatus    @default(CONFIRMED)
-  sourceName          String?
-  sourceUrl           String?
+  id                    String         @id @default(cuid())
+  title                 String
+  slugBase              String         @unique
+  category              EventCategory
+  description           String?
+  isFeatured            Boolean        @default(false)
+  priorityWeight        Int            @default(5)
+  heroQuestion          String?
+  status                EventStatus    @default(CONFIRMED)
+  sourceName            String?
+  sourceUrl             String?
 
   recurrenceType        RecurrenceType @default(NONE)
   dayOfMonth            Int?
@@ -101,13 +101,13 @@ model EventSeries {
 }
 
 model Event {
-  id       String       @id @default(cuid())
-  seriesId String?
-  series   EventSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  id        String       @id @default(cuid())
+  seriesId  String?
+  series    EventSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
 
-  slug     String        @unique
-  title    String
-  category EventCategory
+  slug      String        @unique
+  title     String
+  category  EventCategory
 
   dueAt      DateTime?
   timeZone   String?
@@ -128,11 +128,11 @@ model Event {
   sourceUrl      String?
   lastVerified   DateTime?
 
-  shortSummary     String?
-  whatToExpect     String?
-  whereToWatch     String?
-  expectedDuration String?
-  targetAudience   String?
+  shortSummary      String?
+  whatToExpect      String?
+  whereToWatch      String?
+  expectedDuration  String?
+  targetAudience    String?
 
   // PHASE 4: Deep Data Enrichment (Hybrid JSON columns)
   scheduleRules Json?    // Stores the complex table data (e.g., EDG ranges -> Dates)
@@ -300,21 +300,21 @@ model Subscriber {
   // Timezone-aware delivery (e.g., "America/New_York")
   timezone      String   @default("America/New_York") 
   
-  createdAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   subscriptions Subscription[]
   tokens        VerificationToken[]
 }
 
 model Subscription {
-  id              String     @id @default(cuid())
-  subscriberId    String
-  subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  id               String      @id @default(cuid())
+  subscriberId     String
+  subscriber       Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
   
   // The Rule (Program-Agnostic)
-  state           String     // e.g., "Texas"
-  program         String     // e.g., "SNAP"
-  ruleGroup       String     // e.g., "SSN ending in 4" (Legacy backward compatibility)
+  state            String     // e.g., "Texas"
+  program          String     // e.g., "SNAP"
+  ruleGroup        String     // e.g., "SSN ending in 4" (Legacy backward compatibility)
   
   // RESEARCH APPLIED: Data Minimization. We only store the exact isolated digits needed.
   identifierValue String?    // e.g., "07" or "A"
@@ -323,10 +323,10 @@ model Subscription {
   isActive        Boolean    @default(true)
   ruleVersion     Int        @default(1)
   
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
-  outbox          NotificationOutbox[]
+  outbox           NotificationOutbox[]
 }
 
 // RESEARCH APPLIED: Canonical RulePack Schema
@@ -342,19 +342,21 @@ model ScheduleRule {
   
   // RESEARCH APPLIED: Explicit holiday/weekend handling rules
   calendarPolicy  Json           
+
+  sourceUrl       String?        // ADDED: For Caseworker-Grade provenance tracking
   
   events          PaymentEvent[] 
 }
 
 // RESEARCH APPLIED: Forecast Instances
 model PaymentEvent {
-  id               String       @id @default(cuid())
-  scheduleRuleId   String
-  month            String       // e.g., '2026-03'
-  depositDate      DateTime     
-  identifierMatch  String       // e.g., '04'
+  id                String       @id @default(cuid())
+  scheduleRuleId    String
+  month             String       // e.g., '2026-03'
+  depositDate       DateTime     
+  identifierMatch   String       // e.g., '04'
 
-  rule             ScheduleRule @relation(fields: [scheduleRuleId], references: [id])
+  rule              ScheduleRule @relation(fields: [scheduleRuleId], references: [id])
 
   // RESEARCH APPLIED: Batch 2, Tab 1 (B-Tree Indexing Strategy)
   // Index 1: The "Page Index" (Optimized for full-month schedule page loads)
@@ -390,6 +392,6 @@ model NotificationOutbox {
   providerMsgId   String?      // Twilio or Resend receipt ID
   lastError       String?
   
-  createdAt       DateTime     @default(now())
-  sentAt          DateTime?
+  createdAt        DateTime     @default(now())
+  sentAt           DateTime?
 }
