@@ -18,8 +18,17 @@ interface PageProps {
 const stateMap: Record<string, { code: string; name: string }> = {
   "alabama": { code: "AL", name: "Alabama" },
   "florida": { code: "FL", name: "Florida" },
-  "georgia": { code: "GA", name: "Georgia" }, // <--- GEORGIA ADDED HERE
+  "georgia": { code: "GA", name: "Georgia" },
+  "california": { code: "CA", name: "California" },
   "texas": { code: "TX", name: "Texas" },
+  "new-york": { code: "NY", name: "New York" },
+  "tennessee": { code: "TN", name: "Tennessee" },
+  "ohio": { code: "OH", name: "Ohio" },
+  "north-carolina": { code: "NC", name: "North Carolina" },
+  "arizona": { code: "AZ", name: "Arizona" },
+  "virginia": { code: "VA", name: "Virginia" },
+  "michigan": { code: "MI", name: "Michigan" },
+  "indiana": { code: "IN", name: "Indiana" },
 };
 
 // 1. DYNAMIC METADATA GENERATOR

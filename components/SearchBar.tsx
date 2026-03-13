@@ -14,19 +14,23 @@ type SearchEvent = {
 function buildLink(category: string, slug: string): string {
   const cat = category.toLowerCase();
   
-  // If it's a state schedule, map it to the clean /snap/[state] structure
+  // Intercept any state SNAP schedules and route to the new clean structure
   if (cat === "state" && slug.includes("snap-deposit-schedule")) {
     const parts = slug.split('-');
-    // Extract the state name (e.g. from snap-deposit-schedule-georgia-2026 -> georgia)
+    // Extract state name (e.g., from snap-deposit-schedule-michigan-2026 -> michigan)
     const stateName = parts[parts.length - 2];
     
-    // We strictly map to the three states we have seeded
-    if (["alabama", "florida", "georgia"].includes(stateName)) {
+    const activeStates = [
+      "alabama", "florida", "georgia", "california", "texas", 
+      "new-york", "tennessee", "ohio", "north-carolina", 
+      "arizona", "virginia", "michigan", "indiana"
+    ];
+
+    if (activeStates.includes(stateName)) {
       return `/snap/${stateName}`;
     }
   }
 
-  // Fallback for federal or unmapped events
   return `/${cat}/${slug}`;
 }
 
