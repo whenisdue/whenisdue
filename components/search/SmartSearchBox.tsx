@@ -24,6 +24,14 @@ type SearchResponse = {
   }>;
 };
 
+// Map to translate state codes back to URL slugs
+const stateSlugMap: Record<string, string> = {
+  "AL": "alabama",
+  "FL": "florida",
+  "GA": "georgia",
+  "TX": "texas"
+};
+
 export function SmartSearchBox() {
   const [inputValue, setInputValue] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -42,7 +50,6 @@ export function SmartSearchBox() {
 
   // 2. The Abortable Fetch Layer
   useEffect(() => {
-    // If input is too short, explicitly clear results and don't hit the network
     if (debouncedQuery.trim().length < 2) {
       setResults(null);
       setIsLoading(false);
@@ -51,7 +58,7 @@ export function SmartSearchBox() {
 
     setIsLoading(true);
     const controller = new AbortController();
-    let isCurrentRequest = true; // Stale-response sequence guard
+    let isCurrentRequest = true;
 
     async function fetchSearch() {
       try {
@@ -60,13 +67,11 @@ export function SmartSearchBox() {
         });
         const data = await res.json();
 
-        // Only commit the result if this is still the active request
         if (isCurrentRequest) {
           setResults(data);
           setIsLoading(false);
         }
       } catch (error: any) {
-        // Ignore AbortErrors (caused by the user typing fast and canceling this fetch)
         if (error.name !== "AbortError" && isCurrentRequest) {
           setIsLoading(false);
         }
@@ -75,14 +80,12 @@ export function SmartSearchBox() {
 
     fetchSearch();
 
-    // 3. The Cleanup Function: Cancel in-flight requests if the user types again
     return () => {
       isCurrentRequest = false;
       controller.abort();
     };
   }, [debouncedQuery]);
 
-  // Close dropdown if user clicks outside (basic UX)
   const wrapperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -101,7 +104,7 @@ export function SmartSearchBox() {
       <div className="relative">
         <input
           type="text"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm text-gray-900"
           placeholder="E.g., Texas SNAP 04..."
           value={inputValue}
           onChange={(e) => {
@@ -112,7 +115,7 @@ export function SmartSearchBox() {
         />
         <svg className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         
-        {/* Subtle Loading Indicator (preserves previous results while fetching) */}
+        {/* Subtle Loading Indicator */}
         {isLoading && (
           <div className="absolute right-3 top-3.5">
             <div className="h-5 w-5 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
@@ -149,6 +152,17 @@ export function SmartSearchBox() {
                 <div className="text-2xl font-black text-gray-900">
                   {results.match.depositDate}
                 </div>
+                
+                {/* NEW: Clickable outbound link to the full state page */}
+                {results.query?.stateCode && results.query?.programCode && stateSlugMap[results.query.stateCode] && (
+                  <a 
+                    href={`/${results.query.programCode.toLowerCase()}/${stateSlugMap[results.query.stateCode]}`}
+                    className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    View full {stateSlugMap[results.query.stateCode].charAt(0).toUpperCase() + stateSlugMap[results.query.stateCode].slice(1)} schedule
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                  </a>
+                )}
               </div>
 
               {/* SECONDARY RESULT: Adjacent Context Window */}

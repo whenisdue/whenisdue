@@ -10,6 +10,26 @@ type SearchEvent = {
   category: string;
 };
 
+// URL INTERCEPTOR: Translates old slugs to the new canonical routes
+function buildLink(category: string, slug: string): string {
+  const cat = category.toLowerCase();
+  
+  // If it's a state schedule, map it to the clean /snap/[state] structure
+  if (cat === "state" && slug.includes("snap-deposit-schedule")) {
+    const parts = slug.split('-');
+    // Extract the state name (e.g. from snap-deposit-schedule-georgia-2026 -> georgia)
+    const stateName = parts[parts.length - 2];
+    
+    // We strictly map to the three states we have seeded
+    if (["alabama", "florida", "georgia"].includes(stateName)) {
+      return `/snap/${stateName}`;
+    }
+  }
+
+  // Fallback for federal or unmapped events
+  return `/${cat}/${slug}`;
+}
+
 export default function SearchBar({ events }: { events: SearchEvent[] }) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -101,7 +121,8 @@ export default function SearchBar({ events }: { events: SearchEvent[] }) {
               {filteredEvents.map((event) => (
                 <Link
                   key={event.slug}
-                  href={`/${event.category.toLowerCase()}/${event.slug}`}
+                  // We use our new buildLink interceptor here
+                  href={buildLink(event.category, event.slug)}
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-between p-4 hover:bg-blue-50 transition-colors group"
                 >
