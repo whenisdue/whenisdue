@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "db:seed": "npx tsx prisma/seed.ts && npx tsx scripts/predict-2026.ts",
+    "deploy": "npx vercel --prod --force",
     "validate": "tsx ../scripts/validate.ts",
     "ci:eligibility-registry": "npx ts-node scripts/ci/validateEligibilitySignalRegistry.ts",
     "build:checkpoint": "npx ts-node ../scripts/CheckpointBuilder.ts",
