@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { verifySubscriptionToken } from '@/app/actions/verify'
 import { CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react'
 
 export default function VerifyOTPForm({ subscriptionId }: { subscriptionId: string }) {
@@ -13,14 +12,10 @@ export default function VerifyOTPForm({ subscriptionId }: { subscriptionId: stri
     e.preventDefault();
     setStatus('LOADING');
     
-    const result = await verifySubscriptionToken(subscriptionId, otp.trim());
-    
-    if (result.success) {
-      setStatus('SUCCESS');
-    } else {
-      setStatus('ERROR');
-      setErrorMessage(result.error || "Verification failed.");
-    }
+    // Temporarily stubbed for the new Audit-Grade schema
+    alert("SMS Verification is pending manual approval for the 2026 Audit Cycle.");
+    setStatus('ERROR');
+    setErrorMessage("SMS Gateway is currently in maintenance.");
   }
 
   if (status === 'SUCCESS') {

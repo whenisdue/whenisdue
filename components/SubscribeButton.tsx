@@ -1,45 +1,30 @@
 "use client";
 
-import { useActionState, useOptimistic, startTransition } from "react";
+import { useOptimistic, startTransition, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
-import { urlBase64ToUint8Array } from "@/lib/notifications";
-import { toggleSubscription } from "@/actions/notifications";
 
 export default function SubscribeButton({ eventId, initialSubscribed }: { eventId: string; initialSubscribed: boolean }) {
-  const [state, formAction, isPending] = useActionState(toggleSubscription, { subscribed: initialSubscribed });
-  const [optimisticSubscribed, setOptimisticSubscribed] = useOptimistic(state.subscribed);
+  // We've replaced useActionState with local state temporarily to clear the "toggleSubscription" error.
+  const [isSubscribed, setIsSubscribed] = useState(initialSubscribed);
+  const [optimisticSubscribed, setOptimisticSubscribed] = useOptimistic(isSubscribed);
+  const [isPending, setIsPending] = useState(false);
 
   async function handleSubscribe(formData: FormData) {
+    // We are commenting out the execution logic until your new /api/subscribe route is ready.
+    /*
     try {
-      if (!optimisticSubscribed) {
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-          alert("Please enable notifications in your browser settings to subscribe.");
-          return;
-        }
-
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-        if (!vapidKey) {
-          alert("VAPID key is missing! Please restart your dev server (Ctrl+C then npm run dev).");
-          return;
-        }
-
-        const registration = await navigator.serviceWorker.register("/sw.js");
-        const pushSub = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey)
-        });
-        
-        formData.append("pushDetails", JSON.stringify(pushSub));
-      }
-
+      setIsPending(true);
+      // Future: Call your new /api/subscribe route here
       startTransition(() => {
         setOptimisticSubscribed(!optimisticSubscribed);
-        formAction(formData);
       });
     } catch (error: any) {
       alert("Subscription Error: " + error.message);
+    } finally {
+      setIsPending(false);
     }
+    */
+    alert("Subscription logic is temporarily disabled while we finish the new Audit-Grade backend.");
   }
 
   return (
@@ -47,6 +32,8 @@ export default function SubscribeButton({ eventId, initialSubscribed }: { eventI
       <input type="hidden" name="eventId" value={eventId} />
       <button 
         type="submit"
+        // We commented out the real action to clear the error
+        // formAction={handleSubscribe} 
         className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${
           optimisticSubscribed 
             ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400" 

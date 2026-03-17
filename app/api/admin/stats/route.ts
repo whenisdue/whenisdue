@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     // Count only users who haven't revoked permission
-    const count = await prisma.pushSubscription.count({
+    const count = await prisma.subscription.count({
       where: { status: 'ACTIVE' }
     });
 

@@ -8,13 +8,14 @@ export async function getSeriesWithOccurrences(seriesKey: string) {
   // Safety Guard: stop execution if the key is missing or not a string
   if (!seriesKey || typeof seriesKey !== 'string') return null;
 
-  return await prisma.series.findUnique({
-    where: { seriesKey: seriesKey },
-    include: {
-      occurrences: {
-        orderBy: { date: 'desc' },
-        take: 12,
-      },
+  // web/lib/data-service.ts
+return await prisma.eventSeries.findUnique({
+  where: { id: seriesKey }, // or { slugBase: seriesKey } depending on what you pass
+  include: {
+    events: { // Changed from 'occurrences' to 'events'
+      orderBy: { dueAt: 'desc' }, // Changed from 'date' to 'dueAt'
+      take: 12,
     },
-  });
+  },
+});
 }

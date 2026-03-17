@@ -68,18 +68,6 @@ enum DeliveryStatus {
   INVALID_ENDPOINT
 }
 
-enum Channel {
-  EMAIL
-  SMS
-}
-
-enum SubStatus {
-  PENDING_VERIFICATION
-  ACTIVE
-  PAUSED
-  OUTDATED
-}
-
 enum RuleStatus {
   DRAFT
   REVIEWED
@@ -88,7 +76,6 @@ enum RuleStatus {
   SUPERSEDED
 }
 
-// --- NEW PHASE 5.1 ENUMS ---
 enum ShiftCause {
   WEEKEND
   HOLIDAY
@@ -103,8 +90,41 @@ enum AppliedPolicy {
   NO_SHIFT
 }
 
+enum OutboxStatus { 
+  PENDING
+  CLAIMED
+  RETRY_SCHEDULED
+  SENT
+  DEAD_LETTER 
+}
+
+enum AttemptOutcome { 
+  SUCCESS
+  TRANSIENT_FAILURE
+  PERMANENT_FAILURE
+  PROVIDER_REJECTION 
+}
+
+enum IdentifierMatchType { 
+  CASE_NUMBER_LAST_DIGIT
+  CASE_NUMBER_REMAINDER
+  BIRTH_DATE_DAY
+  LAST_NAME_INITIAL 
+}
+
+enum DecisionReason { 
+  DATE_SHIFT_DETECTED
+  RULE_CHANGE_NOTIFICATION
+  INITIAL_VERIFICATION_SUCCESS 
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+}
+
 // ==========================================
-// THE LEGACY / GENERIC DATA ENGINE
+// CORE DATA ENGINE
 // ==========================================
 
 model EventSeries {
@@ -119,7 +139,6 @@ model EventSeries {
   status                EventStatus    @default(CONFIRMED)
   sourceName            String?
   sourceUrl             String?
-
   recurrenceType        RecurrenceType @default(NONE)
   dayOfMonth            Int?
   nthWeek               Int?
@@ -129,55 +148,45 @@ model EventSeries {
   autoAdjustBusinessDay Boolean        @default(false)
   generateCount         Int?
   isActive              Boolean        @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  events    Event[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  events                Event[]
 }
 
 model Event {
-  id         String       @id @default(cuid())
-  seriesId   String?
-  series     EventSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
-
-  slug       String       @unique
-  title      String
-  category   EventCategory
-
-  dueAt      DateTime?
-  timeZone   String?
-  dateStatus EventDateStatus @default(EXACT)
-
-  displayYear    Int?
-  displayMonth   Int?
-  displayQuarter Int?
-  dateLabel      String?
-
-  trending    Boolean @default(false)
-  isGenerated Boolean @default(false)
-  isDetached  Boolean @default(false)
-
-  seoTitle       String?
-  seoDescription String?
-  keywords       String?
-  sourceUrl      String?
-  lastVerified   DateTime?
-
-  shortSummary      String?
-  whatToExpect      String?
-  whereToWatch      String?
-  expectedDuration  String?
-  targetAudience    String?
-
-  scheduleRules Json?    
-  faqData       Json?    
-
-  isArchived  Boolean          @default(false)
-  clickStat   EventClickStat?
-  titleSearch String?          @map("titleSearch") 
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String          @id @default(cuid())
+  seriesId         String?
+  series           EventSeries?    @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  slug             String          @unique
+  title            String
+  category         EventCategory
+  dueAt            DateTime?
+  timeZone         String?
+  dateStatus       EventDateStatus @default(EXACT)
+  displayYear      Int?
+  displayMonth     Int?
+  displayQuarter   Int?
+  dateLabel        String?
+  trending         Boolean         @default(false)
+  isGenerated      Boolean         @default(false)
+  isDetached       Boolean         @default(false)
+  seoTitle         String?
+  seoDescription   String?
+  keywords         String?
+  sourceUrl        String?
+  lastVerified     DateTime?
+  shortSummary     String?
+  whatToExpect     String?
+  whereToWatch     String?
+  expectedDuration String?
+  targetAudience   String?
+  scheduleRules    Json?
+  faqData          Json?
+  isArchived       Boolean         @default(false)
+  clickStat        EventClickStat?
+  titleSearch      String?         @map("titleSearch")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@index([dateStatus, dueAt])
   @@index([dueAt])
@@ -201,85 +210,8 @@ model EventClickStat {
 }
 
 // ==========================================
-// REQUEST & MODERATION ENGINE
+// INFRASTRUCTURE & ANALYTICS
 // ==========================================
-
-model EventSubmission {
-  id              String           @id @default(cuid())
-  status          SubmissionStatus @default(PENDING)
-  submittedTitle  String
-  submittedDate   String?
-  submittedSource String?
-  submitterIpHash String?
-  userAgent       String?
-  honeypot        String?
-  reviewerNotes   String?
-  duplicateOfId   String?
-  titleSearch     String?          @map("titleSearch") 
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([status, createdAt])
-}
-
-// ==========================================
-// NOTIFICATION & ANALYTICS ENGINE
-// ==========================================
-
-model NotificationDelivery {
-  id                   String              @id @default(cuid())
-  eventId              String
-  channel              NotificationChannel
-  recipientFingerprint String
-  status               DeliveryStatus      @default(PENDING)
-  attemptCount         Int                 @default(0)
-  dedupeKey            String              @unique
-  errorLog             String?
-  providerMessageId    String?
-  scheduledFor         DateTime
-  sentAt               DateTime?
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-
-  @@index([status, scheduledFor])
-  @@index([eventId])
-}
-
-model PushSubscription {
-  id           String   @id @default(cuid())
-  userId       String?
-  endpoint     String   @unique
-  p256dh       String
-  auth         String
-  isValid      Boolean  @default(true)
-  failureCount Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([userId])
-}
-
-model UserTopicSubscription {
-  id         String  @id @default(cuid())
-  userId     String
-  topicKey   String
-  wantsEmail Boolean @default(false)
-  wantsPush  Boolean @default(false)
-
-  @@unique([userId, topicKey])
-}
-
-model IpRateLimit {
-  ipHash       String
-  routeKey     String
-  windowStart  DateTime
-  requestCount Int      @default(0)
-  lastSeenAt   DateTime @default(now())
-
-  @@id([ipHash, routeKey, windowStart])
-  @@index([lastSeenAt])
-}
 
 model PageStat {
   id              String   @id @default(cuid())
@@ -302,145 +234,214 @@ model PageViewDedup {
   @@index([routePath, bucketDate])
 }
 
+model IpRateLimit {
+  ipHash       String
+  routeKey     String
+  windowStart  DateTime
+  requestCount Int      @default(0)
+  lastSeenAt   DateTime @default(now())
+
+  @@id([ipHash, routeKey, windowStart])
+  @@index([lastSeenAt])
+}
+
+model EventSubmission {
+  id              String           @id @default(cuid())
+  status          SubmissionStatus @default(PENDING)
+  submittedTitle  String
+  submittedDate   String?
+  submittedSource String?
+  submitterIpHash String?
+  userAgent       String?
+  honeypot        String?
+  reviewerNotes   String?
+  duplicateOfId   String?
+  titleSearch     String?          @map("titleSearch")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([status, createdAt])
+}
+
 // ==========================================
-// SUBSCRIPTION ENGINE
+// PHASE 9: HARDENED SUBSCRIPTION TIER
 // ==========================================
 
 model Subscriber {
-  id           String   @id @default(cuid())
-  channel      Channel
-  contactValue String   @unique
-  contactHash  String   @unique 
-  timezone     String   @default("America/New_York") 
-  createdAt    DateTime @default(now())
-
-  subscriptions Subscription[]
-  tokens        VerificationToken[]
+  id               String         @id @default(cuid())
+  email            String         @unique
+  normalizedEmail  String         @unique
+  verifiedEmail    String?
+  emailVerifiedAt  DateTime?
+  unsubscribedAt   DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  subscriptions    Subscription[]
 }
 
 model Subscription {
-  id               String      @id @default(cuid())
-  subscriberId     String
-  subscriber       Subscriber  @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
-  state            String      
-  program          String      
-  ruleGroup        String      
-  identifierValue  String?    
-  status           SubStatus   @default(PENDING_VERIFICATION)
-  isActive         Boolean     @default(true)
-  ruleVersion      Int         @default(1)
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id              String             @id @default(cuid())
+  subscriberId    String
+  stateCode       String   
+  programName     String   
+  identifierValue String   
+  status          SubscriptionStatus @default(ACTIVE)
+  nextDepositDate DateTime
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
-  outbox           NotificationOutbox[]
+  subscriber      Subscriber         @relation(fields: [subscriberId], references: [id])
+  decisions       NotificationDecisionAudit[]
+
+  @@unique([subscriberId, stateCode, programName, identifierValue], name: "subscription_identity_key")
+  @@index([subscriberId])
 }
 
-model VerificationToken {
-  id           String     @id @default(cuid())
-  subscriberId String
-  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
-  token        String     @unique 
-  expiresAt    DateTime
-  createdAt    DateTime   @default(now())
-}
+model RequestLog {
+  internalId     String   @id @default(cuid())
+  idempotencyKey String   
+  subscriberId   String
+  action         String   
+  payloadHash    String   
+  responseStatus Int
+  responseBody   Json     
+  createdAt      DateTime @default(now())
 
-model NotificationOutbox {
-  id               String       @id @default(cuid())
-  subscriptionId   String
-  subscription     Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  dedupeKey        String       @unique 
-  status           String       @default("PENDING") 
-  sendAt           DateTime     
-  providerMsgId    String?      
-  lastError        String?
-  createdAt        DateTime     @default(now())
-  sentAt           DateTime?
+  @@unique([subscriberId, action, idempotencyKey], name: "request_idempotency_key")
 }
 
 // ==========================================
-// BITEMPORAL LEDGER MODELS (M2C1 Engine)
+// BITEMPORAL LEDGER & AUDIT ENGINE
 // ==========================================
 
 model RuleIdentity {
-  id           String            @id @default(cuid())
-  stateCode    String
-  programCode  String
-  ruleFamily   String            @default("FULL_SCHEDULE")
-  versions     ScheduleRuleSet[]
-  
+  id          String            @id @default(cuid())
+  stateCode   String
+  programCode String
+  ruleFamily  String            @default("FULL_SCHEDULE")
+  versions    ScheduleRuleSet[]
+
   @@unique([stateCode, programCode, ruleFamily])
 }
 
 model ScheduleRuleSet {
-  id                String        @id @default(cuid())
-  identityId        String
-  identity          RuleIdentity  @relation(fields: [identityId], references: [id])
+  id                 String           @id @default(cuid())
+  identityId         String
+  identity           RuleIdentity     @relation(fields: [identityId], references: [id])
+  validFrom          DateTime
+  validTo            DateTime?
+  createdAt          DateTime         @default(now())
   
-  validFrom         DateTime      
-  validTo           DateTime?     
+  // REPAIR: Restoring Audit Fields
+  recordedFrom       DateTime         @default(now())
+  recordedTo         DateTime?
+  status             RuleStatus       @default(DRAFT)
+  versionNumber      Int              @default(1)
+  changeReason       String?
+  verifiedAt         DateTime?
+  verifiedBy         String?
   
-  createdAt         DateTime      @default(now())
-  recordedFrom      DateTime      @default(now())
-  recordedTo        DateTime?     // Null = ACTIVE
+  identifierKind     String
+  issuanceWindow     String
+  windowBasis        String
+  holidayPolicy      String
+  masterSequenceJson Json
+  sourceAuthority    String
+  sourceUrl          String
   
-  status            RuleStatus    @default(DRAFT)
-  versionNumber     Int           @default(1)
-  changeReason      String?       
-  supersedesId      String?       @unique
-  supersedes        ScheduleRuleSet? @relation("Lineage", fields: [supersedesId], references: [id])
-  predecessorOf     ScheduleRuleSet? @relation("Lineage")
-  
-  identifierKind     String   
-  issuanceWindow     String   
-  windowBasis        String   
-  holidayPolicy      String   
-  masterSequenceJson Json     
-
-  sourceAuthority   String
-  sourceUrl         String
-  verifiedAt        DateTime?
-  verifiedBy        String?
-  
-  paymentEvents     PaymentEvent[]
+  paymentEvents      PaymentEvent[]
+  notificationAudits NotificationDecisionAudit[]
 
   @@index([identityId, recordedFrom, recordedTo])
-  @@index([validFrom, validTo])
 }
 
 model CompilerRun {
-  id              String         @id @default(cuid())
-  createdAt       DateTime       @default(now())
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
   compilerVersion String
-  initiatedBy     String?        
+  initiatedBy     String?
   note            String?
   paymentEvents   PaymentEvent[]
+  notificationAudits NotificationDecisionAudit[]
 }
 
 model PaymentEvent {
-  id              String           @id @default(cuid())
-  createdAt       DateTime         @default(now())
+  id                 String           @id @default(cuid())
+  createdAt          DateTime         @default(now())
+  batchId            String
+  batch              CompilerRun      @relation(fields: [batchId], references: [id])
+  ruleSetId          String
+  ruleSet            ScheduleRuleSet  @relation(fields: [ruleSetId], references: [id])
   
-  batchId         String
-  batch           CompilerRun      @relation(fields: [batchId], references: [id])
-  ruleSetId       String
-  ruleSet         ScheduleRuleSet  @relation(fields: [ruleSetId], references: [id])
+  // REPAIR: Restoring Audit Fields
+  recordedFrom       DateTime         @default(now())
+  recordedTo         DateTime?
   
-  recordedFrom    DateTime         @default(now())
-  recordedTo      DateTime?        
-  
-  stateCode       String
-  programCode     String
-  benefitYear     Int
-  benefitMonth    Int
-  nominalDepositDay Int            
-  depositDate     DateTime
-  identifierKind  String
-  identifierMatch String
-  isShifted       Boolean          @default(false)
+  stateCode          String
+  programCode        String
+  benefitYear        Int
+  benefitMonth       Int
+  nominalDepositDay  Int
+  depositDate        DateTime
+  identifierKind     String
+  identifierMatch    String
+  isShifted          Boolean          @default(false)
+  shiftCause         ShiftCause       @default(NONE)
+  appliedPolicy      AppliedPolicy    @default(NO_SHIFT)
 
-  // AUDIT FIELDS
-  shiftCause      ShiftCause       @default(NONE)
-  appliedPolicy   AppliedPolicy    @default(NO_SHIFT)
+  auditsAsOld        NotificationDecisionAudit[] @relation("OldEvent")
+  auditsAsNew        NotificationDecisionAudit[] @relation("NewEvent")
 
-  @@index([stateCode, programCode, benefitYear, benefitMonth, identifierKind, identifierMatch, recordedFrom, recordedTo])
+  @@index([stateCode, programCode, benefitYear, benefitMonth, recordedFrom, recordedTo])
+}
+
+model NotificationDecisionAudit {
+  id               String             @id @default(cuid())
+  subscriptionId   String
+  compilerRunId    String
+  compilerRun      CompilerRun        @relation(fields: [compilerRunId], references: [id], onDelete: Restrict)
+  ruleSetVersionId String
+  ruleSet          ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id], onDelete: Restrict)
+  oldEventId       String?
+  oldEvent         PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id], onDelete: Restrict)
+  newEventId       String?
+  newEvent         PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id], onDelete: Restrict)
+  reason           DecisionReason
+  createdAt        DateTime           @default(now())
+
+  subscription     Subscription       @relation(fields: [subscriptionId], references: [id])
+  outboxItem       NotificationOutbox?
+
+  @@unique([subscriptionId, oldEventId, newEventId], name: "decision_idempotency_idx")
+}
+
+model NotificationOutbox {
+  id                String       @id @default(cuid())
+  decisionAuditId   String       @unique
+  status            OutboxStatus @default(PENDING)
+  processAt         DateTime     @default(now())
+  idempotencyKey    String       @unique
+  frozenPayload     Json
+  providerMessageId String?      @unique
+  firstAttemptAt    DateTime?
+  claimedAt         DateTime?
+  claimedByRunId    String?
+  expiresAt         DateTime?
+  retryCount        Int          @default(0)
+  lastError         String?
+
+  decision          NotificationDecisionAudit @relation(fields: [decisionAuditId], references: [id])
+  attempts          NotificationAttemptLog[]
+
+  @@index([status, processAt])
+}
+
+model NotificationAttemptLog {
+  id                String             @id @default(cuid())
+  outboxId          String
+  attemptedAt       DateTime           @default(now())
+  outcome           AttemptOutcome
+  errorMessage      String?
+  providerMessageId String?
+  outbox            NotificationOutbox @relation(fields: [outboxId], references: [id])
 }
