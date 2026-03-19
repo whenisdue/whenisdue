@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/dispatch?secret=TheCyia18QuickSophia01BrownMaeve08FoxBrie26",
-      "schedule": "*/15 * * * *"
+      "schedule": "5 8 * * *"
     }
   ]
-} 
+}
