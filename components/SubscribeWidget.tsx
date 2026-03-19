@@ -5,11 +5,11 @@ import { Bell, Mail, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react'
 
 interface SubscribeWidgetProps {
   stateName: string;
-  programName: string;
+  programCode: string;
   ruleGroup: string;
 }
 
-export default function SubscribeWidget({ stateName, programName, ruleGroup }: SubscribeWidgetProps) {
+export default function SubscribeWidget({ stateName, programCode, ruleGroup }: SubscribeWidgetProps) {
   const [contactValue, setContactValue] = useState('');
   const [hasConsent, setHasConsent] = useState(false);
   const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS'>('IDLE');
@@ -27,7 +27,7 @@ export default function SubscribeWidget({ stateName, programName, ruleGroup }: S
         body: JSON.stringify({
           email: contactValue,
           stateCode: 'TX', // Hardcoded as an example, adjust if stateName is the 2-letter code
-          programCode: programName,
+          programCode: programCode,
           matchType: 'LAST_NAME_INITIAL', 
           matchValue: 'A' // Adjust based on your actual UI inputs later
         })
@@ -78,7 +78,7 @@ export default function SubscribeWidget({ stateName, programName, ruleGroup }: S
         <div className="mb-6 inline-flex flex-wrap items-center gap-2 bg-blue-50 text-blue-800 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded border border-blue-100">
           <span>Targeting:</span>
           <span className="text-blue-600">•</span>
-          <span>{stateName} {programName}</span>
+          <span>{stateName} {programCode}</span>
           <span className="text-blue-600">•</span>
           <span className="truncate max-w-[200px] sm:max-w-none">{ruleGroup}</span>
         </div>

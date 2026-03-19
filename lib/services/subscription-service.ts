@@ -40,13 +40,13 @@ export class SubscriptionService {
   constructor(private readonly logger: IntegrityLogger) {}
 
   /**
-   * REPAIR: Updated to use 'programName' and 'identifierValue' 
+   * REPAIR: Updated to use 'programCode' and 'identifierValue' 
    * to match the Phase 9 schema.
    */
   async subscribe(input: {
     email: string;
     stateCode: string;
-    programName: string;
+    programCode: string;
     matchType: IdentifierMatchType;
     rawInput: string;
   }): Promise<SubscribeOutcome> {
@@ -61,8 +61,8 @@ export class SubscriptionService {
       return { type: 'INVALID_INPUT', message: 'Valid 2-letter state code required.' };
     }
 
-    const programName = input.programName.toUpperCase().trim();
-    if (!(CANONICAL_PROGRAM_LIST as readonly string[]).includes(programName)) {
+    const programCode = input.programCode.toUpperCase().trim();
+    if (!(CANONICAL_PROGRAM_LIST as readonly string[]).includes(programCode)) {
       return { type: 'INVALID_INPUT', message: `Invalid program. Supported: ${CANONICAL_PROGRAM_LIST.join(', ')}` };
     }
 
@@ -85,7 +85,7 @@ export class SubscriptionService {
             subscription_identity_key: {
               subscriberId: subscriber.id,
               stateCode,
-              programName,
+              programCode,
               identifierValue: matchCanonical,
             }
           },
@@ -106,7 +106,7 @@ export class SubscriptionService {
           data: {
             subscriberId: subscriber.id,
             stateCode,
-            programName,
+            programCode,
             identifierValue: matchCanonical,
             nextDepositDate,
             status: 'ACTIVE'
@@ -118,7 +118,7 @@ export class SubscriptionService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
         this.logger.logAnomaly('CONCURRENCY_RACE_P2002', { 
-            normalizedEmail, stateCode, programName, identifierValue: matchCanonical 
+            normalizedEmail, stateCode, programCode, identifierValue: matchCanonical 
         });
 
         const winner = await prisma.subscription.findUnique({
@@ -126,7 +126,7 @@ export class SubscriptionService {
             subscription_identity_key: {
               subscriberId: (await prisma.subscriber.findUnique({ where: { normalizedEmail } }))?.id || '',
               stateCode,
-              programName,
+              programCode,
               identifierValue: matchCanonical
             }
           }

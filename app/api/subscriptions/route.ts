@@ -18,7 +18,7 @@ const SUPPORTED_RULES: Record<string, Record<string, (digit: string) => number>>
 
 const CreateSubscriptionSchema = z.object({
   stateCode: z.enum(['CA', 'NY']),
-  programName: z.enum(['SNAP', 'TANF']),
+  programCode: z.enum(['SNAP', 'TANF']),
   identifier: z.string().regex(/^\d$/),
   idempotencyKey: z.string().uuid(), 
 }).strict();
@@ -43,17 +43,17 @@ export async function POST(req: Request) {
       }, { status: 422 });
     }
 
-    const { stateCode, programName, identifier, idempotencyKey } = result.data;
+    const { stateCode, programCode, identifier, idempotencyKey } = result.data;
     const subscriberId = userId;
     const action = "CREATE_SUBSCRIPTION";
-    const payloadHash = createHash('sha256').update(JSON.stringify({stateCode, programName, identifier})).digest('hex');
+    const payloadHash = createHash('sha256').update(JSON.stringify({stateCode, programCode, identifier})).digest('hex');
 
     // SEAL: TYPE-SAFE RESPONSE CONSTRUCTOR
     const buildResponse = (sub: Subscription, type: 'CREATED' | 'EXISTING', idKey: string) => ({
       subscription: {
         id: sub.id,
         stateCode: sub.stateCode,
-        programName: sub.programName,
+        programCode: sub.programCode,
         identifierValue: sub.identifierValue,
         identifierLabel: `Last Digit: ${sub.identifierValue}`,
         nextDepositDate: sub.nextDepositDate.toISOString().split('T')[0],
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
         // B. LOGICAL IDENTITY LOOKUP
         const existingSub = await tx.subscription.findUnique({
-          where: { subscription_identity_key: { subscriberId, stateCode, programName, identifierValue: identifier } }
+          where: { subscription_identity_key: { subscriberId, stateCode, programCode, identifierValue: identifier } }
         });
 
         if (existingSub) {
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
         }
 
         // C. AUTHORITATIVE DERIVATION
-        const rule = SUPPORTED_RULES[stateCode]?.[programName];
+        const rule = SUPPORTED_RULES[stateCode]?.[programCode];
         if (!rule) throw new Error("UNSUPPORTED_RULE_COMBINATION");
         
         const day = rule(identifier);
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
         const nextDepositDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, day));
 
         const sub = await tx.subscription.create({
-          data: { subscriberId, stateCode, programName, identifierValue: identifier, nextDepositDate }
+          data: { subscriberId, stateCode, programCode, identifierValue: identifier, nextDepositDate }
         });
 
         const res = buildResponse(sub, 'CREATED', idempotencyKey);
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
         // RACE ON LOGICAL IDENTITY
         if (target.includes('identifierValue')) {
           const winnerSub = await prisma.subscription.findUnique({
-            where: { subscription_identity_key: { subscriberId, stateCode, programName, identifierValue: identifier } }
+            where: { subscription_identity_key: { subscriberId, stateCode, programCode, identifierValue: identifier } }
           });
           if (winnerSub) {
             const res = buildResponse(winnerSub, 'EXISTING', idempotencyKey);

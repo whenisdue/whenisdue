@@ -5,17 +5,17 @@ import { track } from '@vercel/analytics'
 
 interface AnalyticsTrackerProps {
   stateName: string;
-  programName: string;
+  programCode: string;
 }
 
-export default function AnalyticsTracker({ stateName, programName }: AnalyticsTrackerProps) {
+export default function AnalyticsTracker({ stateName, programCode }: AnalyticsTrackerProps) {
   const tableTracked = useRef(false)
 
   useEffect(() => {
     // 1. Log a specific, high-intent page view
     track('program_page_view', { 
       state: stateName, 
-      program: programName 
+      program: programCode 
     })
 
     // 2. The Forensic UX: Detect when the schedule table actually becomes visible
@@ -28,7 +28,7 @@ export default function AnalyticsTracker({ stateName, programName }: AnalyticsTr
             
             track('schedule_table_visible', {
               state: stateName,
-              program: programName
+              program: programCode
             });
             
             console.log(`[Analytics] Table visible event fired for ${stateName}`);
@@ -48,7 +48,7 @@ export default function AnalyticsTracker({ stateName, programName }: AnalyticsTr
       if (tableElement) observer.unobserve(tableElement)
       observer.disconnect()
     }
-  }, [stateName, programName])
+  }, [stateName, programCode])
 
   // This component renders nothing visually. It is a silent observer.
   return null;

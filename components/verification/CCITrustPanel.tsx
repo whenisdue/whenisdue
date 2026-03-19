@@ -2,11 +2,11 @@ import { ShieldCheck, Info } from "lucide-react";
 
 interface CCITrustProps {
   score: number; // 0.0 to 1.0
-  programName: string;
+  programCode: string;
   sourceUrl?: string;
 }
 
-export default function CCITrustPanel({ score, programName, sourceUrl }: CCITrustProps) {
+export default function CCITrustPanel({ score, programCode, sourceUrl }: CCITrustProps) {
   const percentage = Math.round(score * 100);
   
   // Dynamic color grading based on the score
@@ -27,7 +27,7 @@ export default function CCITrustPanel({ score, programName, sourceUrl }: CCITrus
       </div>
       
       <p className="text-sm leading-relaxed opacity-90">
-        This {programName} schedule is derived using the <strong>WhenIsDue Authority Engine</strong>. 
+        This {programCode} schedule is derived using the <strong>WhenIsDue Authority Engine</strong>. 
         Our {percentage}% confidence score is based on {score > 0.9 ? "deterministic federal statutes" : "historical pattern matching"} 
         and verified {sourceUrl ? "against official .gov publications" : "using cadence stability analysis"}.
       </p>

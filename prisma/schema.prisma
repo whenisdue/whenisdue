@@ -280,20 +280,25 @@ model Subscriber {
 }
 
 model Subscription {
-  id              String             @id @default(cuid())
-  subscriberId    String
-  stateCode       String   
-  programName     String   
-  identifierValue String   
-  status          SubscriptionStatus @default(ACTIVE)
-  nextDepositDate DateTime
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  id               String   @id @default(cuid())
+  subscriberId     String
+  stateCode        String   
+  programCode      String   // CHANGED: Aligned with engine identity
+  identifierValue  String   
+  status           SubscriptionStatus @default(ACTIVE)
+  
+  // STORAGE LOCK: Native Postgres DATE (YYYY-MM-DD)
+  // This prevents timezone drift at the database level.
+  nextDepositDate  DateTime @db.Date 
+  
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  subscriber      Subscriber         @relation(fields: [subscriberId], references: [id])
-  decisions       NotificationDecisionAudit[]
+  subscriber       Subscriber         @relation(fields: [subscriberId], references: [id])
+  decisions        NotificationDecisionAudit[]
 
-  @@unique([subscriberId, stateCode, programName, identifierValue], name: "subscription_identity_key")
+  // IDENTITY LOCK: Unique constraint now uses the stable programCode
+  @@unique([subscriberId, stateCode, programCode, identifierValue], name: "subscription_identity_key")
   @@index([subscriberId])
 }
 
@@ -320,11 +325,14 @@ model RuleIdentity {
   programCode String
   ruleFamily  String            @default("FULL_SCHEDULE")
   versions    ScheduleRuleSet[]
+  allowsSubscriptions Boolean @default(true) // Add this
+  isSearchable        Boolean @default(true) // Add this
 
   @@unique([stateCode, programCode, ruleFamily])
 }
 
 model ScheduleRuleSet {
+  supersedesId String?
   id                 String           @id @default(cuid())
   identityId         String
   identity           RuleIdentity     @relation(fields: [identityId], references: [id])
@@ -396,23 +404,30 @@ model PaymentEvent {
 }
 
 model NotificationDecisionAudit {
-  id               String             @id @default(cuid())
-  subscriptionId   String
-  compilerRunId    String
-  compilerRun      CompilerRun        @relation(fields: [compilerRunId], references: [id], onDelete: Restrict)
-  ruleSetVersionId String
-  ruleSet          ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id], onDelete: Restrict)
-  oldEventId       String?
-  oldEvent         PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id], onDelete: Restrict)
-  newEventId       String?
-  newEvent         PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id], onDelete: Restrict)
-  reason           DecisionReason
-  createdAt        DateTime           @default(now())
+  id                String             @id @default(cuid())
+  subscriptionId    String
+  cycleKey          String             
+  notificationType  String             
+  channel           String             
+  persistenceReason PersistenceReason  
+  
+  // --- ADD THESE 4 LINES TO FIX THE ERRORS ---
+  ruleSetVersionId  String
+  ruleSet           ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id])
+  compilerRunId     String
+  compilerRun       CompilerRun        @relation(fields: [compilerRunId], references: [id])
+  oldEventId        String?
+  oldEvent          PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id])
+  newEventId        String?
+  newEvent          PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
+  // --------------------------------------------
 
-  subscription     Subscription       @relation(fields: [subscriptionId], references: [id])
-  outboxItem       NotificationOutbox?
+  createdAt         DateTime           @default(now())
+  subscription      Subscription       @relation(fields: [subscriptionId], references: [id])
+  outboxItem        NotificationOutbox?
 
   @@unique([subscriptionId, oldEventId, newEventId], name: "decision_idempotency_idx")
+  @@index([subscriptionId, cycleKey, notificationType, channel])
 }
 
 model NotificationOutbox {
@@ -444,4 +459,17 @@ model NotificationAttemptLog {
   errorMessage      String?
   providerMessageId String?
   outbox            NotificationOutbox @relation(fields: [outboxId], references: [id])
+}
+
+enum PersistenceReason {
+  INACTIVE
+  ALREADY_PAID
+  ALREADY_NOTIFIED
+  OUTSIDE_SCHEDULED_DATE
+  INCONSISTENT_STATE
+  SCHEDULED_TRIGGER_MET
+  INTEGRITY_CONFLICT_ALREADY_SENT
+  BLOCK_IN_FLIGHT_EXISTS
+  BLOCK_RETRY_EXISTS
+  TERMINAL_FAILURE_ENCOUNTERED
 }

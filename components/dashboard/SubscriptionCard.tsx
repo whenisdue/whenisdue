@@ -31,7 +31,7 @@ export function SubscriptionCard({ subscription, onDelete }: Props) {
             <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
               {subscription.stateCode}
             </span>
-            <h3 className="text-sm font-bold tracking-tight text-slate-200 uppercase">{subscription.programName}</h3>
+            <h3 className="text-sm font-bold tracking-tight text-slate-200 uppercase">{subscription.programCode}</h3>
           </div>
           <p className="text-[11px] font-medium text-slate-500 italic">{subscription.identifierLabel}</p>
         </div>
@@ -54,7 +54,7 @@ export function SubscriptionCard({ subscription, onDelete }: Props) {
 
       <div className="flex items-center justify-between border-t border-slate-800/50 pt-4">
         <div className="flex gap-3">
-          <button disabled={isLocked} aria-label={`Edit tracking for ${subscription.programName}`} className="text-slate-500 hover:text-slate-300">
+          <button disabled={isLocked} aria-label={`Edit tracking for ${subscription.programCode}`} className="text-slate-500 hover:text-slate-300">
             <Pencil className="h-4 w-4" />
           </button>
           <button disabled={isLocked} aria-label={`View full ${subscription.stateCode} schedule`} className="text-slate-500 hover:text-emerald-400">

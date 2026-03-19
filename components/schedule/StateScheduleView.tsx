@@ -10,10 +10,8 @@ interface Props {
 }
 
 export default async function StateScheduleView({ stateCode, stateName, programCode }: Props) {
-  // 1. Fetch the active ruleset. The resolver returns the ruleSet object directly!
   const ruleSet = await getUpcomingSchedule(stateCode, programCode);
 
-  // 2. Safety guard if no data is found for this state
   if (!ruleSet) {
     return (
       <div className="text-center p-20 bg-slate-50 rounded-3xl border border-dashed border-slate-200 max-w-3xl mx-auto mt-10">
@@ -22,14 +20,11 @@ export default async function StateScheduleView({ stateCode, stateName, programC
     );
   }
 
-  // 3. Extract the pre-computed bitemporal events directly from the ruleset
   const events = ruleSet.paymentEvents;
   const verifiedAt = format(new Date(), "MMMM d, yyyy");
 
   return (
     <div className="max-w-3xl mx-auto px-6 pt-6 pb-16">
-      
-      {/* Tighter margins to keep the widget above the fold */}
       <header className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest mb-4">
           <CalendarDays className="w-3.5 h-3.5" />
@@ -44,8 +39,13 @@ export default async function StateScheduleView({ stateCode, stateName, programC
         </p>
       </header>
 
-      {/* 4. Safely pass the events and the identifier kind to the widget */}
-      <IdentifierAnswerWidget events={events} identifierKind={ruleSet.identifierKind} />
+      <IdentifierAnswerWidget 
+        events={events} 
+        identifierKind={ruleSet.identifierKind} 
+        stateCode={stateCode}
+        programCode={programCode}
+        allowsSubscriptions={ruleSet.identity?.allowsSubscriptions ?? false}
+      />
 
       <footer className="mt-12 px-6 pt-8 border-t border-slate-200 text-center">
         <div className="inline-flex items-center justify-center gap-2 mb-4 text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">

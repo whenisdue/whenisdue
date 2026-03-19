@@ -137,7 +137,7 @@ export function AddSubscriptionModal({
       payload: { 
         id: tempId, 
         stateCode: formData.state, 
-        programName: formData.program, 
+        programCode: formData.program, 
         identifierLabel: `Last Digit: ${formData.identifier}`,
         nextDepositDate: "2026-04-01",
         status: 'active',
@@ -155,7 +155,7 @@ export function AddSubscriptionModal({
           finalSub: {
             id: `srv-auth-${currentSeq}`,
             stateCode: formData.state,
-            programName: formData.program,
+            programCode: formData.program,
             identifierLabel: `Last Digit: ${formData.identifier}`,
             nextDepositDate: "2026-04-12",
             status: 'active'

@@ -19,12 +19,12 @@
   - A unique constraint covering the columns `[subscriptionId,oldEventId,newEventId]` on the table `NotificationDecisionAudit` will be added. If there are existing duplicate values, this will fail.
   - A unique constraint covering the columns `[idempotencyKey]` on the table `NotificationOutbox` will be added. If there are existing duplicate values, this will fail.
   - A unique constraint covering the columns `[providerMessageId]` on the table `NotificationOutbox` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[subscriberId,stateCode,programName,identifierValue]` on the table `Subscription` will be added. If there are existing duplicate values, this will fail.
+  - A unique constraint covering the columns `[subscriberId,stateCode,programCode,identifierValue]` on the table `Subscription` will be added. If there are existing duplicate values, this will fail.
   - Added the required column `frozenPayload` to the `NotificationOutbox` table without a default value. This is not possible if the table is not empty.
   - Added the required column `idempotencyKey` to the `NotificationOutbox` table without a default value. This is not possible if the table is not empty.
   - Added the required column `identifierValue` to the `Subscription` table without a default value. This is not possible if the table is not empty.
   - Added the required column `nextDepositDate` to the `Subscription` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `programName` to the `Subscription` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `programCode` to the `Subscription` table without a default value. This is not possible if the table is not empty.
 
 */
 -- CreateEnum
@@ -79,7 +79,7 @@ DROP COLUMN "programCode",
 DROP COLUMN "rawUserInput",
 ADD COLUMN     "identifierValue" TEXT NOT NULL,
 ADD COLUMN     "nextDepositDate" TIMESTAMP(3) NOT NULL,
-ADD COLUMN     "programName" TEXT NOT NULL,
+ADD COLUMN     "programCode" TEXT NOT NULL,
 ADD COLUMN     "status" "SubscriptionStatus" NOT NULL DEFAULT 'ACTIVE';
 
 -- CreateTable
@@ -118,4 +118,4 @@ CREATE INDEX "ScheduleRuleSet_identityId_idx" ON "ScheduleRuleSet"("identityId")
 CREATE INDEX "Subscription_subscriberId_idx" ON "Subscription"("subscriberId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Subscription_subscriberId_stateCode_programName_identifierV_key" ON "Subscription"("subscriberId", "stateCode", "programName", "identifierValue");
+CREATE UNIQUE INDEX "Subscription_subscriberId_stateCode_programCode_identifierV_key" ON "Subscription"("subscriberId", "stateCode", "programCode", "identifierValue");

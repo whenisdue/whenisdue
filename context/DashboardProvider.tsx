@@ -16,7 +16,7 @@ export type Subscriber = {
 export type Subscription = {
   id: string;
   stateCode: string;
-  programName: string;
+  programCode: string;
   identifierLabel: string;
   nextDepositDate: string; // ISO String: YYYY-MM-DD
   status: 'active' | 'paused';
@@ -67,7 +67,7 @@ const sortSubscriptions = (subs: Subscription[]): Subscription[] => {
   return [...subs].sort((a, b) => {
     const stateRes = compareInvariant(a.stateCode, b.stateCode);
     if (stateRes !== 0) return stateRes;
-    const progRes = compareInvariant(a.programName, b.programName);
+    const progRes = compareInvariant(a.programCode, b.programCode);
     if (progRes !== 0) return progRes;
     return compareInvariant(a.id, b.id);
   });

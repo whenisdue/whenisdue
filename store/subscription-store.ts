@@ -8,7 +8,7 @@ export interface SubscriptionRecord {
   id: string;                // ALWAYS the client-side idempotencyKey
   serverId?: string;         // The Database ID
   stateCode: string;
-  programName: string;
+  programCode: string;
   identifierValue: string;
   syncStatus: SyncStatus;
   serverStatus: ServerStatus | null;
@@ -28,7 +28,7 @@ interface SubscriptionState {
 
 function createSubscriptionRecord(data: Partial<SubscriptionRecord> & { id: string }): SubscriptionRecord {
   const required: (keyof SubscriptionRecord)[] = [
-    'id', 'stateCode', 'programName', 'identifierValue', 
+    'id', 'stateCode', 'programCode', 'identifierValue', 
     'syncStatus', 'payloadHash', 'isOptimistic'
   ];
 
@@ -39,7 +39,7 @@ function createSubscriptionRecord(data: Partial<SubscriptionRecord> & { id: stri
   return {
     id: data.id,
     stateCode: data.stateCode!,
-    programName: data.programName!,
+    programCode: data.programCode!,
     identifierValue: data.identifierValue!,
     syncStatus: data.syncStatus!,
     payloadHash: data.payloadHash!,

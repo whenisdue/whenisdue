@@ -1,4 +1,4 @@
-import { PrismaClient, OutboxStatus, DecisionReason, RuleStatus } from '@prisma/client';
+import { PrismaClient, OutboxStatus, RuleStatus, PersistenceReason } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,7 @@ async function main() {
   const email = 'bjesguerra2025@gmail.com';
 
   // 1. Ensure Subscriber exists
-  await prisma.subscriber.upsert({
+  const subscriber = await prisma.subscriber.upsert({
     where: { email },
     update: { verifiedEmail: email, emailVerifiedAt: new Date() },
     create: {
@@ -51,15 +51,18 @@ async function main() {
     });
   }
 
-  // REPAIR: Updated to match Phase 9 schema properties
   const sub = await prisma.subscription.upsert({
-    where: { id: "test-sub-id" }, 
+    where: { subscription_identity_key: { 
+      subscriberId: subscriber.id, 
+      stateCode: "VT", 
+      programCode: "SNAP", 
+      identifierValue: "5" 
+    }}, 
     update: {},
     create: {
-      id: "test-sub-id",
-      subscriberId: (await prisma.subscriber.findUnique({ where: { email } }))!.id,
+      subscriberId: subscriber.id,
       stateCode: "VT",
-      programName: "SNAP",
+      programCode: "SNAP",
       identifierValue: "5",
       nextDepositDate: new Date(),
       status: "ACTIVE"
@@ -67,13 +70,16 @@ async function main() {
     include: { subscriber: true }
   });
 
-  // 3. Create fresh Audit entry
+  // 3. Create fresh Audit entry (ALIGNED TO PHASE 11)
   const decision = await prisma.notificationDecisionAudit.create({
     data: {
       subscriptionId: sub.id,
       compilerRunId: compiler.id,
       ruleSetVersionId: ruleSet.id,
-      reason: DecisionReason.DATE_SHIFT_DETECTED,
+      cycleKey: "2026-03", // Hardcoded for test
+      notificationType: "DEPOSIT_REMINDER",
+      channel: "EMAIL",
+      persistenceReason: PersistenceReason.SCHEDULED_TRIGGER_MET,
     }
   });
 

@@ -9,7 +9,7 @@ const ServerResponseSchema = z.object({
   subscription: z.object({
     id: z.string(),
     stateCode: z.string(),
-    programName: z.string(),
+    programCode: z.string(),
     identifierValue: z.string(),
     nextDepositDate: z.string(),
     status: ServerSubscriptionStatus, 
@@ -39,10 +39,10 @@ async function computeFingerprint(data: Record<string, string>): Promise<string>
 export function useSubscriptionReconciliation() {
   const { upsert, getById } = useSubscriptionStore();
 
-  const commit = async (formData: { stateCode: string; programName: string; identifier: string }, existingKey?: string) => {
+  const commit = async (formData: { stateCode: string; programCode: string; identifier: string }, existingKey?: string) => {
     const normalized = {
       stateCode: formData.stateCode.trim().toUpperCase(),
-      programName: formData.programName.trim().toUpperCase(),
+      programCode: formData.programCode.trim().toUpperCase(),
       identifierValue: formData.identifier.trim(),
     };
     
@@ -95,7 +95,7 @@ export function useSubscriptionReconciliation() {
         id: idempotencyKey,
         serverId: parsed.subscription.id,
         stateCode: parsed.subscription.stateCode,
-        programName: parsed.subscription.programName,
+        programCode: parsed.subscription.programCode,
         identifierValue: parsed.subscription.identifierValue,
         nextDepositDate: parsed.subscription.nextDepositDate,
         serverStatus: parsed.subscription.status, 

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const result = await subService.subscribe({
       email: body.email,
       stateCode: body.stateCode,
-      programName: body.programName,
+      programCode: body.programCode,
       matchType: body.matchType,
       rawInput: body.matchValue // This comes from your form input
     });

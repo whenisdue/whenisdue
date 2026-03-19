@@ -11,13 +11,13 @@ export function SubscriptionCard({ id }: { id: string }) {
   if (!sub) return null;
 
   const handleRetry = () => {
-    commit({ stateCode: sub.stateCode, programName: sub.programName, identifier: sub.identifierValue }, sub.id);
+    commit({ stateCode: sub.stateCode, programCode: sub.programCode, identifier: sub.identifierValue }, sub.id);
   };
 
   return (
     <div className="w-full max-w-sm border rounded-xl bg-white shadow-sm overflow-hidden flex flex-col">
       <div className="p-4 border-b h-16 flex items-center justify-between">
-        <h3 className="text-lg font-bold">{sub.programName}</h3>
+        <h3 className="text-lg font-bold">{sub.programCode}</h3>
         <div className="h-6 flex items-center">
           {sub.serverStatus ? (
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
