@@ -67,11 +67,12 @@ export async function runDailyNotificationSweep(businessDate: string) {
         engineOutcome: 'SEND', // In a full build, this comes from your Logic Engine
         engineReason: 'SCHEDULED_TRIGGER_MET',
         outboxCategory: 'NONE', // In a full build, you'd check existing Outbox rows first
-        frozenPayload: {
-          to: sub.subscriber.email,
-          subject: `Your ${sub.programCode} Deposit reminder`,
-          body: `Hi! Your ${sub.programCode} deposit for ${sub.stateCode} is expected on ${businessDate}.`,
-        },
+        // ... inside your worker.ts loop
+frozenPayload: {
+  to: sub.subscriber.email,
+  subject: `Your ${sub.programCode} Deposit reminder`,
+  html: `Hi! Your ${sub.programCode} deposit for ${sub.stateCode} is expected on ${businessDate}.`, // CHANGED 'body' TO 'html'
+},
       });
 
       console.log(`[Worker] Processed ${sub.subscriber.email}: ${result.action}`);
