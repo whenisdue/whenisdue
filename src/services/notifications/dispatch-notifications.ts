@@ -37,7 +37,7 @@ export async function runNotificationDispatch() {
     )
     RETURNING *;
   `;
-  
+
   for (const task of claimBatch) {
     await executeTransmission(task, workerRunId);
   }
@@ -49,11 +49,14 @@ async function executeTransmission(task: any, runId: string) {
   let providerId: string | null = null;
   let haltSignal = false;
 
-  try {
-    const response = await resend.emails.send({
-      ...task.frozenPayload,
-      headers: { "X-Entity-Id": task.idempotencyKey },
-    });
+  // ... inside executeTransmission
+try {
+  const response = await resend.emails.send({
+    from: "onboarding@resend.dev", // ADD THIS LINE
+    ...task.frozenPayload,
+    headers: { "X-Entity-Id": task.idempotencyKey },
+  });
+// ... rest of the code
 
     if (response.error) throw response.error;
     
