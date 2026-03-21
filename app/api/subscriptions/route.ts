@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
+import { auth } from "../../../auth"; // Modern Auth.js helper
 import { createHash } from 'crypto';
 import { Subscription } from '@prisma/client';
 
-// 1. SHARED DOMAIN CONTRACT
+// 1. SHARED DOMAIN CONTRACT: Issuance Logic
 const SUPPORTED_RULES: Record<string, Record<string, (digit: string) => number>> = {
   'CA': { 
     'SNAP': (digit) => parseInt(digit, 10) + 1, // Digit 0 = Day 1
@@ -16,6 +16,7 @@ const SUPPORTED_RULES: Record<string, Record<string, (digit: string) => number>>
   }
 };
 
+// 2. VALIDATION SCHEMA
 const CreateSubscriptionSchema = z.object({
   stateCode: z.enum(['CA', 'NY']),
   programCode: z.enum(['SNAP', 'TANF']),
@@ -25,14 +26,17 @@ const CreateSubscriptionSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
-    // REPAIR: Cast to any to access custom session properties like 'id'
-    const userId = (session?.user as any)?.id;
+    // A. AUTHENTICATION: Use the new v5 helper
+    const session = await auth();
+    
+    // session.user.id is now typed thanks to our .d.ts file
+    const userId = session?.user?.id;
     
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // B. INPUT VALIDATION
     const rawBody = await req.json();
     const result = CreateSubscriptionSchema.safeParse(rawBody);
     
@@ -46,9 +50,11 @@ export async function POST(req: Request) {
     const { stateCode, programCode, identifier, idempotencyKey } = result.data;
     const subscriberId = userId;
     const action = "CREATE_SUBSCRIPTION";
-    const payloadHash = createHash('sha256').update(JSON.stringify({stateCode, programCode, identifier})).digest('hex');
+    const payloadHash = createHash('sha256')
+      .update(JSON.stringify({stateCode, programCode, identifier}))
+      .digest('hex');
 
-    // SEAL: TYPE-SAFE RESPONSE CONSTRUCTOR
+    // C. RESPONSE HELPER
     const buildResponse = (sub: Subscription, type: 'CREATED' | 'EXISTING', idKey: string) => ({
       subscription: {
         id: sub.id,
@@ -68,7 +74,7 @@ export async function POST(req: Request) {
 
     try {
       const outcome = await prisma.$transaction(async (tx) => {
-        // A. IDEMPOTENCY LOOKUP
+        // IDEMPOTENCY LOOKUP: Prevent duplicate requests
         const existingReq = await tx.requestLog.findUnique({
           where: { request_idempotency_key: { subscriberId, action, idempotencyKey } }
         });
@@ -78,7 +84,7 @@ export async function POST(req: Request) {
           return { body: existingReq.responseBody, status: existingReq.responseStatus };
         }
 
-        // B. LOGICAL IDENTITY LOOKUP
+        // LOGICAL IDENTITY LOOKUP: Check if user already follows this specific digit
         const existingSub = await tx.subscription.findUnique({
           where: { subscription_identity_key: { subscriberId, stateCode, programCode, identifierValue: identifier } }
         });
@@ -91,7 +97,7 @@ export async function POST(req: Request) {
           return { body: res, status: 200 };
         }
 
-        // C. AUTHORITATIVE DERIVATION
+        // AUTHORITATIVE DERIVATION: Calculate the date
         const rule = SUPPORTED_RULES[stateCode]?.[programCode];
         if (!rule) throw new Error("UNSUPPORTED_RULE_COMBINATION");
         
@@ -114,10 +120,10 @@ export async function POST(req: Request) {
       return NextResponse.json(outcome.body, { status: outcome.status });
 
     } catch (dbError: any) {
+      // HANDLE CONCURRENCY RACES
       if (dbError.code === 'P2002') {
         const target = (dbError.meta?.target as string[]) || [];
 
-        // RACE ON REQUEST IDENTITY
         if (target.includes('idempotencyKey')) {
           const winnerReq = await prisma.requestLog.findUnique({
             where: { request_idempotency_key: { subscriberId, action, idempotencyKey } }
@@ -127,18 +133,15 @@ export async function POST(req: Request) {
           }
         }
 
-        // RACE ON LOGICAL IDENTITY
         if (target.includes('identifierValue')) {
           const winnerSub = await prisma.subscription.findUnique({
             where: { subscription_identity_key: { subscriberId, stateCode, programCode, identifierValue: identifier } }
           });
           if (winnerSub) {
             const res = buildResponse(winnerSub, 'EXISTING', idempotencyKey);
-            // BACKFILL REPLAY LOG
             await prisma.requestLog.create({
               data: { idempotencyKey, subscriberId, action, payloadHash, responseStatus: 200, responseBody: res }
             }).catch(() => {}); 
-            
             return NextResponse.json(res, { status: 200 });
           }
         }
