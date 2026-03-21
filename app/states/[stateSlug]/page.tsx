@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma"; 
 import { STATE_REGISTRY, getStateBySlug } from "@/src/lib/states-data";
 import { format } from "date-fns";
-import { Calendar, ShieldCheck, MapPin, ExternalLink } from "lucide-react";
+import { Calendar, ShieldCheck, MapPin, ExternalLink, Info, CheckCircle2 } from "lucide-react";
 
 interface PageProps {
   params: { stateSlug: string };
@@ -42,6 +42,7 @@ export default async function StatePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
+      {/* HERO */}
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
@@ -78,15 +79,15 @@ export default async function StatePage({ params }: PageProps) {
       </section>
 
       <main className="max-w-5xl mx-auto px-6 -mt-16 pb-20">
+        {/* DATA TABLE */}
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden mb-12">
           <div className="p-8 border-b border-slate-100 flex justify-between items-center">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
               Upcoming Issuance Window
             </h2>
-            {/* NEW: OFFICIAL SOURCE LINK (Satisfies Silas Requirement #2) */}
             <a 
-              href={`https://google.com/search?q=official+benefit+schedule+${state.name}`}
+              href={`https://google.com/search?q=official+benefit+issuance+schedule+${state.name}+2026`}
               target="_blank" 
               className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-blue-600 transition-colors"
             >
@@ -98,8 +99,8 @@ export default async function StatePage({ params }: PageProps) {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50">
-                  <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Date</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Program</th>
+                  <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Expected Date</th>
+                  <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Program / Event</th>
                   <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Verification</th>
                 </tr>
               </thead>
@@ -126,9 +127,45 @@ export default async function StatePage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* E-E-A-T FOOTNOTE */}
-        <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-          Data synchronized with {state.name} regional publications • Updated in real-time
+        {/* EDUCATIONAL CONTENT: Solving the "Thin Content" problem */}
+        <section className="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+              <h3 className="text-2xl font-black text-slate-900 mb-6 tracking-tight">Understanding {state.name} Schedules</h3>
+              <p className="text-slate-600 leading-relaxed font-medium mb-6">
+                Most benefit programs in <strong>{state.name}</strong> operate on a staggered issuance 
+                cycle. This means your specific payment date depends on the 
+                <strong> last digit of your case number</strong> or your 
+                <strong> registration date</strong>.
+              </p>
+              <ul className="space-y-4">
+                <li className="flex gap-3 text-sm font-bold text-slate-700">
+                  <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <span>Refer to your latest agency award letter to locate your ID.</span>
+                </li>
+                <li className="flex gap-3 text-sm font-bold text-slate-700">
+                  <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <span>Match your digits against the staggered window listed above.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 rounded-3xl p-8 border border-blue-100">
+              <div className="flex items-center gap-3 mb-4">
+                <Info className="w-5 h-5 text-blue-600" />
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-800">Operational Logic</h4>
+              </div>
+              <p className="text-sm text-blue-700 leading-relaxed font-bold">
+                If your scheduled date falls on a weekend or federal holiday, our 2026 
+                engine automatically adjusts to the <strong>preceding business day</strong>. 
+                This accounts for standard ACH banking settlement times and ensures 
+                data reliability.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-12">
+          Data synchronized with official {state.name} regional publications
         </p>
       </main>
     </div>

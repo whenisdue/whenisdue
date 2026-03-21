@@ -27,27 +27,27 @@ export default function AboutPage() {
       </header>
 
       <main className="max-w-4xl mx-auto py-24 px-6 space-y-24">
-        {/* NEW SECTION: THE TEAM (Satisifies E-E-A-T) */}
+        {/* TEAM SECTION: Solving the "Faceless" Trust Issue */}
         <section className="space-y-8">
           <div className="flex items-center gap-3">
             <Users className="w-6 h-6 text-blue-600" />
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">The Operators</h2>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Editorial Oversight</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-              <p className="text-sm font-black text-slate-900 mb-2">Technical Lead</p>
-              <p className="text-slate-600 leading-relaxed text-sm">
-                Led by a small team of data engineers specializing in deterministic 
-                scheduling systems and cloud infrastructure. We built WhenIsDue to 
-                solve the "stale data" problem inherent in public benefit tracking.
+              <p className="text-sm font-black text-slate-900 mb-2">The Operators</p>
+              <p className="text-slate-600 leading-relaxed text-sm font-medium">
+                Managed by <strong>Brian Esguerra</strong> and a small team of data 
+                engineers specializing in deterministic scheduling systems. We built 
+                WhenIsDue to solve the "stale data" problem inherent in public benefit tracking.
               </p>
             </div>
             <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-              <p className="text-sm font-black text-slate-900 mb-2">Our Mission</p>
-              <p className="text-slate-600 leading-relaxed text-sm">
-                We believe that public information should be accessible, interactive, 
-                and verified. Our team maintains 50+ regional pipelines to keep 
-                recipients informed.
+              <p className="text-sm font-black text-slate-900 mb-2">Verification Mission</p>
+              <p className="text-slate-600 leading-relaxed text-sm font-medium">
+                Our team monitors 50+ regional pipelines, cross-referencing state 
+                administrative manuals with the 2026 federal banking calendar to 
+                provide verified "Available By" dates.
               </p>
             </div>
           </div>
@@ -62,7 +62,8 @@ export default function AboutPage() {
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Bitemporal Auditing</h2>
             <p className="text-slate-600 leading-relaxed font-medium">
               Standard websites only track the "current" state of a date. Our engine 
-              tracks both <strong>when an event was recorded</strong> and <strong>when it actually occurs</strong>.
+              tracks both <strong>when an event was recorded</strong> and <strong>when it actually occurs</strong>. 
+              This "immutable ledger" allows us to spot state agency changes the moment they happen.
             </p>
           </div>
           <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
@@ -74,7 +75,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <footer className="pt-10 flex flex-col items-center gap-6">
+        <footer className="pt-10 border-t border-slate-100 flex flex-col items-center gap-6">
            <Link href="/" className="text-sm font-black text-blue-600 hover:text-blue-700">
              ← Return to System Home
            </Link>
