@@ -13,6 +13,22 @@ export type ActionState = {
   fieldErrors?: Record<string, string[]>
 }
 
+/**
+ * NEW: Notification Health Check
+ * Fetches the count of failed notifications for the sidebar badge.
+ */
+export async function getDeadLetterCount() {
+  try {
+    const count = await prisma.notificationOutbox.count({
+      where: { status: 'DEAD_LETTER' }
+    });
+    return count;
+  } catch (error) {
+    console.error("[ACTION_ERROR] getDeadLetterCount:", error);
+    return 0;
+  }
+}
+
 // 1. TOGGLE TRENDING
 export async function toggleTrending(id: string, currentStatus: boolean) {
   await requireAdminSession()
@@ -40,7 +56,6 @@ export async function deleteEvent(id: string) {
 export async function saveEvent(prevState: ActionState, formData: FormData): Promise<ActionState> {
   await requireAdminSession()
 
-  // Extract form data into a raw object
   const rawData: Record<string, any> = {
     id: formData.get('id'),
     title: formData.get('title'),
@@ -57,14 +72,12 @@ export async function saveEvent(prevState: ActionState, formData: FormData): Pro
     trending: formData.get('trending') === 'true'
   }
 
-  // Strip empty strings so Zod triggers its optional/undefined fallbacks correctly
   Object.keys(rawData).forEach(key => {
     if (rawData[key] === '') {
       rawData[key] = undefined
     }
   })
 
-  // Validate against our Strict Discriminated Union
   const parsed = adminEventSchema.safeParse(rawData)
 
   if (!parsed.success) {
@@ -78,7 +91,6 @@ export async function saveEvent(prevState: ActionState, formData: FormData): Pro
   const data = parsed.data
   let dueAtUtc: Date | null = null
 
-  // If EXACT, run it through the Luxon DST-Safe Parser
   if (data.dateStatus === EventDateStatus.EXACT) {
     try {
       dueAtUtc = parseLocalDateTimeToUtcDate(
@@ -127,7 +139,6 @@ export async function saveEvent(prevState: ActionState, formData: FormData): Pro
     return { ok: true, message: 'Event saved successfully.' }
 
   } catch (error) {
-    // Handle duplicate slugs gracefully
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return { 
         ok: false, 

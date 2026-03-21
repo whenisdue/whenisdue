@@ -128,29 +128,29 @@ enum SubscriptionStatus {
 // ==========================================
 
 model EventSeries {
-  id                    String         @id @default(cuid())
-  title                 String
-  slugBase              String         @unique
-  category              EventCategory
-  description           String?
-  isFeatured            Boolean        @default(false)
-  priorityWeight        Int            @default(5)
-  heroQuestion          String?
-  status                EventStatus    @default(CONFIRMED)
-  sourceName            String?
-  sourceUrl             String?
-  recurrenceType        RecurrenceType @default(NONE)
-  dayOfMonth            Int?
-  nthWeek               Int?
-  weekday               Int?
-  startMonth            DateTime?
-  endMonth              DateTime?
+  id                  String         @id @default(cuid())
+  title               String
+  slugBase            String         @unique
+  category            EventCategory
+  description         String?
+  isFeatured          Boolean        @default(false)
+  priorityWeight      Int            @default(5)
+  heroQuestion        String?
+  status              EventStatus    @default(CONFIRMED)
+  sourceName          String?
+  sourceUrl           String?
+  recurrenceType      RecurrenceType @default(NONE)
+  dayOfMonth          Int?
+  nthWeek             Int?
+  weekday             Int?
+  startMonth          DateTime?
+  endMonth            DateTime?
   autoAdjustBusinessDay Boolean        @default(false)
-  generateCount         Int?
-  isActive              Boolean        @default(true)
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
-  events                Event[]
+  generateCount       Int?
+  isActive            Boolean        @default(true)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  events              Event[]
 }
 
 model Event {
@@ -320,31 +320,31 @@ model RequestLog {
 // ==========================================
 
 model RuleIdentity {
-  id          String            @id @default(cuid())
-  stateCode   String
-  programCode String
-  ruleFamily  String            @default("FULL_SCHEDULE")
-  versions    ScheduleRuleSet[]
-  allowsSubscriptions Boolean @default(true) // Add this
-  isSearchable        Boolean @default(true) // Add this
+  id                  String            @id @default(cuid())
+  stateCode           String
+  programCode         String
+  ruleFamily          String            @default("FULL_SCHEDULE")
+  versions            ScheduleRuleSet[]
+  allowsSubscriptions Boolean           @default(true) // Add this
+  isSearchable        Boolean           @default(true) // Add this
 
   @@unique([stateCode, programCode, ruleFamily])
 }
 
 model ScheduleRuleSet {
-  supersedesId String?
-  id                 String           @id @default(cuid())
+  supersedesId       String?
+  id                 String            @id @default(cuid())
   identityId         String
-  identity           RuleIdentity     @relation(fields: [identityId], references: [id])
+  identity           RuleIdentity      @relation(fields: [identityId], references: [id])
   validFrom          DateTime
   validTo            DateTime?
-  createdAt          DateTime         @default(now())
+  createdAt          DateTime          @default(now())
   
   // REPAIR: Restoring Audit Fields
-  recordedFrom       DateTime         @default(now())
+  recordedFrom       DateTime          @default(now())
   recordedTo         DateTime?
-  status             RuleStatus       @default(DRAFT)
-  versionNumber      Int              @default(1)
+  status             RuleStatus        @default(DRAFT)
+  versionNumber      Int               @default(1)
   changeReason       String?
   verifiedAt         DateTime?
   verifiedBy         String?
@@ -364,12 +364,12 @@ model ScheduleRuleSet {
 }
 
 model CompilerRun {
-  id              String   @id @default(cuid())
-  createdAt       DateTime @default(now())
-  compilerVersion String
-  initiatedBy     String?
-  note            String?
-  paymentEvents   PaymentEvent[]
+  id                 String   @id @default(cuid())
+  createdAt          DateTime @default(now())
+  compilerVersion    String
+  initiatedBy        String?
+  note               String?
+  paymentEvents      PaymentEvent[]
   notificationAudits NotificationDecisionAudit[]
 }
 
@@ -411,7 +411,6 @@ model NotificationDecisionAudit {
   channel           String             
   persistenceReason PersistenceReason  
   
-  // --- ADD THESE 4 LINES TO FIX THE ERRORS ---
   ruleSetVersionId  String
   ruleSet           ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id])
   compilerRunId     String
@@ -420,7 +419,8 @@ model NotificationDecisionAudit {
   oldEvent          PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id])
   newEventId        String?
   newEvent          PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
-  // --------------------------------------------
+  
+  metadata          Json?              // ADDED THIS LINE
 
   createdAt         DateTime           @default(now())
   subscription      Subscription       @relation(fields: [subscriptionId], references: [id])
@@ -462,14 +462,15 @@ model NotificationAttemptLog {
 }
 
 enum PersistenceReason {
+  SCHEDULED_TRIGGER_MET
   INACTIVE
   ALREADY_PAID
   ALREADY_NOTIFIED
   OUTSIDE_SCHEDULED_DATE
   INCONSISTENT_STATE
-  SCHEDULED_TRIGGER_MET
   INTEGRITY_CONFLICT_ALREADY_SENT
   BLOCK_IN_FLIGHT_EXISTS
   BLOCK_RETRY_EXISTS
   TERMINAL_FAILURE_ENCOUNTERED
+  MANUAL_RETRY_TRIGGERED
 }

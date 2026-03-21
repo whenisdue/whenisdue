@@ -1,27 +1,37 @@
-import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { redirect } from "next/navigation";
+import { getAdminSession } from "@/lib/admin-session";
+import { AdminSidebar } from "./admin-sidebar"; 
+import { getDeadLetterCount } from "./actions"; // Import the counter we just made
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // 1. THE BOUNCER: Server-side check
+  const session = await getAdminSession();
+  
+  if (!session || session.role !== 'admin') {
+    redirect("/");
+  }
+
+  // 2. DATA FETCH: Get real-time failure counts for the sidebar badge
+  const failureCount = await getDeadLetterCount();
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* Admin Top Navigation */}
-      <header className="bg-slate-900 text-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            <span className="text-lg font-bold tracking-wide">DATA COMMAND CENTER</span>
-          </div>
-          <nav className="flex gap-6 text-sm font-medium text-slate-300">
-            <Link href="/admin" className="hover:text-white transition-colors text-white">Dashboard</Link>
-            <Link href="/" className="hover:text-white transition-colors" target="_blank">View Live Site ↗</Link>
-          </nav>
-        </div>
-      </header>
+    <div className="flex min-h-screen bg-slate-50">
+      
+      {/* 3. THE SIDEBAR: Pass verified ID and the failure count */}
+      <AdminSidebar 
+        operatorId={session.sub} 
+        initialFailureCount={failureCount} 
+      />
 
-      {/* Main Admin Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      {/* 4. THE CONTENT: Render the child pages */}
+      <main className="flex-1 overflow-y-auto">
         {children}
       </main>
+
     </div>
   );
 }
