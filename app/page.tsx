@@ -1,6 +1,6 @@
 import { STATE_REGISTRY } from "@/src/lib/states-data";
 import SearchBar from "../components/SearchBar"; 
-import { ShieldCheck, Info, Globe, Scale, AlertCircle } from "lucide-react";
+import { ShieldCheck, Info, Globe, Scale, AlertCircle, Clock, UserCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -9,10 +9,11 @@ export default function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    /* Softened background to bg-slate-100 for more 'depth' */
+    <div className="min-h-screen bg-slate-100 font-sans text-slate-900">
       
-      {/* 1. THE HERO SECTION */}
-      <section className="bg-white pt-24 pb-16 px-6 border-b border-slate-200">
+      {/* 1. THE HERO SECTION: White 'Card' feel on Slate-100 background */}
+      <section className="bg-white pt-24 pb-16 px-6 border-b border-slate-200 shadow-sm">
         <div className="max-w-3xl mx-auto text-center space-y-10">
           
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">
@@ -23,13 +24,22 @@ export default function HomePage() {
           {/* THE SEARCH ANCHOR */}
           <div className="max-w-xl mx-auto">
              <SearchBar states={states} />
-             <p className="mt-6 text-[10px] font-black text-blue-600 uppercase tracking-[0.3em]">
-               Search all 50 states
-             </p>
+             
+             {/* HUMAN REASSURANCE LINE: Adds immediate 'Warmth' */}
+             <div className="mt-6 flex flex-col items-center gap-2">
+                <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em]">
+                  Search all 50 states
+                </p>
+                <div className="flex items-center gap-4 text-slate-400 font-bold text-[11px] uppercase tracking-wider">
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Takes 5 seconds</span>
+                  <span className="w-1 h-1 rounded-full bg-slate-300" />
+                  <span className="flex items-center gap-1"><UserCheck className="w-3 h-3" /> No signup needed</span>
+                </div>
+             </div>
           </div>
 
           {/* THE TRUST ANCHOR */}
-          <div className="inline-flex items-center gap-2 py-2.5 px-5 bg-slate-100 rounded-xl border border-slate-200 text-slate-600">
+          <div className="inline-flex items-center gap-2 py-2.5 px-5 bg-slate-50 rounded-xl border border-slate-200 text-slate-600">
             <AlertCircle className="w-4 h-4 flex-shrink-0 text-blue-600" />
             <span className="text-[10px] font-black uppercase tracking-widest">
               Private Tool • Not affiliated with any government agency
@@ -38,45 +48,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. THE CONTENT BLOCK (Thickened for AdSense) */}
-      <section className="max-w-3xl mx-auto px-6 py-20">
-        <div className="bg-white p-10 md:p-14 rounded-[3rem] border-2 border-slate-100 shadow-sm space-y-6">
-          <h2 className="text-xs font-black uppercase tracking-widest text-blue-600">Independent Data Tracking</h2>
+      {/* 2. THE CONTENT BLOCK: Intentional spacing with a divider */}
+      <div className="max-w-3xl mx-auto px-6 py-20">
+        <div className="bg-white p-10 md:p-14 rounded-[3rem] border-2 border-slate-200 shadow-sm space-y-6">
+          <div className="inline-flex items-center gap-2 text-blue-600">
+            <ShieldCheck className="w-5 h-5" />
+            <h2 className="text-xs font-black uppercase tracking-widest">Independent Data Tracking</h2>
+          </div>
           <p className="text-slate-600 font-bold text-lg md:text-xl leading-relaxed">
             WhenIsDue is a dedicated resource for tracking official 2026 payment dates for SNAP and EBT. 
             By centralizing issuance calendars for all 50 states, we help households plan 
             monthly budgets with confidence and accuracy. 
           </p>
         </div>
-      </section>
+      </div>
 
-      {/* 3. ACCESSIBLE FOOTER */}
+      {/* 3. FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-20 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 text-blue-600">
-              <ShieldCheck className="w-6 h-6" />
-              <span className="font-black text-slate-900 text-xl tracking-tighter">WhenIsDue.</span>
-            </div>
-            <p className="text-xs font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
-              Independent 2026 Benefit <br />Monitoring Infrastructure.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-[0.3em]">Compliance</h4>
-            <nav className="flex flex-col gap-4">
-              <Link href="/privacy" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">Privacy Policy</Link>
-              <Link href="/terms" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">Terms of Use</Link>
-            </nav>
-          </div>
-
-          <div className="space-y-6">
-            <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-[0.3em]">About</h4>
-            <nav className="flex flex-col gap-4">
-              <Link href="/about" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">Who built this tool?</Link>
-            </nav>
-          </div>
+          {/* ... existing footer content ... */}
         </div>
       </footer>
     </div>
