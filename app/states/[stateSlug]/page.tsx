@@ -51,48 +51,54 @@ export default async function StatePage({ params }: PageProps) {
     <div className="min-h-screen bg-slate-50 font-sans">
       {/* DARK HERO SECTION */}
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-blue-600 p-2 rounded-xl text-white">
-              <MapPin className="w-5 h-5" />
-            </div>
-            <span className="text-sm font-black uppercase tracking-widest text-blue-400">{state.name} Operations</span>
-          </div>
+        <div className="max-w-6xl mx-auto relative z-10">
           
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8 leading-none">
-            {state.name} <span className="text-slate-500">2026</span><br />
-            Benefit Schedule
-          </h1>
-
-          <div className="flex flex-col gap-8">
-            {nextPayment ? (
-              <div className="inline-flex flex-col md:flex-row items-start md:items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm w-fit">
-                <div>
-                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Next Expected Deposit</p>
-                  <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'MMMM d, yyyy')}</p>
+          {/* 🚀 FLEX WRAPPER: Side-by-side on large screens, stacked on small */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12">
+            
+            {/* LEFT COLUMN: The Info */}
+            <div className="space-y-8 flex-1">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-600 p-2 rounded-xl text-white">
+                  <MapPin className="w-5 h-5" />
                 </div>
-                <div className="h-12 w-px bg-white/10 hidden md:block" />
-                <div>
-                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Reliability Status</p>
+                <span className="text-sm font-black uppercase tracking-widest text-blue-400">
+                  {state.name} Operations
+                </span>
+              </div>
+              
+              <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">
+                {state.name} <span className="text-slate-500">2026</span><br />
+                Benefit Schedule
+              </h1>
+
+              {nextPayment ? (
+                <div className="inline-flex flex-col md:flex-row items-start md:items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm">
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Next Expected Deposit</p>
+                    <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'MMMM d, yyyy')}</p>
+                  </div>
+                  <div className="h-12 w-px bg-white/10 hidden md:block" />
                   <div className="flex items-center gap-2 text-green-400">
                     <ShieldCheck className="w-5 h-5" />
-                    <span className="text-sm font-bold uppercase tracking-tight">Official 2026 Schedule</span>
+                    <span className="text-xs font-black uppercase tracking-tight">Official 2026 Schedule</span>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <p className="text-slate-400 font-medium italic">Schedules for {state.name} are being updated.</p>
-            )}
+              ) : (
+                <p className="text-slate-400 font-medium italic">Schedules for {state.name} are being updated.</p>
+              )}
+            </div>
 
-            {/* 🚀 COMPACT HERO ALERT BOX: Placed right after the date info */}
-            <div className="mt-4 pt-8 border-t border-white/10">
+            {/* RIGHT COLUMN: The Subscription (Compact Hero Variant) */}
+            <div className="w-full lg:max-w-md bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm">
               <BenefitAlerts stateName={state.name} variant="hero" />
             </div>
+
           </div>
         </div>
       </section>
 
-      <main className="max-w-5xl mx-auto px-6 -mt-16 pb-20">
+      <main className="max-w-6xl mx-auto px-6 -mt-16 pb-20">
         {/* DATA TABLE CONTAINER */}
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden mb-8">
           <div className="p-8 border-b border-slate-100 flex justify-between items-center">
