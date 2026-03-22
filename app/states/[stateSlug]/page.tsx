@@ -5,6 +5,8 @@ import { STATE_REGISTRY, getStateBySlug } from "@/src/lib/states-data";
 import { format } from "date-fns";
 import { Calendar, ShieldCheck, MapPin, ExternalLink, Info, CheckCircle2 } from "lucide-react";
 
+export const revalidate = 60;
+
 type PageProps = {
   params: Promise<{ stateSlug: string }>;
 };
