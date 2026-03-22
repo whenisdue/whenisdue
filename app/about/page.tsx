@@ -1,107 +1,103 @@
-import { ShieldCheck, Cpu, Globe, Scale, Mail, Zap, ExternalLink, Database, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Info, Search, Mail, Landmark, CheckCircle2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About WhenIsDue | 2026 Methodology",
-  description: "Learn about the deterministic logic and official data sources behind the WhenIsDue 2026 benefit tracking system.",
+  title: "About WhenIsDue | Independent 2026 Benefit Data Research",
+  description: "Information on how we collect, verify, and display 2026 food assistance and EBT payment schedules.",
 };
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* HEADER */}
-      <header className="bg-white border-b border-slate-200 pt-20 pb-16 px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-4">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full border border-blue-100">
-            <Cpu className="w-4 h-4" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">System Architecture</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
-            The 2026 <span className="text-blue-600">Orchestrator.</span>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 leading-relaxed">
+      
+      {/* 1. PLAIN LANGUAGE HEADER */}
+      <section className="bg-white pt-24 pb-16 px-6 border-b border-slate-200">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
+            About WhenIsDue
           </h1>
-          <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto leading-relaxed">
-            WhenIsDue is an independent digital utility operated by the <b>WhenIsDue Editorial Team</b>. We provide high-precision monitoring and scheduling for US benefit issuance.
+          <p className="text-xl text-slate-600 font-bold">
+            WhenIsDue is an independent research tool designed to help households 
+            find and understand official 2026 food benefit payment schedules.
           </p>
         </div>
-      </header>
+      </section>
 
-      <main className="max-w-4xl mx-auto py-20 px-6 space-y-20">
+      {/* 2. FACTUAL METHODOLOGY */}
+      <main className="max-w-3xl mx-auto px-6 py-16 space-y-16">
         
-        {/* MISSION SECTION */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Our Mission</h2>
-            <p className="text-slate-600 leading-relaxed font-medium">
-              For millions of households, knowing the exact date of a SNAP or EBT deposit is a critical component of liquidity management. 
-            </p>
-            <p className="text-slate-600 leading-relaxed font-medium">
-              Our mission is to eliminate "issuance anxiety" by providing a single, centralized dashboard that tracks 2026 distribution windows with audit-grade accuracy.
-            </p>
-          </div>
-          <div className="bg-blue-600 rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-200 relative overflow-hidden">
-            <ShieldCheck className="w-10 h-10 mb-6 opacity-50" />
-            <p className="text-xl font-black leading-tight">
-              "Turning administrative complexity into actionable schedules."
-            </p>
-          </div>
-        </section>
-
-        {/* METHODOLOGY & DATA TRACEABILITY */}
-        <section className="space-y-10">
-          <div className="bg-white p-8 md:p-12 rounded-[3rem] border border-slate-200 shadow-sm space-y-8">
-            <div className="flex items-center gap-3 text-blue-600">
-              <Database className="w-6 h-6" />
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Verification & Sourcing</h2>
-            </div>
-            <p className="text-slate-500 font-medium leading-relaxed">
-              Our 2026 Engine normalizes data from disparate official sources. We prioritize traceability by verifying our internal schedules against primary government authorities:
-            </p>
-            <div className="flex flex-wrap gap-6">
-              <a href="https://www.fns.usda.gov/" target="_blank" className="flex items-center gap-2 text-sm font-black text-blue-600 hover:underline">
-                USDA FNS Portal <ExternalLink className="w-4 h-4" />
-              </a>
-              <a href="https://www.usa.gov/food-help" target="_blank" className="flex items-center gap-2 text-sm font-black text-blue-600 hover:underline">
-                USA.gov Benefits <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* DISCLAIMER BOX */}
-        <section className="bg-amber-50 p-10 rounded-[3rem] border border-amber-100 space-y-4">
-          <div className="flex items-center gap-3 text-amber-600">
-            <AlertTriangle className="w-6 h-6" />
-            <h2 className="font-black uppercase text-xs tracking-widest">Official Status Disclaimer</h2>
-          </div>
-          <p className="text-sm text-amber-900 leading-relaxed font-medium">
-            WhenIsDue is a private, independent informational utility. <b>We are NOT affiliated with, authorized by, or endorsed by any government agency.</b> This platform is a data orchestration tool; always verify your specific case details through your official state human services portal or caseworker.
+        <div className="space-y-6">
+          <h2 className="text-2xl font-black tracking-tight">How we collect and update data</h2>
+          <p className="text-slate-600 font-medium">
+            The dates displayed on this site are gathered through manual research of 
+            publicly available government resources. Our process involves:
           </p>
-        </section>
+          <ul className="space-y-4">
+            <li className="flex gap-4">
+              <div className="mt-1 bg-blue-100 p-1 rounded-md h-fit">
+                <Search className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-black text-slate-900">Official Source Review</p>
+                <p className="text-slate-500 text-sm font-medium">We monitor state administrative manuals, agency news releases, and official social media channels for 2026 issuance updates.</p>
+              </div>
+            </li>
+            <li className="flex gap-4">
+              <div className="mt-1 bg-blue-100 p-1 rounded-md h-fit">
+                <CheckCircle2 className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-black text-slate-900">Calendar Normalization</p>
+                <p className="text-slate-500 text-sm font-medium">We adjust raw issuance logic (based on case numbers or surnames) to account for 2026 weekend shifts and federal holiday bank closures.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
 
-        {/* CONTACT SECTION */}
-        <section className="bg-slate-900 rounded-[3.5rem] p-12 text-center space-y-8">
-          <div className="max-w-2xl mx-auto space-y-4">
-            <h2 className="text-3xl font-black text-white tracking-tight">Accountability & Contact</h2>
-            <p className="text-slate-400 font-medium leading-relaxed">
-              For data corrections, source inquiries, or compliance concerns, please contact our administrative team directly.
-            </p>
+        {/* 3. STRICT GOVERNMENT DISCLAIMER */}
+        <div className="p-8 rounded-3xl bg-amber-50 border-2 border-amber-200 space-y-4">
+          <div className="flex items-center gap-2 text-amber-700">
+            <AlertTriangle className="w-5 h-5" />
+            <h3 className="font-black uppercase text-xs tracking-widest">Mandatory Disclosure</h3>
           </div>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-            <a href="mailto:admin@whenisdue.com" className="flex items-center gap-3 bg-white/10 text-white px-8 py-4 rounded-2xl font-black text-sm hover:bg-white/20 transition-all border border-white/10">
-              <Mail className="w-4 h-4" /> admin@whenisdue.com
+          <p className="text-slate-800 font-bold text-sm leading-relaxed">
+            WhenIsDue is a private, independent resource. We are NOT a government agency, 
+            nor are we affiliated with the USDA or any state department of human services. 
+            Official applications and case-specific information must be handled through 
+            your state's verified portal.
+          </p>
+        </div>
+
+        {/* 4. ACCURACY & CORRECTIONS */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-black tracking-tight">Accuracy and Reporting</h2>
+          <p className="text-slate-600 font-medium leading-relaxed">
+            While we strive for 100% accuracy, state agencies may change issuance 
+            schedules without prior notice. We encourage all users to cross-reference 
+            our data with the official state links provided on each state page.
+          </p>
+          <div className="pt-4 border-t border-slate-200">
+            <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Contact Information</p>
+            <p className="text-slate-600 font-bold mb-4">
+              If you notice a discrepancy or have a question about our data collection, 
+              please reach out:
+            </p>
+            <a 
+              href="mailto:admin@whenisdue.com" 
+              className="text-blue-600 font-black text-lg hover:underline underline-offset-4 decoration-2"
+            >
+              contact@whenisdue.com
             </a>
           </div>
-        </section>
+        </div>
+
       </main>
 
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-12 px-6 text-center">
-        <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.3em]">
-          Precision Compliance Infrastructure • 2026
-        </p>
-        <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">
-          Last Verified: March 22, 2026
-        </p>
+        <Link href="/" className="text-sm font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest transition-colors">
+          ← Return to Home
+        </Link>
       </footer>
     </div>
   );
