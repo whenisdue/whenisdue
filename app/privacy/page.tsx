@@ -1,71 +1,64 @@
+import { ShieldCheck, Lock, Eye, Globe, Mail, Info } from "lucide-react";
 import Link from "next/link";
-import { ShieldCheck, Lock, Eye, MousePointer2, Database, Mail, Server } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Policy | WhenIsDue Compliance",
-  description: "Official privacy disclosures regarding data collection, Google Analytics, and AdSense advertising partners.",
+  title: "Privacy Policy | WhenIsDue 2026",
+  description: "Our commitment to data privacy and transparency for 2026 benefit tracking.",
 };
 
 export default function PrivacyPage() {
+  const sections = [
+    {
+      title: "Overview",
+      icon: <Info className="w-5 h-5" />,
+      content: "WhenIsDue is an independent informational website that helps users view publicly available 2026 benefit payment schedules. We do not require account registration and do not collect personally identifiable information (PII) for normal use of this site."
+    },
+    {
+      title: "Data Collection",
+      icon: <Lock className="w-5 h-5" />,
+      content: "We do not collect names, emails, Social Security numbers, or personal benefit details. If you contact us directly (e.g., via email to admin@whenisdue.com), we may receive the information you provide voluntarily."
+    },
+    {
+      title: "Cookies and Analytics",
+      icon: <Eye className="w-5 h-5" />,
+      content: "This website uses Google Analytics 4 (GA4) to understand how visitors use the site. GA4 may collect anonymized data such as pages visited, device type, and general location (e.g., country or state). This information is used only to improve usability and performance."
+    },
+    {
+      title: "Third-Party Links",
+      icon: <Globe className="w-5 h-5" />,
+      content: "This site contains links to external government and public resources. We are not responsible for the content, accuracy, or privacy practices of these third-party websites."
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
-      <header className="bg-slate-50 border-b border-slate-200 py-16 px-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-2 mb-4 text-blue-600">
-            <ShieldCheck className="w-5 h-5" />
-            <span className="text-xs font-black uppercase tracking-widest">Transparency Division</span>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      <section className="bg-white pt-24 pb-16 px-6 border-b border-slate-200 text-center">
+        <h1 className="text-4xl font-black tracking-tight mb-4">Privacy Policy</h1>
+        <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Last Updated: March 2026</p>
+      </section>
+
+      <main className="max-w-3xl mx-auto px-6 py-16 space-y-12">
+        {sections.map((section) => (
+          <div key={section.title} className="space-y-4">
+            <div className="flex items-center gap-3 text-blue-600">
+              {section.icon}
+              <h2 className="text-xl font-black tracking-tight text-slate-900">{section.title}</h2>
+            </div>
+            <p className="text-slate-600 font-medium leading-relaxed">{section.content}</p>
           </div>
-          <h1 className="text-4xl font-black tracking-tight mb-4">Privacy Policy</h1>
-          <p className="text-slate-500 font-medium italic">Effective Date: March 22, 2026</p>
+        ))}
+
+        <div className="pt-8 border-t border-slate-200 text-center">
+          <p className="text-sm font-bold text-slate-500 mb-4 italic">Questions or concerns?</p>
+          <a href="mailto:admin@whenisdue.com" className="text-blue-600 font-black hover:underline">admin@whenisdue.com</a>
         </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto py-16 px-6 space-y-12">
-        <section className="space-y-4">
-          <h2 className="text-xl font-black flex items-center gap-3 text-slate-800">
-            <Server className="w-5 h-5 text-blue-500" />
-            1. Hosting & Infrastructure
-          </h2>
-          <p className="text-slate-600 leading-relaxed font-medium">
-            This website is hosted on **Vercel**. Vercel may collect server logs, including IP addresses and browser types, to maintain system security and operational stability.
-          </p>
-        </section>
-
-        <section className="space-y-4 p-8 bg-blue-50 rounded-[2rem] border border-blue-100">
-          <h2 className="text-xl font-black flex items-center gap-3 text-blue-900">
-            <MousePointer2 className="w-5 h-5 text-blue-600" />
-            2. Advertising & Analytics
-          </h2>
-          <p className="text-blue-800 text-sm leading-relaxed font-bold">
-            We use Google Analytics and Google AdSense to monitor traffic and serve advertisements.
-          </p>
-          <ul className="list-disc pl-6 space-y-3 text-blue-800 text-sm font-medium">
-            <li><strong>Cookies:</strong> Google uses cookies to serve ads based on your prior visits to this and other websites.</li>
-            <li><strong>DART Cookie:</strong> Google’s use of advertising cookies enables it and its partners to serve ads based on your visit to this site.</li>
-            <li><strong>Opt-Out:</strong> Users may opt out of personalized advertising by visiting the <Link href="https://www.google.com/settings/ads" className="underline">Google Ad Settings</Link>.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-4">
-          <h2 className="text-xl font-black flex items-center gap-3 text-slate-800">
-            <Lock className="w-5 h-5 text-slate-400" />
-            3. Data Retention & PII
-          </h2>
-          <p className="text-slate-600 leading-relaxed font-medium">
-            WhenIsDue is a privacy-first utility. We do not collect names, Social Security Numbers (SSNs), or case IDs. Any information provided via contact email is used solely for support and is never shared with third parties.
-          </p>
-        </section>
-
-        <section className="space-y-4 pt-10 border-t border-slate-100">
-          <h2 className="text-xl font-black flex items-center gap-3 text-slate-800">
-            <Mail className="w-5 h-5 text-slate-400" />
-            4. Contact
-          </h2>
-          <p className="text-slate-600 leading-relaxed font-medium">
-            For privacy inquiries: <span className="font-bold text-blue-600">admin@whenisdue.com</span>
-          </p>
-        </section>
       </main>
+
+      <footer className="py-12 px-6 text-center">
+        <Link href="/" className="text-xs font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest transition-colors">
+          ← Back to Home
+        </Link>
+      </footer>
     </div>
   );
 }
