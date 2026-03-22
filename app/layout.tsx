@@ -1,10 +1,4 @@
-import type { Metadata } from "next";
-import "./globals.css";
-
-export const metadata: Metadata = {
-  title: "WhenIsDue | 2026 Benefit Schedules",
-  description: "Official payment dates and issuance schedules for 2026.",
-};
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export default function RootLayout({
   children,
@@ -16,6 +10,8 @@ export default function RootLayout({
       <body>
         {children}
       </body>
+      {/* 🚀 This is the modern Next.js way to add GA4 */}
+      <GoogleAnalytics gaId="G-XX24XLLQRG" /> 
     </html>
   );
 }
