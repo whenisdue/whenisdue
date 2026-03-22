@@ -42,6 +42,8 @@ export default function SearchBar({ states }: { states: StateDefinition[] }) {
         <input
           type="text"
           id="state-search"
+          autoComplete="off" // 🚀 Kills the browser's past search history dropdown
+          spellCheck={false} // 🚀 Disables red underlines on state names
           className="w-full h-16 pl-16 pr-16 bg-slate-50 border-2 border-blue-500 rounded-2xl text-lg font-bold text-slate-900 placeholder:text-slate-500 focus:outline-none focus:bg-white focus:ring-4 focus:ring-blue-100 shadow-lg shadow-blue-100 transition-all"
           placeholder="Start typing your state..."
           value={query}
@@ -74,7 +76,6 @@ export default function SearchBar({ states }: { states: StateDefinition[] }) {
                   href={`/states/${state.slug}`}
                   onClick={() => {
                     setIsOpen(false);
-                    // 🚀 Track the specific click event
                     sendGAEvent('event', 'state_result_click', {
                       state_name: state.name,
                       state_slug: state.slug,

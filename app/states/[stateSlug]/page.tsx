@@ -5,7 +5,6 @@ import { STATE_REGISTRY, getStateBySlug } from "@/src/lib/states-data";
 import { format } from "date-fns";
 import { Calendar, ShieldCheck, MapPin, Landmark } from "lucide-react";
 import OfficialResourceLink from "@/components/OfficialResourceLink";
-// 🚀 New Import for Brick 2
 import BenefitAlerts from "@/components/BenefitAlerts";
 
 export const revalidate = 60;
@@ -50,7 +49,7 @@ export default async function StatePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
-      {/* HERO SECTION */}
+      {/* DARK HERO SECTION */}
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
@@ -65,24 +64,31 @@ export default async function StatePage({ params }: PageProps) {
             Benefit Schedule
           </h1>
 
-          {nextPayment ? (
-            <div className="inline-flex flex-col md:flex-row items-start md:items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm">
-              <div>
-                <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Next Expected Deposit</p>
-                <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'MMMM d, yyyy')}</p>
-              </div>
-              <div className="h-12 w-px bg-white/10 hidden md:block" />
-              <div>
-                <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Reliability Status</p>
-                <div className="flex items-center gap-2 text-green-400">
-                  <ShieldCheck className="w-5 h-5" />
-                  <span className="text-sm font-bold uppercase tracking-tight">Official 2026 Schedule</span>
+          <div className="flex flex-col gap-8">
+            {nextPayment ? (
+              <div className="inline-flex flex-col md:flex-row items-start md:items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm w-fit">
+                <div>
+                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Next Expected Deposit</p>
+                  <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'MMMM d, yyyy')}</p>
+                </div>
+                <div className="h-12 w-px bg-white/10 hidden md:block" />
+                <div>
+                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">Reliability Status</p>
+                  <div className="flex items-center gap-2 text-green-400">
+                    <ShieldCheck className="w-5 h-5" />
+                    <span className="text-sm font-bold uppercase tracking-tight">Official 2026 Schedule</span>
+                  </div>
                 </div>
               </div>
+            ) : (
+              <p className="text-slate-400 font-medium italic">Schedules for {state.name} are being updated.</p>
+            )}
+
+            {/* 🚀 COMPACT HERO ALERT BOX: Placed right after the date info */}
+            <div className="mt-4 pt-8 border-t border-white/10">
+              <BenefitAlerts stateName={state.name} variant="hero" />
             </div>
-          ) : (
-            <p className="text-slate-400 font-medium italic">Schedules for {state.name} are being updated.</p>
-          )}
+          </div>
         </div>
       </section>
 
@@ -126,9 +132,6 @@ export default async function StatePage({ params }: PageProps) {
             </table>
           </div>
         </div>
-
-        {/* 🚀 BRICK 2: BENEFIT ALERTS BOX */}
-        <BenefitAlerts stateName={state.name} />
 
         {/* OFFICIAL GOVERNMENT LINK BLOCK */}
         {state.officialUrl && (
