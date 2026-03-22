@@ -1,12 +1,7 @@
 import { STATE_REGISTRY } from "@/src/lib/states-data";
-import StateSearch from "../components/SearchBar"; 
-import { ShieldCheck, Info, Globe, Scale, AlertCircle, Search } from "lucide-react";
+import SearchBar from "../components/SearchBar"; 
+import { ShieldCheck, Info, Globe, Scale, AlertCircle } from "lucide-react";
 import Link from "next/link";
-
-export const metadata = {
-  title: "WhenIsDue | Find Your 2026 SNAP & EBT Payment Dates",
-  description: "Check exactly when your food or cash benefits will be deposited. We provide verified 2026 payment schedules for all 50 states.",
-};
 
 export default function HomePage() {
   const states = Object.values(STATE_REGISTRY).sort((a, b) => 
@@ -16,84 +11,73 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       
-      {/* 1. THE HERO: ACTION AT THE TOP */}
-      <section className="bg-white pt-20 pb-12 px-6">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
+      {/* 1. THE HERO: CLEAN, FOCUSED, & FAST */}
+      <section className="bg-white pt-24 pb-16 px-6 border-b border-slate-200">
+        <div className="max-w-3xl mx-auto text-center space-y-10">
           
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
-            Find your <span className="text-blue-600">benefit date.</span>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-4">
+            Find out when your <br />
+            <span className="text-blue-600">benefits arrive.</span>
           </h1>
 
-          {/* THE PRIMARY ACTION: Moved Above the Fold */}
-          <div className="pt-4 max-w-2xl mx-auto">
-             <StateSearch states={states} />
-             <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-               Start typing your state (e.g., California)
+          {/* THE PRIMARY ACTION: No distractions, just the tool */}
+          <div className="max-w-xl mx-auto">
+             <SearchBar states={states} />
+             <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+               Type your state name (e.g., Michigan)
              </p>
           </div>
 
-          {/* THE TRUST ANCHOR: High Visibility, Low Friction */}
-          <div className="flex items-center justify-center gap-2 py-2 px-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 max-w-fit mx-auto">
-            <AlertCircle className="w-4 h-4" />
+          {/* THE TRUST ANCHOR: High Contrast Disclaimer */}
+          <div className="inline-flex items-center gap-2 py-2.5 px-5 bg-amber-50 rounded-xl border border-amber-100 text-amber-900">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-amber-600" />
             <span className="text-[10px] font-black uppercase tracking-widest">
-              Private Site • Not a Government Agency
+              Private Tool • Not affiliated with any government agency
             </span>
           </div>
         </div>
       </section>
 
-      {/* 2. THE SEO BLOCK: Moved Below the Action */}
-      <section className="max-w-3xl mx-auto px-6 py-12">
-        <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
-          <h2 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-4">About WhenIsDue</h2>
-          <p className="text-slate-600 font-medium text-base leading-relaxed">
-            WhenIsDue is an independent tool designed to help you track your 2026 SNAP, EBT, 
-            and other benefit payment dates. We know how important it is to plan your household 
-            budget, so we have gathered the official issuance schedules for all 50 states 
-            into one easy-to-use place. 
+      {/* 2. THE CONTENT LAYER: Information Gain for AdSense */}
+      <section className="max-w-3xl mx-auto px-6 py-20">
+        <div className="bg-white p-10 md:p-14 rounded-[3rem] border border-slate-200 shadow-sm space-y-6">
+          <h2 className="text-sm font-black uppercase tracking-widest text-blue-600">Verification & Reliability</h2>
+          <p className="text-slate-600 font-bold text-lg md:text-xl leading-relaxed">
+            WhenIsDue is an independent resource created to simplify 2026 SNAP and EBT scheduling. 
+            By centralizing the official issuance calendars for all 50 states, we provide a reliable 
+            way for families to plan their monthly budgets. Our data is cross-referenced with 
+            state-level administrative manuals to ensure the highest degree of accuracy.
           </p>
         </div>
       </section>
 
-      {/* 3. ACCESSIBLE FOOTER */}
-      <footer className="bg-white border-t border-slate-200 py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-blue-600" />
-                <span className="font-black text-slate-900 tracking-tighter text-lg underline decoration-blue-100 decoration-4">WhenIsDue.</span>
-              </div>
-              <p className="text-sm text-slate-400 font-bold leading-relaxed">
-                Independent monitoring of 2026 benefit timing. Updated daily.
-              </p>
+      {/* 3. ACCESSIBLE FOOTER: Clear Navigation */}
+      <footer className="bg-white border-t border-slate-200 py-20 px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 text-blue-600">
+              <ShieldCheck className="w-6 h-6" />
+              <span className="font-black text-slate-900 text-xl tracking-tighter">WhenIsDue.</span>
             </div>
-
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-widest text-center md:text-left">Legal & Privacy</h4>
-              <nav className="flex flex-col gap-3 items-center md:items-start">
-                <Link href="/privacy" className="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-2 underline">
-                   <Globe className="w-4 h-4" /> Privacy Policy
-                </Link>
-                <Link href="/terms" className="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-2 underline">
-                   <Scale className="w-4 h-4" /> Terms of Use
-                </Link>
-              </nav>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-widest text-center md:text-left">About</h4>
-              <nav className="flex flex-col gap-3 items-center md:items-start">
-                <Link href="/about" className="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-2 underline">
-                   <Info className="w-4 h-4" /> Who built this tool?
-                </Link>
-              </nav>
-            </div>
+            <p className="text-xs font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
+              Independent 2026 Benefit <br />Monitoring Infrastructure.
+            </p>
           </div>
-          
-          <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em] text-center pt-12 border-t border-slate-100">
-            Official 2026 Data Tracking • Verified Daily
-          </p>
+
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-[0.3em]">Compliance</h4>
+            <nav className="flex flex-col gap-4">
+              <Link href="/privacy" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">Privacy Policy</Link>
+              <Link href="/terms" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">Terms of Use</Link>
+            </nav>
+          </div>
+
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-[0.3em]">Resources</h4>
+            <nav className="flex flex-col gap-4">
+              <Link href="/about" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">About the Team</Link>
+            </nav>
+          </div>
         </div>
       </footer>
     </div>
