@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { STATE_REGISTRY, getStateBySlug } from "@/src/lib/states-data";
 import { format } from "date-fns";
 import { Calendar, ShieldCheck, MapPin, ExternalLink, Info, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 export const revalidate = 60;
 
@@ -33,14 +34,10 @@ export default async function StatePage({ params }: PageProps) {
   const state = getStateBySlug(stateSlug);
   if (!state) notFound();
 
-  // We fetch the state-specific events from Prisma
   const upcomingEvents = await prisma.event.findMany({
     where: { 
       category: "STATE",
-      title: {
-        contains: state.name,
-        mode: "insensitive"
-      },
+      title: { contains: state.name, mode: "insensitive" },
       dueAt: { gte: new Date() } 
     },
     orderBy: { dueAt: 'asc' },
@@ -51,7 +48,6 @@ export default async function StatePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
-      {/* HERO */}
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
@@ -124,6 +120,30 @@ export default async function StatePage({ params }: PageProps) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* AUTHORITY TRACEPOINT BLOCK (New Audit Fix) */}
+        <div className="mt-12 p-8 md:p-12 rounded-[3rem] bg-slate-900 text-white space-y-6">
+          <div className="flex items-center gap-3 text-blue-400">
+            <ShieldCheck className="w-5 h-5" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Authority Tracepoint</span>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">Verify with {state.name} Officials</h3>
+            <p className="text-slate-400 text-sm leading-relaxed max-w-2xl">
+              While we maintain our engine with strict bitemporal logic, administrative changes can occur. 
+              We recommend cross-referencing this schedule with the official {state.name} portal.
+            </p>
+          </div>
+          <div className="pt-4">
+            <Link 
+              href={`https://www.google.com/search?q=official+${state.name}+snap+ebt+portal`}
+              target="_blank"
+              className="inline-flex items-center gap-3 bg-white text-slate-900 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-white/5"
+            >
+              Open Official Portal <ExternalLink className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </main>
