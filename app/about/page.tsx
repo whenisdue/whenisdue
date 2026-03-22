@@ -86,7 +86,7 @@ export default function AboutPage() {
               href="mailto:admin@whenisdue.com" 
               className="text-blue-600 font-black text-lg hover:underline underline-offset-4 decoration-2"
             >
-              contact@whenisdue.com
+              admin@whenisdue.com
             </a>
           </div>
         </div>
