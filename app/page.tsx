@@ -11,26 +11,26 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       
-      {/* 1. THE HERO: CLEAN, FOCUSED, & FAST */}
+      {/* 1. THE HERO SECTION */}
       <section className="bg-white pt-24 pb-16 px-6 border-b border-slate-200">
         <div className="max-w-3xl mx-auto text-center space-y-10">
           
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-4">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">
             Find out when your <br />
             <span className="text-blue-600">benefits arrive.</span>
           </h1>
 
-          {/* THE PRIMARY ACTION: No distractions, just the tool */}
+          {/* THE SEARCH ANCHOR */}
           <div className="max-w-xl mx-auto">
              <SearchBar states={states} />
-             <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-               Type your state name (e.g., Michigan)
+             <p className="mt-6 text-[10px] font-black text-blue-600 uppercase tracking-[0.3em]">
+               Search all 50 states
              </p>
           </div>
 
-          {/* THE TRUST ANCHOR: High Contrast Disclaimer */}
-          <div className="inline-flex items-center gap-2 py-2.5 px-5 bg-amber-50 rounded-xl border border-amber-100 text-amber-900">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-amber-600" />
+          {/* THE TRUST ANCHOR */}
+          <div className="inline-flex items-center gap-2 py-2.5 px-5 bg-slate-100 rounded-xl border border-slate-200 text-slate-600">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-blue-600" />
             <span className="text-[10px] font-black uppercase tracking-widest">
               Private Tool • Not affiliated with any government agency
             </span>
@@ -38,20 +38,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. THE CONTENT LAYER: Information Gain for AdSense */}
+      {/* 2. THE CONTENT BLOCK (Thickened for AdSense) */}
       <section className="max-w-3xl mx-auto px-6 py-20">
-        <div className="bg-white p-10 md:p-14 rounded-[3rem] border border-slate-200 shadow-sm space-y-6">
-          <h2 className="text-sm font-black uppercase tracking-widest text-blue-600">Verification & Reliability</h2>
+        <div className="bg-white p-10 md:p-14 rounded-[3rem] border-2 border-slate-100 shadow-sm space-y-6">
+          <h2 className="text-xs font-black uppercase tracking-widest text-blue-600">Independent Data Tracking</h2>
           <p className="text-slate-600 font-bold text-lg md:text-xl leading-relaxed">
-            WhenIsDue is an independent resource created to simplify 2026 SNAP and EBT scheduling. 
-            By centralizing the official issuance calendars for all 50 states, we provide a reliable 
-            way for families to plan their monthly budgets. Our data is cross-referenced with 
-            state-level administrative manuals to ensure the highest degree of accuracy.
+            WhenIsDue is a dedicated resource for tracking official 2026 payment dates for SNAP and EBT. 
+            By centralizing issuance calendars for all 50 states, we help households plan 
+            monthly budgets with confidence and accuracy. 
           </p>
         </div>
       </section>
 
-      {/* 3. ACCESSIBLE FOOTER: Clear Navigation */}
+      {/* 3. ACCESSIBLE FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-20 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
           <div className="space-y-6">
@@ -73,9 +72,9 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-6">
-            <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-[0.3em]">Resources</h4>
+            <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-[0.3em]">About</h4>
             <nav className="flex flex-col gap-4">
-              <Link href="/about" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">About the Team</Link>
+              <Link href="/about" className="text-sm font-bold text-slate-500 hover:text-blue-600 underline decoration-slate-200 decoration-2 underline-offset-4">Who built this tool?</Link>
             </nav>
           </div>
         </div>
