@@ -53,10 +53,10 @@ export default async function StatePage({ params }: PageProps) {
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto relative z-10">
           
-          {/* 🚀 FLEX WRAPPER: Side-by-side on large screens, stacked on small */}
+          {/* 🚀 THE BALANCE WRAPPER: Stacks on mobile (like your screenshot), splits on desktop */}
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12">
             
-            {/* LEFT COLUMN: The Info */}
+            {/* LEFT COLUMN: Title and Date Card */}
             <div className="space-y-8 flex-1">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-xl text-white">
@@ -89,7 +89,7 @@ export default async function StatePage({ params }: PageProps) {
               )}
             </div>
 
-            {/* RIGHT COLUMN: The Subscription (Compact Hero Variant) */}
+            {/* RIGHT COLUMN: The Subscription Box (Utilizing the negative space) */}
             <div className="w-full lg:max-w-md bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm">
               <BenefitAlerts stateName={state.name} variant="hero" />
             </div>
