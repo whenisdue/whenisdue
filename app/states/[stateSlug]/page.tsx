@@ -5,6 +5,8 @@ import { STATE_REGISTRY, getStateBySlug } from "@/src/lib/states-data";
 import { format } from "date-fns";
 import { Calendar, ShieldCheck, MapPin, Landmark } from "lucide-react";
 import OfficialResourceLink from "@/components/OfficialResourceLink";
+// 🚀 New Import for Brick 2
+import BenefitAlerts from "@/components/BenefitAlerts";
 
 export const revalidate = 60;
 
@@ -48,6 +50,7 @@ export default async function StatePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
+      {/* HERO SECTION */}
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
@@ -84,6 +87,7 @@ export default async function StatePage({ params }: PageProps) {
       </section>
 
       <main className="max-w-5xl mx-auto px-6 -mt-16 pb-20">
+        {/* DATA TABLE CONTAINER */}
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden mb-8">
           <div className="p-8 border-b border-slate-100 flex justify-between items-center">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -122,6 +126,9 @@ export default async function StatePage({ params }: PageProps) {
             </table>
           </div>
         </div>
+
+        {/* 🚀 BRICK 2: BENEFIT ALERTS BOX */}
+        <BenefitAlerts stateName={state.name} />
 
         {/* OFFICIAL GOVERNMENT LINK BLOCK */}
         {state.officialUrl && (
