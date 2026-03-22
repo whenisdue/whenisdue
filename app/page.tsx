@@ -2,14 +2,13 @@ import Link from "next/link";
 import { STATE_REGISTRY } from "@/src/lib/states-data";
 import { ChevronRight, MapPin, ShieldCheck, Zap, Globe, Scale, Info } from "lucide-react";
 
-// 1. SEO METADATA: This tells Google exactly what this page is about
 export const metadata = {
   title: "SNAP & EBT Payment Schedules by State (2026)",
   description: "Find your SNAP, EBT, and benefit payment dates by state. Track deposits and never miss a payment with our automated 2026 schedule.",
 };
 
 export default function HomePage() {
-  // 2. SORTING: This keeps the list alphabetical (A-Z) automatically
+  // Sorting Alphabetically for better User Experience
   const states = Object.values(STATE_REGISTRY).sort((a, b) => 
     a.name.localeCompare(b.name)
   );
@@ -19,7 +18,7 @@ export default function HomePage() {
       {/* HERO SECTION */}
       <section className="bg-white border-b border-slate-200 pt-24 pb-20 px-6">
         <div className="max-w-5xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full border border-blue-100 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full border border-blue-100">
             <Zap className="w-3 h-3 fill-current" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">2026 Engine Live</span>
           </div>
@@ -31,12 +30,12 @@ export default function HomePage() {
           
           <p className="max-w-2xl mx-auto text-slate-500 font-medium text-lg leading-relaxed">
             Automated, audit-grade benefit issuance tracking across 50 US states. 
-            Select your state to view your personalized 2026 schedule.
+            Select your state below to view your verified 2026 schedule.
           </p>
         </div>
       </section>
 
-      {/* DIRECTORY GRID */}
+      {/* STATE SELECTION GRID */}
       <main className="max-w-6xl mx-auto py-20 px-6">
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Active State Directories</h2>
@@ -44,7 +43,6 @@ export default function HomePage() {
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-nowrap">v2.0 Orchestrator</span>
         </div>
 
-        {/* 3. LIST SEMANTICS: Using <ul> and <li> helps Google's robots read the list better */}
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {states.map((state) => (
             <li key={state.code}>
@@ -62,7 +60,7 @@ export default function HomePage() {
                   </h3>
                   
                   <p className="text-slate-400 text-sm font-medium mb-8 leading-relaxed">
-                    {state.description}
+                    Official 2026 {state.name} benefit availability and distribution windows.
                   </p>
 
                   <div className="mt-auto flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
@@ -70,7 +68,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <span className="absolute -bottom-4 -right-2 text-9xl font-black text-slate-50 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none">
+                <span className="absolute -bottom-4 -right-2 text-9xl font-black text-slate-50 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity pointer-events-none uppercase">
                   {state.code}
                 </span>
               </Link>
@@ -79,12 +77,12 @@ export default function HomePage() {
         </ul>
       </main>
 
-      {/* 4. COMPLIANCE FOOTER: Mandatory for AdSense Approval */}
+      {/* COMPLIANCE FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-16 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
+            <div className="space-y-4 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2">
                 <ShieldCheck className="w-5 h-5 text-blue-600" />
                 <span className="font-black text-slate-900 tracking-tighter text-lg">WhenIsDue.</span>
               </div>
@@ -93,6 +91,7 @@ export default function HomePage() {
               </p>
             </div>
 
+            {/* QUICK LINKS FOR SEO */}
             <div className="space-y-4">
               <h4 className="text-[10px] font-black uppercase text-slate-900 tracking-widest">Compliance</h4>
               <nav className="flex flex-col gap-2">
@@ -119,7 +118,7 @@ export default function HomePage() {
             <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.3em]">
               Precision Compliance Infrastructure • 2026
             </p>
-            <p className="text-[10px] font-bold text-slate-400">
+            <p className="text-[10px] font-bold text-slate-400 italic">
               DATA REFRESHED EVERY 6 HOURS
             </p>
           </div>
