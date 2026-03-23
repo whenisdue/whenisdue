@@ -105,25 +105,12 @@ enum AttemptOutcome {
   PROVIDER_REJECTION 
 }
 
-enum IdentifierMatchType { 
-  CASE_NUMBER_LAST_DIGIT
-  CASE_NUMBER_REMAINDER
-  BIRTH_DATE_DAY
-  LAST_NAME_INITIAL 
-}
-
-enum DecisionReason { 
-  DATE_SHIFT_DETECTED
-  RULE_CHANGE_NOTIFICATION
-  INITIAL_VERIFICATION_SUCCESS 
-}
-
 enum SubscriptionStatus {
   ACTIVE
   PAUSED
 }
 
-// 🚀 NEW CLARITY ENGINE ENUMS
+// 🚀 CLARITY ENGINE ENUMS
 enum TriggerType {
   CASE_DIGIT
   ALPHABETIC_RANGE
@@ -136,6 +123,15 @@ enum DateOffsetStrategy {
   NEXT_BUSINESS_DAY
   NEAREST_BUSINESS_DAY
   EXACT_CALENDAR_DATE
+}
+
+enum CohortType {
+  PRE_JUNE_2020
+  POST_JUNE_2020
+  NYC_A_CYCLE
+  NYC_B_CYCLE
+  UPSTATE
+  STANDARD
 }
 
 // ==========================================
@@ -160,6 +156,9 @@ model Program {
   state        State         @relation(fields: [stateId], references: [id])
   rules        Rule[]
   manualEvents ManualEvent[]
+
+  // 🚀 PATH TO GREEN: Stable identity prevents drift across states
+  @@unique([stateId, name], name: "program_identity")
 }
 
 model Rule {
@@ -167,28 +166,31 @@ model Rule {
   programId       String
   program         Program            @relation(fields: [programId], references: [id])
   
-  // Deterministic Triggering
-  triggerType     TriggerType
-  triggerStart    String             // e.g., "0" or "A"
-  triggerEnd      String?            // e.g., "4" or "D"
+  // 🚀 PATH TO GREEN: Explicit Cohort Logic
+  cohortKey       CohortType         @default(STANDARD)
   
-  // Timing Logic
-  baseDay         Int                // The raw government date (1-31)
+  triggerType     TriggerType
+  triggerStart    String             
+  triggerEnd      String?            
+  
+  baseDay         Int                
   offsetStrategy  DateOffsetStrategy @default(PREV_BUSINESS_DAY)
   
-  // Trust Metadata
   sourceCitation  String?            
   version         Int                @default(1)
   updatedAt       DateTime           @updatedAt
+
+  // 🚀 PATH TO GREEN: Mathematically unique rule sets
+  @@unique([programId, cohortKey, triggerStart, triggerEnd], name: "rule_uniqueness")
 }
 
 model ManualEvent {
-  id             String   @id @default(cuid())
-  programId      String
-  program        Program  @relation(fields: [programId], references: [id])
-  title          String   
-  dueAt          DateTime
-  sourceCitation String?
+  id              String   @id @default(cuid())
+  programId       String
+  program         Program  @relation(fields: [programId], references: [id])
+  title           String   
+  dueAt           DateTime
+  sourceCitation  String?
 }
 
 model Resource {
@@ -200,35 +202,34 @@ model Resource {
   value       String
 }
 
-
 // ==========================================
 // CORE DATA ENGINE
 // ==========================================
 
 model EventSeries {
-  id                  String         @id @default(cuid())
-  title               String
-  slugBase            String         @unique
-  category            EventCategory
-  description         String?
-  isFeatured          Boolean        @default(false)
-  priorityWeight      Int            @default(5)
-  heroQuestion        String?
-  status              EventStatus    @default(CONFIRMED)
-  sourceName          String?
-  sourceUrl           String?
-  recurrenceType      RecurrenceType @default(NONE)
-  dayOfMonth          Int?
-  nthWeek             Int?
-  weekday             Int?
-  startMonth          DateTime?
-  endMonth            DateTime?
+  id                    String         @id @default(cuid())
+  title                 String
+  slugBase              String         @unique
+  category              EventCategory
+  description           String?
+  isFeatured            Boolean        @default(false)
+  priorityWeight        Int            @default(5)
+  heroQuestion          String?
+  status                EventStatus    @default(CONFIRMED)
+  sourceName            String?
+  sourceUrl             String?
+  recurrenceType        RecurrenceType @default(NONE)
+  dayOfMonth            Int?
+  nthWeek               Int?
+  weekday               Int?
+  startMonth            DateTime?
+  endMonth              DateTime?
   autoAdjustBusinessDay Boolean        @default(false)
-  generateCount       Int?
-  isActive            Boolean        @default(true)
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  events              Event[]
+  generateCount         Int?
+  isActive              Boolean        @default(true)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  events                Event[]
 }
 
 model Event {
@@ -342,7 +343,7 @@ model EventSubmission {
 }
 
 // ==========================================
-// PHASE 9: HARDENED SUBSCRIPTION TIER
+// HARDENED SUBSCRIPTION TIER
 // ==========================================
 
 model Subscriber {
@@ -361,12 +362,10 @@ model Subscription {
   id               String   @id @default(cuid())
   subscriberId     String
   stateCode        String   
-  programCode      String   // CHANGED: Aligned with engine identity
+  programCode      String   
   identifierValue  String   
   status           SubscriptionStatus @default(ACTIVE)
   
-  // STORAGE LOCK: Native Postgres DATE (YYYY-MM-DD)
-  // This prevents timezone drift at the database level.
   nextDepositDate  DateTime @db.Date 
   
   createdAt        DateTime           @default(now())
@@ -375,7 +374,6 @@ model Subscription {
   subscriber       Subscriber         @relation(fields: [subscriberId], references: [id])
   decisions        NotificationDecisionAudit[]
 
-  // IDENTITY LOCK: Unique constraint now uses the stable programCode
   @@unique([subscriberId, stateCode, programCode, identifierValue], name: "subscription_identity_key")
   @@index([subscriberId])
 }
@@ -403,8 +401,8 @@ model RuleIdentity {
   programCode         String
   ruleFamily          String            @default("FULL_SCHEDULE")
   versions            ScheduleRuleSet[]
-  allowsSubscriptions Boolean           @default(true) // Add this
-  isSearchable        Boolean           @default(true) // Add this
+  allowsSubscriptions Boolean           @default(true) 
+  isSearchable        Boolean           @default(true) 
 
   @@unique([stateCode, programCode, ruleFamily])
 }
@@ -418,7 +416,6 @@ model ScheduleRuleSet {
   validTo            DateTime?
   createdAt          DateTime          @default(now())
   
-  // REPAIR: Restoring Audit Fields
   recordedFrom       DateTime          @default(now())
   recordedTo         DateTime?
   status             RuleStatus        @default(DRAFT)
@@ -459,7 +456,6 @@ model PaymentEvent {
   ruleSetId          String
   ruleSet            ScheduleRuleSet  @relation(fields: [ruleSetId], references: [id])
   
-  // REPAIR: Restoring Audit Fields
   recordedFrom       DateTime         @default(now())
   recordedTo         DateTime?
   
@@ -498,9 +494,9 @@ model NotificationDecisionAudit {
   newEventId         String?
   newEvent           PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
   
-  metadata           Json?              // ADDED THIS LINE
+  metadata           Json?              
 
-  createdAt          DateTime           @default(now())
+  createdAt          DateTime            @default(now())
   subscription       Subscription       @relation(fields: [subscriptionId], references: [id])
   outboxItem         NotificationOutbox?
 
@@ -553,7 +549,9 @@ enum PersistenceReason {
   MANUAL_RETRY_TRIGGERED
 }
 
-// --- ADD THESE NEW AUTH MODELS ---
+// ==========================================
+// AUTH MODELS
+// ==========================================
 
 model User {
   id            String    @id @default(cuid())
