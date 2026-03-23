@@ -18,6 +18,7 @@ import BenefitAlerts from "@/components/BenefitAlerts";
 import FloridaDecoder, { FloridaDecoderRule } from "@/components/FloridaDecoder";
 import TexasDecoder, { TexasDecoderRule } from "@/components/TexasDecoder";
 import NewYorkDecoder from "@/components/NewYorkDecoder"; 
+import CaliforniaDecoder from "@/components/CaliforniaDecoder";
 
 export const revalidate = 60;
 
@@ -26,7 +27,7 @@ export const revalidate = 60;
  */
 type TexasRule = TexasDecoderRule;
 type FloridaRule = FloridaDecoderRule;
-type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule;
+type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule | any; // Added 'any' for CA flexibility
 type PageProps = {
   params: Promise<{ stateSlug: string }>;
 };
@@ -71,6 +72,13 @@ function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule 
     if (r.triggerStart.length !== width || (r.triggerEnd && r.triggerEnd.length !== width)) return null;
     return { ...r, baseDay, offsetStrategy: strategy, cohortKey: cohort } as TexasRule;
   }
+  
+  if (stateSlug === 'california') {
+    // California logic: Single digit (0-9) mapping to Day (1-10)
+    if (r.triggerStart.length !== 1) return null;
+    return { ...r, baseDay, offsetStrategy: strategy };
+  }
+
   return { ...r, baseDay, offsetStrategy: strategy } as FloridaRule;
 }
 
@@ -139,6 +147,16 @@ function verifyTexasIntegrity(rules: TexasRule[]): boolean {
   return check(pre, 9) && check(post, 99);
 }
 
+function verifyCaliforniaIntegrity(rules: any[]): boolean {
+  if (rules.length !== 10) return false;
+  const map = new Array(10).fill(0);
+  rules.forEach(r => {
+    const digit = parseInt(r.triggerStart);
+    if (!isNaN(digit) && digit >= 0 && digit <= 9) map[digit]++;
+  });
+  return map.every(count => count === 1);
+}
+
 function verifyNewYorkUpstateIntegrity(rules: NYUpstateRule[]): boolean {
   if (rules.length === 0) return false;
   const map = new Array(26).fill(0);
@@ -177,6 +195,9 @@ export default async function StatePage({ params }: PageProps) {
     const hasExactlyOneB = nyCityRules.filter(r => r.cohortKey === 'NYC_B_CYCLE').length === 1;
 
     isIntegrityOk = upstateOk && hasExactlyOneA && hasExactlyOneB;
+  } else if (stateSlug === 'california') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    isIntegrityOk = verifyCaliforniaIntegrity(flTxRules);
   } else {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter((r): r is StateRule => r !== null);
     if (stateSlug === 'texas') isIntegrityOk = verifyTexasIntegrity(flTxRules as TexasRule[]);
@@ -205,7 +226,6 @@ export default async function StatePage({ params }: PageProps) {
               <div className="inline-flex items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm shadow-xl">
                 <div>
                   <p className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1">Next Expected Deposit</p>
-                  {/* 🚀 FIXED: Added EEEE for day name */}
                   <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'EEEE, MMMM d')}</p>
                 </div>
               </div>
@@ -228,6 +248,10 @@ export default async function StatePage({ params }: PageProps) {
                   cityRules={nyCityRules} 
                 />
               )
+            )}
+
+            {stateSlug === 'california' && (
+              !isIntegrityOk ? <IntegrityError /> : <CaliforniaDecoder rules={flTxRules} />
             )}
 
             <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
