@@ -3,8 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { calculateSmartDate } from '@/lib/smart-dates';
 import { format } from 'date-fns';
-import { Search, Map, Building2 } from 'lucide-react';
-import { NYUpstateRule, NYCityRule } from '@/lib/ny-types'; // 🚀 Pointing to the new file
+import { Search } from 'lucide-react';
+import { NYUpstateRule, NYCityRule } from '@/lib/ny-types';
 
 type NYRulesProps = {
   upstateRules: NYUpstateRule[];
@@ -36,7 +36,6 @@ export default function NewYorkDecoder({ upstateRules, cityRules }: NYRulesProps
 
   return (
     <div className="bg-white rounded-[2.5rem] border-4 border-slate-200 shadow-2xl p-8 max-w-md w-full flex flex-col gap-6">
-      {/* Region Toggle */}
       <div className="flex bg-slate-100 p-1.5 rounded-2xl border-2 border-slate-200">
         <button 
           onClick={() => { setRegion('UPSTATE'); setInitial(''); }}
@@ -87,7 +86,8 @@ export default function NewYorkDecoder({ upstateRules, cityRules }: NYRulesProps
       {resultDate && (
         <div className="bg-blue-600 rounded-3xl p-8 text-white text-center shadow-xl shadow-blue-100">
           <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Deposit Expected</p>
-          <p className="text-4xl font-black tracking-tight">{format(resultDate, 'MMMM d')}</p>
+          {/* 🚀 FIXED: Added EEEE for day name */}
+          <p className="text-4xl font-black tracking-tight">{format(resultDate, 'EEEE, MMMM d')}</p>
         </div>
       )}
     </div>

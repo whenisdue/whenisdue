@@ -12,12 +12,12 @@ import {
   TexasCohort, 
   NewYorkCohort 
 } from "@/lib/smart-dates";
-import { NYUpstateRule, NYCityRule } from "@/lib/ny-types"; // 🚀 PATH TO GREEN: Shared Types
+import { NYUpstateRule, NYCityRule } from "@/lib/ny-types"; 
 import OfficialResourceLink from "@/components/OfficialResourceLink";
 import BenefitAlerts from "@/components/BenefitAlerts";
 import FloridaDecoder, { FloridaDecoderRule } from "@/components/FloridaDecoder";
 import TexasDecoder, { TexasDecoderRule } from "@/components/TexasDecoder";
-import NewYorkDecoder from "@/components/NewYorkDecoder"; // 🚀 PATH TO GREEN: Unified Decoder
+import NewYorkDecoder from "@/components/NewYorkDecoder"; 
 
 export const revalidate = 60;
 
@@ -40,7 +40,6 @@ type RawRule = {
   triggerType: string;
 };
 
-// Simple internal component for integrity failures
 const IntegrityError = () => (
   <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl">
     <h3 className="text-xl font-black mb-2 flex items-center gap-2">
@@ -201,26 +200,25 @@ export default async function StatePage({ params }: PageProps) {
               <span className="text-sm font-black uppercase tracking-widest text-blue-400">{state.name} Operations</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">{state.name} <span className="text-slate-500">2026</span><br />Benefit Schedule</h1>
+            
             {nextPayment && (
               <div className="inline-flex items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm shadow-xl">
                 <div>
-                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Next Expected Deposit</p>
-                  <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'MMMM d, yyyy')}</p>
+                  <p className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1">Next Expected Deposit</p>
+                  {/* 🚀 FIXED: Added EEEE for day name */}
+                  <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'EEEE, MMMM d')}</p>
                 </div>
               </div>
             )}
           </div>
 
           <div className="w-full lg:max-w-md space-y-6">
-            {/* FLORIDA LANE */}
             {stateSlug === 'florida' && flTxRules.length > 0 && <FloridaDecoder rules={flTxRules as FloridaRule[]} />}
             
-            {/* TEXAS LANE */}
             {stateSlug === 'texas' && (
               !isIntegrityOk ? <IntegrityError /> : <TexasDecoder rules={flTxRules as TexasRule[]} />
             )}
 
-           {/* NEW YORK LANE */}
             {stateSlug === 'new-york' && (
               !isIntegrityOk ? (
                 <IntegrityError />
@@ -232,7 +230,6 @@ export default async function StatePage({ params }: PageProps) {
               )
             )}
 
-            {/* SUBSCRIPTION WIDGET */}
             <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
               <BenefitAlerts stateName={state.name} variant="hero" />
             </div>

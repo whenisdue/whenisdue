@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { calculateSmartDate, TexasCohort, OffsetStrategy } from '@/lib/smart-dates';
 import { format } from 'date-fns';
-import { Search, CheckCircle2, XCircle, Info } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export type TexasDecoderRule = {
   triggerStart: string;
@@ -21,7 +21,6 @@ export default function TexasDecoder({ rules }: Props) {
   const [cohort, setCohort] = useState<TexasCohort | null>(null);
   const [digits, setDigits] = useState('');
   const [resultDate, setResultDate] = useState<Date | null>(null);
-  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const expectedLength = cohort === 'PRE_JUNE_2020' ? 1 : 2;
@@ -37,14 +36,11 @@ export default function TexasDecoder({ rules }: Props) {
 
       if (matchedRules.length === 1) {
         setResultDate(calculateSmartDate(matchedRules[0], 4, 2026));
-        setHasError(false);
       } else {
         setResultDate(null);
-        setHasError(true);
       }
     } else {
       setResultDate(null);
-      setHasError(false);
     }
   }, [digits, cohort, rules]);
 
@@ -90,9 +86,12 @@ export default function TexasDecoder({ rules }: Props) {
         )}
 
         {resultDate && (
-          <div className="bg-emerald-600 rounded-[2.5rem] p-8 text-white text-center shadow-xl">
-            <p className="text-4xl font-black">{format(resultDate, 'MMMM d')}</p>
-            <p className="text-xs font-black uppercase mt-2">Weekend Adjusted</p>
+          <div className="bg-green-600 rounded-3xl p-8 text-white text-center shadow-xl shadow-green-100 animate-in zoom-in-95 duration-300">
+            {/* 🚀 FIXED: Added EEEE for day name */}
+            <p className="text-3xl md:text-4xl font-black leading-tight">
+              {format(resultDate, 'EEEE, MMMM d')}
+            </p>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mt-2">Weekend Adjusted</p>
           </div>
         )}
       </div>

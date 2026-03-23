@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { calculateSmartDate } from '@/lib/smart-dates';
-import { DateOffsetStrategy } from '@prisma/client';
+import { OffsetStrategy } from '@/lib/smart-dates';
 import { format } from 'date-fns';
 import { Search, Info, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export type FloridaDecoderRule = {
   triggerStart: string;
   triggerEnd: string | null;
   baseDay: number;
-  offsetStrategy: DateOffsetStrategy;
+  offsetStrategy: OffsetStrategy;
 };
 
 interface Props {
@@ -63,7 +63,6 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
 
       <div className="space-y-6">
         <div>
-          {/* 🚀 FIXED: Larger size and darker Slate-600 for contrast */}
           <label className="block text-sm font-black uppercase text-slate-600 tracking-wider mb-3 px-1">
             9th & 8th Digits of Case Number
           </label>
@@ -82,12 +81,13 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
           <div className="animate-in zoom-in-95 fade-in duration-300">
             <div className="bg-emerald-50 border-2 border-emerald-100 rounded-[2rem] p-6 text-center shadow-inner">
               <p className="text-xs font-black uppercase text-emerald-600 tracking-widest mb-2">Expected Deposit Date</p>
-              <p className="text-3xl font-black text-emerald-950">
-                {format(resultDate, 'MMMM d, yyyy')}
+              {/* 🚀 FIXED: Added EEEE for day name */}
+              <p className="text-2xl md:text-3xl font-black text-emerald-950 leading-tight">
+                {format(resultDate, 'EEEE, MMMM d, yyyy')}
               </p>
               <div className="mt-4 flex items-center justify-center gap-2 text-emerald-700 text-xs font-bold uppercase tracking-tight">
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Weekend & Holiday Adjusted</span>
+                <span>Verified Schedule</span>
               </div>
             </div>
           </div>
@@ -97,7 +97,6 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
           <div className="animate-in shake-1 duration-300 bg-rose-50 border-2 border-rose-100 rounded-[2rem] p-6 flex flex-col items-center gap-2">
             <XCircle className="w-8 h-8 text-rose-500" />
             <p className="text-base font-black text-rose-900">Invalid Digits</p>
-            <p className="text-xs font-bold text-rose-500 uppercase">Check your case number</p>
           </div>
         )}
 
@@ -110,12 +109,11 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
           </div>
         )}
 
-        {/* 🚀 FIXED: Higher contrast text for the dark footer */}
         <div className="flex items-start gap-4 bg-slate-900 p-6 rounded-2xl shadow-inner">
           <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
           <p className="text-xs leading-relaxed font-bold text-slate-300">
             <span className="text-white font-black uppercase tracking-tighter mr-1">Note:</span> 
-            Florida issuance is determined by the 9th and 8th digits of your case number, skipping the very last digit.
+            Florida issuance is determined by the 9th and 8th digits of your case number.
           </p>
         </div>
       </div>
