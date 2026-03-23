@@ -12,19 +12,21 @@ import {
   TexasCohort, 
   NewYorkCohort 
 } from "@/lib/smart-dates";
+import { NYUpstateRule, NYCityRule } from "@/lib/ny-types"; // 🚀 PATH TO GREEN: Shared Types
 import OfficialResourceLink from "@/components/OfficialResourceLink";
 import BenefitAlerts from "@/components/BenefitAlerts";
 import FloridaDecoder, { FloridaDecoderRule } from "@/components/FloridaDecoder";
 import TexasDecoder, { TexasDecoderRule } from "@/components/TexasDecoder";
-import NewYorkUpstateDecoder, { NewYorkDecoderRule } from "@/components/NewYorkUpstateDecoder";
+import NewYorkDecoder from "@/components/NewYorkDecoder"; // 🚀 PATH TO GREEN: Unified Decoder
 
 export const revalidate = 60;
 
+/**
+ * 🚀 PATH TO GREEN: Strict Type Definitions
+ */
 type TexasRule = TexasDecoderRule;
 type FloridaRule = FloridaDecoderRule;
-type NYRule = NewYorkDecoderRule;
-type StateRule = TexasRule | FloridaRule | NYRule;
-
+type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule;
 type PageProps = {
   params: Promise<{ stateSlug: string }>;
 };
@@ -50,6 +52,8 @@ const IntegrityError = () => (
   </div>
 );
 
+// --- VALIDATORS ---
+
 function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
   const cohort = toTexasCohort(r.cohortKey);
@@ -71,22 +75,55 @@ function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule 
   return { ...r, baseDay, offsetStrategy: strategy } as FloridaRule;
 }
 
-function validateNYUpstateRuleForClient(r: RawRule): NYRule | null {
+function validateNYUpstate(r: RawRule): NYUpstateRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
   const cohort = toNewYorkCohort(r.cohortKey);
   if (cohort !== 'UPSTATE' || r.triggerType !== 'ALPHABETIC_RANGE' || !strategy) return null;
-  const isSingleLetter = (val: string) => /^[A-Z]$/i.test(val);
-  if (!isSingleLetter(r.triggerStart)) return null;
-  if (r.triggerEnd && !isSingleLetter(r.triggerEnd)) return null;
+
+  const isLetter = (val: string) => /^[A-Z]$/i.test(val);
+  if (!isLetter(r.triggerStart)) return null;
+  if (r.triggerEnd && !isLetter(r.triggerEnd)) return null;
+  if (r.baseDay < 1 || r.baseDay > 31) return null;
 
   return {
     triggerStart: r.triggerStart.toUpperCase(),
     triggerEnd: r.triggerEnd ? r.triggerEnd.toUpperCase() : null,
-    baseDay: Number(r.baseDay),
+    baseDay: r.baseDay,
     offsetStrategy: strategy,
-    cohortKey: cohort
-  } as NYRule;
+    cohortKey: 'UPSTATE'
+  };
 }
+
+function validateNYCity(r: RawRule): NYCityRule | null {
+  const strategy = toOffsetStrategy(r.offsetStrategy);
+  
+  if (r.triggerType !== 'MONTHLY_STATIC' || r.triggerStart !== 'STATIC' || !strategy) return null;
+  if (r.baseDay < 1 || r.baseDay > 31) return null;
+
+  if (r.cohortKey === 'NYC_A_CYCLE') {
+    return { 
+      triggerStart: 'STATIC', 
+      triggerEnd: null, 
+      baseDay: r.baseDay, 
+      offsetStrategy: strategy, 
+      cohortKey: 'NYC_A_CYCLE' as const 
+    };
+  }
+  
+  if (r.cohortKey === 'NYC_B_CYCLE') {
+    return { 
+      triggerStart: 'STATIC', 
+      triggerEnd: null, 
+      baseDay: r.baseDay, 
+      offsetStrategy: strategy, 
+      cohortKey: 'NYC_B_CYCLE' as const 
+    };
+  }
+
+  return null;
+}
+
+// --- INTEGRITY PROOFS ---
 
 function verifyTexasIntegrity(rules: TexasRule[]): boolean {
   const pre = rules.filter(r => r.cohortKey === 'PRE_JUNE_2020');
@@ -103,17 +140,18 @@ function verifyTexasIntegrity(rules: TexasRule[]): boolean {
   return check(pre, 9) && check(post, 99);
 }
 
-function verifyNewYorkUpstateIntegrity(rules: NYRule[]): boolean {
-  const upstate = rules.filter(r => r.cohortKey === 'UPSTATE');
-  if (upstate.length === 0) return false;
+function verifyNewYorkUpstateIntegrity(rules: NYUpstateRule[]): boolean {
+  if (rules.length === 0) return false;
   const map = new Array(26).fill(0);
-  upstate.forEach(r => {
+  rules.forEach(r => {
     const s = r.triggerStart.charCodeAt(0) - 65;
     const e = (r.triggerEnd || r.triggerStart).charCodeAt(0) - 65;
     for (let i = s; i <= e; i++) if (i >= 0 && i < 26) map[i]++;
   });
   return map.every(count => count === 1);
 }
+
+// --- MAIN COMPONENT ---
 
 export default async function StatePage({ params }: PageProps) {
   const { stateSlug } = await params;
@@ -127,12 +165,19 @@ export default async function StatePage({ params }: PageProps) {
   });
 
   let flTxRules: StateRule[] = [];
-  let nyUpstateRules: NYRule[] = [];
+  let nyUpstateRules: NYUpstateRule[] = [];
+  let nyCityRules: NYCityRule[] = [];
   let isIntegrityOk = true;
 
   if (stateSlug === 'new-york') {
-    nyUpstateRules = rawRules.map(r => validateNYUpstateRuleForClient(r as RawRule)).filter((r): r is NYRule => r !== null);
-    isIntegrityOk = verifyNewYorkUpstateIntegrity(nyUpstateRules);
+    nyUpstateRules = rawRules.map(r => validateNYUpstate(r as RawRule)).filter((r): r is NYUpstateRule => r !== null);
+    nyCityRules = rawRules.map(r => validateNYCity(r as RawRule)).filter((r): r is NYCityRule => r !== null);
+
+    const upstateOk = verifyNewYorkUpstateIntegrity(nyUpstateRules);
+    const hasExactlyOneA = nyCityRules.filter(r => r.cohortKey === 'NYC_A_CYCLE').length === 1;
+    const hasExactlyOneB = nyCityRules.filter(r => r.cohortKey === 'NYC_B_CYCLE').length === 1;
+
+    isIntegrityOk = upstateOk && hasExactlyOneA && hasExactlyOneB;
   } else {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter((r): r is StateRule => r !== null);
     if (stateSlug === 'texas') isIntegrityOk = verifyTexasIntegrity(flTxRules as TexasRule[]);
@@ -167,18 +212,27 @@ export default async function StatePage({ params }: PageProps) {
           </div>
 
           <div className="w-full lg:max-w-md space-y-6">
-            {/* CALCULATOR LANE */}
+            {/* FLORIDA LANE */}
             {stateSlug === 'florida' && flTxRules.length > 0 && <FloridaDecoder rules={flTxRules as FloridaRule[]} />}
             
+            {/* TEXAS LANE */}
             {stateSlug === 'texas' && (
               !isIntegrityOk ? <IntegrityError /> : <TexasDecoder rules={flTxRules as TexasRule[]} />
             )}
 
+           {/* NEW YORK LANE */}
             {stateSlug === 'new-york' && (
-              !isIntegrityOk ? <IntegrityError /> : <NewYorkUpstateDecoder rules={nyUpstateRules} />
+              !isIntegrityOk ? (
+                <IntegrityError />
+              ) : (
+                <NewYorkDecoder 
+                  upstateRules={nyUpstateRules} 
+                  cityRules={nyCityRules} 
+                />
+              )
             )}
 
-            {/* 🚀 SUBSCRIPTION RESTORED: Appears for Florida, Texas, New York, and all others */}
+            {/* SUBSCRIPTION WIDGET */}
             <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
               <BenefitAlerts stateName={state.name} variant="hero" />
             </div>
@@ -193,6 +247,7 @@ export default async function StatePage({ params }: PageProps) {
               <Calendar className="w-6 h-6 text-blue-600" /> Upcoming Issuance Window
             </h2>
           </div>
+          
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
