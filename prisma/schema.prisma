@@ -123,6 +123,84 @@ enum SubscriptionStatus {
   PAUSED
 }
 
+// 🚀 NEW CLARITY ENGINE ENUMS
+enum TriggerType {
+  CASE_DIGIT
+  ALPHABETIC_RANGE
+  SSN_LAST_FOUR
+  MONTHLY_STATIC
+}
+
+enum DateOffsetStrategy {
+  PREV_BUSINESS_DAY
+  NEXT_BUSINESS_DAY
+  NEAREST_BUSINESS_DAY
+  EXACT_CALENDAR_DATE
+}
+
+// ==========================================
+// CLARITY ENGINE (SMART DATES)
+// ==========================================
+
+model State {
+  id           String     @id @default(cuid())
+  name         String     @unique
+  slug         String     @unique
+  abbreviation String     @unique
+  officialUrl  String?
+  programs     Program[]
+  resources    Resource[]
+}
+
+model Program {
+  id           String        @id @default(cuid())
+  name         String
+  category     String
+  stateId      String
+  state        State         @relation(fields: [stateId], references: [id])
+  rules        Rule[]
+  manualEvents ManualEvent[]
+}
+
+model Rule {
+  id              String             @id @default(cuid())
+  programId       String
+  program         Program            @relation(fields: [programId], references: [id])
+  
+  // Deterministic Triggering
+  triggerType     TriggerType
+  triggerStart    String             // e.g., "0" or "A"
+  triggerEnd      String?            // e.g., "4" or "D"
+  
+  // Timing Logic
+  baseDay         Int                // The raw government date (1-31)
+  offsetStrategy  DateOffsetStrategy @default(PREV_BUSINESS_DAY)
+  
+  // Trust Metadata
+  sourceCitation  String?            
+  version         Int                @default(1)
+  updatedAt       DateTime           @updatedAt
+}
+
+model ManualEvent {
+  id             String   @id @default(cuid())
+  programId      String
+  program        Program  @relation(fields: [programId], references: [id])
+  title          String   
+  dueAt          DateTime
+  sourceCitation String?
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  stateId     String
+  state       State    @relation(fields: [stateId], references: [id])
+  type        String   
+  name        String
+  value       String
+}
+
+
 // ==========================================
 // CORE DATA ENGINE
 // ==========================================
@@ -404,27 +482,27 @@ model PaymentEvent {
 }
 
 model NotificationDecisionAudit {
-  id                String             @id @default(cuid())
-  subscriptionId    String
-  cycleKey          String             
-  notificationType  String             
-  channel           String             
-  persistenceReason PersistenceReason  
+  id                 String              @id @default(cuid())
+  subscriptionId     String
+  cycleKey           String              
+  notificationType   String              
+  channel            String              
+  persistenceReason  PersistenceReason  
   
-  ruleSetVersionId  String
-  ruleSet           ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id])
-  compilerRunId     String
-  compilerRun       CompilerRun        @relation(fields: [compilerRunId], references: [id])
-  oldEventId        String?
-  oldEvent          PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id])
-  newEventId        String?
-  newEvent          PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
+  ruleSetVersionId   String
+  ruleSet            ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id])
+  compilerRunId      String
+  compilerRun        CompilerRun        @relation(fields: [compilerRunId], references: [id])
+  oldEventId         String?
+  oldEvent           PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id])
+  newEventId         String?
+  newEvent           PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
   
-  metadata          Json?              // ADDED THIS LINE
+  metadata           Json?              // ADDED THIS LINE
 
-  createdAt         DateTime           @default(now())
-  subscription      Subscription       @relation(fields: [subscriptionId], references: [id])
-  outboxItem        NotificationOutbox?
+  createdAt          DateTime           @default(now())
+  subscription       Subscription       @relation(fields: [subscriptionId], references: [id])
+  outboxItem         NotificationOutbox?
 
   @@unique([subscriptionId, oldEventId, newEventId], name: "decision_idempotency_idx")
   @@index([subscriptionId, cycleKey, notificationType, channel])

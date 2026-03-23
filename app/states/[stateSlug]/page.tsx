@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma"; 
 import { STATE_REGISTRY, getStateBySlug } from "@/src/lib/states-data";
 import { format } from "date-fns";
-import { Calendar, ShieldCheck, MapPin, Landmark, History } from "lucide-react"; // 🚀 Added History icon
+import { Calendar, ShieldCheck, MapPin, Landmark, History } from "lucide-react";
 import OfficialResourceLink from "@/components/OfficialResourceLink";
 import BenefitAlerts from "@/components/BenefitAlerts";
+import FloridaDecoder, { FloridaDecoderRule } from "@/components/FloridaDecoder";
 
 export const revalidate = 60;
 
@@ -35,6 +36,26 @@ export default async function StatePage({ params }: PageProps) {
   const state = getStateBySlug(stateSlug);
   if (!state) notFound();
 
+  // 🚀 PATH TO GREEN: Deterministic Rule Fetching for the Decoder
+  const rawRules = await prisma.rule.findMany({
+    where: { 
+      program: { 
+        state: { slug: stateSlug },
+        name: { contains: "SNAP", mode: "insensitive" }
+      } 
+    },
+    orderBy: { triggerStart: 'asc' }
+  });
+
+  // 🚀 PATH TO GREEN: Narrow to client-safe shape (prevents serialization errors)
+  const stateRules: FloridaDecoderRule[] = rawRules.map(r => ({
+    triggerStart: r.triggerStart,
+    triggerEnd: r.triggerEnd,
+    baseDay: r.baseDay,
+    offsetStrategy: r.offsetStrategy
+  }));
+
+  // Fetch individual events for the table below
   const upcomingEvents = await prisma.event.findMany({
     where: { 
       category: "STATE",
@@ -53,9 +74,9 @@ export default async function StatePage({ params }: PageProps) {
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto relative z-10">
           
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12">
             
-            {/* LEFT COLUMN */}
+            {/* LEFT COLUMN: Title and Global Stats */}
             <div className="space-y-8 flex-1">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-xl text-white">
@@ -83,7 +104,6 @@ export default async function StatePage({ params }: PageProps) {
                       <ShieldCheck className="w-5 h-5" />
                       <span className="text-xs font-black uppercase tracking-tight">Official 2026 Schedule</span>
                     </div>
-                    {/* 🚀 NEW: LAST VERIFIED BADGE */}
                     <div className="flex items-center gap-2 text-slate-500">
                       <History className="w-3.5 h-3.5" />
                       <span className="text-[10px] font-bold uppercase tracking-widest">Verified: March 2026</span>
@@ -95,9 +115,15 @@ export default async function StatePage({ params }: PageProps) {
               )}
             </div>
 
-            {/* RIGHT COLUMN */}
-            <div className="w-full lg:max-w-md bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm">
-              <BenefitAlerts stateName={state.name} variant="hero" />
+            {/* RIGHT COLUMN: The "SnapScreener Killer" (The Decoder) */}
+            <div className="w-full lg:max-w-md">
+              {stateSlug === 'florida' && stateRules.length > 0 ? (
+                <FloridaDecoder rules={stateRules} />
+              ) : (
+                <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm">
+                  <BenefitAlerts stateName={state.name} variant="hero" />
+                </div>
+              )}
             </div>
 
           </div>
@@ -124,7 +150,7 @@ export default async function StatePage({ params }: PageProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {upcomingEvents.map((event) => (
+                {upcomingEvents.length > 0 ? upcomingEvents.map((event) => (
                   <tr key={event.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-8 py-6 font-black text-slate-900">
                       {format(new Date(event.dueAt!), 'MMM d, yyyy')}
@@ -139,13 +165,19 @@ export default async function StatePage({ params }: PageProps) {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                    <tr>
+                        <td colSpan={3} className="px-8 py-12 text-center text-slate-400 font-bold italic">
+                            Official {state.name} table data is refreshing for 2026.
+                        </td>
+                    </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* GOVERNMENT BLOCK */}
+        {/* OFFICIAL GOVERNMENT LINK BLOCK */}
         {state.officialUrl && (
           <div className="p-8 md:p-12 rounded-[3rem] bg-blue-50 border-2 border-blue-100 space-y-6">
             <div className="flex items-center gap-3 text-blue-600">
