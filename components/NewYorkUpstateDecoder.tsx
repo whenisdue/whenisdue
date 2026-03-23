@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { calculateSmartDate, NewYorkCohort, OffsetStrategy } from '@/lib/smart-dates';
 import { format } from 'date-fns';
-import { Search, Info } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export type NewYorkDecoderRule = {
   triggerStart: string;
@@ -44,14 +44,15 @@ export default function NewYorkUpstateDecoder({ rules }: { rules: NewYorkDecoder
           <label className="text-xs font-black uppercase text-slate-500 tracking-widest">
             Last Name Starts With:
           </label>
+          {/* 🚀 FIXED: Added text-slate-900 for high-contrast visibility */}
           <select 
             value={letter}
             onChange={(e) => setLetter(e.target.value)}
-            className="w-full bg-slate-100 border-4 border-slate-200 rounded-2xl p-5 text-2xl font-black appearance-none outline-none focus:border-blue-600"
+            className="w-full bg-slate-100 border-4 border-slate-200 rounded-2xl p-5 text-2xl font-black text-slate-900 appearance-none outline-none focus:border-blue-600"
           >
-            <option value="">Select Initial...</option>
+            <option value="" className="text-slate-500">Select Initial...</option>
             {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => (
-              <option key={l} value={l}>{l}</option>
+              <option key={l} value={l} className="text-slate-900">{l}</option>
             ))}
           </select>
         </div>

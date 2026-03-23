@@ -20,9 +20,6 @@ import NewYorkUpstateDecoder, { NewYorkDecoderRule } from "@/components/NewYorkU
 
 export const revalidate = 60;
 
-/**
- * 🚀 PATH TO GREEN: Strict Type Definitions
- */
 type TexasRule = TexasDecoderRule;
 type FloridaRule = FloridaDecoderRule;
 type NYRule = NewYorkDecoderRule;
@@ -41,11 +38,18 @@ type RawRule = {
   triggerType: string;
 };
 
-// --- VALIDATION BOUNDARIES ---
+// Simple internal component for integrity failures
+const IntegrityError = () => (
+  <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl">
+    <h3 className="text-xl font-black mb-2 flex items-center gap-2">
+      <AlertTriangle className="w-6 h-6" /> Integrity Error
+    </h3>
+    <p className="font-bold text-sm leading-relaxed">
+      Data integrity issue detected. Please refer to the manual table below for verified dates.
+    </p>
+  </div>
+);
 
-/**
- * 🛡️ FLORIDA/TEXAS VALIDATOR (Numeric)
- */
 function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
   const cohort = toTexasCohort(r.cohortKey);
@@ -67,15 +71,10 @@ function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule 
   return { ...r, baseDay, offsetStrategy: strategy } as FloridaRule;
 }
 
-/**
- * 🛡️ NEW YORK VALIDATOR (Alphabetic)
- */
 function validateNYUpstateRuleForClient(r: RawRule): NYRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
   const cohort = toNewYorkCohort(r.cohortKey);
-  
   if (cohort !== 'UPSTATE' || r.triggerType !== 'ALPHABETIC_RANGE' || !strategy) return null;
-
   const isSingleLetter = (val: string) => /^[A-Z]$/i.test(val);
   if (!isSingleLetter(r.triggerStart)) return null;
   if (r.triggerEnd && !isSingleLetter(r.triggerEnd)) return null;
@@ -88,8 +87,6 @@ function validateNYUpstateRuleForClient(r: RawRule): NYRule | null {
     cohortKey: cohort
   } as NYRule;
 }
-
-// --- INTEGRITY PROOFS ---
 
 function verifyTexasIntegrity(rules: TexasRule[]): boolean {
   const pre = rules.filter(r => r.cohortKey === 'PRE_JUNE_2020');
@@ -118,8 +115,6 @@ function verifyNewYorkUpstateIntegrity(rules: NYRule[]): boolean {
   return map.every(count => count === 1);
 }
 
-// --- MAIN COMPONENT ---
-
 export default async function StatePage({ params }: PageProps) {
   const { stateSlug } = await params;
   const state = getStateBySlug(stateSlug);
@@ -131,7 +126,6 @@ export default async function StatePage({ params }: PageProps) {
     orderBy: { triggerStart: 'asc' }
   });
 
-  // 🚀 Logic Lane Segregation
   let flTxRules: StateRule[] = [];
   let nyUpstateRules: NYRule[] = [];
   let isIntegrityOk = true;
@@ -172,36 +166,22 @@ export default async function StatePage({ params }: PageProps) {
             )}
           </div>
 
-          <div className="w-full lg:max-w-md">
-            {/* FLORIDA LANE */}
+          <div className="w-full lg:max-w-md space-y-6">
+            {/* CALCULATOR LANE */}
             {stateSlug === 'florida' && flTxRules.length > 0 && <FloridaDecoder rules={flTxRules as FloridaRule[]} />}
             
-            {/* TEXAS LANE */}
             {stateSlug === 'texas' && (
-              !isIntegrityOk ? (
-                <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl">
-                  <h3 className="text-xl font-black mb-2 flex items-center gap-2"><AlertTriangle className="w-6 h-6" /> System Error</h3>
-                  <p className="font-bold text-sm leading-relaxed">Texas data integrity issue detected. Please refer to the manual table below.</p>
-                </div>
-              ) : <TexasDecoder rules={flTxRules as TexasRule[]} />
+              !isIntegrityOk ? <IntegrityError /> : <TexasDecoder rules={flTxRules as TexasRule[]} />
             )}
 
-            {/* NEW YORK LANE */}
             {stateSlug === 'new-york' && (
-              !isIntegrityOk ? (
-                <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl">
-                  <h3 className="text-xl font-black mb-2 flex items-center gap-2"><AlertTriangle className="w-6 h-6" /> Integrity Error</h3>
-                  <p className="font-bold text-sm leading-relaxed">New York Upstate schedule data is currently being verified for 2026. Please use the manual table below.</p>
-                </div>
-              ) : <NewYorkUpstateDecoder rules={nyUpstateRules} />
+              !isIntegrityOk ? <IntegrityError /> : <NewYorkUpstateDecoder rules={nyUpstateRules} />
             )}
 
-            {/* DEFAULT STATE */}
-            {!['florida', 'texas', 'new-york'].includes(stateSlug) && (
-              <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
-                <BenefitAlerts stateName={state.name} variant="hero" />
-              </div>
-            )}
+            {/* 🚀 SUBSCRIPTION RESTORED: Appears for Florida, Texas, New York, and all others */}
+            <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
+              <BenefitAlerts stateName={state.name} variant="hero" />
+            </div>
           </div>
         </div>
       </section>
