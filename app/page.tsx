@@ -1,4 +1,4 @@
-import { STATE_REGISTRY } from "@/src/lib/states-data";
+import { STATE_REGISTRY } from "@/lib/states-data";
 import SearchBar from "../components/SearchBar"; 
 import { ShieldCheck, Info, Globe, Scale, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";

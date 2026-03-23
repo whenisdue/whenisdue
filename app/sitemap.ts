@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
-import { STATE_REGISTRY } from "@/src/lib/states-data"; // Import your registry
+import { STATE_REGISTRY } from "@/lib/states-data"; // Import your registry
 
 const BASE_URL = 'https://www.whenisdue.com';
 

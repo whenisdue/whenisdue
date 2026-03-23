@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { STATE_REGISTRY } from "@/src/lib/states-data"; // Path-Perfect: Verified src/lib
+import { STATE_REGISTRY } from "@/lib/states-data"; // Path-Perfect: Verified src/lib
 import { Map, ChevronRight, ShieldCheck, Globe, Zap } from "lucide-react";
 
 // 1. SEO: This is what shows up in Google search results for the main directory
