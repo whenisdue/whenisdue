@@ -7,7 +7,10 @@ import {
   differenceInCalendarDays
 } from "date-fns";
 
-// 🚀 PATH TO GREEN: Decoupled Plain TS Types
+// ==========================================
+// 🚀 SHARED TYPES (THE CONTRACTS)
+// ==========================================
+
 export type OffsetStrategy = 
   | 'PREV_BUSINESS_DAY' 
   | 'NEXT_BUSINESS_DAY' 
@@ -16,9 +19,13 @@ export type OffsetStrategy =
 
 export type TexasCohort = 'PRE_JUNE_2020' | 'POST_JUNE_2020';
 
-/**
- * 🛠️ Literal Mappers (No Casting)
- */
+// 🛡️ NEW YORK VERTICAL TYPES
+export type NewYorkCohort = 'UPSTATE' | 'NYC_A_CYCLE' | 'NYC_B_CYCLE';
+
+// ==========================================
+// 🛠️ LITERAL MAPPERS (NO CASTING)
+// ==========================================
+
 export function toOffsetStrategy(value: string): OffsetStrategy | null {
   if (value === 'PREV_BUSINESS_DAY') return 'PREV_BUSINESS_DAY';
   if (value === 'NEXT_BUSINESS_DAY') return 'NEXT_BUSINESS_DAY';
@@ -34,8 +41,19 @@ export function toTexasCohort(value: string | null): TexasCohort | null {
 }
 
 /**
- * 📅 1. Dynamic US Federal Observed Holiday Registry
+ * 🚀 PATH TO GREEN: New York Cohort Mapper
  */
+export function toNewYorkCohort(value: string | null): NewYorkCohort | null {
+  if (value === 'UPSTATE') return 'UPSTATE';
+  if (value === 'NYC_A_CYCLE') return 'NYC_A_CYCLE';
+  if (value === 'NYC_B_CYCLE') return 'NYC_B_CYCLE';
+  return null;
+}
+
+// ==========================================
+// 📅 HOLIDAY REGISTRY
+// ==========================================
+
 export function getObservedUSHolidays(year: number): Date[] {
   const fixedHolidays = [
     new Date(year, 0, 1),   // New Year's
@@ -64,40 +82,80 @@ export function getObservedUSHolidays(year: number): Date[] {
   return [...observedFixed, ...floating];
 }
 
-/**
- * 🧠 2. Deterministic Date Calculator
- */
-export function calculateSmartDate(rule: { baseDay: number, offsetStrategy: OffsetStrategy }, month: number, year: number): Date {
+// ==========================================
+// 🧠 DETERMINISTIC CALCULATOR
+// ==========================================
+
+export function calculateSmartDate(
+  rule: { baseDay: number, offsetStrategy: OffsetStrategy }, 
+  month: number, 
+  year: number
+): Date {
   const holidays = getObservedUSHolidays(year);
-  const targetDate = new Date(year, month - 1, Math.min(rule.baseDay, lastDayOfMonth(new Date(year, month - 1, 1)).getDate()));
+  
+  // Guard against month length (e.g., February 31st)
+  const safeDay = Math.min(
+    rule.baseDay, 
+    lastDayOfMonth(new Date(year, month - 1, 1)).getDate()
+  );
+
+  const targetDate = new Date(year, month - 1, safeDay);
 
   if (rule.offsetStrategy === "EXACT_CALENDAR_DATE" || (!isWeekend(targetDate) && !isHoliday(targetDate, holidays))) {
     return targetDate;
   }
 
-  if (rule.offsetStrategy === "PREV_BUSINESS_DAY") return findBusinessDay(targetDate, holidays, "BACKWARD");
-  if (rule.offsetStrategy === "NEXT_BUSINESS_DAY") return findBusinessDay(targetDate, holidays, "FORWARD");
+  if (rule.offsetStrategy === "PREV_BUSINESS_DAY") {
+    return findBusinessDay(targetDate, holidays, "BACKWARD");
+  }
+
+  if (rule.offsetStrategy === "NEXT_BUSINESS_DAY") {
+    return findBusinessDay(targetDate, holidays, "FORWARD");
+  }
 
   if (rule.offsetStrategy === "NEAREST_BUSINESS_DAY") {
     const prev = findBusinessDay(targetDate, holidays, "BACKWARD");
     const next = findBusinessDay(targetDate, holidays, "FORWARD");
-    return Math.abs(differenceInCalendarDays(targetDate, next)) < Math.abs(differenceInCalendarDays(targetDate, prev)) ? next : prev;
+    
+    // Tie-break: if Sunday/Monday Holiday, choose the shorter calendar gap
+    return Math.abs(differenceInCalendarDays(targetDate, next)) < Math.abs(differenceInCalendarDays(targetDate, prev)) 
+      ? next 
+      : prev;
   }
 
   return targetDate;
 }
 
-// Helpers remain the same...
+// ==========================================
+// 🛠️ INTERNAL HELPERS
+// ==========================================
+
 function findBusinessDay(date: Date, holidays: Date[], dir: "FORWARD" | "BACKWARD"): Date {
   let curr = date;
-  while (isWeekend(curr) || isHoliday(curr, holidays)) curr = dir === "FORWARD" ? addDays(curr, 1) : subDays(curr, 1);
+  while (isWeekend(curr) || isHoliday(curr, holidays)) {
+    curr = dir === "FORWARD" ? addDays(curr, 1) : subDays(curr, 1);
+  }
   return curr;
 }
-function isHoliday(date: Date, holidays: Date[]): boolean { return holidays.some(h => isSameDay(date, h)); }
-function getNthWeekdayOfMonth(y: number, m: number, dw: number, n: number): Date {
-  let d = new Date(y, m, 1); let c = 0;
-  while (c < n) { if (d.getDay() === dw) c++; if (c < n) d = addDays(d, 1); } return d;
+
+function isHoliday(date: Date, holidays: Date[]): boolean {
+  return holidays.some(h => isSameDay(date, h));
 }
+
+function getNthWeekdayOfMonth(y: number, m: number, dw: number, n: number): Date {
+  let d = new Date(y, m, 1);
+  let c = 0;
+  while (c < n) {
+    if (d.getDay() === dw) c++;
+    if (c < n) d = addDays(d, 1);
+  }
+  return d;
+}
+
 function getLastWeekdayOfMonth(y: number, m: number, dw: number): Date {
-  let d = lastDayOfMonth(new Date(y, m, 1)); while (d.getDay() !== dw) d = subDays(d, 1); return d;
+  let d = lastDayOfMonth(new Date(y, m, 1));
+  while (d.getDay() !== dw) {
+    d = subDays(d, 1);
+  }
+  return d;
 }
