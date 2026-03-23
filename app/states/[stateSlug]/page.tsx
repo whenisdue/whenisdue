@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma"; 
 import { STATE_REGISTRY, getStateBySlug } from "@/src/lib/states-data";
 import { format } from "date-fns";
-import { Calendar, ShieldCheck, MapPin, Landmark } from "lucide-react";
+import { Calendar, ShieldCheck, MapPin, Landmark, History } from "lucide-react"; // 🚀 Added History icon
 import OfficialResourceLink from "@/components/OfficialResourceLink";
 import BenefitAlerts from "@/components/BenefitAlerts";
 
@@ -53,10 +53,9 @@ export default async function StatePage({ params }: PageProps) {
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto relative z-10">
           
-          {/* 🚀 THE BALANCE WRAPPER: Stacks on mobile (like your screenshot), splits on desktop */}
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12">
             
-            {/* LEFT COLUMN: Title and Date Card */}
+            {/* LEFT COLUMN */}
             <div className="space-y-8 flex-1">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-xl text-white">
@@ -79,9 +78,16 @@ export default async function StatePage({ params }: PageProps) {
                     <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'MMMM d, yyyy')}</p>
                   </div>
                   <div className="h-12 w-px bg-white/10 hidden md:block" />
-                  <div className="flex items-center gap-2 text-green-400">
-                    <ShieldCheck className="w-5 h-5" />
-                    <span className="text-xs font-black uppercase tracking-tight">Official 2026 Schedule</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <ShieldCheck className="w-5 h-5" />
+                      <span className="text-xs font-black uppercase tracking-tight">Official 2026 Schedule</span>
+                    </div>
+                    {/* 🚀 NEW: LAST VERIFIED BADGE */}
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <History className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Verified: March 2026</span>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -89,7 +95,7 @@ export default async function StatePage({ params }: PageProps) {
               )}
             </div>
 
-            {/* RIGHT COLUMN: The Subscription Box (Utilizing the negative space) */}
+            {/* RIGHT COLUMN */}
             <div className="w-full lg:max-w-md bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm">
               <BenefitAlerts stateName={state.name} variant="hero" />
             </div>
@@ -139,7 +145,7 @@ export default async function StatePage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* OFFICIAL GOVERNMENT LINK BLOCK */}
+        {/* GOVERNMENT BLOCK */}
         {state.officialUrl && (
           <div className="p-8 md:p-12 rounded-[3rem] bg-blue-50 border-2 border-blue-100 space-y-6">
             <div className="flex items-center gap-3 text-blue-600">
@@ -156,10 +162,7 @@ export default async function StatePage({ params }: PageProps) {
             </p>
 
             <div className="pt-4">
-              <OfficialResourceLink 
-                url={state.officialUrl} 
-                stateName={state.name} 
-              />
+              <OfficialResourceLink url={state.officialUrl} stateName={state.name} />
             </div>
 
             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-t border-blue-100 pt-6">
