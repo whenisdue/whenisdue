@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { GoogleAnalytics } from '@next/third-parties/google';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: "WhenIsDue | 2026 Food Benefits & EBT Payment Dates",
@@ -14,8 +16,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        {children}
+      <body className="antialiased bg-slate-50">
+        <Header />
+        
+        {/* 🚀 FIXED: pt-20 ensures hero content isn't hidden under the fixed header */}
+        <div className="pt-20 min-h-screen">
+          {children}
+        </div>
+
+        <Footer />
       </body>
       <GoogleAnalytics gaId="G-XX24XLLQRG" />
     </html>

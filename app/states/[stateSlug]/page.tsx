@@ -19,6 +19,7 @@ import FloridaDecoder, { FloridaDecoderRule } from "@/components/FloridaDecoder"
 import TexasDecoder, { TexasDecoderRule } from "@/components/TexasDecoder";
 import NewYorkDecoder from "@/components/NewYorkDecoder"; 
 import CaliforniaDecoder from "@/components/CaliforniaDecoder";
+import GeorgiaDecoder from "@/components/GeorgiaDecoder";
 
 export const revalidate = 60;
 
@@ -27,7 +28,7 @@ export const revalidate = 60;
  */
 type TexasRule = TexasDecoderRule;
 type FloridaRule = FloridaDecoderRule;
-type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule | any; // Added 'any' for CA flexibility
+type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule | any; 
 type PageProps = {
   params: Promise<{ stateSlug: string }>;
 };
@@ -74,11 +75,11 @@ function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule 
   }
   
   if (stateSlug === 'california') {
-    // California logic: Single digit (0-9) mapping to Day (1-10)
     if (r.triggerStart.length !== 1) return null;
     return { ...r, baseDay, offsetStrategy: strategy };
   }
 
+  // General 2-digit numeric validator for Florida and Georgia
   return { ...r, baseDay, offsetStrategy: strategy } as FloridaRule;
 }
 
@@ -198,6 +199,10 @@ export default async function StatePage({ params }: PageProps) {
   } else if (stateSlug === 'california') {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
     isIntegrityOk = verifyCaliforniaIntegrity(flTxRules);
+  } else if (stateSlug === 'georgia') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    // Georgia Integrity: Check for 20 unique range blocks (00-99 in steps of 5)
+    isIntegrityOk = flTxRules.length === 20; 
   } else {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter((r): r is StateRule => r !== null);
     if (stateSlug === 'texas') isIntegrityOk = verifyTexasIntegrity(flTxRules as TexasRule[]);
@@ -252,6 +257,11 @@ export default async function StatePage({ params }: PageProps) {
 
             {stateSlug === 'california' && (
               !isIntegrityOk ? <IntegrityError /> : <CaliforniaDecoder rules={flTxRules} />
+            )}
+
+            {/* 🚀 GEORGIA LANE */}
+            {stateSlug === 'georgia' && (
+              !isIntegrityOk ? <IntegrityError /> : <GeorgiaDecoder rules={flTxRules} />
             )}
 
             <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
