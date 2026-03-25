@@ -1,16 +1,13 @@
 import { PrismaClient, EventCategory } from '@prisma/client';
-// 🛡️ Pathing: Standard relative path from prisma/ to lib/
 import { calculateSmartDate } from '../lib/smart-dates.js';
 
 const prisma = new PrismaClient();
 
 /**
- * 🚀 DOCTOR STRANGE PROTOCOL: GEORGIA CANONICAL SEED (V5)
- * Strategy: Weekend Sensitive (Preceding Friday Shift)
- * Fix: Signature Match (3 Arguments: Object, Month, Year)
+ * 🚀 DOCTOR STRANGE PROTOCOL: GEORGIA CANONICAL SEED (V10)
+ * Strategy: Wipe and Replace for Rules logic + JSON Type Safety.
  */
 
-// 🛡️ FIX A: Deterministic local date-key extraction for the audit layer
 function toLocalDateKey(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -45,6 +42,29 @@ async function main() {
     }
   });
 
+  console.log("🧹 Cleaning old Georgia rules...");
+  await prisma.rule.deleteMany({
+    where: { programId: snapProgram.id }
+  });
+
+  console.log("📏 Seeding 100 Georgia logic rules (00-99)...");
+  for (let i = 0; i <= 99; i++) {
+    const digitStr = i.toString().padStart(2, '0');
+    const baseDay = 5 + Math.floor(i / 5);
+
+    await prisma.rule.create({
+      data: {
+        programId: snapProgram.id,
+        triggerStart: digitStr,
+        triggerEnd: digitStr,
+        triggerType: 'NUMERIC_RANGE',
+        baseDay: baseDay,
+        offsetStrategy: 'WEEKEND_SENSITIVE',
+        cohortKey: 'GEORGIA_STANDARD'
+      }
+    });
+  }
+
   const series = await prisma.eventSeries.upsert({
     where: { slugBase: `${stateSlug}-snap-${year}` },
     update: {},
@@ -52,7 +72,7 @@ async function main() {
       title: "Georgia SNAP Deposit Schedule 2026",
       slugBase: `${stateSlug}-snap-${year}`,
       category: EventCategory.STATE,
-      description: "Official 2026 monthly issuance schedule for Georgia SNAP/Food Stamps via Georgia Gateway.",
+      description: "Official 2026 monthly issuance schedule for Georgia SNAP via Georgia Gateway.",
     }
   });
 
@@ -66,7 +86,6 @@ async function main() {
       const digitStr = digit.toString().padStart(2, '0');
       const baseDay = 5 + Math.floor(digit / 5);
 
-      // 🛡️ FIX: Signature Match (Aligning with your Object-based engine)
       const depositDate = calculateSmartDate(
         { baseDay: baseDay, offsetStrategy: 'WEEKEND_SENSITIVE' as any },
         month,
@@ -83,12 +102,13 @@ async function main() {
           category: EventCategory.STATE,
           dueAt: depositDate,
           shortSummary: `Official Georgia DFCS EBT deposit for case IDs ending in ${digitStr}.`,
+          // 🛡️ DOCTOR STRANGE FIX: Cast as any to satisfy Prisma's strict JSON type requirement
           scheduleRules: {
             digit: digitStr,
             baseDay: baseDay,
             programId: snapProgram.id,
             agency: 'DFCS'
-          }
+          } as any 
         },
         create: {
           seriesId: series.id,
@@ -97,47 +117,35 @@ async function main() {
           category: EventCategory.STATE,
           dueAt: depositDate,
           shortSummary: `Official Georgia DFCS EBT deposit for case IDs ending in ${digitStr}.`,
+          // 🛡️ DOCTOR STRANGE FIX: Cast as any to satisfy Prisma's strict JSON type requirement
           scheduleRules: {
             digit: digitStr,
             baseDay: baseDay,
             programId: snapProgram.id,
             agency: 'DFCS'
-          }
+          } as any 
         },
       });
     }
     console.log(`📍 Georgia Month ${monthKey}/2026 synchronized.`);
   }
 
-  // 🛡️ FIX A: POST-SEED CANARY LOGIC AUDIT (Timezone-Safe)
   console.log("🧪 Running Timezone-Safe Canary Audit...");
-  
   const canaries = [
-    { digit: "00", month: "04", expected: "2026-04-03" }, // Sunday Shift
-    { digit: "20", month: "05", expected: "2026-05-08" }, // Saturday Shift
-    { digit: "95", month: "10", expected: "2026-10-23" }  // Saturday Shift (End Window)
+    { digit: "00", month: "04", expected: "2026-04-03" },
+    { digit: "20", month: "05", expected: "2026-05-08" },
+    { digit: "95", month: "10", expected: "2026-10-23" }
   ];
 
   for (const c of canaries) {
     const slug = `${stateSlug}-snap-d${c.digit}-m${c.month}-${year}`;
     const row = await prisma.event.findUnique({ where: { slug } });
-    
     const actual = row?.dueAt ? toLocalDateKey(row.dueAt) : undefined;
-    
-    if (actual !== c.expected) {
-      throw new Error(`🚨 CANARY FAILURE: ${slug} expected ${c.expected} but got ${actual}`);
-    }
+    if (actual !== c.expected) throw new Error(`🚨 CANARY FAILURE: ${slug} expected ${c.expected} but got ${actual}`);
     console.log(`✅ Verified: ${slug} -> ${actual}`);
   }
 
   console.log(`✨ Georgia 2026 fully synchronized`);
 }
 
-main()
-  .catch((e) => {
-    console.error(`❌ Seed Failed: ${e.message}`);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch((e) => { console.error(`❌ Seed Failed: ${e.message}`); process.exit(1); }).finally(async () => { await prisma.$disconnect(); });

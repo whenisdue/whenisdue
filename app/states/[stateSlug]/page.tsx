@@ -20,6 +20,7 @@ import TexasDecoder, { TexasDecoderRule } from "@/components/TexasDecoder";
 import NewYorkDecoder from "@/components/NewYorkDecoder"; 
 import CaliforniaDecoder from "@/components/CaliforniaDecoder";
 import GeorgiaDecoder from "@/components/GeorgiaDecoder";
+import PennsylvaniaDecoder from "@/components/PennsylvaniaDecoder";
 
 export const revalidate = 60;
 
@@ -74,13 +75,19 @@ function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule 
     return { ...r, baseDay, offsetStrategy: strategy, cohortKey: cohort } as TexasRule;
   }
   
-  if (stateSlug === 'california') {
+  // 🛡️ California/Florida/Georgia all now use 2-digit precision for the 100-digit overhaul
+  if (stateSlug === 'california' || stateSlug === 'florida' || stateSlug === 'georgia') {
+    if (r.triggerStart.length !== 2) return null;
+    return { ...r, baseDay, offsetStrategy: strategy };
+  }
+
+  // Pennsylvania uses 1-digit precision (0-9)
+  if (stateSlug === 'pennsylvania') {
     if (r.triggerStart.length !== 1) return null;
     return { ...r, baseDay, offsetStrategy: strategy };
   }
 
-  // General 2-digit numeric validator for Florida and Georgia
-  return { ...r, baseDay, offsetStrategy: strategy } as FloridaRule;
+  return { ...r, baseDay, offsetStrategy: strategy };
 }
 
 function validateNYUpstate(r: RawRule): NYUpstateRule | null {
@@ -139,7 +146,9 @@ function verifyTexasIntegrity(rules: TexasRule[]): boolean {
   const check = (set: TexasRule[], max: number) => {
     const map = new Array(max + 1).fill(0);
     set.forEach(r => {
-      for (let i = parseInt(r.triggerStart); i <= parseInt(r.triggerEnd || r.triggerStart); i++) {
+      const start = parseInt(r.triggerStart);
+      const end = parseInt(r.triggerEnd || r.triggerStart);
+      for (let i = start; i <= end; i++) {
         if (i >= 0 && i <= max) map[i]++;
       }
     });
@@ -149,11 +158,11 @@ function verifyTexasIntegrity(rules: TexasRule[]): boolean {
 }
 
 function verifyCaliforniaIntegrity(rules: any[]): boolean {
-  if (rules.length !== 10) return false;
-  const map = new Array(10).fill(0);
+  if (rules.length !== 100) return false;
+  const map = new Array(100).fill(0);
   rules.forEach(r => {
     const digit = parseInt(r.triggerStart);
-    if (!isNaN(digit) && digit >= 0 && digit <= 9) map[digit]++;
+    if (!isNaN(digit) && digit >= 0 && digit <= 99) map[digit]++;
   });
   return map.every(count => count === 1);
 }
@@ -190,22 +199,27 @@ export default async function StatePage({ params }: PageProps) {
   if (stateSlug === 'new-york') {
     nyUpstateRules = rawRules.map(r => validateNYUpstate(r as RawRule)).filter((r): r is NYUpstateRule => r !== null);
     nyCityRules = rawRules.map(r => validateNYCity(r as RawRule)).filter((r): r is NYCityRule => r !== null);
-
     const upstateOk = verifyNewYorkUpstateIntegrity(nyUpstateRules);
     const hasExactlyOneA = nyCityRules.filter(r => r.cohortKey === 'NYC_A_CYCLE').length === 1;
     const hasExactlyOneB = nyCityRules.filter(r => r.cohortKey === 'NYC_B_CYCLE').length === 1;
-
     isIntegrityOk = upstateOk && hasExactlyOneA && hasExactlyOneB;
   } else if (stateSlug === 'california') {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
     isIntegrityOk = verifyCaliforniaIntegrity(flTxRules);
+  } else if (stateSlug === 'pennsylvania') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    isIntegrityOk = flTxRules.length === 10;
   } else if (stateSlug === 'georgia') {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    // Georgia Integrity: Check for 20 unique range blocks (00-99 in steps of 5)
-    isIntegrityOk = flTxRules.length === 20; 
+    isIntegrityOk = flTxRules.length === 100; 
+  } else if (stateSlug === 'florida') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    isIntegrityOk = flTxRules.length === 100;
+  } else if (stateSlug === 'texas') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    isIntegrityOk = flTxRules.length === 110;
   } else {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter((r): r is StateRule => r !== null);
-    if (stateSlug === 'texas') isIntegrityOk = verifyTexasIntegrity(flTxRules as TexasRule[]);
   }
 
   const upcomingEvents = await prisma.event.findMany({
@@ -238,30 +252,15 @@ export default async function StatePage({ params }: PageProps) {
           </div>
 
           <div className="w-full lg:max-w-md space-y-6">
-            {stateSlug === 'florida' && flTxRules.length > 0 && <FloridaDecoder rules={flTxRules as FloridaRule[]} />}
-            
-            {stateSlug === 'texas' && (
-              !isIntegrityOk ? <IntegrityError /> : <TexasDecoder rules={flTxRules as TexasRule[]} />
-            )}
-
-            {stateSlug === 'new-york' && (
-              !isIntegrityOk ? (
-                <IntegrityError />
-              ) : (
-                <NewYorkDecoder 
-                  upstateRules={nyUpstateRules} 
-                  cityRules={nyCityRules} 
-                />
-              )
-            )}
-
-            {stateSlug === 'california' && (
-              !isIntegrityOk ? <IntegrityError /> : <CaliforniaDecoder rules={flTxRules} />
-            )}
-
-            {/* 🚀 GEORGIA LANE */}
-            {stateSlug === 'georgia' && (
-              !isIntegrityOk ? <IntegrityError /> : <GeorgiaDecoder rules={flTxRules} />
+            {!isIntegrityOk ? <IntegrityError /> : (
+              <>
+                {stateSlug === 'florida' && <FloridaDecoder rules={flTxRules as FloridaRule[]} />}
+                {stateSlug === 'texas' && <TexasDecoder rules={flTxRules as TexasRule[]} />}
+                {stateSlug === 'california' && <CaliforniaDecoder rules={flTxRules} />}
+                {stateSlug === 'pennsylvania' && <PennsylvaniaDecoder rules={flTxRules} />}
+                {stateSlug === 'georgia' && <GeorgiaDecoder rules={flTxRules} />}
+                {stateSlug === 'new-york' && <NewYorkDecoder upstateRules={nyUpstateRules} cityRules={nyCityRules} />}
+              </>
             )}
 
             <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">

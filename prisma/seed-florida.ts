@@ -1,13 +1,33 @@
 import { PrismaClient, TriggerType, DateOffsetStrategy } from '@prisma/client';
+import { calculateSmartDate } from '../lib/smart-dates.js';
+
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("🚀 Starting Florida Beachhead Seed...");
+/**
+ * 🚀 DOCTOR STRANGE PROTOCOL: FLORIDA CANONICAL SEED (V11)
+ * Strategy: 100-Digit "Interpreted" Model
+ * Goal: 1,200 Indexable URLs (100 Digits x 12 Months)
+ */
 
-  // 1. Ensure Florida State exists
+const getFloridaDay = (digit: number) => {
+  if (digit <= 3) return 1; if (digit <= 6) return 2; if (digit <= 10) return 3;
+  if (digit <= 13) return 4; if (digit <= 17) return 5; if (digit <= 20) return 6;
+  if (digit <= 24) return 7; if (digit <= 27) return 8; if (digit <= 31) return 9;
+  if (digit <= 34) return 10; if (digit <= 38) return 11; if (digit <= 41) return 12;
+  if (digit <= 45) return 13; if (digit <= 48) return 14; if (digit <= 53) return 15;
+  if (digit <= 57) return 16; if (digit <= 60) return 17; if (digit <= 64) return 18;
+  if (digit <= 67) return 19; if (digit <= 71) return 20; if (digit <= 74) return 21;
+  if (digit <= 78) return 22; if (digit <= 81) return 23; if (digit <= 85) return 24;
+  if (digit <= 88) return 25; if (digit <= 92) return 26; if (digit <= 95) return 27;
+  return 28;
+};
+
+async function main() {
+  console.log("🚀 Starting Florida Canonical Overhaul...");
+
   const florida = await prisma.state.upsert({
     where: { abbreviation: "FL" },
-    update: {},
+    update: { slug: "florida" },
     create: {
       name: "Florida",
       slug: "florida",
@@ -16,104 +36,83 @@ async function main() {
     }
   });
 
-  // 2. Ensure SNAP Program exists
   const snap = await prisma.program.upsert({
-    where: { id: "fl-snap-program" }, // Using a fixed ID for idempotency
-    update: {},
+    where: { program_identity: { stateId: florida.id, name: "SNAP" } },
+    update: { category: "BENEFIT" },
     create: {
-      id: "fl-snap-program",
-      name: "SNAP (Food Assistance)",
+      name: "SNAP",
       category: "BENEFIT",
       stateId: florida.id
     }
   });
 
-  // 3. Complete Florida Logic (00-99 Coverage)
-  // Logic: 9th and 8th digits determine the base day.
-  const flRules = [
-    { start: "00", end: "03", day: 1 },  { start: "04", end: "06", day: 2 },
-    { start: "07", end: "10", day: 3 },  { start: "11", end: "13", day: 4 },
-    { start: "14", end: "17", day: 5 },  { start: "18", end: "20", day: 6 },
-    { start: "21", end: "24", day: 7 },  { start: "25", end: "27", day: 8 },
-    { start: "28", end: "31", day: 9 },  { start: "32", end: "34", day: 10 },
-    { start: "35", end: "38", day: 11 }, { start: "39", end: "41", day: 12 },
-    { start: "42", end: "45", day: 13 }, { start: "46", end: "48", day: 14 },
-    { start: "49", end: "53", day: 15 }, { start: "54", end: "57", day: 16 },
-    { start: "58", end: "60", day: 17 }, { start: "61", end: "64", day: 18 },
-    { start: "65", end: "67", day: 19 }, { start: "68", end: "71", day: 20 },
-    { start: "72", end: "74", day: 21 }, { start: "75", end: "78", day: 22 },
-    { start: "79", end: "81", day: 23 }, { start: "82", end: "85", day: 24 },
-    { start: "86", end: "88", day: 25 }, { start: "89", end: "92", day: 26 },
-    { start: "93", end: "95", day: 27 }, { start: "96", end: "99", day: 28 }
-  ];
-
-  console.log("Cleaning old Florida rules...");
+  console.log("🧹 Cleaning old Florida rules...");
   await prisma.rule.deleteMany({ where: { programId: snap.id } });
 
-  console.log(`Seeding ${flRules.length} deterministic rules...`);
-  for (const r of flRules) {
+  console.log("📏 Seeding 100 interpreted rules (00-99)...");
+  for (let i = 0; i <= 99; i++) {
+    const d = i.toString().padStart(2, '0');
     await prisma.rule.create({
       data: {
         programId: snap.id,
         triggerType: TriggerType.CASE_DIGIT,
-        triggerStart: r.start,
-        triggerEnd: r.end,
-        baseDay: r.day,
-        offsetStrategy: DateOffsetStrategy.PREV_BUSINESS_DAY,
-        sourceCitation: "Florida DCF Public Assistance Manual Section 1410.0102"
+        triggerStart: d,
+        triggerEnd: d,
+        baseDay: getFloridaDay(i),
+        offsetStrategy: DateOffsetStrategy.PREVIOUS_BUSINESS_DAY,
+        cohortKey: 'STANDARD'
       }
     });
   }
 
-  // 4. High-Contrast Action Resources
-  const flResources = [
-    { 
-      name: "Florida EBT Balance Check", 
-      type: "PHONE", 
-      value: "1-888-356-3281" 
-    },
-    { 
-      name: "Florida DCF Help Line", 
-      type: "PHONE", 
-      value: "1-850-300-4323" 
-    },
-    { 
-      name: "Feeding Florida (Food Banks)", 
-      type: "LINK", 
-      value: "https://www.feedingflorida.org/find-food" 
-    },
-    { 
-      name: "Emergency Assistance", 
-      type: "PHONE", 
-      value: "211" 
+  const series = await prisma.eventSeries.upsert({
+    where: { slugBase: `florida-snap-2026` },
+    update: {},
+    create: {
+      title: "Florida SNAP Schedule 2026",
+      slugBase: `florida-snap-2026`,
+      category: 'STATE',
     }
-  ];
+  });
 
-  console.log("Cleaning old Florida resources...");
-  await prisma.resource.deleteMany({ where: { stateId: florida.id } });
+  console.log("📅 Generating 1,200 indexable events...");
+  for (const m of Array.from({ length: 12 }, (_, i) => i + 1)) {
+    const mk = m.toString().padStart(2, '0');
+    for (let i = 0; i <= 99; i++) {
+      const interpreted = i.toString().padStart(2, '0');
+      const rawExample = interpreted.split('').reverse().join('');
+      
+      const depositDate = calculateSmartDate(
+        { baseDay: getFloridaDay(i), offsetStrategy: 'PREVIOUS_BUSINESS_DAY' as any },
+        m,
+        2026
+      );
 
-  console.log("Seeding accessibility-first resources...");
-  for (const res of flResources) {
-    await prisma.resource.create({
-      data: {
-        stateId: florida.id,
-        name: res.name,
-        type: res.type,
-        value: res.value
-      }
-    });
+      const slug = `florida-snap-interpreted-d${interpreted}-m${mk}-2026`;
+      
+      await prisma.event.upsert({
+        where: { slug },
+        update: { dueAt: depositDate },
+        create: {
+          seriesId: series.id,
+          title: `Florida SNAP — Digits ${rawExample} read as ${interpreted}`,
+          slug, 
+          category: 'STATE', 
+          dueAt: depositDate,
+          shortSummary: `Official Florida DCF deposit date for Case IDs where the 9th and 8th digits are interpreted as ${interpreted} (read backward).`,
+          scheduleRules: { 
+            interpretedDigit: interpreted, 
+            agency: 'Florida DCF (MyACCESS)' 
+          } as any
+        }
+      });
+    }
+    console.log(`📍 Month ${mk}/2026 Synchronized.`);
   }
 
-  console.log("✅ Florida Beachhead Fully Hydrated.");
+  console.log("✅ Florida Canonical Overhaul Complete.");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
-
-export {};
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });

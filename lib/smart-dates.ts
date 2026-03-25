@@ -189,3 +189,14 @@ export function toNewYorkCohort(value: string | null): NewYorkCohort | null {
   if (value === 'NYC_B_CYCLE') return 'NYC_B_CYCLE';
   return null;
 }
+
+/**
+ * 🛡️ FLORIDA NORMALIZATION ENGINE (M2C1 - V2)
+ * Strictly validates and reverses the 9th & 8th digits per DCF rules.
+ * @returns string (normalized) or null (if invalid)
+ */
+export function normalizeFloridaPair(raw: string): string | null {
+  const clean = raw.trim();
+  if (!/^\d{2}$/.test(clean)) return null;
+  return clean.split('').reverse().join('');
+}

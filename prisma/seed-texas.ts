@@ -1,113 +1,121 @@
 import { PrismaClient, TriggerType, DateOffsetStrategy, CohortType } from '@prisma/client';
+import { calculateSmartDate } from '../lib/smart-dates.js';
+
 const prisma = new PrismaClient();
 
 /**
- * 🛡️ THE VALIDATOR
- * Enforces numeric logic and ensures no ranges overlap.
+ * 🚀 DOCTOR STRANGE PROTOCOL: TEXAS CANONICAL SEED (V12)
+ * Strategy: Dual-Cohort 100-Digit Overhaul
+ * Inventory: 110 Rules + 1,320 Monthly Events
  */
-function validateTexasRules(rules: any[]) {
-  const sorted = [...rules].sort((a, b) => parseInt(a.start) - parseInt(b.start));
-  
-  for (let i = 0; i < sorted.length; i++) {
-    const r = sorted[i];
-    const startNum = parseInt(r.start);
-    const endNum = parseInt(r.end || r.start);
 
-    if (isNaN(startNum) || isNaN(endNum)) throw new Error(`Invalid non-numeric trigger: ${r.start}`);
-    if (startNum > endNum) throw new Error(`Reversed range detected: ${startNum} > ${endNum}`);
-    
-    if (i < sorted.length - 1) {
-      const nextStart = parseInt(sorted[i+1].start);
-      if (endNum >= nextStart) throw new Error(`Overlap detected: Range ${startNum}-${endNum} overlaps with next start ${nextStart}`);
-    }
-  }
-}
+const getTexasStandardDay = (digit: number) => {
+  const map: Record<number, number> = { 0: 1, 1: 3, 2: 5, 3: 6, 4: 7, 5: 9, 6: 11, 7: 12, 8: 13, 9: 15 };
+  return map[digit];
+};
+
+const getTexasModernDay = (digit: number) => {
+  if (digit <= 3) return 16; if (digit <= 6) return 17; if (digit <= 10) return 18;
+  if (digit <= 13) return 19; if (digit <= 17) return 20; if (digit <= 20) return 21;
+  if (digit <= 24) return 22; if (digit <= 27) return 23; if (digit <= 31) return 24;
+  if (digit <= 34) return 25; if (digit <= 38) return 26; if (digit <= 41) return 27;
+  if (digit <= 45) return 28; if (digit <= 49) return 27; if (digit <= 53) return 28;
+  if (digit <= 57) return 16; if (digit <= 60) return 17; if (digit <= 64) return 18;
+  if (digit <= 67) return 19; if (digit <= 71) return 20; if (digit <= 74) return 21;
+  if (digit <= 78) return 22; if (digit <= 81) return 23; if (digit <= 85) return 24;
+  if (digit <= 88) return 25; if (digit <= 92) return 26; if (digit <= 95) return 27;
+  return 28;
+};
 
 async function main() {
-  console.log("🚀 Starting Hardened & Corrected Texas Seed...");
+  console.log("🚀 Starting Texas Dual-Universe Synchronization...");
 
   const texas = await prisma.state.upsert({
     where: { abbreviation: "TX" },
-    update: { name: "Texas", slug: "texas" },
+    update: { slug: "texas" },
     create: { name: "Texas", slug: "texas", abbreviation: "TX" }
   });
 
   const snap = await prisma.program.findFirst({
     where: { stateId: texas.id, name: { contains: "SNAP", mode: "insensitive" } }
   });
+  if (!snap) throw new Error("❌ SNAP program not found for Texas.");
 
-  if (!snap) throw new Error("❌ SNAP program not found for Texas. Ensure base seeds ran.");
+  console.log("🧹 Cleaning old Texas rules...");
+  await prisma.rule.deleteMany({ where: { programId: snap.id } });
 
-  // 1. DATASETS: Corrected for 2026 Stagger Logic
-  // Pre-June 2020: 10-day cycle based on last digit (0-9)
-  const preRules = [
-    { start: "0", end: "0", day: 1 }, { start: "1", end: "1", day: 2 }, 
-    { start: "2", end: "2", day: 3 }, { start: "3", end: "3", day: 4 },
-    { start: "4", end: "4", day: 5 }, { start: "5", end: "5", day: 6 },
-    { start: "6", end: "6", day: 7 }, { start: "7", end: "7", day: 8 },
-    { start: "8", end: "8", day: 9 }, { start: "9", end: "9", day: 10 }
-  ];
+  // 1. Seed 10 Standard Rules (Digits 0-9)
+  for (let i = 0; i <= 9; i++) {
+    await prisma.rule.create({
+      data: {
+        programId: snap.id,
+        triggerType: TriggerType.CASE_DIGIT,
+        triggerStart: i.toString(), triggerEnd: i.toString(),
+        baseDay: getTexasStandardDay(i),
+        offsetStrategy: DateOffsetStrategy.PREVIOUS_BUSINESS_DAY,
+        cohortKey: CohortType.PRE_JUNE_2020
+      }
+    });
+  }
 
-  // Post-June 2020: 10-day cycle based on last TWO digits (00-99)
-  // 🚀 FIXED: Digit '00' now maps to Day 1, ensuring April 1st delivery.
-  const postRules = [
-    { start: "00", end: "09", day: 1 },
-    { start: "10", end: "19", day: 2 },
-    { start: "20", end: "29", day: 3 },
-    { start: "30", end: "39", day: 4 },
-    { start: "40", end: "49", day: 5 },
-    { start: "50", end: "59", day: 6 },
-    { start: "60", end: "69", day: 7 },
-    { start: "70", end: "79", day: 8 },
-    { start: "80", end: "89", day: 9 },
-    { start: "90", end: "99", day: 10 }
-  ];
+  // 2. Seed 100 Modern Rules (Digits 00-99)
+  for (let i = 0; i <= 99; i++) {
+    const d = i.toString().padStart(2, '0');
+    await prisma.rule.create({
+      data: {
+        programId: snap.id,
+        triggerType: TriggerType.CASE_DIGIT,
+        triggerStart: d, triggerEnd: d,
+        baseDay: getTexasModernDay(i),
+        offsetStrategy: DateOffsetStrategy.PREVIOUS_BUSINESS_DAY,
+        cohortKey: CohortType.POST_JUNE_2020
+      }
+    });
+  }
 
-  // 2. VALIDATE
-  validateTexasRules(preRules);
-  validateTexasRules(postRules);
-
-  // 3. CLEAN & INJECT
-  await prisma.rule.deleteMany({ 
-    where: { 
-      programId: snap.id,
-      cohortKey: { in: [CohortType.PRE_JUNE_2020, CohortType.POST_JUNE_2020] }
-    } 
+  const series = await prisma.eventSeries.upsert({
+    where: { slugBase: `texas-snap-2026` },
+    update: {},
+    create: { title: "Texas SNAP Lone Star Schedule 2026", slugBase: `texas-snap-2026`, category: 'STATE' as any }
   });
 
-  console.log("Seeding Corrected PRE-2020 rules...");
-  for (const r of preRules) {
-    await prisma.rule.create({
-      data: {
-        programId: snap.id,
-        cohortKey: CohortType.PRE_JUNE_2020,
-        triggerType: TriggerType.CASE_DIGIT,
-        triggerStart: r.start,
-        triggerEnd: r.end,
-        baseDay: r.day,
-        offsetStrategy: DateOffsetStrategy.PREV_BUSINESS_DAY
-      }
-    });
-  }
+  for (const m of Array.from({ length: 12 }, (_, i) => i + 1)) {
+    const mk = m.toString().padStart(2, '0');
+    
+    // Generate Standard Events
+    for (let i = 0; i <= 9; i++) {
+      const depositDate = calculateSmartDate({ baseDay: getTexasStandardDay(i), offsetStrategy: 'PREVIOUS_BUSINESS_DAY' as any }, m, 2026);
+      const slug = `texas-snap-standard-d${i}-m${mk}-2026`;
+      await prisma.event.upsert({
+        where: { slug },
+        update: { dueAt: depositDate },
+        create: {
+          seriesId: series.id, title: `Texas SNAP (Legacy Group - Digit ${i})`,
+          slug, category: 'STATE' as any, dueAt: depositDate,
+          shortSummary: `Deposit date for Texas SNAP cases certified BEFORE June 2020 with EDG ending in ${i}.`,
+          scheduleRules: { digit: i, cohort: 'STANDARD' } as any
+        }
+      });
+    }
 
-  console.log("Seeding Corrected POST-2020 rules...");
-  for (const r of postRules) {
-    await prisma.rule.create({
-      data: {
-        programId: snap.id,
-        cohortKey: CohortType.POST_JUNE_2020,
-        triggerType: TriggerType.CASE_DIGIT,
-        triggerStart: r.start,
-        triggerEnd: r.end,
-        baseDay: r.day,
-        offsetStrategy: DateOffsetStrategy.PREV_BUSINESS_DAY
-      }
-    });
+    // Generate Modern Events
+    for (let i = 0; i <= 99; i++) {
+      const d = i.toString().padStart(2, '0');
+      const depositDate = calculateSmartDate({ baseDay: getTexasModernDay(i), offsetStrategy: 'PREVIOUS_BUSINESS_DAY' as any }, m, 2026);
+      const slug = `texas-snap-modern-d${d}-m${mk}-2026`;
+      await prisma.event.upsert({
+        where: { slug },
+        update: { dueAt: depositDate },
+        create: {
+          seriesId: series.id, title: `Texas SNAP (Modern Group - Digits ${d})`,
+          slug, category: 'STATE' as any, dueAt: depositDate,
+          shortSummary: `Deposit date for Texas SNAP cases certified AFTER June 2020 with EDG ending in ${d}.`,
+          scheduleRules: { digit: d, cohort: 'MODERN' } as any
+        }
+      });
+    }
+    console.log(`📍 Texas Month ${mk}/2026 Synchronized.`);
   }
-
-  console.log("✅ Texas Data Integrity Corrected & Seeded.");
 }
 
-main()
-  .catch(e => { console.error("❌ SEED FAILED:", e.message); process.exit(1); })
-  .finally(async () => { await prisma.$disconnect(); });
+main().catch(e => { console.error(e); process.exit(1); }).finally(async () => { await prisma.$disconnect(); });

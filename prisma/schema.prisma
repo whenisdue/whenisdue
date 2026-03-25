@@ -116,6 +116,9 @@ enum TriggerType {
   ALPHABETIC_RANGE
   SSN_LAST_FOUR
   MONTHLY_STATIC
+  MONTH_SPECIFIC
+  WEEK_NUMBER
+  NUMERIC_RANGE
 }
 
 enum DateOffsetStrategy {
@@ -123,6 +126,10 @@ enum DateOffsetStrategy {
   NEXT_BUSINESS_DAY
   NEAREST_BUSINESS_DAY
   EXACT_CALENDAR_DATE
+  PREVIOUS_BUSINESS_DAY
+  NO_SHIFT
+  WEEKEND_SENSITIVE
+  BUSINESS_DAY_STAGGER
 }
 
 enum CohortType {
@@ -132,6 +139,7 @@ enum CohortType {
   NYC_B_CYCLE
   UPSTATE
   STANDARD
+  GEORGIA_STANDARD
 }
 
 // ==========================================
@@ -347,32 +355,32 @@ model EventSubmission {
 // ==========================================
 
 model Subscriber {
-  id               String         @id @default(cuid())
-  email            String         @unique
-  normalizedEmail  String         @unique
-  verifiedEmail    String?
-  emailVerifiedAt  DateTime?
-  unsubscribedAt   DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  subscriptions    Subscription[]
+  id              String         @id @default(cuid())
+  email           String         @unique
+  normalizedEmail String         @unique
+  verifiedEmail   String?
+  emailVerifiedAt DateTime?
+  unsubscribedAt  DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  subscriptions   Subscription[]
 }
 
 model Subscription {
-  id               String   @id @default(cuid())
-  subscriberId     String
-  stateCode        String   
-  programCode      String   
-  identifierValue  String   
-  status           SubscriptionStatus @default(ACTIVE)
+  id              String   @id @default(cuid())
+  subscriberId    String
+  stateCode       String   
+  programCode     String   
+  identifierValue String   
+  status          SubscriptionStatus @default(ACTIVE)
   
-  nextDepositDate  DateTime @db.Date 
+  nextDepositDate DateTime @db.Date 
   
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
-  subscriber       Subscriber         @relation(fields: [subscriberId], references: [id])
-  decisions        NotificationDecisionAudit[]
+  subscriber      Subscriber         @relation(fields: [subscriberId], references: [id])
+  decisions       NotificationDecisionAudit[]
 
   @@unique([subscriberId, stateCode, programCode, identifierValue], name: "subscription_identity_key")
   @@index([subscriberId])
@@ -497,7 +505,7 @@ model NotificationDecisionAudit {
   metadata           Json?              
 
   createdAt          DateTime            @default(now())
-  subscription       Subscription       @relation(fields: [subscriptionId], references: [id])
+  subscription       Subscription        @relation(fields: [subscriptionId], references: [id])
   outboxItem         NotificationOutbox?
 
   @@unique([subscriptionId, oldEventId, newEventId], name: "decision_idempotency_idx")
