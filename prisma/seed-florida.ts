@@ -93,18 +93,19 @@ async function main() {
       await prisma.event.upsert({
         where: { slug },
         update: { dueAt: depositDate },
-        create: {
-          seriesId: series.id,
-          title: `Florida SNAP — Digits ${rawExample} read as ${interpreted}`,
-          slug, 
-          category: 'STATE', 
-          dueAt: depositDate,
-          shortSummary: `Official Florida DCF deposit date for Case IDs where the 9th and 8th digits are interpreted as ${interpreted} (read backward).`,
-          scheduleRules: { 
-            interpretedDigit: interpreted, 
-            agency: 'Florida DCF (MyACCESS)' 
-          } as any
-        }
+        // Look for this block and update the agency string
+create: {
+  seriesId: series.id,
+  title: `Florida SNAP — Digits ${rawExample} read as ${interpreted}`,
+  slug, 
+  category: 'STATE' as any, 
+  dueAt: depositDate,
+  shortSummary: `Official Florida DCF deposit date for Case IDs where the 9th and 8th digits are interpreted as ${interpreted} (read backward).`,
+  scheduleRules: { 
+    interpretedDigit: interpreted, 
+    agency: 'Florida DCF (MyACCESS)' // 🛡️ Fix: No longer Georgia!
+  } as any
+}
       });
     }
     console.log(`📍 Month ${mk}/2026 Synchronized.`);
