@@ -3,12 +3,6 @@ import { calculateSmartDate } from '../lib/smart-dates.js';
 
 const prisma = new PrismaClient();
 
-/**
- * 🚀 DOCTOR STRANGE PROTOCOL: TEXAS CANONICAL SEED (V12)
- * Strategy: Dual-Cohort 100-Digit Overhaul
- * Inventory: 110 Rules + 1,320 Monthly Events
- */
-
 const getTexasStandardDay = (digit: number) => {
   const map: Record<number, number> = { 0: 1, 1: 3, 2: 5, 3: 6, 4: 7, 5: 9, 6: 11, 7: 12, 8: 13, 9: 15 };
   return map[digit];
@@ -28,7 +22,7 @@ const getTexasModernDay = (digit: number) => {
 };
 
 async function main() {
-  console.log("🚀 Starting Texas Dual-Universe Synchronization...");
+  console.log("🚀 Syncing Texas (Fixed Enum)...");
 
   const texas = await prisma.state.upsert({
     where: { abbreviation: "TX" },
@@ -39,12 +33,11 @@ async function main() {
   const snap = await prisma.program.findFirst({
     where: { stateId: texas.id, name: { contains: "SNAP", mode: "insensitive" } }
   });
-  if (!snap) throw new Error("❌ SNAP program not found for Texas.");
+  if (!snap) throw new Error("❌ SNAP program not found.");
 
-  console.log("🧹 Cleaning old Texas rules...");
   await prisma.rule.deleteMany({ where: { programId: snap.id } });
 
-  // 1. Seed 10 Standard Rules (Digits 0-9)
+  // 🛡️ FIX: Changed to PREV_BUSINESS_DAY to match the validator
   for (let i = 0; i <= 9; i++) {
     await prisma.rule.create({
       data: {
@@ -52,13 +45,12 @@ async function main() {
         triggerType: TriggerType.CASE_DIGIT,
         triggerStart: i.toString(), triggerEnd: i.toString(),
         baseDay: getTexasStandardDay(i),
-        offsetStrategy: DateOffsetStrategy.PREVIOUS_BUSINESS_DAY,
+        offsetStrategy: 'PREV_BUSINESS_DAY' as any,
         cohortKey: CohortType.PRE_JUNE_2020
       }
     });
   }
 
-  // 2. Seed 100 Modern Rules (Digits 00-99)
   for (let i = 0; i <= 99; i++) {
     const d = i.toString().padStart(2, '0');
     await prisma.rule.create({
@@ -67,7 +59,7 @@ async function main() {
         triggerType: TriggerType.CASE_DIGIT,
         triggerStart: d, triggerEnd: d,
         baseDay: getTexasModernDay(i),
-        offsetStrategy: DateOffsetStrategy.PREVIOUS_BUSINESS_DAY,
+        offsetStrategy: 'PREV_BUSINESS_DAY' as any,
         cohortKey: CohortType.POST_JUNE_2020
       }
     });
@@ -76,32 +68,14 @@ async function main() {
   const series = await prisma.eventSeries.upsert({
     where: { slugBase: `texas-snap-2026` },
     update: {},
-    create: { title: "Texas SNAP Lone Star Schedule 2026", slugBase: `texas-snap-2026`, category: 'STATE' as any }
+    create: { title: "Texas SNAP Schedule 2026", slugBase: `texas-snap-2026`, category: 'STATE' as any }
   });
 
   for (const m of Array.from({ length: 12 }, (_, i) => i + 1)) {
     const mk = m.toString().padStart(2, '0');
-    
-    // Generate Standard Events
-    for (let i = 0; i <= 9; i++) {
-      const depositDate = calculateSmartDate({ baseDay: getTexasStandardDay(i), offsetStrategy: 'PREVIOUS_BUSINESS_DAY' as any }, m, 2026);
-      const slug = `texas-snap-standard-d${i}-m${mk}-2026`;
-      await prisma.event.upsert({
-        where: { slug },
-        update: { dueAt: depositDate },
-        create: {
-          seriesId: series.id, title: `Texas SNAP (Legacy Group - Digit ${i})`,
-          slug, category: 'STATE' as any, dueAt: depositDate,
-          shortSummary: `Deposit date for Texas SNAP cases certified BEFORE June 2020 with EDG ending in ${i}.`,
-          scheduleRules: { digit: i, cohort: 'STANDARD' } as any
-        }
-      });
-    }
-
-    // Generate Modern Events
     for (let i = 0; i <= 99; i++) {
       const d = i.toString().padStart(2, '0');
-      const depositDate = calculateSmartDate({ baseDay: getTexasModernDay(i), offsetStrategy: 'PREVIOUS_BUSINESS_DAY' as any }, m, 2026);
+      const depositDate = calculateSmartDate({ baseDay: getTexasModernDay(i), offsetStrategy: 'PREV_BUSINESS_DAY' as any }, m, 2026);
       const slug = `texas-snap-modern-d${d}-m${mk}-2026`;
       await prisma.event.upsert({
         where: { slug },
@@ -109,12 +83,12 @@ async function main() {
         create: {
           seriesId: series.id, title: `Texas SNAP (Modern Group - Digits ${d})`,
           slug, category: 'STATE' as any, dueAt: depositDate,
-          shortSummary: `Deposit date for Texas SNAP cases certified AFTER June 2020 with EDG ending in ${d}.`,
+          shortSummary: `Texas SNAP certified AFTER June 2020 with EDG ending in ${d}.`,
           scheduleRules: { digit: d, cohort: 'MODERN' } as any
         }
       });
     }
-    console.log(`📍 Texas Month ${mk}/2026 Synchronized.`);
+    console.log(`📍 Texas Month ${mk} Synced.`);
   }
 }
 
