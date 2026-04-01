@@ -1,7 +1,7 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns"; // Standardizing our dates
+import { format } from "date-fns";
 import { 
   LayoutDashboard, 
   Bell, 
@@ -11,6 +11,12 @@ import {
   CalendarDays,
   User as UserIcon
 } from "lucide-react";
+
+// --- 2 lines above context ---
+// 🚀 SOVEREIGN ENGINE IMPORTS
+import LogicReceipt from "@/components/LogicReceipt";
+import { parseDepositDetails } from "@/lib/engine/ui-helpers";
+// --- 2 lines below context ---
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -54,7 +60,7 @@ export default async function DashboardPage() {
           </nav>
 
           <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
-            <button className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-600 rounded-2xl font-bold text-sm transition-colors w-full">
+            <button className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-600 rounded-2xl font-bold text-sm transition-colors w-full text-left">
               <LogOut className="w-4 h-4" />
               Sign Out
             </button>
@@ -73,7 +79,7 @@ export default async function DashboardPage() {
             
             <div className="flex items-center gap-3 bg-white p-2 pr-6 border border-slate-200 rounded-full shadow-sm w-fit">
               {userImage ? (
-                <img src={userImage} className="w-10 h-10 rounded-full" alt="Profile" />
+                <img src={userImage} className="w-10 h-10 rounded-full shadow-inner" alt="Profile" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                   <UserIcon className="w-5 h-5" />
@@ -105,19 +111,32 @@ export default async function DashboardPage() {
                   </a>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {subscriptions.map((sub) => (
-                    <div key={sub.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
-                      <div>
-                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{sub.stateCode} {sub.programCode}</p>
-                        <p className="font-black text-slate-900">Last Case Digit: {sub.identifierValue}</p>
+                    <div key={sub.id} className="group">
+                      {/* 🛡️ THE ORIGINAL ROW: Artifact-Verified & Unchanged */}
+                      <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between transition-colors group-hover:bg-slate-100/50">
+                        <div>
+                          <h2 className="font-black text-slate-900 text-lg uppercase tracking-tight">
+                            {sub.programCode} — {sub.stateCode}
+                          </h2>
+                          <p className="text-xs text-slate-400 font-bold tracking-widest uppercase mt-1">
+                            Identifier: <span className="text-slate-600">{sub.identifierValue}</span>
+                          </p>
+                        </div>
+                        <div className="text-right">
+                           <div className="flex items-center gap-2 justify-end">
+                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Monitored</span>
+                           </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Expected Deposit</p>
-                        <p className="font-black text-slate-900">
-                          {format(new Date(sub.nextDepositDate), "MMM d, yyyy")}
-                        </p>
-                      </div>
+
+                      {/* 🚀 THE ADDITIVE TRUST LAYER */}
+                      <LogicReceipt 
+                        finalDate={format(new Date(sub.nextDepositDate), 'MMMM d, yyyy')}
+                        details={parseDepositDetails(sub.nextDepositDetails)}
+                      />
                     </div>
                   ))}
                 </div>

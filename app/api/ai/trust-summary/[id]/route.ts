@@ -16,10 +16,10 @@ async function fetchRawTrustVerdict(id: string) {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const rawVerdict = await fetchRawTrustVerdict(id);
     
     // 1. Enforce the Conflict-Collapse scoring rules

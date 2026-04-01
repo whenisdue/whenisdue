@@ -18,20 +18,23 @@ async function runSeed() {
     },
   ];
 
+  // web/scripts/seed-phase29.ts
+// --- SURGICAL REPLACEMENT START ---
   for (const s of newSeries) {
-    await prismaPhase29.series.upsert({
-      where: { seriesKey: s.key },
-      update: { occurrenceRule: s.rule },
+    await prismaPhase29.eventSeries.upsert({
+      where: { slugBase: s.key },
+      update: { description: s.rule },
       create: {
-        seriesKey: s.key,
-        canonicalName: s.name,
-        entityName: s.entity,
-        frequency: 'MONTHLY',
-        occurrenceRule: s.rule
+        slugBase: s.key,
+        title: s.name,
+        sourceName: s.entity,
+        category: 'FEDERAL', 
+        description: s.rule
       }
     });
   }
-  console.log("✅ Phase 29 Series Seeded (OPM & VA).");
+// --- SURGICAL REPLACEMENT END ---
+//   console.log("✅ Phase 29 Series Seeded (OPM & VA).");
 }
 
 runSeed()

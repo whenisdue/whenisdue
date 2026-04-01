@@ -13,6 +13,47 @@ datasource db {
 // ENUMS
 // ==========================================
 
+enum IdentifierMatchType {
+  CASE_NUMBER_LAST_DIGIT
+  CASE_NUMBER_REMAINDER
+  LAST_NAME_INITIAL
+  BIRTH_DATE_DAY
+}
+
+enum DecisionReason {
+  SSN_LAST_DIGIT
+  SSN_LAST_TWO_DIGITS
+  CASE_NUMBER_LAST_DIGIT
+  CASE_NUMBER_LAST_TWO_DIGITS
+  CLIENT_ID_MODULO
+  NAME_ALPHABETICAL_GROUP
+  WEEKEND_SHIFT_FORWARD
+  WEEKEND_SHIFT_BACKWARD
+  FEDERAL_HOLIDAY_SHIFT_FORWARD
+  FEDERAL_HOLIDAY_SHIFT_BACKWARD
+  EARLY_ISSUANCE_PRE_HOLIDAY
+  FLORIDA_REVERSED_DIGIT_LOGIC
+  TEXAS_SPLIT_SCHEDULE
+  CALIFORNIA_COUNTY_BASED
+  NEW_YORK_BOROUGH_DISTRIBUTION
+  STATE_MANUAL_OVERRIDE
+  INITIAL_APPLICATION_ISSUANCE
+  EXPEDITED_BENEFITS
+  RETROACTIVE_BENEFITS
+  DISASTER_SNAP_DSNAP
+  SUPPLEMENTAL_BENEFIT
+  CORRECTIVE_ADJUSTMENT
+  BIRTH_DATE_RANGE
+  HOUSEHOLD_SIZE_GROUP
+  BENEFIT_GROUP_PHASE
+  GEOGRAPHIC_STAGGER
+  CASELOAD_DISTRIBUTION
+  SYSTEM_BATCH_PROCESSING
+  PAYMENT_CYCLE_STANDARD
+  MIGRATION_LEGACY_SYSTEM
+  MANUAL_ADMIN_OVERRIDE
+}
+
 enum EventCategory {
   FEDERAL
   STATE
@@ -126,7 +167,6 @@ enum DateOffsetStrategy {
   NEXT_BUSINESS_DAY
   NEAREST_BUSINESS_DAY
   EXACT_CALENDAR_DATE
-  PREVIOUS_BUSINESS_DAY
   NO_SHIFT
   WEEKEND_SENSITIVE
   BUSINESS_DAY_STAGGER
@@ -367,15 +407,19 @@ model Subscriber {
 }
 
 model Subscription {
-  id              String   @id @default(cuid())
+  id              String             @id @default(cuid())
   subscriberId    String
   stateCode       String   
   programCode     String   
   identifierValue String   
   status          SubscriptionStatus @default(ACTIVE)
   
-  nextDepositDate DateTime @db.Date 
+  nextDepositDate DateTime           @db.Date 
   
+  // 🚀 THE "WHY" UPGRADE
+  nextDepositReason  DecisionReason  @default(PAYMENT_CYCLE_STANDARD)
+  nextDepositDetails Json?           
+
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
@@ -447,12 +491,12 @@ model ScheduleRuleSet {
 }
 
 model CompilerRun {
-  id                 String   @id @default(cuid())
-  createdAt          DateTime @default(now())
-  compilerVersion    String
-  initiatedBy        String?
-  note               String?
-  paymentEvents      PaymentEvent[]
+  id                  String   @id @default(cuid())
+  createdAt           DateTime @default(now())
+  compilerVersion     String
+  initiatedBy         String?
+  note                String?
+  paymentEvents       PaymentEvent[]
   notificationAudits NotificationDecisionAudit[]
 }
 
@@ -475,6 +519,11 @@ model PaymentEvent {
   depositDate        DateTime
   identifierKind     String
   identifierMatch    String
+
+  // 🚀 THE "WHY" UPGRADE
+  reason             DecisionReason   @default(PAYMENT_CYCLE_STANDARD)
+  reasonDetails      Json?            
+
   isShifted          Boolean          @default(false)
   shiftCause         ShiftCause       @default(NONE)
   appliedPolicy      AppliedPolicy    @default(NO_SHIFT)
@@ -486,27 +535,27 @@ model PaymentEvent {
 }
 
 model NotificationDecisionAudit {
-  id                 String              @id @default(cuid())
-  subscriptionId     String
-  cycleKey           String              
-  notificationType   String              
-  channel            String              
-  persistenceReason  PersistenceReason  
+  id                  String               @id @default(cuid())
+  subscriptionId      String
+  cycleKey            String               
+  notificationType    String               
+  channel             String               
+  persistenceReason   PersistenceReason  
   
-  ruleSetVersionId   String
-  ruleSet            ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id])
-  compilerRunId      String
-  compilerRun        CompilerRun        @relation(fields: [compilerRunId], references: [id])
-  oldEventId         String?
-  oldEvent           PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id])
-  newEventId         String?
-  newEvent           PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
+  ruleSetVersionId    String
+  ruleSet             ScheduleRuleSet    @relation(fields: [ruleSetVersionId], references: [id])
+  compilerRunId       String
+  compilerRun         CompilerRun        @relation(fields: [compilerRunId], references: [id])
+  oldEventId          String?
+  oldEvent            PaymentEvent?      @relation("OldEvent", fields: [oldEventId], references: [id])
+  newEventId          String?
+  newEvent            PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
   
-  metadata           Json?              
+  metadata            Json?               
 
-  createdAt          DateTime            @default(now())
-  subscription       Subscription        @relation(fields: [subscriptionId], references: [id])
-  outboxItem         NotificationOutbox?
+  createdAt           DateTime             @default(now())
+  subscription        Subscription         @relation(fields: [subscriptionId], references: [id])
+  outboxItem          NotificationOutbox?
 
   @@unique([subscriptionId, oldEventId, newEventId], name: "decision_idempotency_idx")
   @@index([subscriptionId, cycleKey, notificationType, channel])
@@ -534,9 +583,9 @@ model NotificationOutbox {
 }
 
 model NotificationAttemptLog {
-  id                String             @id @default(cuid())
+  id                String         @id @default(cuid())
   outboxId          String
-  attemptedAt       DateTime           @default(now())
+  attemptedAt       DateTime       @default(now())
   outcome           AttemptOutcome
   errorMessage      String?
   providerMessageId String?

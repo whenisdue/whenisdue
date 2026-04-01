@@ -4,14 +4,15 @@ import {
   Subscription, 
   Subscriber, 
   Prisma,
-  SubscriptionStatus // Added for Enum Parity
+  SubscriptionStatus
 } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
+import { RULES_INVENTORY } from "../engine/rules";
+import { BenefitEngine } from "../engine/benefit-engine";
+import { IdentifierNormalization } from "../engine/normalization";
 
-const prisma = new PrismaClient();
-
-/** * =========================================================
+/**
  * OPERATION-SPECIFIC OUTCOME CONTRACTS
- * =========================================================
  */
 export type SubscribeOutcome = 
   | { type: 'SUCCESS'; data: Subscription }
@@ -40,8 +41,8 @@ export class SubscriptionService {
   constructor(private readonly logger: IntegrityLogger) {}
 
   /**
-   * REPAIR: Updated to use 'programCode' and 'identifierValue' 
-   * to match the Phase 9 schema.
+   * REPAIR: Updated to use deterministic BenefitEngine and 
+   * Boss State normalization (FL/TX).
    */
   async subscribe(input: {
     email: string;
@@ -50,6 +51,7 @@ export class SubscriptionService {
     matchType: IdentifierMatchType;
     rawInput: string;
   }): Promise<SubscribeOutcome> {
+    
     // 1. BOUNDARY SANITIZATION
     const normalizedEmail = input.email.toLowerCase().trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
@@ -57,36 +59,41 @@ export class SubscriptionService {
     }
 
     const stateCode = input.stateCode.toUpperCase().trim();
-    if (!/^[A-Z]{2}$/.test(stateCode)) {
-      return { type: 'INVALID_INPUT', message: 'Valid 2-letter state code required.' };
-    }
-
     const programCode = input.programCode.toUpperCase().trim();
-    if (!(CANONICAL_PROGRAM_LIST as readonly string[]).includes(programCode)) {
-      return { type: 'INVALID_INPUT', message: `Invalid program. Supported: ${CANONICAL_PROGRAM_LIST.join(', ')}` };
-    }
 
-    const canonicalResult = this.canonicalize(input.matchType, input.rawInput);
-    if (canonicalResult.type === 'INVALID_INPUT') return canonicalResult;
-    const matchCanonical = canonicalResult.value;
+    // 🚀 2. BOSS STATE NORMALIZATION
+    let matchCanonical: string;
+    try {
+      if (stateCode === 'FL') {
+        matchCanonical = IdentifierNormalization.forFlorida(input.rawInput);
+      } else if (stateCode === 'TX') {
+        matchCanonical = IdentifierNormalization.forTexas(input.rawInput);
+      } else {
+        const canonicalResult = this.canonicalize(input.matchType, input.rawInput);
+        if (canonicalResult.type === 'INVALID_INPUT') return canonicalResult;
+        matchCanonical = canonicalResult.value;
+      }
+    } catch (err: any) {
+      return { type: 'INVALID_INPUT', message: err.message };
+    }
 
     try {
       return await prisma.$transaction(async (tx) => {
-        // 2. ATOMIC IDENTITY RESOLUTION
+        // 3. ATOMIC IDENTITY RESOLUTION
         const subscriber = await tx.subscriber.upsert({
           where: { normalizedEmail },
           update: {}, 
           create: { email: input.email.trim(), normalizedEmail },
         });
 
-        // 3. LIFECYCLE CHECK (Using Phase 9 Property Names)
+        // 4. LIFECYCLE CHECK
         const existing = await tx.subscription.findUnique({
           where: {
-            subscription_identity_key: {
-              subscriberId: subscriber.id,
-              stateCode,
-              programCode,
-              identifierValue: matchCanonical,
+            subscription_identity_key: { 
+              subscriberId: subscriber.id, 
+              stateCode, 
+              programCode, 
+              identifierValue: matchCanonical 
             }
           },
         });
@@ -97,10 +104,19 @@ export class SubscriptionService {
             : { type: 'ALREADY_ACTIVE', data: existing };
         }
 
-        // 4. ATTEMPT CREATION
-        // STUB: Real derivation engine would provide the date
-        const nextDepositDate = new Date();
-        nextDepositDate.setMonth(nextDepositDate.getMonth() + 1);
+        // 5. RULE LOOKUP
+        const rule = RULES_INVENTORY.find(r => r.state === stateCode && r.program === programCode);
+        if (!rule) {
+          return { type: 'INVALID_INPUT', message: `Location ${stateCode} ${programCode} is not currently supported.` };
+        }
+
+        // 🛡️ 6. DEFENSE-IN-DEPTH VALIDATION
+        if (!rule.validate(matchCanonical)) {
+          return { type: 'INVALID_INPUT', message: `Identifier format is invalid for ${stateCode} ${programCode} rules.` };
+        }
+
+        // 🚀 7. DETERMINISTIC ENGINE RESOLUTION
+        const { date, details } = BenefitEngine.resolve(rule, matchCanonical);
 
         const newSub = await tx.subscription.create({
           data: {
@@ -108,34 +124,27 @@ export class SubscriptionService {
             stateCode,
             programCode,
             identifierValue: matchCanonical,
-            nextDepositDate,
+            nextDepositDate: date,
+            nextDepositReason: rule.reason,
+            nextDepositDetails: { ...details, ruleApplied: rule.reason },
             status: 'ACTIVE'
           },
         });
 
         return { type: 'SUCCESS', data: newSub };
       });
-    } catch (e) {
+    } catch (e: any) {
+      // 🚨 8. AUDITED CATCH PATH
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        this.logger.logAnomaly('CONCURRENCY_RACE_P2002', { 
-            normalizedEmail, stateCode, programCode, identifierValue: matchCanonical 
-        });
-
-        const winner = await prisma.subscription.findUnique({
-          where: { 
-            subscription_identity_key: {
-              subscriberId: (await prisma.subscriber.findUnique({ where: { normalizedEmail } }))?.id || '',
-              stateCode,
-              programCode,
-              identifierValue: matchCanonical
-            }
-          }
-        });
-
-        if (!winner) return { type: 'CONCURRENCY_ANOMALY', message: 'Race detected but no winner resolved.' };
-        return winner.status === 'PAUSED' ? { type: 'ALREADY_PAUSED', data: winner } : { type: 'ALREADY_ACTIVE', data: winner };
+        return { type: 'CONCURRENCY_ANOMALY', message: 'A subscription attempt is already in progress.' };
       }
-      throw e;
+
+      this.logger.logAnomaly('SUBSCRIPTION_ENGINE_FAILURE', { 
+        error: e.message, 
+        context: { stateCode, programCode, matchCanonical } 
+      });
+
+      throw e; 
     }
   }
 
