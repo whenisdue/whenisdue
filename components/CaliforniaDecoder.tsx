@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { calculateSmartDate } from '@/lib/smart-dates';
 import { format } from 'date-fns';
-import { Landmark, Info, ExternalLink, Search } from 'lucide-react';
+import { Landmark, Info, ExternalLink } from 'lucide-react';
 
 export default function CaliforniaDecoder({ rules }: { rules: any[] }) {
   const router = useRouter();
@@ -15,8 +15,10 @@ export default function CaliforniaDecoder({ rules }: { rules: any[] }) {
   const currentYear = 2026;
 
   useEffect(() => {
-    if (digits.length === 2) {
-      const matched = rules.find(r => r.triggerStart === digits);
+    // 🛡️ SOVEREIGN FIX: California only uses the LAST single digit
+    if (digits.length >= 1) {
+      const targetDigit = digits.slice(-1); 
+      const matched = rules.find(r => r.triggerStart === targetDigit);
       if (matched) {
         setResultDate(calculateSmartDate(matched, currentMonth, currentYear));
       }
@@ -26,9 +28,11 @@ export default function CaliforniaDecoder({ rules }: { rules: any[] }) {
   }, [digits, rules, currentMonth]);
 
   const handleDeepLink = () => {
-    if (digits.length === 2) {
+    if (digits.length >= 1) {
+      const targetDigit = digits.slice(-1);
       const monthKey = currentMonth.toString().padStart(2, '0');
-      const slug = `california-snap-d${digits}-m${monthKey}-${currentYear}`;
+      // 🚀 SLUG HARDENING: Force single-digit slug
+      const slug = `california-snap-d${targetDigit}-m${monthKey}-${currentYear}`;
       router.push(`/s/snap/${slug}`);
     }
   };
@@ -41,20 +45,20 @@ export default function CaliforniaDecoder({ rules }: { rules: any[] }) {
         </div>
         <div>
           <h3 className="text-xl font-black text-slate-900 leading-tight">CalFresh Finder</h3>
-          <p className="text-xs font-black text-orange-600 uppercase tracking-widest">100-Digit Model</p>
+          <p className="text-xs font-black text-orange-600 uppercase tracking-widest">Sovereign 1-Digit Model</p>
         </div>
       </div>
 
       <div className="space-y-4">
         <label className="text-xs font-black uppercase text-slate-500 tracking-widest px-1">
-          Last 2 Digits of Case ID
+          Last Digit of Case ID
         </label>
         <input
           type="text"
-          maxLength={2}
+          maxLength={1}
           value={digits}
           onChange={(e) => setDigits(e.target.value.replace(/\D/g, ''))}
-          placeholder="00"
+          placeholder="0"
           className="w-full bg-slate-50 border-4 border-slate-200 rounded-2xl p-6 text-5xl font-black text-slate-900 focus:border-orange-600 outline-none transition-all placeholder:text-slate-200"
         />
       </div>
@@ -64,7 +68,7 @@ export default function CaliforniaDecoder({ rules }: { rules: any[] }) {
           <div className="bg-orange-50 rounded-2xl p-5 text-center border-b-4 border-orange-100">
             <p className="text-[10px] font-black uppercase text-orange-500 mb-1 tracking-widest">California Rule</p>
             <p className="text-sm font-bold text-slate-800 leading-tight">
-              Digit <span className="text-orange-600 underline">{digits.slice(-1)}</span> determines your set date.
+              Digit <span className="text-orange-600 underline">{digits}</span> determines your set date.
             </p>
           </div>
 
