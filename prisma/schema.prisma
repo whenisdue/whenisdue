@@ -151,6 +151,14 @@ enum SubscriptionStatus {
   PAUSED
 }
 
+// 🚀 AEO ENHANCEMENT ENUM
+enum VerificationStatus {
+  PROVISIONAL
+  VERIFIED
+  OFFICIAL_API
+  COMMUNITY_CONSENSUS
+}
+
 // 🚀 CLARITY ENGINE ENUMS
 enum TriggerType {
   CASE_DIGIT
@@ -242,12 +250,12 @@ model ManualEvent {
 }
 
 model Resource {
-  id          String   @id @default(cuid())
-  stateId     String
-  state       State    @relation(fields: [stateId], references: [id])
-  type        String   
-  name        String
-  value       String
+  id      String @id @default(cuid())
+  stateId String
+  state   State  @relation(fields: [stateId], references: [id])
+  type    String 
+  name    String
+  value   String
 }
 
 // ==========================================
@@ -300,8 +308,13 @@ model Event {
   seoTitle         String?
   seoDescription   String?
   keywords         String?
-  sourceUrl        String?
+  sourceUrl         String?
   lastVerified     DateTime?
+
+  // 🚀 AEO ENHANCEMENTS
+  verificationStatus VerificationStatus @default(PROVISIONAL)
+  confidenceScore    Float              @default(0.5)
+
   shortSummary     String?
   whatToExpect     String?
   whereToWatch     String?
@@ -407,24 +420,24 @@ model Subscriber {
 }
 
 model Subscription {
-  id              String             @id @default(cuid())
-  subscriberId    String
-  stateCode       String   
-  programCode     String   
-  identifierValue String   
-  status          SubscriptionStatus @default(ACTIVE)
+  id               String              @id @default(cuid())
+  subscriberId     String
+  stateCode        String   
+  programCode      String   
+  identifierValue  String   
+  status           SubscriptionStatus @default(ACTIVE)
   
   nextDepositDate DateTime           @db.Date 
   
   // 🚀 THE "WHY" UPGRADE
   nextDepositReason  DecisionReason  @default(PAYMENT_CYCLE_STANDARD)
-  nextDepositDetails Json?           
+  nextDepositDetails Json?            
 
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  subscriber      Subscriber         @relation(fields: [subscriberId], references: [id])
-  decisions       NotificationDecisionAudit[]
+  subscriber       Subscriber         @relation(fields: [subscriberId], references: [id])
+  decisions        NotificationDecisionAudit[]
 
   @@unique([subscriberId, stateCode, programCode, identifierValue], name: "subscription_identity_key")
   @@index([subscriberId])
@@ -501,14 +514,14 @@ model CompilerRun {
 }
 
 model PaymentEvent {
-  id                 String           @id @default(cuid())
-  createdAt          DateTime         @default(now())
-  batchId            String
-  batch              CompilerRun      @relation(fields: [batchId], references: [id])
-  ruleSetId          String
-  ruleSet            ScheduleRuleSet  @relation(fields: [ruleSetId], references: [id])
+  id                  String           @id @default(cuid())
+  createdAt           DateTime         @default(now())
+  batchId             String
+  batch               CompilerRun      @relation(fields: [batchId], references: [id])
+  ruleSetId           String
+  ruleSet             ScheduleRuleSet  @relation(fields: [ruleSetId], references: [id])
   
-  recordedFrom       DateTime         @default(now())
+  recordedFrom       DateTime          @default(now())
   recordedTo         DateTime?
   
   stateCode          String
@@ -535,11 +548,11 @@ model PaymentEvent {
 }
 
 model NotificationDecisionAudit {
-  id                  String               @id @default(cuid())
+  id                  String                @id @default(cuid())
   subscriptionId      String
-  cycleKey            String               
-  notificationType    String               
-  channel             String               
+  cycleKey            String                
+  notificationType    String                
+  channel             String                
   persistenceReason   PersistenceReason  
   
   ruleSetVersionId    String
@@ -551,7 +564,7 @@ model NotificationDecisionAudit {
   newEventId          String?
   newEvent            PaymentEvent?      @relation("NewEvent", fields: [newEventId], references: [id])
   
-  metadata            Json?               
+  metadata            Json?                
 
   createdAt           DateTime             @default(now())
   subscription        Subscription         @relation(fields: [subscriptionId], references: [id])

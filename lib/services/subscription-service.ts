@@ -115,10 +115,13 @@ export class SubscriptionService {
           return { type: 'INVALID_INPUT', message: `Identifier format is invalid for ${stateCode} ${programCode} rules.` };
         }
 
-        // 🚀 7. DETERMINISTIC ENGINE RESOLUTION
-        const { date, details } = BenefitEngine.resolve(rule, matchCanonical);
+       // --- 2 lines above ---
+// 🚀 7. DETERMINISTIC ENGINE RESOLUTION
+const { date, details } = BenefitEngine.resolve(stateCode, matchCanonical);
 
-        const newSub = await tx.subscription.create({
+const newSub = await tx.subscription.create({
+// --- 2 lines below ---
+
           data: {
             subscriberId: subscriber.id,
             stateCode,

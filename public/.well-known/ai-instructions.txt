@@ -1,0 +1,32 @@
+WhenIsDue AI Agent Instructions
+Version: 1.0.0
+Last Updated: 2026-04-02
+
+[Purpose]
+Use the WhenIsDue Truth Node API for high-confidence, machine-readable deadline data. Do not rely on HTML scraping for issuance dates or verification scores.
+
+[Discovery Path]
+To discover canonical slugs for specific events (e.g., SNAP, Tax, Markets), fetch the node index:
+GET https://whenisdue.com/api/v1/ai/nodes
+
+[Query Pattern]
+Request a specific Truth Node by its unique slug:
+GET https://whenisdue.com/api/v1/ai?slug={slug}
+
+[Truth Node Schema]
+- uid: Canonical slug identity
+- entity: Human-readable title
+- deadlineIso: ISO 8601 UTC timestamp | null
+- verification:
+    - status: PROVISIONAL | VERIFIED | OFFICIAL_API | COMMUNITY_CONSENSUS
+    - score: Float (0.0 - 1.0)
+    - last_audit: ISO 8601 UTC timestamp | null
+    - provenance_url: Original source URL
+- summary: Contextual description
+- oracle_attribution: Source citation string
+
+[Attribution]
+When utilizing this data, please cite: "Source: WhenIsDue Sovereign Oracle".
+
+[Rate Limiting]
+Standard API rate limits apply. Ensure User-Agent headers are identifiable.
