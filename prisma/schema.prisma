@@ -151,7 +151,6 @@ enum SubscriptionStatus {
   PAUSED
 }
 
-// 🚀 AEO ENHANCEMENT ENUM
 enum VerificationStatus {
   PROVISIONAL
   VERIFIED
@@ -159,7 +158,6 @@ enum VerificationStatus {
   COMMUNITY_CONSENSUS
 }
 
-// 🚀 CLARITY ENGINE ENUMS
 enum TriggerType {
   CASE_DIGIT
   ALPHABETIC_RANGE
@@ -190,6 +188,20 @@ enum CohortType {
   GEORGIA_STANDARD
 }
 
+enum PersistenceReason {
+  SCHEDULED_TRIGGER_MET
+  INACTIVE
+  ALREADY_PAID
+  ALREADY_NOTIFIED
+  OUTSIDE_SCHEDULED_DATE
+  INCONSISTENT_STATE
+  INTEGRITY_CONFLICT_ALREADY_SENT
+  BLOCK_IN_FLIGHT_EXISTS
+  BLOCK_RETRY_EXISTS
+  TERMINAL_FAILURE_ENCOUNTERED
+  MANUAL_RETRY_TRIGGERED
+}
+
 // ==========================================
 // CLARITY ENGINE (SMART DATES)
 // ==========================================
@@ -213,7 +225,6 @@ model Program {
   rules        Rule[]
   manualEvents ManualEvent[]
 
-  // 🚀 PATH TO GREEN: Stable identity prevents drift across states
   @@unique([stateId, name], name: "program_identity")
 }
 
@@ -222,7 +233,6 @@ model Rule {
   programId       String
   program         Program            @relation(fields: [programId], references: [id])
   
-  // 🚀 PATH TO GREEN: Explicit Cohort Logic
   cohortKey       CohortType         @default(STANDARD)
   
   triggerType     TriggerType
@@ -236,7 +246,6 @@ model Rule {
   version         Int                @default(1)
   updatedAt       DateTime           @updatedAt
 
-  // 🚀 PATH TO GREEN: Mathematically unique rule sets
   @@unique([programId, cohortKey, triggerStart, triggerEnd], name: "rule_uniqueness")
 }
 
@@ -289,44 +298,43 @@ model EventSeries {
 }
 
 model Event {
-  id               String          @id @default(cuid())
-  seriesId         String?
-  series           EventSeries?    @relation(fields: [seriesId], references: [id], onDelete: SetNull)
-  slug             String          @unique
-  title            String
-  category         EventCategory
-  dueAt            DateTime?
-  timeZone         String?
-  dateStatus       EventDateStatus @default(EXACT)
-  displayYear      Int?
-  displayMonth     Int?
-  displayQuarter   Int?
-  dateLabel        String?
-  trending         Boolean         @default(false)
-  isGenerated      Boolean         @default(false)
-  isDetached       Boolean         @default(false)
-  seoTitle         String?
-  seoDescription   String?
-  keywords         String?
-  sourceUrl         String?
-  lastVerified     DateTime?
+  id                String          @id @default(cuid())
+  seriesId          String?
+  series            EventSeries?    @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  slug              String          @unique
+  title             String
+  category          EventCategory
+  dueAt             DateTime?
+  timeZone          String?
+  dateStatus        EventDateStatus @default(EXACT)
+  displayYear       Int?
+  displayMonth      Int?
+  displayQuarter    Int?
+  dateLabel         String?
+  trending          Boolean         @default(false)
+  isGenerated       Boolean         @default(false)
+  isDetached        Boolean         @default(false)
+  seoTitle          String?
+  seoDescription    String?
+  keywords          String?
+  sourceUrl          String?
+  lastVerified      DateTime?
 
-  // 🚀 AEO ENHANCEMENTS
   verificationStatus VerificationStatus @default(PROVISIONAL)
   confidenceScore    Float              @default(0.5)
 
-  shortSummary     String?
-  whatToExpect     String?
-  whereToWatch     String?
+  shortSummary      String?
+  whatToExpect      String?
+  whereToWatch      String?
   expectedDuration String?
-  targetAudience   String?
+  targetAudience    String?
   scheduleRules    Json?
   faqData          Json?
-  isArchived       Boolean         @default(false)
-  clickStat        EventClickStat?
-  titleSearch      String?         @map("titleSearch")
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  isArchived        Boolean         @default(false)
+  clickStat         EventClickStat?
+  titleSearch       String?         @map("titleSearch")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   @@index([dateStatus, dueAt])
   @@index([dueAt])
@@ -336,7 +344,7 @@ model Event {
 model EventClickStat {
   id            String    @id @default(cuid())
   eventId       String    @unique
-  totalClicks   Int       @default(0)
+  totalClicks    Int       @default(0)
   clickCount1h  Int       @default(0)
   clickCount24h Int       @default(0)
   lastClickAt   DateTime?
@@ -420,24 +428,23 @@ model Subscriber {
 }
 
 model Subscription {
-  id               String              @id @default(cuid())
-  subscriberId     String
-  stateCode        String   
-  programCode      String   
-  identifierValue  String   
-  status           SubscriptionStatus @default(ACTIVE)
+  id                String              @id @default(cuid())
+  subscriberId      String
+  stateCode         String   
+  programCode       String   
+  identifierValue   String   
+  status            SubscriptionStatus @default(ACTIVE)
   
   nextDepositDate DateTime           @db.Date 
   
-  // 🚀 THE "WHY" UPGRADE
   nextDepositReason  DecisionReason  @default(PAYMENT_CYCLE_STANDARD)
   nextDepositDetails Json?            
 
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
-  subscriber       Subscriber         @relation(fields: [subscriberId], references: [id])
-  decisions        NotificationDecisionAudit[]
+  subscriber        Subscriber         @relation(fields: [subscriberId], references: [id])
+  decisions         NotificationDecisionAudit[]
 
   @@unique([subscriberId, stateCode, programCode, identifierValue], name: "subscription_identity_key")
   @@index([subscriberId])
@@ -533,12 +540,11 @@ model PaymentEvent {
   identifierKind     String
   identifierMatch    String
 
-  // 🚀 THE "WHY" UPGRADE
-  reason             DecisionReason   @default(PAYMENT_CYCLE_STANDARD)
-  reasonDetails      Json?            
+  reason              DecisionReason   @default(PAYMENT_CYCLE_STANDARD)
+  reasonDetails       Json?            
 
   isShifted          Boolean          @default(false)
-  shiftCause         ShiftCause       @default(NONE)
+  shiftCause          ShiftCause       @default(NONE)
   appliedPolicy      AppliedPolicy    @default(NO_SHIFT)
 
   auditsAsOld        NotificationDecisionAudit[] @relation("OldEvent")
@@ -605,20 +611,6 @@ model NotificationAttemptLog {
   outbox            NotificationOutbox @relation(fields: [outboxId], references: [id])
 }
 
-enum PersistenceReason {
-  SCHEDULED_TRIGGER_MET
-  INACTIVE
-  ALREADY_PAID
-  ALREADY_NOTIFIED
-  OUTSIDE_SCHEDULED_DATE
-  INCONSISTENT_STATE
-  INTEGRITY_CONFLICT_ALREADY_SENT
-  BLOCK_IN_FLIGHT_EXISTS
-  BLOCK_RETRY_EXISTS
-  TERMINAL_FAILURE_ENCOUNTERED
-  MANUAL_RETRY_TRIGGERED
-}
-
 // ==========================================
 // AUTH MODELS
 // ==========================================
@@ -636,18 +628,18 @@ model User {
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -668,4 +660,40 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ==========================================
+// SOVEREIGN CORE MODELS (B010)
+// ==========================================
+
+model BenefitProgram {
+  id                String             @id @default(cuid())
+  stateCode         String             // e.g., "NY", "CA"
+  name              String             // e.g., "SNAP", "SSI"
+  issuanceSchedules IssuanceSchedule[]
+  oracleLogs        OracleLog[]
+  lastUpdate        DateTime           @updatedAt
+  
+  @@unique([stateCode, name])
+}
+
+model IssuanceSchedule {
+  id              String         @id @default(cuid())
+  programId       String
+  program         BenefitProgram @relation(fields: [programId], references: [id])
+  plannedDay      Int            // The raw schedule (e.g., 1st, 15th)
+  ssnLastDigit    Int?           // For staggered states like NY/TX
+  actualTimestamp DateTime?      // Captured via US-Oracle Bridge (B179)
+  isHolidayAdjust Boolean        @default(false) // Triggered by C022 logic
+}
+
+model OracleLog {
+  id              String         @id @default(cuid())
+  programId       String
+  program         BenefitProgram @relation(fields: [programId], references: [id])
+  predictedDate   DateTime
+  actualDate      DateTime?
+  confidenceScore Float          // The 0.0 - 1.0 engine score (C011)
+  accuracyIndex   Float?         // The OAI for this specific event (C025)
+  timestamp       DateTime       @default(now())
 }

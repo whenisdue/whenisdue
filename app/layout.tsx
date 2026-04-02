@@ -3,6 +3,7 @@ import "./globals.css";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { SovereignProvider } from "@/providers";
 
 export const metadata: Metadata = {
   title: "WhenIsDue | 2026 Food Benefits & EBT Payment Dates",
@@ -16,17 +17,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased bg-slate-50">
-        <Header />
-        
-        {/* 🚀 FIXED: pt-20 ensures hero content isn't hidden under the fixed header */}
-        <div className="pt-20 min-h-screen">
-          {children}
-        </div>
+      {/* Topic B190: tabular-nums ensures EBT/SNAP amounts don't jitter on update */}
+      <body className="antialiased tabular-nums">
+        {/* Topic B177: Managed theme state with zero-CLS variable injection */}
+        <SovereignProvider>
+          <Header />
+          
+          {/* 🚀 FIXED: pt-20 ensures hero content isn't hidden under the fixed header */}
+          <div className="pt-20 min-h-screen">
+            {children}
+          </div>
 
-        <Footer />
+          <Footer />
+        </SovereignProvider>
+        
+        <GoogleAnalytics gaId="G-XX24XLLQRG" />
       </body>
-      <GoogleAnalytics gaId="G-XX24XLLQRG" />
     </html>
   );
 }

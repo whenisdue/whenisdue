@@ -1,0 +1,29 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+/**
+ * @description According to Topic B187: Sovereign Geo-Routing (SGR).
+ * Intercepts US users at the Edge and rewrites them to state-specific fragments.
+ * Eliminates "Redirection Tax" to maintain the sub-10ms latency mandate.
+ */
+export function middleware(request: NextRequest) {
+  // 1. THE 10X MOVE: Augmenting Request with Edge-Geo Metadata (Topic B187)
+  const req = request as NextRequest & { geo?: { country?: string; region?: string } };
+  const { nextUrl: url, geo } = req;
+  
+  const country = geo?.country || 'US';
+  const state = geo?.region?.toLowerCase() || 'global';
+  
+  // Protect the sub-10ms mandate: Only intercept the main dashboard entry
+  if (country === 'US' && state !== 'global' && url.pathname === '/dashboard') {
+    // 2. THE 10X MOVE: Internal Rewrite (No browser-side redirect)
+    url.pathname = `/fragments/${state}/snap`;
+    return NextResponse.rewrite(url);
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/dashboard', '/fragments/:path*'],
+};
