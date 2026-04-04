@@ -57,21 +57,41 @@ export function validateRulesForState(stateSlug: string, rawRules: RawRule[]): P
   }
 }
 
+// --- SURGICAL REPLACEMENT: DIAGNOSTIC NORMALIZER (D107.4) ---
+// Locate the 'normalizeNumericRule' function and replace it with this version:
+
 function normalizeNumericRule(r: RawRule, stateSlug: string): NumericRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
-  if (!strategy) return null;
+
+  if (!strategy) {
+    console.error(`[ENGINE][${stateSlug}] DROP: Invalid Strategy -> "${r.offsetStrategy}"`);
+    return null;
+  }
 
   const cleanStart = r.triggerStart.trim();
   const cleanEnd = r.triggerEnd?.trim() || null;
 
-  if (!/^\d+$/.test(cleanStart)) return null;
-  if (cleanEnd && !/^\d+$/.test(cleanEnd)) return null;
+  if (!/^\d+$/.test(cleanStart)) {
+    console.error(`[ENGINE][${stateSlug}] DROP: Non-numeric Start -> "${cleanStart}"`);
+    return null;
+  }
+
+  if (cleanEnd && !/^\d+$/.test(cleanEnd)) {
+    console.error(`[ENGINE][${stateSlug}] DROP: Non-numeric End -> "${cleanEnd}"`);
+    return null;
+  }
 
   const baseDay = Number(r.baseDay);
-  if (!Number.isFinite(baseDay) || baseDay < 1 || baseDay > 31) return null;
+  if (!Number.isFinite(baseDay) || baseDay < 1 || baseDay > 31) {
+    console.error(`[ENGINE][${stateSlug}] DROP: Invalid BaseDay -> ${baseDay}`);
+    return null;
+  }
 
   const txCohort = stateSlug === "texas" ? toTexasCohort(r.cohortKey) : null;
-  if (stateSlug === "texas" && !txCohort) return null;
+  if (stateSlug === "texas" && !txCohort) {
+    console.error(`[ENGINE][texas] DROP: Invalid Cohort -> "${r.cohortKey}"`);
+    return null;
+  }
 
   const width =
     stateSlug === "florida" || stateSlug === "georgia"
@@ -91,6 +111,7 @@ function normalizeNumericRule(r: RawRule, stateSlug: string): NumericRule | null
     cohortKey: txCohort,
   };
 }
+// --- END SURGICAL REPLACEMENT ---
 
 function validateNYUpstate(r: RawRule): NYUpstateRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);

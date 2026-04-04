@@ -89,11 +89,14 @@ export default async function StatePage({ params }: PageProps) {
     console.error(`[D107.3.1-H] Critical: Could not find abbreviation/code for ${stateSlug}`);
   }
 
-  // 2. Fetch the latest Active RuleSet from the Bitemporal Ledger
+  // --- SURGICAL REPLACEMENT: HARDENED BITEMPORAL BRIDGE ---
+// Locate 'const latestRuleSet' and replace down to the 'console.log'
+
+  // 1. Fetch the latest Active RuleSet from the Bitemporal Ledger
   const latestRuleSet = await prisma.scheduleRuleSet.findFirst({
     where: {
       identity: {
-        stateCode: targetStateCode,
+        stateCode: (state as any).abbreviation || (state as any).code,
         programCode: "SNAP"
       },
       status: "ACTIVE"
@@ -101,17 +104,20 @@ export default async function StatePage({ params }: PageProps) {
     orderBy: { validFrom: 'desc' }
   });
 
-  // 3. Robust Policy Mapping
+  // 2. Define Policy Mapping inside the component scope
   const policyMapping: Record<string, string> = {
     'PREVIOUS_BUSINESS_DAY': 'PREVIOUS_BUSINESS_DAY',
     'NEXT_BUSINESS_DAY': 'NEXT_BUSINESS_DAY',
     'NO_SHIFT': 'SAME_DAY',
-    'SAME_DAY': 'SAME_DAY'
+    'SAME_DAY': 'SAME_DAY',
+    'PREV_BUSINESS_DAY': 'PREVIOUS_BUSINESS_DAY',
+    'NEXT_BIZ_DAY': 'NEXT_BUSINESS_DAY'
   };
+
   const effectiveOffset = policyMapping[latestRuleSet?.holidayPolicy || ''] || 'SAME_DAY';
 
-  // 4. Map MasterSequenceJson to Engine Input
-  const rawRules: RuleQueryRow[] = (latestRuleSet?.masterSequenceJson as any[] || []).map(slice => ({
+  // 3. Map MasterSequenceJson to Engine Input
+  const rawRules: RuleQueryRow[] = (latestRuleSet?.masterSequenceJson as any[] || []).map((slice: any) => ({
     triggerStart: slice.identifierFrom || "",
     triggerEnd: slice.identifierTo || null,
     baseDay: Number(slice.nominalDepositDay),
@@ -122,6 +128,10 @@ export default async function StatePage({ params }: PageProps) {
       name: latestRuleSet?.sourceAuthority || "SNAP Food Benefits"
     }
   }));
+
+  console.log(`[D107.3.1-H] ${stateSlug.toUpperCase()} | Policy: ${effectiveOffset} | Rows: ${rawRules.length}`);
+
+// --- END SURGICAL REPLACEMENT ---
 
   console.log(`[D107.3.1-H] ${stateSlug.toUpperCase()} | Code: ${targetStateCode} | Policy: ${effectiveOffset} | Rows: ${rawRules.length}`);
   
