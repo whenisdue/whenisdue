@@ -25,11 +25,21 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
   const [resultDate, setResultDate] = useState<Date | null>(null);
   const [hasError, setHasError] = useState(false);
 
+  // --- SURGICAL REPLACEMENT: RANGED RULE MATCHING ---
   useEffect(() => {
     const interpreted = normalizeFloridaPair(digits);
     
     if (interpreted) {
-      const matchedRule = rules.find(r => r.triggerStart === interpreted);
+      const numericInput = parseInt(interpreted, 10);
+
+      // Find the rule where the input falls within the start and end range
+      const matchedRule = rules.find(r => {
+        const start = parseInt(r.triggerStart, 10);
+        // If triggerEnd is null, assume it's a single-digit exact match, otherwise use the range
+        const end = r.triggerEnd ? parseInt(r.triggerEnd, 10) : start;
+        return numericInput >= start && numericInput <= end;
+      });
+
       if (matchedRule) {
         setResultDate(calculateSmartDate(matchedRule, month, year));
         setHasError(false);
@@ -42,6 +52,7 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
       setHasError(digits.length === 2); 
     }
   }, [digits, rules, month, year]);
+  // --- END SURGICAL REPLACEMENT ---
 
   return (
     <div className="bg-white rounded-[2.5rem] border-4 border-slate-200 shadow-2xl p-8 max-w-md w-full flex flex-col gap-6">
