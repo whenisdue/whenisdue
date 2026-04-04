@@ -24,15 +24,27 @@ import PennsylvaniaDecoder from "@/components/PennsylvaniaDecoder";
 
 export const revalidate = 60;
 
-/**
- * 🚀 PATH TO GREEN: Strict Type Definitions
- */
-type TexasRule = TexasDecoderRule;
-type FloridaRule = FloridaDecoderRule;
-type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule | any; 
 type PageProps = {
   params: Promise<{ stateSlug: string }>;
 };
+
+/**
+ * 🏛️ METADATA ENGINE
+ */
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { stateSlug } = await params;
+  const state = getStateBySlug(stateSlug);
+  if (!state) return { title: "State Not Found" };
+
+  return {
+    title: `${state.name} 2026 Food Benefit Schedule | WhenIsDue`,
+    description: `Official 2026 ${state.name} SNAP/EBT deposit dates. Use our CalFresh and Texas EDG finders for precise benefit timing.`,
+  };
+}
+
+type TexasRule = TexasDecoderRule;
+type FloridaRule = FloridaDecoderRule;
+type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule | any; 
 
 type RawRule = {
   triggerStart: string;
@@ -44,7 +56,7 @@ type RawRule = {
 };
 
 const IntegrityError = () => (
-  <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl">
+  <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500">
     <h3 className="text-xl font-black mb-2 flex items-center gap-2">
       <AlertTriangle className="w-6 h-6" /> Integrity Error
     </h3>
@@ -54,7 +66,7 @@ const IntegrityError = () => (
   </div>
 );
 
-// --- VALIDATORS ---
+// --- VALIDATORS (AIRTIGHT RESTORATION) ---
 
 function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
@@ -77,12 +89,10 @@ function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule 
   
   if (stateSlug === 'california' || stateSlug === 'florida' || stateSlug === 'georgia') {
     if (r.triggerStart.length !== 2) return null;
-    return { ...r, baseDay, offsetStrategy: strategy };
   }
 
   if (stateSlug === 'pennsylvania') {
     if (r.triggerStart.length !== 1) return null;
-    return { ...r, baseDay, offsetStrategy: strategy };
   }
 
   return { ...r, baseDay, offsetStrategy: strategy };
@@ -94,8 +104,9 @@ function validateNYUpstate(r: RawRule): NYUpstateRule | null {
   if (cohort !== 'UPSTATE' || r.triggerType !== 'ALPHABETIC_RANGE' || !strategy) return null;
 
   const isLetter = (val: string) => /^[A-Z]$/i.test(val);
-  if (!isLetter(r.triggerStart)) return null;
-  if (r.triggerEnd && !isLetter(r.triggerEnd)) return null;
+  if (!isLetter(r.triggerStart) || (r.triggerEnd && !isLetter(r.triggerEnd))) return null;
+  
+  // RESTORED: baseDay Guard
   if (r.baseDay < 1 || r.baseDay > 31) return null;
 
   return {
@@ -109,34 +120,18 @@ function validateNYUpstate(r: RawRule): NYUpstateRule | null {
 
 function validateNYCity(r: RawRule): NYCityRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
-  
   if (r.triggerType !== 'MONTHLY_STATIC' || r.triggerStart !== 'STATIC' || !strategy) return null;
+  
+  // RESTORED: baseDay Guard
   if (r.baseDay < 1 || r.baseDay > 31) return null;
 
-  if (r.cohortKey === 'NYC_A_CYCLE') {
-    return { 
-      triggerStart: 'STATIC', 
-      triggerEnd: null, 
-      baseDay: r.baseDay, 
-      offsetStrategy: strategy, 
-      cohortKey: 'NYC_A_CYCLE' as const 
-    };
+  if (r.cohortKey === 'NYC_A_CYCLE' || r.cohortKey === 'NYC_B_CYCLE') {
+    return { triggerStart: 'STATIC', triggerEnd: null, baseDay: r.baseDay, offsetStrategy: strategy, cohortKey: r.cohortKey };
   }
-  
-  if (r.cohortKey === 'NYC_B_CYCLE') {
-    return { 
-      triggerStart: 'STATIC', 
-      triggerEnd: null, 
-      baseDay: r.baseDay, 
-      offsetStrategy: strategy, 
-      cohortKey: 'NYC_B_CYCLE' as const 
-    };
-  }
-
   return null;
 }
 
-// --- INTEGRITY PROOFS ---
+// --- INTEGRITY PROOFS (GROUND TRUTH HARDENING) ---
 
 function verifyTexasIntegrity(rules: TexasRule[]): boolean {
   const pre = rules.filter(r => r.cohortKey === 'PRE_JUNE_2020');
@@ -146,13 +141,11 @@ function verifyTexasIntegrity(rules: TexasRule[]): boolean {
     set.forEach(r => {
       const start = parseInt(r.triggerStart);
       const end = parseInt(r.triggerEnd || r.triggerStart);
-      for (let i = start; i <= end; i++) {
-        if (i >= 0 && i <= max) map[i]++;
-      }
+      for (let i = start; i <= end; i++) if (i >= 0 && i <= max) map[i]++;
     });
     return map.every(count => count === 1);
   };
-  return check(pre, 9) && check(post, 99);
+  return pre.length > 0 && post.length > 0 && check(pre, 9) && check(post, 99);
 }
 
 function verifyCaliforniaIntegrity(rules: any[]): boolean {
@@ -161,6 +154,26 @@ function verifyCaliforniaIntegrity(rules: any[]): boolean {
   rules.forEach(r => {
     const digit = parseInt(r.triggerStart);
     if (!isNaN(digit) && digit >= 0 && digit <= 99) map[digit]++;
+  });
+  return map.every(count => count === 1);
+}
+
+function verifyGeorgiaIntegrity(rules: any[]): boolean {
+  if (rules.length !== 100) return false;
+  const map = new Array(100).fill(0);
+  rules.forEach(r => {
+    const digit = parseInt(r.triggerStart);
+    if (!isNaN(digit) && digit >= 0 && digit <= 99) map[digit]++;
+  });
+  return map.every(count => count === 1);
+}
+
+function verifyPennsylvaniaIntegrity(rules: any[]): boolean {
+  if (rules.length !== 10) return false;
+  const map = new Array(10).fill(0);
+  rules.forEach(r => {
+    const digit = parseInt(r.triggerStart);
+    if (!isNaN(digit) && digit >= 0 && digit <= 9) map[digit]++;
   });
   return map.every(count => count === 1);
 }
@@ -197,28 +210,26 @@ export default async function StatePage({ params }: PageProps) {
   if (stateSlug === 'new-york') {
     nyUpstateRules = rawRules.map(r => validateNYUpstate(r as RawRule)).filter((r): r is NYUpstateRule => r !== null);
     nyCityRules = rawRules.map(r => validateNYCity(r as RawRule)).filter((r): r is NYCityRule => r !== null);
-    const upstateOk = verifyNewYorkUpstateIntegrity(nyUpstateRules);
-    const hasExactlyOneA = nyCityRules.filter(r => r.cohortKey === 'NYC_A_CYCLE').length === 1;
-    const hasExactlyOneB = nyCityRules.filter(r => r.cohortKey === 'NYC_B_CYCLE').length === 1;
-    isIntegrityOk = upstateOk && hasExactlyOneA && hasExactlyOneB;
+    isIntegrityOk = verifyNewYorkUpstateIntegrity(nyUpstateRules) && 
+                    nyCityRules.filter(r => r.cohortKey === 'NYC_A_CYCLE').length === 1 &&
+                    nyCityRules.filter(r => r.cohortKey === 'NYC_B_CYCLE').length === 1;
   } else if (stateSlug === 'california') {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
     isIntegrityOk = verifyCaliforniaIntegrity(flTxRules);
-  } else if (stateSlug === 'pennsylvania') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = flTxRules.length === 10;
-  } else if (stateSlug === 'georgia') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = flTxRules.length === 100; 
-  } else if (stateSlug === 'florida') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    // 🛡️ D070: Resilience Logic - Partial truth is better than a total blackout. 
-    isIntegrityOk = flTxRules.length > 0;
   } else if (stateSlug === 'texas') {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = flTxRules.length === 110;
+    isIntegrityOk = verifyTexasIntegrity(flTxRules as TexasRule[]);
+  } else if (stateSlug === 'georgia') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    isIntegrityOk = verifyGeorgiaIntegrity(flTxRules);
+  } else if (stateSlug === 'pennsylvania') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    isIntegrityOk = verifyPennsylvaniaIntegrity(flTxRules);
+  } else if (stateSlug === 'florida') {
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+    isIntegrityOk = flTxRules.length > 0;
   } else {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter((r): r is StateRule => r !== null);
+    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
   }
 
   const upcomingEvents = await prisma.event.findMany({
@@ -232,7 +243,6 @@ export default async function StatePage({ params }: PageProps) {
     <div className="min-h-screen bg-slate-50 font-sans">
       <section className="bg-slate-900 text-white pt-20 pb-32 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12">
-          
           <div className="space-y-8 flex-1">
             <div className="flex items-center gap-3">
               <div className="bg-blue-600 p-2 rounded-xl text-white"><MapPin className="w-5 h-5" /></div>
@@ -240,7 +250,7 @@ export default async function StatePage({ params }: PageProps) {
             </div>
             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">{state.name} <span className="text-slate-500">2026</span><br />Benefit Schedule</h1>
             
-            {/* 🚀 D100: Unified UI Logic. Decoder states show 'Truth' inside the card. */}
+            {/* BEHAVIOR REVERSION: Texas is no longer excluded from the hero card per original script */}
             {nextPayment && stateSlug !== 'california' && stateSlug !== 'new-york' && stateSlug !== 'florida' && (
               <div className="inline-flex items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm shadow-xl animate-in fade-in zoom-in duration-500">
                 <div>
@@ -262,7 +272,6 @@ export default async function StatePage({ params }: PageProps) {
                 {stateSlug === 'new-york' && <NewYorkDecoder upstateRules={nyUpstateRules} cityRules={nyCityRules} />}
               </>
             )}
-
             <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
               <BenefitAlerts stateName={state.name} variant="hero" />
             </div>
@@ -277,7 +286,6 @@ export default async function StatePage({ params }: PageProps) {
               <Calendar className="w-6 h-6 text-blue-600" /> Upcoming Issuance Window
             </h2>
           </div>
-          
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -297,7 +305,6 @@ export default async function StatePage({ params }: PageProps) {
             </table>
           </div>
         </div>
-
         {state.officialUrl && (
           <div className="p-10 rounded-[3rem] bg-blue-50 border-4 border-blue-100 space-y-6">
             <h3 className="text-2xl font-black text-slate-900 flex items-center gap-4"><Landmark className="w-8 h-8 text-blue-600" /> Official {state.name} Portal</h3>
