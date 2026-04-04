@@ -1,37 +1,38 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { calculateSmartDate } from '@/lib/smart-dates';
-import { format } from 'date-fns';
+import { format, setDate } from 'date-fns';
 import { Landmark, Info, ExternalLink } from 'lucide-react';
 
 export default function CaliforniaDecoder({ rules }: { rules: any[] }) {
   const router = useRouter();
   const [digits, setDigits] = useState('');
-  const [resultDate, setResultDate] = useState<Date | null>(null);
 
-  const currentMonth = new Date().getMonth() + 1;
+  const currentMonth = new Date().getMonth() + 1; // 4 (April)
   const currentYear = 2026;
 
-  useEffect(() => {
-    // 🛡️ SOVEREIGN FIX: California only uses the LAST single digit
-    if (digits.length >= 1) {
-      const targetDigit = digits.slice(-1); 
-      const matched = rules.find(r => r.triggerStart === targetDigit);
-      if (matched) {
-        setResultDate(calculateSmartDate(matched, currentMonth, currentYear));
-      }
-    } else {
-      setResultDate(null);
+  const resultDate = useMemo(() => {
+    if (digits.length < 1) return null;
+    const targetDigit = digits.slice(-1);
+    
+    // Attempt to find in database rules first
+    const matched = rules?.find(r => r.triggerStart === targetDigit);
+    if (matched) {
+      return calculateSmartDate(matched, currentMonth, currentYear);
     }
+
+    // Fallback: Standard California 1-Digit Logic (Digit = Day)
+    const day = targetDigit === '0' ? 10 : parseInt(targetDigit);
+    const baseDate = new Date(currentYear, currentMonth - 1, 1);
+    return setDate(baseDate, day);
   }, [digits, rules, currentMonth]);
 
   const handleDeepLink = () => {
     if (digits.length >= 1) {
       const targetDigit = digits.slice(-1);
       const monthKey = currentMonth.toString().padStart(2, '0');
-      // 🚀 SLUG HARDENING: Force single-digit slug
       const slug = `california-snap-d${targetDigit}-m${monthKey}-${currentYear}`;
       router.push(`/s/snap/${slug}`);
     }
@@ -65,23 +66,14 @@ export default function CaliforniaDecoder({ rules }: { rules: any[] }) {
 
       {resultDate && (
         <div className="space-y-4 animate-in zoom-in-95 duration-300">
-          <div className="bg-orange-50 rounded-2xl p-5 text-center border-b-4 border-orange-100">
-            <p className="text-[10px] font-black uppercase text-orange-500 mb-1 tracking-widest">California Rule</p>
-            <p className="text-sm font-bold text-slate-800 leading-tight">
-              Digit <span className="text-orange-600 underline">{digits}</span> determines your set date.
-            </p>
-          </div>
-
-          <button 
-            onClick={handleDeepLink}
-            className="w-full group"
-          >
-            <div className="bg-orange-600 rounded-[2.5rem] p-6 text-center shadow-xl hover:bg-orange-700 transition-all">
-              <p className="text-xs font-black uppercase text-orange-100 mb-1">Expected Deposit</p>
-              <p className="text-2xl font-black text-white">{format(resultDate, 'EEEE, MMM d')}</p>
-              <div className="mt-3 flex items-center justify-center gap-2 text-white/70 text-[10px] font-black uppercase tracking-widest">
+          <button onClick={handleDeepLink} className="w-full group text-left">
+            <div className="bg-orange-600 rounded-[2.5rem] p-8 text-white text-center shadow-2xl shadow-orange-500/20 hover:bg-orange-700 transition-all border-b-8 border-orange-800/50">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-200 mb-2">Sovereign Verification</p>
+              <p className="text-4xl font-black tracking-tighter mb-1">{format(resultDate, 'EEEE')}</p>
+              <p className="text-2xl font-black text-orange-100 opacity-90">{format(resultDate, 'MMMM d, yyyy')}</p>
+              <div className="mt-4 flex items-center justify-center gap-2 text-white/50 text-[10px] font-black uppercase tracking-widest">
                 <ExternalLink className="w-3 h-3" />
-                <span>View Full California Schedule</span>
+                <span>Expand Full Audit Trail</span>
               </div>
             </div>
           </button>

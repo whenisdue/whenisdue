@@ -1,8 +1,5 @@
 "use client";
 
-// --- REVISION: PREVENT BUILD-TIME PRERENDER COLLISION ---
-export const dynamic = "force-dynamic";
-
 import React, { useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { 
@@ -31,8 +28,7 @@ interface SovereignDashboardProps {
 }
 
 /**
- * 🏛️ SOVEREIGN VARIANTS
- * Defined outside the component to ensure strict type inference for Easing literals.
+ * @description Master variants with explicit typing to resolve Easing literal mismatch.
  */
 const containerVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -40,8 +36,8 @@ const containerVariants: Variants = {
     opacity: 1, 
     y: 0,
     transition: { 
-      staggerChildren: 0.1, 
-      duration: 0.4, 
+      staggerChildren: 0.15, 
+      duration: 0.5, 
       ease: "easeOut" 
     }
   }
@@ -52,7 +48,7 @@ const itemVariants: Variants = {
   visible: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.3 } 
+    transition: { duration: 0.4, ease: "easeOut" }
   }
 };
 
@@ -65,15 +61,14 @@ export default function SovereignDashboardClient({ user }: SovereignDashboardPro
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30">
-      {/* 1. STATUS BAR (E187) */}
+      {/* 1. STATUS BAR: STICKY AUTHORITY LAYER */}
       <div className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
           <h1 className="text-lg font-bold tracking-tighter uppercase">Singapore Core: C090</h1>
         </div>
         <div className="flex gap-6 text-[10px] font-mono text-slate-400">
-          {/* --- REVISION: OPTIONAL CHAINING TO PREVENT UNDEFINED CRASH --- */}
-          <span className="hidden md:inline font-bold text-nowrap">OPERATOR: {user?.name?.toUpperCase() || "UNIDENTIFIED"}</span>
+          <span className="hidden md:inline font-bold">OPERATOR: {user.name?.toUpperCase() || "UNIDENTIFIED"}</span>
           <span className="text-cyan-500">D100_FRESHNESS: {appState.dataFreshness}</span>
         </div>
       </div>
@@ -84,7 +79,7 @@ export default function SovereignDashboardClient({ user }: SovereignDashboardPro
         animate="visible"
         className="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-6"
       >
-        {/* 2. NATIONAL CRISIS HEATMAP (E200) */}
+        {/* 2. NATIONAL CRISIS HEATMAP (E200) - PROMOTED TO MOTION.SECTION */}
         <motion.section 
           variants={itemVariants}
           className="md:col-span-8 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group"
@@ -118,7 +113,7 @@ export default function SovereignDashboardClient({ user }: SovereignDashboardPro
           </div>
         </motion.section>
 
-        {/* 3. PHISHING CLONE SIGNATURE SYSTEM (E188) */}
+        {/* 3. PHISHING CLONE SIGNATURE SYSTEM (E188) - PROMOTED TO MOTION.SECTION */}
         <motion.section 
           variants={itemVariants}
           className="md:col-span-4 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between"
@@ -129,11 +124,11 @@ export default function SovereignDashboardClient({ user }: SovereignDashboardPro
               <h3 className="text-xs font-mono uppercase tracking-widest text-slate-400">Security E188</h3>
             </div>
             <p className="text-sm text-slate-300 leading-relaxed font-medium">
-              Real-time TLS Handshake monitoring active. ASN reputation mapping protecting all state portal links.
+              Real-time TLS Handshake monitoring active. ASN reputation mapping protecting all state portal links from 1099-skimming clones.
             </p>
           </div>
           <div className="mt-6 pt-6 border-t border-slate-800 flex justify-between text-xs font-mono">
-            <span className="text-emerald-400 font-bold">PORTAL_VERIFIED</span>
+            <span className="text-emerald-400 font-bold tracking-tighter">PORTAL_VERIFIED</span>
             <span className="text-slate-500">REF: D100-PSS</span>
           </div>
         </motion.section>
@@ -153,9 +148,9 @@ export default function SovereignDashboardClient({ user }: SovereignDashboardPro
         <motion.section variants={itemVariants} className="md:col-span-12 mt-4">
           <button 
             onClick={() => setAppState(s => ({ ...s, isScanning: !s.isScanning }))}
-            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-6 rounded-2xl flex items-center justify-center gap-4 transition-all active:scale-[0.98] shadow-lg shadow-cyan-900/20"
+            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-6 rounded-2xl flex items-center justify-center gap-4 transition-all active:scale-[0.98] shadow-lg shadow-cyan-900/20 group"
           >
-            <Camera size={24} />
+            <Camera size={24} className="group-hover:rotate-12 transition-transform" />
             <span className="tracking-widest uppercase">Initiate Optical Privacy Scan</span>
           </button>
         </motion.section>
@@ -164,18 +159,18 @@ export default function SovereignDashboardClient({ user }: SovereignDashboardPro
   );
 }
 
+/**
+ * @description Individual metric card using the sub-variant for staggered entrance.
+ */
 function MetricCard({ node, title, value, icon }: MetricCardProps) {
   return (
-    <motion.div 
-      variants={itemVariants}
-      className="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors"
-    >
+    <div className="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all hover:-translate-y-1">
       <div className="flex justify-between items-start mb-4">
         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-tighter">{node}</span>
         {icon}
       </div>
-      <h4 className="text-sm text-slate-400 font-bold">{title}</h4>
+      <h4 className="text-sm text-slate-400 font-bold tracking-tight">{title}</h4>
       <p className="text-2xl font-black text-white mt-1">{value}</p>
-    </motion.div>
+    </div>
   );
 }

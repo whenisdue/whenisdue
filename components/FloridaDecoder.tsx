@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { calculateSmartDate, normalizeFloridaPair } from '@/lib/smart-dates';
 import { format } from 'date-fns';
-import { Search, Info, ExternalLink, XCircle, AlertCircle } from 'lucide-react';
+import { Search, Info, ExternalLink, XCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 
 export type FloridaDecoderRule = {
   triggerStart: string;
@@ -26,7 +26,6 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    // 🛡️ Apply strict Florida reversal logic
     const interpreted = normalizeFloridaPair(digits);
     
     if (interpreted) {
@@ -40,12 +39,22 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
       }
     } else {
       setResultDate(null);
-      setHasError(digits.length === 2); // Error if 2 characters but not digits
+      setHasError(digits.length === 2); 
     }
   }, [digits, rules, month, year]);
 
   return (
     <div className="bg-white rounded-[2.5rem] border-4 border-slate-200 shadow-2xl p-8 max-w-md w-full flex flex-col gap-6">
+      {/* 🛡️ Topic D070: Partial Sync Warning */}
+      {rules.length !== 100 && (
+        <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl mb-4 flex items-center gap-3">
+          <AlertTriangle className="w-4 h-4 text-amber-500" />
+          <p className="text-[10px] font-black uppercase text-amber-600 tracking-tight">
+            Topic D070: Partial Sync Active. Verification in progress.
+          </p>
+        </div>
+      )}
+
       <div className="flex items-center gap-4">
         <div className="bg-blue-600 p-3 rounded-xl text-white shadow-lg">
           <Search className="w-6 h-6" />
@@ -72,7 +81,6 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
 
       {resultDate && (
         <div className="space-y-4 animate-in zoom-in-95 duration-300">
-          {/* 🛡️ COGNITIVE BRIDGE: Explicit Reading Rule */}
           <div className="bg-blue-50 rounded-2xl p-5 text-center border-b-4 border-blue-100">
             <p className="text-[10px] font-black uppercase text-blue-500 mb-1 tracking-widest">Florida Reading Rule</p>
             <p className="text-sm font-bold text-slate-800 leading-tight">
@@ -89,10 +97,12 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
             }}
             className="w-full group"
           >
-            <div className="bg-emerald-600 rounded-[2.5rem] p-6 text-center shadow-xl hover:bg-emerald-700 transition-all">
-              <p className="text-xs font-black uppercase text-emerald-100 mb-1">Estimated Deposit</p>
-              <p className="text-2xl font-black text-white">{format(resultDate, 'EEEE, MMM d')}</p>
-              <div className="mt-3 flex items-center justify-center gap-2 text-white/70 text-[10px] font-black uppercase tracking-widest">
+            {/* 🏛️ FGO UNIVERSAL RESULT STYLE */}
+            <div className="bg-blue-600 rounded-[2.5rem] p-8 text-white text-center shadow-2xl shadow-blue-500/20 hover:bg-blue-700 transition-all border-b-8 border-blue-800/50">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200 mb-2">Sovereign Verification</p>
+              <p className="text-4xl font-black tracking-tighter mb-1">{format(resultDate, 'EEEE')}</p>
+              <p className="text-2xl font-black text-blue-100 opacity-90">{format(resultDate, 'MMMM d, yyyy')}</p>
+              <div className="mt-4 flex items-center justify-center gap-2 text-white/50 text-[10px] font-black uppercase tracking-widest">
                 <ExternalLink className="w-3 h-3" />
                 <span>View Full Schedule Details</span>
               </div>

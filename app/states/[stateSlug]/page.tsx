@@ -75,13 +75,11 @@ function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule 
     return { ...r, baseDay, offsetStrategy: strategy, cohortKey: cohort } as TexasRule;
   }
   
-  // 🛡️ California/Florida/Georgia all now use 2-digit precision for the 100-digit overhaul
   if (stateSlug === 'california' || stateSlug === 'florida' || stateSlug === 'georgia') {
     if (r.triggerStart.length !== 2) return null;
     return { ...r, baseDay, offsetStrategy: strategy };
   }
 
-  // Pennsylvania uses 1-digit precision (0-9)
   if (stateSlug === 'pennsylvania') {
     if (r.triggerStart.length !== 1) return null;
     return { ...r, baseDay, offsetStrategy: strategy };
@@ -214,7 +212,8 @@ export default async function StatePage({ params }: PageProps) {
     isIntegrityOk = flTxRules.length === 100; 
   } else if (stateSlug === 'florida') {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = flTxRules.length === 100;
+    // 🛡️ D070: Resilience Logic - Partial truth is better than a total blackout. 
+    isIntegrityOk = flTxRules.length > 0;
   } else if (stateSlug === 'texas') {
     flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
     isIntegrityOk = flTxRules.length === 110;
@@ -241,8 +240,9 @@ export default async function StatePage({ params }: PageProps) {
             </div>
             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">{state.name} <span className="text-slate-500">2026</span><br />Benefit Schedule</h1>
             
-            {nextPayment && (
-              <div className="inline-flex items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm shadow-xl">
+            {/* 🚀 D100: Unified UI Logic. Decoder states show 'Truth' inside the card. */}
+            {nextPayment && stateSlug !== 'california' && stateSlug !== 'new-york' && stateSlug !== 'florida' && (
+              <div className="inline-flex items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm shadow-xl animate-in fade-in zoom-in duration-500">
                 <div>
                   <p className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1">Next Expected Deposit</p>
                   <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'EEEE, MMMM d')}</p>

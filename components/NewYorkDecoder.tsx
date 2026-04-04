@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { calculateSmartDate } from '@/lib/smart-dates';
 import { format } from 'date-fns';
-import { Search } from 'lucide-react';
+import { Search, Info } from 'lucide-react';
 import { NYUpstateRule, NYCityRule } from '@/lib/ny-types';
 
 type NYRulesProps = {
@@ -17,9 +17,12 @@ export default function NewYorkDecoder({ upstateRules, cityRules }: NYRulesProps
   const [initial, setInitial] = useState('');
 
   const resultDate = useMemo(() => {
+    const currentMonth = 4; // April 2026
+    const currentYear = 2026;
+
     if (region === 'NYC') {
       const rule = cityRules.find(r => r.cohortKey === cycle);
-      return rule ? calculateSmartDate(rule, 4, 2026) : null;
+      return rule ? calculateSmartDate(rule, currentMonth, currentYear) : null;
     }
 
     if (initial) {
@@ -29,7 +32,7 @@ export default function NewYorkDecoder({ upstateRules, cityRules }: NYRulesProps
         const end = (r.triggerEnd || r.triggerStart).charCodeAt(0);
         return charCode >= start && charCode <= end;
       });
-      return rule ? calculateSmartDate(rule, 4, 2026) : null;
+      return rule ? calculateSmartDate(rule, currentMonth, currentYear) : null;
     }
     return null;
   }, [region, cycle, initial, upstateRules, cityRules]);
@@ -84,10 +87,13 @@ export default function NewYorkDecoder({ upstateRules, cityRules }: NYRulesProps
       )}
 
       {resultDate && (
-        <div className="bg-blue-600 rounded-3xl p-8 text-white text-center shadow-xl shadow-blue-100">
-          <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Deposit Expected</p>
-          {/* 🚀 FIXED: Added EEEE for day name */}
-          <p className="text-4xl font-black tracking-tight">{format(resultDate, 'EEEE, MMMM d')}</p>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* 🏛️ FGO UNIVERSAL RESULT STYLE */}
+          <div className="bg-blue-600 rounded-[2.5rem] p-8 text-white text-center shadow-2xl shadow-blue-500/20 border-b-8 border-blue-800/50">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200 mb-2">Sovereign Verification</p>
+            <p className="text-4xl font-black tracking-tighter mb-1">{format(resultDate, 'EEEE')}</p>
+            <p className="text-2xl font-black text-blue-100 opacity-90">{format(resultDate, 'MMMM d, yyyy')}</p>
+          </div>
         </div>
       )}
     </div>
