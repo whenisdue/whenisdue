@@ -80,38 +80,52 @@ export default async function StatePage({ params }: PageProps) {
     notFound();
   }
 
-  // D107.2 diagnostic query: keyword filter removed to discover actual production program names.
-  const dbRules = await prisma.rule.findMany({
+  // --- SURGICAL REPLACEMENT: THE HARDENED BITEMPORAL BRIDGE ---
+  
+  // 1. Identify the State Code (Defensive Fallback)
+  const targetStateCode = (state as any).abbreviation || (state as any).code;
+  
+  if (!targetStateCode) {
+    console.error(`[D107.3.1-H] Critical: Could not find abbreviation/code for ${stateSlug}`);
+  }
+
+  // 2. Fetch the latest Active RuleSet from the Bitemporal Ledger
+  const latestRuleSet = await prisma.scheduleRuleSet.findFirst({
     where: {
-      program: {
-        state: { slug: stateSlug },
+      identity: {
+        stateCode: targetStateCode,
+        programCode: "SNAP"
       },
+      status: "ACTIVE"
     },
-    select: {
-      triggerStart: true,
-      triggerEnd: true,
-      baseDay: true,
-      offsetStrategy: true,
-      cohortKey: true,
-      triggerType: true,
-      program: { select: { name: true } },
-    },
+    orderBy: { validFrom: 'desc' }
   });
 
-  const rawRules: RuleQueryRow[] = dbRules.map((r) => ({
-    triggerStart: r.triggerStart,
-    triggerEnd: r.triggerEnd,
-    baseDay: r.baseDay,
-    offsetStrategy: r.offsetStrategy,
-    cohortKey: r.cohortKey,
-    triggerType: r.triggerType,
-    program: { name: r.program.name },
+  // 3. Robust Policy Mapping
+  const policyMapping: Record<string, string> = {
+    'PREVIOUS_BUSINESS_DAY': 'PREVIOUS_BUSINESS_DAY',
+    'NEXT_BUSINESS_DAY': 'NEXT_BUSINESS_DAY',
+    'NO_SHIFT': 'SAME_DAY',
+    'SAME_DAY': 'SAME_DAY'
+  };
+  const effectiveOffset = policyMapping[latestRuleSet?.holidayPolicy || ''] || 'SAME_DAY';
+
+  // 4. Map MasterSequenceJson to Engine Input
+  const rawRules: RuleQueryRow[] = (latestRuleSet?.masterSequenceJson as any[] || []).map(slice => ({
+    triggerStart: slice.identifierFrom || "",
+    triggerEnd: slice.identifierTo || null,
+    baseDay: Number(slice.nominalDepositDay),
+    offsetStrategy: effectiveOffset,
+    cohortKey: slice.cohortKey || null,
+    triggerType: "NUMERIC_RANGE",
+    program: {
+      name: latestRuleSet?.sourceAuthority || "SNAP Food Benefits"
+    }
   }));
 
-  const matchedPrograms = Array.from(new Set(rawRules.map((r) => r.program.name)));
-  console.log(
-    `[D107.2] ${stateSlug.toUpperCase()} | Programs: ${matchedPrograms.join(", ") || "(none)"} | Rows: ${rawRules.length}`
-  );
+  console.log(`[D107.3.1-H] ${stateSlug.toUpperCase()} | Code: ${targetStateCode} | Policy: ${effectiveOffset} | Rows: ${rawRules.length}`);
+  
+  // --- END SURGICAL REPLACEMENT ---
 
   const processedRules = validateRulesForState(
     stateSlug,
