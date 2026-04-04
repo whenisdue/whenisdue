@@ -1,5 +1,7 @@
-import { toOffsetStrategy, toTexasCohort, toNewYorkCohort } from "./smart-dates";
+import { toTexasCohort, toNewYorkCohort, OffsetStrategy } from "./smart-dates";
 import { NYUpstateRule, NYCityRule } from "./ny-types";
+
+// --- TYPES ---
 
 export type RawRule = {
   triggerStart: string;
@@ -9,6 +11,30 @@ export type RawRule = {
   cohortKey: string | null;
   triggerType: string;
 };
+
+export function toOffsetStrategy(val: string | null | undefined): OffsetStrategy | null {
+  if (!val) return null;
+
+  const mapping: Record<string, OffsetStrategy> = {
+    // New Bitemporal Ledger Strings (From Seed)
+    'PREVIOUS_BUSINESS_DAY': 'PREVIOUS_BUSINESS_DAY' as OffsetStrategy,
+    'NEXT_BUSINESS_DAY': 'NEXT_BUSINESS_DAY' as OffsetStrategy,
+
+    // Legacy / Shorthand Strings
+    'PREV_BUSINESS_DAY': 'PREVIOUS_BUSINESS_DAY' as OffsetStrategy,
+    'NEXT_BIZ_DAY': 'NEXT_BUSINESS_DAY' as OffsetStrategy,
+    'SAME_DAY': 'SAME_DAY' as OffsetStrategy,
+    'NO_SHIFT': 'SAME_DAY' as OffsetStrategy
+  };
+
+  const normalized = mapping[val.toUpperCase()] || null;
+
+  if (!normalized) {
+    console.error(`[ENGINE] Strategy Mapping Failure: "${val}" is not a recognized policy.`);
+  }
+
+  return normalized;
+}
 
 type NumericRule = RawRule & {
   baseDay: number;
@@ -22,6 +48,8 @@ export type ProcessedRules =
       upstate: NYUpstateRule[];
       city: NYCityRule[];
     };
+
+// --- CORE LOGIC ---
 
 export function validateRulesForState(stateSlug: string, rawRules: RawRule[]): ProcessedRules {
   switch (stateSlug) {
@@ -56,9 +84,6 @@ export function validateRulesForState(stateSlug: string, rawRules: RawRule[]): P
         .filter((r): r is NumericRule => r !== null);
   }
 }
-
-// --- SURGICAL REPLACEMENT: DIAGNOSTIC NORMALIZER (D107.4) ---
-// Locate the 'normalizeNumericRule' function and replace it with this version:
 
 function normalizeNumericRule(r: RawRule, stateSlug: string): NumericRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
@@ -111,7 +136,6 @@ function normalizeNumericRule(r: RawRule, stateSlug: string): NumericRule | null
     cohortKey: txCohort,
   };
 }
-// --- END SURGICAL REPLACEMENT ---
 
 function validateNYUpstate(r: RawRule): NYUpstateRule | null {
   const strategy = toOffsetStrategy(r.offsetStrategy);
@@ -182,6 +206,7 @@ export function verifyIntegrity(stateSlug: string, rules: ProcessedRules): boole
 
   if (!Array.isArray(rules) || rules.length === 0) return false;
 
+  // Manual override for Florida as we transition to the bitemporal ledger
   if (stateSlug === "florida") return true;
 
   switch (stateSlug) {
