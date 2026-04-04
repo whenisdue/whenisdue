@@ -56,8 +56,9 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
 
   return (
     <div className="bg-white rounded-[2.5rem] border-4 border-slate-200 shadow-2xl p-8 max-w-md w-full flex flex-col gap-6">
-      {/* 🛡️ Topic D070: Partial Sync Warning */}
-      {rules.length !== 100 && (
+      
+      {/* 🛡️ Topic D070: Sync Status Warning (Corrected for Bitemporal Slices) */}
+      {rules.length < 28 && (
         <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl mb-4 flex items-center gap-3">
           <AlertTriangle className="w-4 h-4 text-amber-500" />
           <p className="text-[10px] font-black uppercase text-amber-600 tracking-tight">
@@ -123,9 +124,11 @@ export default function FloridaDecoder({ rules, month = 4, year = 2026 }: Props)
       )}
 
       {hasError && (
-        <div className="bg-rose-50 border-4 border-rose-100 rounded-[2rem] p-6 flex flex-col items-center gap-2">
+        <div className="bg-rose-50 border-4 border-rose-100 rounded-[2rem] p-6 flex flex-col items-center gap-2 text-center">
           <XCircle className="w-8 h-8 text-rose-500" />
-          <p className="text-base font-black text-rose-900">Please enter 2 digits</p>
+          <p className="text-base font-black text-rose-900">
+            {digits.length < 2 ? "Please enter 2 digits" : `No rule found for group "${normalizeFloridaPair(digits)}"`}
+          </p>
         </div>
       )}
 

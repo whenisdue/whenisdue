@@ -15,9 +15,10 @@ const mapToAppliedPolicy = (input: string): AppliedPolicy => {
   const mapping: Record<string, AppliedPolicy> = {
     'PREVIOUS_BUSINESS_DAY': 'PREVIOUS_BUSINESS_DAY',
     'NEXT_BUSINESS_DAY': 'NEXT_BUSINESS_DAY',
-    'NO_SHIFT': 'NO_SHIFT'
+    'NO_SHIFT': 'SAME_DAY',
+    'SAME_DAY': 'SAME_DAY'
   };
-  return mapping[input] || 'NO_SHIFT';
+  return mapping[input] || 'SAME_DAY';
 };
 
 function applyHolidayPolicy(nominalDate: Date, policy: string): Date {
@@ -54,6 +55,7 @@ async function main() {
         nominalDepositDay: 4 + (i * 2) // Digits 0-9 map to days 4-22
       }))
     },
+    // --- SURGICAL REPLACEMENT: FULL SPECTRUM FLORIDA RULES ---
     {
       stateCode: "FL",
       stateName: "Florida",
@@ -61,11 +63,20 @@ async function main() {
       holidayPolicy: "PREVIOUS_BUSINESS_DAY",
       sourceAgency: "Florida Dept of Children and Families",
       sourceUrl: "https://www.myflfamilies.com/snap-issuance-schedule",
-      slices: Array.from({ length: 28 }, (_, i) => ({
-        identifierFrom: (i * 3 + 1).toString().padStart(2, '0'),
-        identifierTo: (Math.min(i * 3 + 3, 99)).toString().padStart(2, '0'),
-        nominalDepositDay: i + 1 // Slices map to days 1-28
-      }))
+      slices: Array.from({ length: 28 }, (_, i) => {
+        const day = i + 1;
+        
+        // This math (3.5714) ensures we spread 100 units (00-99) across 28 days
+        // Group 0 starts at 00, Group 27 ends at 99.
+        const from = i === 0 ? 0 : Math.floor(i * 3.5714);
+        const to = i === 27 ? 99 : Math.floor((i + 1) * 3.5714) - 1;
+        
+        return {
+          identifierFrom: from.toString().padStart(2, '0'),
+          identifierTo: to.toString().padStart(2, '0'),
+          nominalDepositDay: day
+        };
+      })
     }
   ];
 
@@ -111,7 +122,7 @@ async function main() {
     data: { 
         compilerVersion: "1.1.0", 
         initiatedBy: "SEED_SYSTEM",
-        note: "Initial 2026 Batch"
+        note: "Initial 2026 Batch - Spectrum Calibration"
     }
   });
 
@@ -171,7 +182,7 @@ async function main() {
     console.log(`  📦 Ledger Update: [${progress} / ${allEvents.length}] records written...`);
   }
 
-  console.log("✅ Bitemporal Ledger Fully Hydrated.");
+  console.log("✅ Bitemporal Ledger Fully Hydrated with Full Spectrum Coverage.");
 }
 
 main()
