@@ -298,27 +298,27 @@ model EventSeries {
 }
 
 model Event {
-  id                String          @id @default(cuid())
-  seriesId          String?
-  series            EventSeries?    @relation(fields: [seriesId], references: [id], onDelete: SetNull)
-  slug              String          @unique
-  title             String
-  category          EventCategory
-  dueAt             DateTime?
-  timeZone          String?
-  dateStatus        EventDateStatus @default(EXACT)
-  displayYear       Int?
-  displayMonth      Int?
-  displayQuarter    Int?
-  dateLabel         String?
-  trending          Boolean         @default(false)
-  isGenerated       Boolean         @default(false)
-  isDetached        Boolean         @default(false)
-  seoTitle          String?
-  seoDescription    String?
-  keywords          String?
+  id                 String          @id @default(cuid())
+  seriesId           String?
+  series             EventSeries?    @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  slug               String          @unique
+  title              String
+  category           EventCategory
+  dueAt              DateTime?
+  timeZone           String?
+  dateStatus         EventDateStatus @default(EXACT)
+  displayYear        Int?
+  displayMonth       Int?
+  displayQuarter     Int?
+  dateLabel          String?
+  trending           Boolean         @default(false)
+  isGenerated        Boolean         @default(false)
+  isDetached         Boolean         @default(false)
+  seoTitle           String?
+  seoDescription     String?
+  keywords           String?
   sourceUrl          String?
-  lastVerified      DateTime?
+  lastVerified       DateTime?
 
   verificationStatus VerificationStatus @default(PROVISIONAL)
   confidenceScore    Float              @default(0.5)
@@ -344,7 +344,7 @@ model Event {
 model EventClickStat {
   id            String    @id @default(cuid())
   eventId       String    @unique
-  totalClicks    Int       @default(0)
+  totalClicks   Int       @default(0)
   clickCount1h  Int       @default(0)
   clickCount24h Int       @default(0)
   lastClickAt   DateTime?
@@ -440,8 +440,8 @@ model Subscription {
   nextDepositReason  DecisionReason  @default(PAYMENT_CYCLE_STANDARD)
   nextDepositDetails Json?            
 
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   subscriber        Subscriber         @relation(fields: [subscriberId], references: [id])
   decisions         NotificationDecisionAudit[]
@@ -517,18 +517,18 @@ model CompilerRun {
   initiatedBy         String?
   note                String?
   paymentEvents       PaymentEvent[]
-  notificationAudits NotificationDecisionAudit[]
+  notificationAudits  NotificationDecisionAudit[]
 }
 
 model PaymentEvent {
-  id                  String           @id @default(cuid())
-  createdAt           DateTime         @default(now())
-  batchId             String
-  batch               CompilerRun      @relation(fields: [batchId], references: [id])
-  ruleSetId           String
-  ruleSet             ScheduleRuleSet  @relation(fields: [ruleSetId], references: [id])
+  id                 String          @id @default(cuid())
+  createdAt          DateTime        @default(now())
+  batchId            String
+  batch              CompilerRun     @relation(fields: [batchId], references: [id])
+  ruleSetId          String
+  ruleSet            ScheduleRuleSet @relation(fields: [ruleSetId], references: [id])
   
-  recordedFrom       DateTime          @default(now())
+  recordedFrom       DateTime        @default(now())
   recordedTo         DateTime?
   
   stateCode          String
@@ -539,13 +539,16 @@ model PaymentEvent {
   depositDate        DateTime
   identifierKind     String
   identifierMatch    String
+  
+  // 🏛️ PERSISTED COHORT FOR TRACEABILITY
+  cohortKey          String?          
 
-  reason              DecisionReason   @default(PAYMENT_CYCLE_STANDARD)
-  reasonDetails       Json?            
+  reason             DecisionReason  @default(PAYMENT_CYCLE_STANDARD)
+  reasonDetails      Json?            
 
-  isShifted          Boolean          @default(false)
-  shiftCause          ShiftCause       @default(NONE)
-  appliedPolicy      AppliedPolicy    @default(NO_SHIFT)
+  isShifted          Boolean         @default(false)
+  shiftCause         ShiftCause      @default(NONE)
+  appliedPolicy      AppliedPolicy   @default(NO_SHIFT)
 
   auditsAsOld        NotificationDecisionAudit[] @relation("OldEvent")
   auditsAsNew        NotificationDecisionAudit[] @relation("NewEvent")
@@ -668,8 +671,8 @@ model VerificationToken {
 
 model BenefitProgram {
   id                String             @id @default(cuid())
-  stateCode         String             // e.g., "NY", "CA"
-  name              String             // e.g., "SNAP", "SSI"
+  stateCode          String             // e.g., "NY", "CA"
+  name               String             // e.g., "SNAP", "SSI"
   issuanceSchedules IssuanceSchedule[]
   oracleLogs        OracleLog[]
   lastUpdate        DateTime           @updatedAt

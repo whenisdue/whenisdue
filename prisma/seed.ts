@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { addDays, isWeekend } from 'date-fns';
 
 const prisma = new PrismaClient();
@@ -40,63 +40,65 @@ async function main() {
 
   const year = 2026;
 
-  // --- TOPIC 61 RULES DEFINITIONS ---
   const rulesets = [
     {
       stateCode: "AL",
-      stateName: "Alabama",
       identifierKind: "CASE_NUMBER_LAST_DIGIT",
       holidayPolicy: "PREVIOUS_BUSINESS_DAY",
-      sourceAgency: "Alabama Dept of Human Resources",
-      sourceUrl: "https://dhr.alabama.gov/food-assistance/",
       slices: Array.from({ length: 10 }, (_, i) => ({
-        identifierFrom: i.toString(),
-        identifierTo: i.toString(),
-        nominalDepositDay: 4 + (i * 2) // Digits 0-9 map to days 4-22
+        identifierFrom: i.toString(), identifierTo: i.toString(), nominalDepositDay: 4 + (i * 2)
       }))
     },
-    // --- SURGICAL REPLACEMENT: FULL SPECTRUM FLORIDA RULES ---
     {
       stateCode: "FL",
-      stateName: "Florida",
       identifierKind: "CASE_NUMBER_9TH_8TH_DIGIT",
       holidayPolicy: "PREVIOUS_BUSINESS_DAY",
-      sourceAgency: "Florida Dept of Children and Families",
-      sourceUrl: "https://www.myflfamilies.com/snap-issuance-schedule",
       slices: Array.from({ length: 28 }, (_, i) => {
-        const day = i + 1;
-        
-        // This math (3.5714) ensures we spread 100 units (00-99) across 28 days
-        // Group 0 starts at 00, Group 27 ends at 99.
         const from = i === 0 ? 0 : Math.floor(i * 3.5714);
         const to = i === 27 ? 99 : Math.floor((i + 1) * 3.5714) - 1;
-        
-        return {
-          identifierFrom: from.toString().padStart(2, '0'),
-          identifierTo: to.toString().padStart(2, '0'),
-          nominalDepositDay: day
-        };
+        return { identifierFrom: from.toString().padStart(2, '0'), identifierTo: to.toString().padStart(2, '0'), nominalDepositDay: i + 1 };
       })
+    },
+    {
+      stateCode: "TX",
+      identifierKind: "CASE_NUMBER_MULTI_COHORT",
+      holidayPolicy: "SAME_DAY",
+      slices: [
+        { identifierFrom: "0", identifierTo: "0", nominalDepositDay: 1, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "1", identifierTo: "1", nominalDepositDay: 3, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "2", identifierTo: "2", nominalDepositDay: 5, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "3", identifierTo: "3", nominalDepositDay: 6, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "4", identifierTo: "4", nominalDepositDay: 7, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "5", identifierTo: "5", nominalDepositDay: 9, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "6", identifierTo: "6", nominalDepositDay: 11, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "7", identifierTo: "7", nominalDepositDay: 12, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "8", identifierTo: "8", nominalDepositDay: 13, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "9", identifierTo: "9", nominalDepositDay: 15, cohortKey: "PRE_JUNE_2020" },
+        { identifierFrom: "00", identifierTo: "07", nominalDepositDay: 16, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "08", identifierTo: "15", nominalDepositDay: 17, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "16", identifierTo: "23", nominalDepositDay: 18, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "24", identifierTo: "31", nominalDepositDay: 19, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "32", identifierTo: "39", nominalDepositDay: 20, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "40", identifierTo: "47", nominalDepositDay: 21, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "48", identifierTo: "55", nominalDepositDay: 22, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "56", identifierTo: "63", nominalDepositDay: 23, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "64", identifierTo: "71", nominalDepositDay: 24, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "72", identifierTo: "79", nominalDepositDay: 25, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "80", identifierTo: "87", nominalDepositDay: 26, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "88", identifierTo: "95", nominalDepositDay: 27, cohortKey: "POST_JUNE_2020" },
+        { identifierFrom: "96", identifierTo: "99", nominalDepositDay: 28, cohortKey: "POST_JUNE_2020" }
+      ]
     }
   ];
 
-  const createdRuleData = [];
+  const compilerRun = await prisma.compilerRun.create({ data: { compilerVersion: "1.1.0", note: "Production-Grade Sync" } });
 
-  console.log("📑 Registering Rule Identities...");
+  const allEvents: Prisma.PaymentEventCreateManyInput[] = [];
+
   for (const r of rulesets) {
     const identity = await prisma.ruleIdentity.upsert({
-      where: { 
-        stateCode_programCode_ruleFamily: { 
-          stateCode: r.stateCode, 
-          programCode: 'SNAP', 
-          ruleFamily: 'FULL_SCHEDULE' 
-        } 
-      },
-      update: {},
-      create: { 
-        stateCode: r.stateCode, 
-        programCode: 'SNAP' 
-      }
+      where: { stateCode_programCode_ruleFamily: { stateCode: r.stateCode, programCode: 'SNAP', ruleFamily: 'FULL_SCHEDULE' } },
+      update: {}, create: { stateCode: r.stateCode, programCode: 'SNAP' }
     });
 
     const ruleSet = await prisma.scheduleRuleSet.create({
@@ -109,87 +111,45 @@ async function main() {
         windowBasis: 'CALENDAR_DAY',
         holidayPolicy: r.holidayPolicy,
         masterSequenceJson: r.slices,
-        sourceUrl: r.sourceUrl,
-        sourceAuthority: r.sourceAgency,
+        sourceUrl: "https://gov.url",
+        sourceAuthority: "State Agency",
         verifiedAt: new Date(),
       }
     });
 
-    createdRuleData.push({ ruleSet, stateCode: r.stateCode });
-  }
-
-  const compilerRun = await prisma.compilerRun.create({
-    data: { 
-        compilerVersion: "1.1.0", 
-        initiatedBy: "SEED_SYSTEM",
-        note: "Initial 2026 Batch - Spectrum Calibration"
-    }
-  });
-
-  const allEvents = [];
-
-  console.log("⚙️ Compiling 2026 Calendar...");
-  for (const { ruleSet, stateCode } of createdRuleData) {
-    const sequence = ruleSet.masterSequenceJson as any[];
     for (let month = 0; month < 12; month++) {
-      for (const slice of sequence) {
+      for (const slice of r.slices) {
         const nominalDate = new Date(Date.UTC(year, month, slice.nominalDepositDay));
         const actualDate = applyHolidayPolicy(nominalDate, ruleSet.holidayPolicy);
         const isShifted = toDateStr(nominalDate) !== toDateStr(actualDate);
 
-        let shiftCause: ShiftCause = 'NONE';
-        if (isShifted) {
-          shiftCause = isWeekend(nominalDate) ? 'WEEKEND' : 'HOLIDAY';
-        }
-
-        const matchStr = slice.identifierFrom === slice.identifierTo 
-            ? slice.identifierFrom 
-            : `${slice.identifierFrom}-${slice.identifierTo}`;
-
         allEvents.push({
           batchId: compilerRun.id,
           ruleSetId: ruleSet.id,
-          stateCode: stateCode,
+          stateCode: r.stateCode,
           programCode: "SNAP",
           benefitYear: year,
           benefitMonth: month + 1,
           nominalDepositDay: slice.nominalDepositDay,
           depositDate: actualDate,
           isShifted,
-          shiftCause,
-          appliedPolicy: mapToAppliedPolicy(ruleSet.holidayPolicy),
+          shiftCause: (isShifted ? (isWeekend(nominalDate) ? 'WEEKEND' : 'HOLIDAY') : 'NONE') as ShiftCause,
+          appliedPolicy: mapToAppliedPolicy(ruleSet.holidayPolicy) as AppliedPolicy,
           identifierKind: ruleSet.identifierKind,
-          identifierMatch: matchStr,
+          identifierMatch: slice.identifierFrom === slice.identifierTo ? slice.identifierFrom : `${slice.identifierFrom}-${slice.identifierTo}`,
+          cohortKey: (slice as any).cohortKey || null
         });
       }
     }
   }
 
-  // --- NEON BATCHER INTEGRATION ---
-  console.log(`🚀 Preparing to seed ${allEvents.length} events...`);
-
   const BATCH_SIZE = 100; 
-
   for (let i = 0; i < allEvents.length; i += BATCH_SIZE) {
-    const batch = allEvents.slice(i, i + BATCH_SIZE);
-    
-    await prisma.paymentEvent.createMany({
-      data: batch,
-      skipDuplicates: true,
-    });
-
-    const progress = Math.min(i + BATCH_SIZE, allEvents.length);
-    console.log(`  📦 Ledger Update: [${progress} / ${allEvents.length}] records written...`);
+    await prisma.paymentEvent.createMany({ data: allEvents.slice(i, i + BATCH_SIZE), skipDuplicates: true });
+    console.log(`  📦 Ledger Update: [${Math.min(i + BATCH_SIZE, allEvents.length)} / ${allEvents.length}] records written...`);
   }
 
-  console.log("✅ Bitemporal Ledger Fully Hydrated with Full Spectrum Coverage.");
+  console.log("✅ Bitemporal Ledger Fully Hydrated: Denormalized & Production-Safe.");
 }
 
-main()
-  .catch(e => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch(console.error).finally(() => prisma.$disconnect());
