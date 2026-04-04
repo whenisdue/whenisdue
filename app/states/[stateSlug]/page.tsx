@@ -1,23 +1,15 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma"; 
-import { STATE_REGISTRY, getStateBySlug } from "@/lib/states-data"; 
+import { prisma } from "@/lib/prisma";
+import { getStateBySlug } from "@/lib/states-data";
 import { format } from "date-fns";
-import { Calendar, ShieldCheck, MapPin, Landmark, History, AlertTriangle } from "lucide-react";
-import { 
-  toOffsetStrategy, 
-  toTexasCohort, 
-  toNewYorkCohort, 
-  OffsetStrategy, 
-  TexasCohort, 
-  NewYorkCohort 
-} from "@/lib/smart-dates";
-import { NYUpstateRule, NYCityRule } from "@/lib/ny-types"; 
+import { Calendar, MapPin, Landmark, AlertTriangle } from "lucide-react";
+import { validateRulesForState, verifyIntegrity, RawRule } from "@/lib/rules-engine";
 import OfficialResourceLink from "@/components/OfficialResourceLink";
 import BenefitAlerts from "@/components/BenefitAlerts";
-import FloridaDecoder, { FloridaDecoderRule } from "@/components/FloridaDecoder";
-import TexasDecoder, { TexasDecoderRule } from "@/components/TexasDecoder";
-import NewYorkDecoder from "@/components/NewYorkDecoder"; 
+import FloridaDecoder from "@/components/FloridaDecoder";
+import TexasDecoder from "@/components/TexasDecoder";
+import NewYorkDecoder from "@/components/NewYorkDecoder";
 import CaliforniaDecoder from "@/components/CaliforniaDecoder";
 import GeorgiaDecoder from "@/components/GeorgiaDecoder";
 import PennsylvaniaDecoder from "@/components/PennsylvaniaDecoder";
@@ -28,216 +20,109 @@ type PageProps = {
   params: Promise<{ stateSlug: string }>;
 };
 
-/**
- * 🏛️ METADATA ENGINE
- */
+type RuleQueryRow = RawRule & {
+  program: {
+    name: string;
+  };
+};
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { stateSlug } = await params;
   const state = getStateBySlug(stateSlug);
-  if (!state) return { title: "State Not Found" };
+
+  if (!state) {
+    return { title: "State Not Found" };
+  }
 
   return {
     title: `${state.name} 2026 Food Benefit Schedule | WhenIsDue`,
-    description: `Official 2026 ${state.name} SNAP/EBT deposit dates. Use our CalFresh and Texas EDG finders for precise benefit timing.`,
+    description: `Official 2026 ${state.name} SNAP/EBT deposit dates. Find your expected benefit timing using your state's official schedule rules.`,
   };
 }
 
-type TexasRule = TexasDecoderRule;
-type FloridaRule = FloridaDecoderRule;
-type StateRule = TexasRule | FloridaRule | NYUpstateRule | NYCityRule | any; 
-
-type RawRule = {
-  triggerStart: string;
-  triggerEnd: string | null;
-  baseDay: number;
-  offsetStrategy: string;
-  cohortKey: string | null;
-  triggerType: string;
-};
-
-const IntegrityError = () => (
-  <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500">
-    <h3 className="text-xl font-black mb-2 flex items-center gap-2">
-      <AlertTriangle className="w-6 h-6" /> Integrity Error
-    </h3>
-    <p className="font-bold text-sm leading-relaxed">
-      Data integrity issue detected. Please refer to the manual table below for verified dates.
-    </p>
-  </div>
-);
-
-// --- VALIDATORS (AIRTIGHT RESTORATION) ---
-
-function validateNumericRuleForClient(r: RawRule, stateSlug: string): StateRule | null {
-  const strategy = toOffsetStrategy(r.offsetStrategy);
-  const cohort = toTexasCohort(r.cohortKey);
-  if (!strategy) return null;
-
-  const isNumeric = (val: string) => /^\d+$/.test(val);
-  if (!isNumeric(r.triggerStart)) return null;
-  if (r.triggerEnd && !isNumeric(r.triggerEnd)) return null;
-
-  const baseDay = Number(r.baseDay);
-  if (isNaN(baseDay) || baseDay < 1 || baseDay > 31) return null;
-
-  if (stateSlug === 'texas') {
-    if (!cohort) return null;
-    const width = cohort === 'PRE_JUNE_2020' ? 1 : 2;
-    if (r.triggerStart.length !== width || (r.triggerEnd && r.triggerEnd.length !== width)) return null;
-    return { ...r, baseDay, offsetStrategy: strategy, cohortKey: cohort } as TexasRule;
-  }
-  
-  if (stateSlug === 'california' || stateSlug === 'florida' || stateSlug === 'georgia') {
-    if (r.triggerStart.length !== 2) return null;
-  }
-
-  if (stateSlug === 'pennsylvania') {
-    if (r.triggerStart.length !== 1) return null;
-  }
-
-  return { ...r, baseDay, offsetStrategy: strategy };
+function IntegrityError() {
+  return (
+    <div className="bg-rose-600 p-8 rounded-[2.5rem] text-white border-4 border-rose-400 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-500">
+      <h3 className="text-xl font-black mb-2 flex items-center gap-2">
+        <AlertTriangle className="w-6 h-6" />
+        Integrity Error
+      </h3>
+      <p className="font-bold text-sm leading-relaxed">
+        Data integrity issue detected. Please refer to the manual table below for verified dates.
+      </p>
+    </div>
+  );
 }
-
-function validateNYUpstate(r: RawRule): NYUpstateRule | null {
-  const strategy = toOffsetStrategy(r.offsetStrategy);
-  const cohort = toNewYorkCohort(r.cohortKey);
-  if (cohort !== 'UPSTATE' || r.triggerType !== 'ALPHABETIC_RANGE' || !strategy) return null;
-
-  const isLetter = (val: string) => /^[A-Z]$/i.test(val);
-  if (!isLetter(r.triggerStart) || (r.triggerEnd && !isLetter(r.triggerEnd))) return null;
-  
-  // RESTORED: baseDay Guard
-  if (r.baseDay < 1 || r.baseDay > 31) return null;
-
-  return {
-    triggerStart: r.triggerStart.toUpperCase(),
-    triggerEnd: r.triggerEnd ? r.triggerEnd.toUpperCase() : null,
-    baseDay: r.baseDay,
-    offsetStrategy: strategy,
-    cohortKey: 'UPSTATE'
-  };
-}
-
-function validateNYCity(r: RawRule): NYCityRule | null {
-  const strategy = toOffsetStrategy(r.offsetStrategy);
-  if (r.triggerType !== 'MONTHLY_STATIC' || r.triggerStart !== 'STATIC' || !strategy) return null;
-  
-  // RESTORED: baseDay Guard
-  if (r.baseDay < 1 || r.baseDay > 31) return null;
-
-  if (r.cohortKey === 'NYC_A_CYCLE' || r.cohortKey === 'NYC_B_CYCLE') {
-    return { triggerStart: 'STATIC', triggerEnd: null, baseDay: r.baseDay, offsetStrategy: strategy, cohortKey: r.cohortKey };
-  }
-  return null;
-}
-
-// --- INTEGRITY PROOFS (GROUND TRUTH HARDENING) ---
-
-function verifyTexasIntegrity(rules: TexasRule[]): boolean {
-  const pre = rules.filter(r => r.cohortKey === 'PRE_JUNE_2020');
-  const post = rules.filter(r => r.cohortKey === 'POST_JUNE_2020');
-  const check = (set: TexasRule[], max: number) => {
-    const map = new Array(max + 1).fill(0);
-    set.forEach(r => {
-      const start = parseInt(r.triggerStart);
-      const end = parseInt(r.triggerEnd || r.triggerStart);
-      for (let i = start; i <= end; i++) if (i >= 0 && i <= max) map[i]++;
-    });
-    return map.every(count => count === 1);
-  };
-  return pre.length > 0 && post.length > 0 && check(pre, 9) && check(post, 99);
-}
-
-function verifyCaliforniaIntegrity(rules: any[]): boolean {
-  if (rules.length !== 100) return false;
-  const map = new Array(100).fill(0);
-  rules.forEach(r => {
-    const digit = parseInt(r.triggerStart);
-    if (!isNaN(digit) && digit >= 0 && digit <= 99) map[digit]++;
-  });
-  return map.every(count => count === 1);
-}
-
-function verifyGeorgiaIntegrity(rules: any[]): boolean {
-  if (rules.length !== 100) return false;
-  const map = new Array(100).fill(0);
-  rules.forEach(r => {
-    const digit = parseInt(r.triggerStart);
-    if (!isNaN(digit) && digit >= 0 && digit <= 99) map[digit]++;
-  });
-  return map.every(count => count === 1);
-}
-
-function verifyPennsylvaniaIntegrity(rules: any[]): boolean {
-  if (rules.length !== 10) return false;
-  const map = new Array(10).fill(0);
-  rules.forEach(r => {
-    const digit = parseInt(r.triggerStart);
-    if (!isNaN(digit) && digit >= 0 && digit <= 9) map[digit]++;
-  });
-  return map.every(count => count === 1);
-}
-
-function verifyNewYorkUpstateIntegrity(rules: NYUpstateRule[]): boolean {
-  if (rules.length === 0) return false;
-  const map = new Array(26).fill(0);
-  rules.forEach(r => {
-    const s = r.triggerStart.charCodeAt(0) - 65;
-    const e = (r.triggerEnd || r.triggerStart).charCodeAt(0) - 65;
-    for (let i = s; i <= e; i++) if (i >= 0 && i < 26) map[i]++;
-  });
-  return map.every(count => count === 1);
-}
-
-// --- MAIN COMPONENT ---
 
 export default async function StatePage({ params }: PageProps) {
   const { stateSlug } = await params;
   const state = getStateBySlug(stateSlug);
-  if (!state) notFound();
 
-  const rawRules = await prisma.rule.findMany({
-    where: { program: { state: { slug: stateSlug }, name: { contains: "SNAP", mode: "insensitive" } } },
-    select: { triggerStart: true, triggerEnd: true, baseDay: true, offsetStrategy: true, cohortKey: true, triggerType: true },
-    orderBy: { triggerStart: 'asc' }
-  });
-
-  let flTxRules: StateRule[] = [];
-  let nyUpstateRules: NYUpstateRule[] = [];
-  let nyCityRules: NYCityRule[] = [];
-  let isIntegrityOk = true;
-
-  if (stateSlug === 'new-york') {
-    nyUpstateRules = rawRules.map(r => validateNYUpstate(r as RawRule)).filter((r): r is NYUpstateRule => r !== null);
-    nyCityRules = rawRules.map(r => validateNYCity(r as RawRule)).filter((r): r is NYCityRule => r !== null);
-    isIntegrityOk = verifyNewYorkUpstateIntegrity(nyUpstateRules) && 
-                    nyCityRules.filter(r => r.cohortKey === 'NYC_A_CYCLE').length === 1 &&
-                    nyCityRules.filter(r => r.cohortKey === 'NYC_B_CYCLE').length === 1;
-  } else if (stateSlug === 'california') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = verifyCaliforniaIntegrity(flTxRules);
-  } else if (stateSlug === 'texas') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = verifyTexasIntegrity(flTxRules as TexasRule[]);
-  } else if (stateSlug === 'georgia') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = verifyGeorgiaIntegrity(flTxRules);
-  } else if (stateSlug === 'pennsylvania') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = verifyPennsylvaniaIntegrity(flTxRules);
-  } else if (stateSlug === 'florida') {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
-    isIntegrityOk = flTxRules.length > 0;
-  } else {
-    flTxRules = rawRules.map(r => validateNumericRuleForClient(r as RawRule, stateSlug)).filter(r => r !== null);
+  if (!state) {
+    notFound();
   }
 
-  const upcomingEvents = await prisma.event.findMany({
-    where: { category: "STATE", title: { contains: state.name, mode: "insensitive" }, dueAt: { gte: new Date() } },
-    orderBy: { dueAt: 'asc' }, take: 10
+  const dbRules = await prisma.rule.findMany({
+    where: {
+      program: {
+        state: { slug: stateSlug },
+        OR: [
+          { name: { contains: "SNAP", mode: "insensitive" } },
+          { name: { contains: "Food", mode: "insensitive" } },
+          { name: { contains: "EBT", mode: "insensitive" } },
+          { name: { contains: "CalFresh", mode: "insensitive" } },
+        ],
+      },
+    },
+    select: {
+      triggerStart: true,
+      triggerEnd: true,
+      baseDay: true,
+      offsetStrategy: true,
+      cohortKey: true,
+      triggerType: true,
+      program: {
+        select: {
+          name: true,
+        },
+      },
+    },
   });
 
-  const nextPayment = upcomingEvents[0];
+  const rawRules: RuleQueryRow[] = dbRules.map((r) => ({
+    triggerStart: r.triggerStart,
+    triggerEnd: r.triggerEnd,
+    baseDay: r.baseDay,
+    offsetStrategy: r.offsetStrategy,
+    cohortKey: r.cohortKey,
+    triggerType: r.triggerType,
+    program: {
+      name: r.program.name,
+    },
+  }));
+
+  const matchedPrograms = Array.from(new Set(rawRules.map((r) => r.program.name)));
+  console.log(
+    `[D106] ${stateSlug.toUpperCase()} | Programs: ${matchedPrograms.join(", ") || "(none)"} | Rows: ${rawRules.length}`
+  );
+
+  const processedRules = validateRulesForState(
+    stateSlug,
+    rawRules.map(({ program, ...rule }) => rule)
+  );
+  const isIntegrityOk = verifyIntegrity(stateSlug, processedRules);
+
+  const upcomingEvents = await prisma.event.findMany({
+    where: {
+      category: "STATE",
+      title: { contains: state.name, mode: "insensitive" },
+      dueAt: { gte: new Date() },
+    },
+    orderBy: { dueAt: "asc" },
+    take: 10,
+  });
+
+  const nextPayment = upcomingEvents[0] ?? null;
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -245,33 +130,53 @@ export default async function StatePage({ params }: PageProps) {
         <div className="max-w-6xl mx-auto relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12">
           <div className="space-y-8 flex-1">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-2 rounded-xl text-white"><MapPin className="w-5 h-5" /></div>
-              <span className="text-sm font-black uppercase tracking-widest text-blue-400">{state.name} Operations</span>
+              <div className="bg-blue-600 p-2 rounded-xl text-white">
+                <MapPin className="w-5 h-5" />
+              </div>
+              <span className="text-sm font-black uppercase tracking-widest text-blue-400">
+                {state.name} Operations
+              </span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">{state.name} <span className="text-slate-500">2026</span><br />Benefit Schedule</h1>
-            
-            {/* BEHAVIOR REVERSION: Texas is no longer excluded from the hero card per original script */}
-            {nextPayment && stateSlug !== 'california' && stateSlug !== 'new-york' && stateSlug !== 'florida' && (
+
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">
+              {state.name} <span className="text-slate-500">2026</span>
+              <br />
+              Benefit Schedule
+            </h1>
+
+            {nextPayment && !["california", "new-york", "florida"].includes(stateSlug) && (
               <div className="inline-flex items-center gap-6 bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-sm shadow-xl animate-in fade-in zoom-in duration-500">
                 <div>
-                  <p className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1">Next Expected Deposit</p>
-                  <p className="text-3xl font-black text-white">{format(new Date(nextPayment.dueAt!), 'EEEE, MMMM d')}</p>
+                  <p className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1">
+                    Next Expected Deposit
+                  </p>
+                  <p className="text-3xl font-black text-white">
+                    {format(new Date(nextPayment.dueAt!), "EEEE, MMMM d")}
+                  </p>
                 </div>
               </div>
             )}
           </div>
 
           <div className="w-full lg:max-w-md space-y-6">
-            {!isIntegrityOk ? <IntegrityError /> : (
+            {!isIntegrityOk ? (
+              <IntegrityError />
+            ) : (
               <>
-                {stateSlug === 'florida' && <FloridaDecoder rules={flTxRules as FloridaRule[]} />}
-                {stateSlug === 'texas' && <TexasDecoder rules={flTxRules as TexasRule[]} />}
-                {stateSlug === 'california' && <CaliforniaDecoder rules={flTxRules} />}
-                {stateSlug === 'pennsylvania' && <PennsylvaniaDecoder rules={flTxRules} />}
-                {stateSlug === 'georgia' && <GeorgiaDecoder rules={flTxRules} />}
-                {stateSlug === 'new-york' && <NewYorkDecoder upstateRules={nyUpstateRules} cityRules={nyCityRules} />}
+                {stateSlug === "florida" && <FloridaDecoder rules={processedRules as any} />}
+                {stateSlug === "texas" && <TexasDecoder rules={processedRules as any} />}
+                {stateSlug === "california" && <CaliforniaDecoder rules={processedRules as any} />}
+                {stateSlug === "pennsylvania" && <PennsylvaniaDecoder rules={processedRules as any} />}
+                {stateSlug === "georgia" && <GeorgiaDecoder rules={processedRules as any} />}
+                {stateSlug === "new-york" && (
+                  <NewYorkDecoder
+                    upstateRules={(processedRules as any).upstate}
+                    cityRules={(processedRules as any).city}
+                  />
+                )}
               </>
             )}
+
             <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
               <BenefitAlerts stateName={state.name} variant="hero" />
             </div>
@@ -283,21 +188,29 @@ export default async function StatePage({ params }: PageProps) {
         <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden mb-12">
           <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-3">
-              <Calendar className="w-6 h-6 text-blue-600" /> Upcoming Issuance Window
+              <Calendar className="w-6 h-6 text-blue-600" />
+              Upcoming Issuance Window
             </h2>
           </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50">
-                  <th className="px-8 py-4 text-xs font-black uppercase text-slate-500 tracking-widest">Date</th>
-                  <th className="px-8 py-4 text-xs font-black uppercase text-slate-500 tracking-widest">Description</th>
+                  <th className="px-8 py-4 text-xs font-black uppercase text-slate-500 tracking-widest">
+                    Date
+                  </th>
+                  <th className="px-8 py-4 text-xs font-black uppercase text-slate-500 tracking-widest">
+                    Description
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {upcomingEvents.map((event) => (
                   <tr key={event.id} className="hover:bg-slate-50/50">
-                    <td className="px-8 py-6 font-black text-slate-900">{format(new Date(event.dueAt!), 'MMM d, yyyy')}</td>
+                    <td className="px-8 py-6 font-black text-slate-900">
+                      {format(new Date(event.dueAt!), "MMM d, yyyy")}
+                    </td>
                     <td className="px-8 py-6 font-bold text-slate-700">{event.title}</td>
                   </tr>
                 ))}
@@ -305,10 +218,16 @@ export default async function StatePage({ params }: PageProps) {
             </table>
           </div>
         </div>
+
         {state.officialUrl && (
           <div className="p-10 rounded-[3rem] bg-blue-50 border-4 border-blue-100 space-y-6">
-            <h3 className="text-2xl font-black text-slate-900 flex items-center gap-4"><Landmark className="w-8 h-8 text-blue-600" /> Official {state.name} Portal</h3>
-            <p className="text-slate-700 font-bold text-xl leading-relaxed max-w-2xl">Please visit the official government site for case management.</p>
+            <h3 className="text-2xl font-black text-slate-900 flex items-center gap-4">
+              <Landmark className="w-8 h-8 text-blue-600" />
+              Official {state.name} Portal
+            </h3>
+            <p className="text-slate-700 font-bold text-xl leading-relaxed max-w-2xl">
+              Please visit the official government site for case management.
+            </p>
             <OfficialResourceLink url={state.officialUrl} stateName={state.name} />
           </div>
         )}
