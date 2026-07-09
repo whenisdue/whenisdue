@@ -72,7 +72,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    document.title = getDocumentTitle(route)
+    applyRouteMetadata(route)
   }, [route])
 
   function navigate(path: string) {
@@ -1503,44 +1503,127 @@ function getRouteFromPath(pathname: string): RouteName {
   return 'not-found'
 }
 
-function getDocumentTitle(route: RouteName): string {
+type RouteMetadata = {
+  title: string
+  description: string
+  path: string
+}
+
+function applyRouteMetadata(route: RouteName) {
+  const metadata = getRouteMetadata(route)
+  document.title = metadata.title
+
+  const description = getOrCreateMetaDescription()
+  description.setAttribute('content', metadata.description)
+
+  const canonical = getOrCreateCanonicalLink()
+  canonical.setAttribute('href', `https://www.whenisdue.com${metadata.path}`)
+}
+
+function getRouteMetadata(route: RouteName): RouteMetadata {
   if (route === 'business-days') {
-    return 'Business Days Calculator — WhenIsDue'
+    return {
+      title: 'Business Days Calculator — WhenIsDue',
+      description: 'Add business days to a start date and find the exact due date while skipping weekends.',
+      path: '/business-days-calculator',
+    }
   }
 
   if (route === 'free-trial') {
-    return 'Free Trial Calculator — WhenIsDue'
+    return {
+      title: 'Free Trial Calculator — WhenIsDue',
+      description: 'Find when a free trial ends and the last safe day to cancel before renewal.',
+      path: '/free-trial-calculator',
+    }
   }
 
   if (route === 'return-window') {
-    return 'Return Window Calculator — WhenIsDue'
+    return {
+      title: 'Return Window Calculator — WhenIsDue',
+      description: 'Calculate the last day to return an item based on a purchase date and return window.',
+      path: '/return-window-calculator',
+    }
   }
 
   if (route === 'invoice-due-date') {
-    return 'Invoice Due Date Calculator — WhenIsDue'
+    return {
+      title: 'Invoice Due Date Calculator — WhenIsDue',
+      description: 'Calculate invoice due dates from common payment terms like Net 7, Net 15, Net 30, Net 45, and Net 60.',
+      path: '/invoice-due-date-calculator',
+    }
   }
 
   if (route === 'about') {
-    return 'About — WhenIsDue'
+    return {
+      title: 'About — WhenIsDue',
+      description: 'Learn what WhenIsDue does and how its simple due date calculators work.',
+      path: '/about',
+    }
   }
 
   if (route === 'privacy') {
-    return 'Privacy Policy — WhenIsDue'
+    return {
+      title: 'Privacy Policy — WhenIsDue',
+      description: 'Learn how WhenIsDue handles saved due dates, local browser storage, accounts, analytics, and ads.',
+      path: '/privacy',
+    }
   }
 
   if (route === 'terms') {
-    return 'Terms of Use — WhenIsDue'
+    return {
+      title: 'Terms of Use — WhenIsDue',
+      description: 'Read the terms for using WhenIsDue’s simple due date calculators.',
+      path: '/terms',
+    }
   }
 
   if (route === 'contact') {
-    return 'Contact — WhenIsDue'
+    return {
+      title: 'Contact — WhenIsDue',
+      description: 'Contact WhenIsDue for questions, corrections, feedback, or calculation issues.',
+      path: '/contact',
+    }
   }
 
   if (route === 'not-found') {
-    return 'Page Not Found — WhenIsDue'
+    return {
+      title: 'Page Not Found — WhenIsDue',
+      description: 'That page does not exist yet. Choose a calculator or go back home.',
+      path: window.location.pathname,
+    }
   }
 
-  return 'WhenIsDue — Simple Due Date Calculator'
+  return {
+    title: 'WhenIsDue — Simple Due Date Calculator',
+    description: 'Turn calendar days, business days, invoice terms, free trials, and return windows into exact due dates.',
+    path: '/',
+  }
+}
+
+function getOrCreateMetaDescription(): HTMLMetaElement {
+  const existing = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+
+  if (existing) {
+    return existing
+  }
+
+  const meta = document.createElement('meta')
+  meta.setAttribute('name', 'description')
+  document.head.append(meta)
+  return meta
+}
+
+function getOrCreateCanonicalLink(): HTMLLinkElement {
+  const existing = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+
+  if (existing) {
+    return existing
+  }
+
+  const link = document.createElement('link')
+  link.setAttribute('rel', 'canonical')
+  document.head.append(link)
+  return link
 }
 
 type StaticPageContent = {
