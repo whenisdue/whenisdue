@@ -36,7 +36,7 @@ const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60',
 const businessDayQuickPicks = [1, 5, 10, 15, 30]
 const titleMaxLength = 80
 
-type RouteName = 'home' | 'business-days'
+type RouteName = 'home' | 'business-days' | 'about' | 'privacy' | 'terms' | 'contact'
 
 type NavigationProps = {
   onNavigate: (path: string) => void
@@ -58,9 +58,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    document.title = route === 'business-days'
-      ? 'Business Days Calculator — WhenIsDue'
-      : 'WhenIsDue — Simple Due Date Calculator'
+    document.title = getDocumentTitle(route)
   }, [route])
 
   function navigate(path: string) {
@@ -71,6 +69,10 @@ function App() {
 
   if (route === 'business-days') {
     return <BusinessDaysPage onNavigate={navigate} />
+  }
+
+  if (route === 'about' || route === 'privacy' || route === 'terms' || route === 'contact') {
+    return <StaticPage route={route} onNavigate={navigate} />
   }
 
   return <HomePage onNavigate={navigate} />
@@ -574,6 +576,49 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   )
 }
 
+type StaticPageRoute = Extract<RouteName, 'about' | 'privacy' | 'terms' | 'contact'>
+
+type StaticPageProps = NavigationProps & {
+  route: StaticPageRoute
+}
+
+function StaticPage({ route, onNavigate }: StaticPageProps) {
+  const currentTime = useCurrentMinute()
+  const page = getStaticPageContent(route)
+
+  return (
+    <main className="page-shell static-page">
+      <section className="intro" aria-labelledby={`${route}-title`}>
+        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <a
+          className="back-link"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          Home
+        </a>
+        <h1 id={`${route}-title`}>{page.title}</h1>
+      </section>
+
+      <section className="static-content" aria-label={page.title}>
+        {page.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+        {page.email ? (
+          <p>
+            <a href={`mailto:${page.email}`}>{page.email}</a>
+          </p>
+        ) : null}
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  )
+}
+
 type IdentityRowProps = {
   currentTime: Date
   onNavigate?: (path: string) => void
@@ -618,10 +663,42 @@ function SiteFooter({
   return (
     <footer className="site-footer">
       <div className="footer-links">
-        <a href="#">About</a>
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Contact</a>
+        <a
+          href="/about"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/about')
+          }}
+        >
+          About
+        </a>
+        <a
+          href="/privacy"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/privacy')
+          }}
+        >
+          Privacy
+        </a>
+        <a
+          href="/terms"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/terms')
+          }}
+        >
+          Terms
+        </a>
+        <a
+          href="/contact"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/contact')
+          }}
+        >
+          Contact
+        </a>
         <a
           href="/business-days-calculator"
           onClick={(event) => {
@@ -809,7 +886,95 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'business-days'
   }
 
+  if (pathname === '/about') {
+    return 'about'
+  }
+
+  if (pathname === '/privacy') {
+    return 'privacy'
+  }
+
+  if (pathname === '/terms') {
+    return 'terms'
+  }
+
+  if (pathname === '/contact') {
+    return 'contact'
+  }
+
   return 'home'
+}
+
+function getDocumentTitle(route: RouteName): string {
+  if (route === 'business-days') {
+    return 'Business Days Calculator — WhenIsDue'
+  }
+
+  if (route === 'about') {
+    return 'About WhenIsDue — WhenIsDue'
+  }
+
+  if (route === 'privacy') {
+    return 'Privacy Policy — WhenIsDue'
+  }
+
+  if (route === 'terms') {
+    return 'Terms of Use — WhenIsDue'
+  }
+
+  if (route === 'contact') {
+    return 'Contact — WhenIsDue'
+  }
+
+  return 'WhenIsDue — Simple Due Date Calculator'
+}
+
+type StaticPageContent = {
+  title: string
+  paragraphs: string[]
+  email?: string
+}
+
+function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
+  if (route === 'about') {
+    return {
+      title: 'About WhenIsDue',
+      paragraphs: [
+        'WhenIsDue is a simple independent due date calculator. It helps people calculate calendar days, business days, invoice terms, free trial dates, return windows, and other everyday deadlines.',
+        'Saved due dates stay in your browser on your device. WhenIsDue is not an official government, legal, financial, or medical source.',
+      ],
+    }
+  }
+
+  if (route === 'privacy') {
+    return {
+      title: 'Privacy Policy',
+      paragraphs: [
+        'This MVP does not require an account, does not ask for personal information, and does not upload saved due dates.',
+        'Saved due dates are stored locally in your browser. Clearing browser data, using private browsing, or switching devices may remove or hide saved due dates.',
+        'If analytics or ads are added later, this page will be updated.',
+      ],
+    }
+  }
+
+  if (route === 'terms') {
+    return {
+      title: 'Terms of Use',
+      paragraphs: [
+        'WhenIsDue provides general date calculation tools for convenience only.',
+        'You should verify important deadlines with official documents, contracts, schools, employers, agencies, or service providers.',
+        'WhenIsDue does not provide legal, financial, medical, tax, immigration, or professional advice.',
+      ],
+    }
+  }
+
+  return {
+    title: 'Contact',
+    paragraphs: [
+      'For questions, corrections, or feedback about WhenIsDue, contact:',
+    ],
+    email: 'bjesguerra2025@gmail.com',
+  }
 }
 
 function formatBusinessDistance(days: number): string {

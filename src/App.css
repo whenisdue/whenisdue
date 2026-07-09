@@ -144,6 +144,32 @@
   text-decoration: underline;
 }
 
+.static-page {
+  max-width: 820px;
+}
+
+.static-content {
+  display: grid;
+  gap: 10px;
+  max-width: 720px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: #ffffff;
+  padding: 18px;
+}
+
+.static-content p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.static-content a {
+  color: #0f172a;
+  font-weight: 720;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
