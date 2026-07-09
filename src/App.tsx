@@ -175,7 +175,7 @@ function HomePage({ onNavigate }: NavigationProps) {
   }
 
   return (
-    <main className="page-shell">
+    <main className="page-shell home-page">
       <section className="intro" aria-labelledby="homepage-title">
         <IdentityRow currentTime={currentTime} />
         <h1 id="homepage-title">When is it due?</h1>
@@ -205,7 +205,7 @@ function HomePage({ onNavigate }: NavigationProps) {
             />
           </label>
 
-          <fieldset className="field">
+          <fieldset className="field mode-field">
             <legend>Mode</legend>
             <div className="mode-grid">
               {modes.map((modeOption) => (
@@ -254,8 +254,13 @@ function HomePage({ onNavigate }: NavigationProps) {
             </label>
           )}
 
+          <p className="current-mode">
+            <span>Mode</span>
+            <strong>{modeLabels[mode]}</strong>
+          </p>
+
           <section className={`result-panel ${daysRemaining < 0 ? 'is-overdue' : ''}`}>
-            <p className="result-label">Due date</p>
+            <p className="result-label">Answer</p>
             {dueDate ? (
               <>
                 <p className="due-date">{formatPlainDate(dueDate)}</p>
