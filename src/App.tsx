@@ -550,6 +550,20 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             <dd>Calendar days count every day. Business days skip weekends.</dd>
           </dl>
         </article>
+
+        <article>
+          <h2>When to use this calculator</h2>
+          <p>
+            Use this calculator when a deadline is measured in business days instead of calendar days. It can help with work tasks, invoice follow-ups, school forms, shipping estimates, application timelines, and simple planning. This version skips weekends only, so always check official terms if holidays or local rules matter.
+          </p>
+        </article>
+
+        <article>
+          <h2>Business days vs calendar days</h2>
+          <p>
+            Calendar days count every day on the calendar. Business days usually count Monday through Friday and skip weekends. That is why 10 business days can be more than 10 calendar days away.
+          </p>
+        </article>
       </section>
 
       <SiteFooter
