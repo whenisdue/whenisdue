@@ -1260,7 +1260,7 @@ function getDocumentTitle(route: RouteName): string {
   }
 
   if (route === 'about') {
-    return 'About WhenIsDue — WhenIsDue'
+    return 'About — WhenIsDue'
   }
 
   if (route === 'privacy') {
