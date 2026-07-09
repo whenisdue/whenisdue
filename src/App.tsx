@@ -50,6 +50,7 @@ type RouteName =
   | 'privacy'
   | 'terms'
   | 'contact'
+  | 'not-found'
 
 type NavigationProps = {
   onNavigate: (path: string) => void
@@ -98,6 +99,10 @@ function App() {
 
   if (route === 'about' || route === 'privacy' || route === 'terms' || route === 'contact') {
     return <StaticPage route={route} onNavigate={navigate} />
+  }
+
+  if (route === 'not-found') {
+    return <NotFoundPage onNavigate={navigate} />
   }
 
   return <HomePage onNavigate={navigate} />
@@ -1080,6 +1085,84 @@ function StaticPage({ route, onNavigate }: StaticPageProps) {
   )
 }
 
+function NotFoundPage({ onNavigate }: NavigationProps) {
+  const currentTime = useCurrentMinute()
+
+  return (
+    <main className="page-shell static-page">
+      <section className="intro" aria-labelledby="not-found-title">
+        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <h1 id="not-found-title">Page not found</h1>
+        <p className="subtitle">
+          That page does not exist yet. You can go back home or choose one of the calculators below.
+        </p>
+      </section>
+
+      <section className="static-content" aria-label="Page not found links">
+        <div className="not-found-links">
+          <a
+            className="calculator-link-card"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            <strong>Home</strong>
+            <span>Return to the main due date calculator.</span>
+          </a>
+          <a
+            className="calculator-link-card"
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            <strong>Business Days Calculator</strong>
+            <span>Add business days to a start date.</span>
+          </a>
+          <a
+            className="calculator-link-card"
+            href="/free-trial-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/free-trial-calculator')
+            }}
+          >
+            <strong>Free Trial Calculator</strong>
+            <span>Find the last safe day to cancel before renewal.</span>
+          </a>
+          <a
+            className="calculator-link-card"
+            href="/return-window-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/return-window-calculator')
+            }}
+          >
+            <strong>Return Window Calculator</strong>
+            <span>Find the last day to return an item.</span>
+          </a>
+          <a
+            className="calculator-link-card"
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            <strong>Invoice Due Date Calculator</strong>
+            <span>Calculate due dates from payment terms.</span>
+          </a>
+        </div>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  )
+}
+
 type IdentityRowProps = {
   currentTime: Date
   onNavigate?: (path: string) => void
@@ -1370,6 +1453,10 @@ function formatCurrentTime(date: Date): string {
 }
 
 function getRouteFromPath(pathname: string): RouteName {
+  if (pathname === '/') {
+    return 'home'
+  }
+
   if (pathname === '/business-days-calculator') {
     return 'business-days'
   }
@@ -1402,7 +1489,7 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'contact'
   }
 
-  return 'home'
+  return 'not-found'
 }
 
 function getDocumentTitle(route: RouteName): string {
@@ -1436,6 +1523,10 @@ function getDocumentTitle(route: RouteName): string {
 
   if (route === 'contact') {
     return 'Contact — WhenIsDue'
+  }
+
+  if (route === 'not-found') {
+    return 'Page Not Found — WhenIsDue'
   }
 
   return 'WhenIsDue — Simple Due Date Calculator'

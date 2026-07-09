@@ -170,6 +170,11 @@
   font-weight: 720;
 }
 
+.not-found-links {
+  display: grid;
+  gap: 9px;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
