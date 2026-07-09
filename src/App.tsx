@@ -39,6 +39,7 @@ const trialLengthQuickPicks = [7, 14, 30]
 const returnWindowQuickPicks = [7, 14, 30, 60, 90]
 const invoiceDueDateQuickPicks = [7, 14, 15, 30, 45, 60]
 const titleMaxLength = 80
+const positiveWholeNumberMessage = 'Enter a whole number greater than 0.'
 
 type RouteName =
   | 'home'
@@ -123,6 +124,9 @@ function HomePage({ onNavigate }: NavigationProps) {
   const parsedStartDate = parsePlainDate(startDate)
   const amount = parseInteger(dayAmount)
   const validationMessage = getValidationMessage(mode, parsedStartDate, amount, title)
+  const amountValidationMessage = mode !== 'invoice' && validationMessage === positiveWholeNumberMessage
+    ? validationMessage
+    : null
   const canCalculate = parsedStartDate !== null && (mode === 'invoice' || amount !== null) && !validationMessage
   const safeAmount = amount ?? 0
   const dueDate = canCalculate && parsedStartDate
@@ -298,11 +302,12 @@ function HomePage({ onNavigate }: NavigationProps) {
               <input
                 type="number"
                 inputMode="numeric"
-                min="0"
+                min="1"
                 max={getAmountLimit(mode)}
                 value={dayAmount}
                 onChange={(event) => setDayAmount(event.target.value)}
               />
+              {amountValidationMessage ? <span className="field-error">{amountValidationMessage}</span> : null}
             </label>
           )}
 
@@ -549,7 +554,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             <input
               type="number"
               inputMode="numeric"
-              min="0"
+              min="1"
               max="2600"
               value={businessDays}
               onChange={(event) => setBusinessDays(event.target.value)}
@@ -719,7 +724,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
             <input
               type="number"
               inputMode="numeric"
-              min="0"
+              min="1"
               max={getAmountLimit('trial')}
               value={trialLength}
               onChange={(event) => setTrialLength(event.target.value)}
@@ -845,7 +850,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             <input
               type="number"
               inputMode="numeric"
-              min="0"
+              min="1"
               max={getAmountLimit('return')}
               value={returnWindow}
               onChange={(event) => setReturnWindow(event.target.value)}
@@ -974,7 +979,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             <input
               type="number"
               inputMode="numeric"
-              min="0"
+              min="1"
               max="3650"
               value={paymentTerms}
               onChange={(event) => setPaymentTerms(event.target.value)}
@@ -1889,8 +1894,8 @@ function getValidationMessage(
   if (mode !== 'invoice') {
     const limit = getAmountLimit(mode)
 
-    if (amount === null || amount < 0 || amount > limit) {
-      return `${getAmountLabel(mode)} must be a whole number from 0 to ${limit}.`
+    if (amount === null || amount <= 0 || amount > limit) {
+      return positiveWholeNumberMessage
     }
   }
 
@@ -1914,8 +1919,8 @@ function getBusinessDaysValidationMessage(
     return 'Date must be from 1900-01-01 to 2100-12-31.'
   }
 
-  if (businessDays === null || businessDays < 0 || businessDays > 2600) {
-    return 'Business days must be a whole number from 0 to 2600.'
+  if (businessDays === null || businessDays <= 0 || businessDays > 2600) {
+    return positiveWholeNumberMessage
   }
 
   if (title.length > titleMaxLength) {
@@ -1939,8 +1944,8 @@ function getTrialValidationMessage(
 
   const limit = getAmountLimit('trial')
 
-  if (trialLength === null || trialLength < 0 || trialLength > limit) {
-    return `Trial length must be a whole number from 0 to ${limit}.`
+  if (trialLength === null || trialLength <= 0 || trialLength > limit) {
+    return positiveWholeNumberMessage
   }
 
   return null
@@ -1960,8 +1965,8 @@ function getReturnWindowValidationMessage(
 
   const limit = getAmountLimit('return')
 
-  if (returnWindow === null || returnWindow < 0 || returnWindow > limit) {
-    return `Return window must be a whole number from 0 to ${limit}.`
+  if (returnWindow === null || returnWindow <= 0 || returnWindow > limit) {
+    return positiveWholeNumberMessage
   }
 
   return null
@@ -1979,8 +1984,8 @@ function getInvoiceDueDateValidationMessage(
     return 'Date must be from 1900-01-01 to 2100-12-31.'
   }
 
-  if (paymentTerms === null || paymentTerms < 0 || paymentTerms > 3650) {
-    return 'Payment terms must be a whole number from 0 to 3650.'
+  if (paymentTerms === null || paymentTerms <= 0 || paymentTerms > 3650) {
+    return positiveWholeNumberMessage
   }
 
   return null

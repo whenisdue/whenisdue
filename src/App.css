@@ -354,6 +354,13 @@
   font-weight: 720;
 }
 
+.field .field-error {
+  color: #8f1d1d;
+  font-size: 0.76rem;
+  font-weight: 680;
+  line-height: 1.35;
+}
+
 input,
 select {
   width: 100%;
