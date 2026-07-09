@@ -57,6 +57,12 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    document.title = route === 'business-days'
+      ? 'Business Days Calculator — WhenIsDue'
+      : 'WhenIsDue — Simple Due Date Calculator'
+  }, [route])
+
   function navigate(path: string) {
     window.history.pushState(null, '', path)
     setRoute(getRouteFromPath(path))
