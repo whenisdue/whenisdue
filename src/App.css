@@ -921,20 +921,56 @@ a:focus-visible,
     padding-top: 22px;
   }
 
-  .intro {
-    margin-bottom: 18px;
+  .home-page {
+    padding-top: 14px;
+  }
+
+  .home-page .intro {
+    margin-bottom: 8px;
+  }
+
+  .home-page .identity-row {
+    margin-bottom: 7px;
   }
 
   .intro h1 {
     font-size: 2.8rem;
   }
 
+  .home-page .intro h1 {
+    font-size: 2.55rem;
+  }
+
   .subtitle {
     font-size: 1rem;
   }
 
+  .home-page .subtitle {
+    margin-top: 5px;
+    line-height: 1.35;
+  }
+
   .intro-note {
     font-size: 0.86rem;
+  }
+
+  .home-page .intro-note {
+    margin-top: 2px;
+    line-height: 1.32;
+  }
+
+  .home-page .popular-calculator-card {
+    gap: 2px;
+    margin: 0 0 10px;
+    padding: 8px 11px;
+  }
+
+  .home-page .popular-calculator-card em {
+    line-height: 1.3;
+  }
+
+  .home-page .workspace {
+    gap: 12px;
   }
 
   .workspace {
@@ -956,6 +992,41 @@ a:focus-visible,
   .calculator-card,
   .dashboard {
     padding: 18px;
+  }
+
+  .home-page .calculator-card {
+    gap: 9px;
+    padding: 14px;
+  }
+
+  .home-page .field {
+    gap: 4px;
+  }
+
+  .home-page input,
+  .home-page select {
+    min-height: 36px;
+    padding-block: 6px;
+  }
+
+  .home-page .current-mode {
+    margin-top: -3px;
+  }
+
+  .home-page .result-panel {
+    padding: 10px 12px;
+  }
+
+  .home-page .result-meta {
+    margin-top: 5px;
+  }
+
+  .home-page .mode-field {
+    gap: 4px;
+  }
+
+  .home-page .mode-note {
+    margin-top: 0;
   }
 
   .business-save {
