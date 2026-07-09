@@ -4,6 +4,7 @@ import {
   type CalculatorMode,
   type InvoiceTerm,
   type PlainDate,
+  addCalendarDays,
   addBusinessDays,
   daysBetween,
   formatPlainDate,
@@ -34,9 +35,17 @@ const storageKey = 'whenisdue.savedDeadlines.v1'
 const modes: CalculatorMode[] = ['calendar', 'business', 'invoice', 'trial', 'return']
 const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60', 'net90', 'eom']
 const businessDayQuickPicks = [1, 5, 10, 15, 30]
+const trialLengthQuickPicks = [7, 14, 30]
 const titleMaxLength = 80
 
-type RouteName = 'home' | 'business-days' | 'about' | 'privacy' | 'terms' | 'contact'
+type RouteName =
+  | 'home'
+  | 'business-days'
+  | 'free-trial'
+  | 'about'
+  | 'privacy'
+  | 'terms'
+  | 'contact'
 
 type NavigationProps = {
   onNavigate: (path: string) => void
@@ -69,6 +78,10 @@ function App() {
 
   if (route === 'business-days') {
     return <BusinessDaysPage onNavigate={navigate} />
+  }
+
+  if (route === 'free-trial') {
+    return <FreeTrialPage onNavigate={navigate} />
   }
 
   if (route === 'about' || route === 'privacy' || route === 'terms' || route === 'contact') {
@@ -576,6 +589,131 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   )
 }
 
+function FreeTrialPage({ onNavigate }: NavigationProps) {
+  const currentTime = useCurrentMinute()
+  const [startDate, setStartDate] = useState(todayInputValue)
+  const [trialLength, setTrialLength] = useState('7')
+
+  const parsedStartDate = parsePlainDate(startDate)
+  const parsedTrialLength = parseInteger(trialLength)
+  const validationMessage = getTrialValidationMessage(parsedStartDate, parsedTrialLength)
+  const trialEndDate = parsedStartDate && parsedTrialLength !== null && !validationMessage
+    ? addCalendarDays(parsedStartDate, parsedTrialLength)
+    : null
+  const cancelByDate = trialEndDate ? addCalendarDays(trialEndDate, -1) : null
+  const calendarDaysFromStart = parsedStartDate && trialEndDate ? daysBetween(parsedStartDate, trialEndDate) : 0
+
+  return (
+    <main className="page-shell free-trial-page">
+      <section className="intro" aria-labelledby="free-trial-title">
+        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <a
+          className="back-link"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          Home
+        </a>
+        <h1 id="free-trial-title">Free Trial Calculator</h1>
+        <p className="subtitle">
+          Find when a free trial ends and the last safe day to cancel before renewal.
+        </p>
+        <p className="intro-note">
+          Date-only planning for trial periods that count calendar days.
+        </p>
+      </section>
+
+      <section className="business-workspace" aria-label="Free trial calculator">
+        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
+          <div className="card-heading">
+            <h2>Calculate trial dates</h2>
+            <p>Enter the trial start date and trial length.</p>
+          </div>
+
+          <label className="field start-field">
+            <span>Trial start date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+            />
+          </label>
+
+          <label className="field value-field">
+            <span>Trial length in days</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              max={getAmountLimit('trial')}
+              value={trialLength}
+              onChange={(event) => setTrialLength(event.target.value)}
+            />
+            <span className="quick-picks" aria-label="Quick trial length values">
+              {trialLengthQuickPicks.map((quickPick) => (
+                <button
+                  className={trialLength === String(quickPick) ? 'is-selected' : ''}
+                  key={quickPick}
+                  type="button"
+                  onClick={() => setTrialLength(String(quickPick))}
+                >
+                  {quickPick}
+                </button>
+              ))}
+            </span>
+          </label>
+
+          {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
+        </form>
+
+        <section className="result-panel free-trial-result">
+          <p className="result-label">Trial dates</p>
+          {trialEndDate && cancelByDate && parsedTrialLength !== null ? (
+            <>
+              <p className="due-date">{formatPlainDate(trialEndDate)}</p>
+              <div className="result-meta result-meta-stack">
+                <span>Trial ends on {formatPlainDate(trialEndDate)}</span>
+                <span>Last day to cancel: {formatPlainDate(cancelByDate)}</span>
+                <span className="status-badge status-comfortable">
+                  {calendarDaysFromStart} {calendarDaysFromStart === 1 ? 'calendar day' : 'calendar days'} from the start date
+                </span>
+              </div>
+              <p className="result-note">Always check the service terms for exact renewal timing.</p>
+            </>
+          ) : (
+            <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
+          )}
+        </section>
+      </section>
+
+      <section className="business-content" aria-label="Free trial help">
+        <article>
+          <h2>How this calculator works</h2>
+          <p>
+            Enter the day your trial starts and the number of days in the trial. The calculator shows the trial end date and the last day to cancel before the renewal date. Always check the company's official cancellation terms because some services renew earlier or use a specific billing time.
+          </p>
+        </article>
+
+        <article>
+          <h2>Common trial lengths</h2>
+          <ul>
+            <li>7-day trial</li>
+            <li>14-day trial</li>
+            <li>30-day trial</li>
+          </ul>
+        </article>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  )
+}
+
 type StaticPageRoute = Extract<RouteName, 'about' | 'privacy' | 'terms' | 'contact'>
 
 type StaticPageProps = NavigationProps & {
@@ -707,6 +845,15 @@ function SiteFooter({
           }}
         >
           Business Days Calculator
+        </a>
+        <a
+          href="/free-trial-calculator"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/free-trial-calculator')
+          }}
+        >
+          Free Trial Calculator
         </a>
       </div>
       <p>
@@ -886,6 +1033,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'business-days'
   }
 
+  if (pathname === '/free-trial-calculator') {
+    return 'free-trial'
+  }
+
   if (pathname === '/about') {
     return 'about'
   }
@@ -908,6 +1059,10 @@ function getRouteFromPath(pathname: string): RouteName {
 function getDocumentTitle(route: RouteName): string {
   if (route === 'business-days') {
     return 'Business Days Calculator — WhenIsDue'
+  }
+
+  if (route === 'free-trial') {
+    return 'Free Trial Calculator — WhenIsDue'
   }
 
   if (route === 'about') {
@@ -1139,6 +1294,27 @@ function getBusinessDaysValidationMessage(
 
   if (title.length > titleMaxLength) {
     return `Title must be ${titleMaxLength} characters or less.`
+  }
+
+  return null
+}
+
+function getTrialValidationMessage(
+  startDate: PlainDate | null,
+  trialLength: number | null,
+): string | null {
+  if (!startDate) {
+    return 'Enter a valid date from 1900-01-01 to 2100-12-31.'
+  }
+
+  if (!isDateInSupportedRange(startDate)) {
+    return 'Date must be from 1900-01-01 to 2100-12-31.'
+  }
+
+  const limit = getAmountLimit('trial')
+
+  if (trialLength === null || trialLength < 0 || trialLength > limit) {
+    return `Trial length must be a whole number from 0 to ${limit}.`
   }
 
   return null
