@@ -36,12 +36,14 @@ const modes: CalculatorMode[] = ['calendar', 'business', 'invoice', 'trial', 're
 const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60', 'net90', 'eom']
 const businessDayQuickPicks = [1, 5, 10, 15, 30]
 const trialLengthQuickPicks = [7, 14, 30]
+const returnWindowQuickPicks = [7, 14, 30, 60, 90]
 const titleMaxLength = 80
 
 type RouteName =
   | 'home'
   | 'business-days'
   | 'free-trial'
+  | 'return-window'
   | 'about'
   | 'privacy'
   | 'terms'
@@ -82,6 +84,10 @@ function App() {
 
   if (route === 'free-trial') {
     return <FreeTrialPage onNavigate={navigate} />
+  }
+
+  if (route === 'return-window') {
+    return <ReturnWindowPage onNavigate={navigate} />
   }
 
   if (route === 'about' || route === 'privacy' || route === 'terms' || route === 'contact') {
@@ -404,6 +410,17 @@ function HomePage({ onNavigate }: NavigationProps) {
           >
             <strong>Free Trial Calculator</strong>
             <span>Find the last safe day to cancel before renewal.</span>
+          </a>
+          <a
+            className="calculator-link-card"
+            href="/return-window-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/return-window-calculator')
+            }}
+          >
+            <strong>Return Window Calculator</strong>
+            <span>Find the last day to return an item.</span>
           </a>
         </div>
       </section>
@@ -745,6 +762,135 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
   )
 }
 
+function ReturnWindowPage({ onNavigate }: NavigationProps) {
+  const currentTime = useCurrentMinute()
+  const [purchaseDate, setPurchaseDate] = useState(todayInputValue)
+  const [returnWindow, setReturnWindow] = useState('30')
+
+  const parsedPurchaseDate = parsePlainDate(purchaseDate)
+  const parsedReturnWindow = parseInteger(returnWindow)
+  const validationMessage = getReturnWindowValidationMessage(parsedPurchaseDate, parsedReturnWindow)
+  const returnDeadline = parsedPurchaseDate && parsedReturnWindow !== null && !validationMessage
+    ? addCalendarDays(parsedPurchaseDate, Math.max(parsedReturnWindow - 1, 0))
+    : null
+  const calendarDaysFromPurchase = parsedPurchaseDate && returnDeadline
+    ? daysBetween(parsedPurchaseDate, returnDeadline)
+    : 0
+
+  return (
+    <main className="page-shell return-window-page">
+      <section className="intro" aria-labelledby="return-window-title">
+        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <a
+          className="back-link"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          Home
+        </a>
+        <h1 id="return-window-title">Return Window Calculator</h1>
+        <p className="subtitle">
+          Find the last calendar day to return an item.
+        </p>
+        <p className="intro-note">
+          Date-only planning for common purchase return windows.
+        </p>
+      </section>
+
+      <section className="business-workspace" aria-label="Return window calculator">
+        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
+          <div className="card-heading">
+            <h2>Calculate return deadline</h2>
+            <p>Enter the purchase date and return window.</p>
+          </div>
+
+          <label className="field start-field">
+            <span>Purchase date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={purchaseDate}
+              onChange={(event) => setPurchaseDate(event.target.value)}
+            />
+          </label>
+
+          <label className="field value-field">
+            <span>Return window in days</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              max={getAmountLimit('return')}
+              value={returnWindow}
+              onChange={(event) => setReturnWindow(event.target.value)}
+            />
+            <span className="quick-picks" aria-label="Quick return window values">
+              {returnWindowQuickPicks.map((quickPick) => (
+                <button
+                  className={returnWindow === String(quickPick) ? 'is-selected' : ''}
+                  key={quickPick}
+                  type="button"
+                  onClick={() => setReturnWindow(String(quickPick))}
+                >
+                  {quickPick}
+                </button>
+              ))}
+            </span>
+          </label>
+
+          {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
+        </form>
+
+        <section className="result-panel return-window-result">
+          <p className="result-label">Return deadline</p>
+          {returnDeadline && parsedReturnWindow !== null ? (
+            <>
+              <p className="due-date">{formatPlainDate(returnDeadline)}</p>
+              <div className="result-meta result-meta-stack">
+                <span>Last day to return: {formatPlainDate(returnDeadline)}</span>
+                <span className="status-badge status-comfortable">
+                  {calendarDaysFromPurchase} {calendarDaysFromPurchase === 1 ? 'calendar day' : 'calendar days'} from purchase date
+                </span>
+              </div>
+              <p className="result-note">
+                Check the store's official return policy because some return windows start on delivery date, not purchase date.
+              </p>
+            </>
+          ) : (
+            <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
+          )}
+        </section>
+      </section>
+
+      <section className="business-content" aria-label="Return window help">
+        <article>
+          <h2>How this calculator works</h2>
+          <p>
+            Enter the purchase date and the number of days in the return window. The calculator shows the last calendar day to return the item. Some stores count from delivery date instead of purchase date, so always check the official return policy.
+          </p>
+        </article>
+
+        <article>
+          <h2>Common return windows</h2>
+          <ul>
+            <li>7-day return window</li>
+            <li>14-day return window</li>
+            <li>30-day return window</li>
+            <li>60-day return window</li>
+            <li>90-day return window</li>
+          </ul>
+        </article>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  )
+}
+
 type StaticPageRoute = Extract<RouteName, 'about' | 'privacy' | 'terms' | 'contact'>
 
 type StaticPageProps = NavigationProps & {
@@ -885,6 +1031,15 @@ function SiteFooter({
           }}
         >
           Free Trial Calculator
+        </a>
+        <a
+          href="/return-window-calculator"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/return-window-calculator')
+          }}
+        >
+          Return Window Calculator
         </a>
       </div>
       <p>
@@ -1068,6 +1223,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'free-trial'
   }
 
+  if (pathname === '/return-window-calculator') {
+    return 'return-window'
+  }
+
   if (pathname === '/about') {
     return 'about'
   }
@@ -1094,6 +1253,10 @@ function getDocumentTitle(route: RouteName): string {
 
   if (route === 'free-trial') {
     return 'Free Trial Calculator — WhenIsDue'
+  }
+
+  if (route === 'return-window') {
+    return 'Return Window Calculator — WhenIsDue'
   }
 
   if (route === 'about') {
@@ -1346,6 +1509,27 @@ function getTrialValidationMessage(
 
   if (trialLength === null || trialLength < 0 || trialLength > limit) {
     return `Trial length must be a whole number from 0 to ${limit}.`
+  }
+
+  return null
+}
+
+function getReturnWindowValidationMessage(
+  purchaseDate: PlainDate | null,
+  returnWindow: number | null,
+): string | null {
+  if (!purchaseDate) {
+    return 'Enter a valid date from 1900-01-01 to 2100-12-31.'
+  }
+
+  if (!isDateInSupportedRange(purchaseDate)) {
+    return 'Date must be from 1900-01-01 to 2100-12-31.'
+  }
+
+  const limit = getAmountLimit('return')
+
+  if (returnWindow === null || returnWindow < 0 || returnWindow > limit) {
+    return `Return window must be a whole number from 0 to ${limit}.`
   }
 
   return null
