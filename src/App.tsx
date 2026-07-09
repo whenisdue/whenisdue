@@ -377,6 +377,37 @@ function HomePage({ onNavigate }: NavigationProps) {
         </section>
       </section>
 
+      <section className="popular-calculators" aria-labelledby="popular-calculators-title">
+        <div className="section-heading">
+          <h2 id="popular-calculators-title">Popular calculators</h2>
+          <p>Quick tools for common due dates.</p>
+        </div>
+        <div className="popular-calculators-grid">
+          <a
+            className="calculator-link-card"
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            <strong>Business Days Calculator</strong>
+            <span>Add business days to a start date.</span>
+          </a>
+          <a
+            className="calculator-link-card"
+            href="/free-trial-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/free-trial-calculator')
+            }}
+          >
+            <strong>Free Trial Calculator</strong>
+            <span>Find the last safe day to cancel before renewal.</span>
+          </a>
+        </div>
+      </section>
+
       <SiteFooter onNavigate={onNavigate} />
     </main>
   )
