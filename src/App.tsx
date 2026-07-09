@@ -1070,8 +1070,13 @@ function StaticPage({ route, onNavigate }: StaticPageProps) {
       </section>
 
       <section className="static-content" aria-label={page.title}>
-        {page.paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+        {page.sections.map((section) => (
+          <article key={section.title}>
+            <h2>{section.title}</h2>
+            {section.paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </article>
         ))}
         {page.email ? (
           <p>
@@ -1540,7 +1545,10 @@ function getDocumentTitle(route: RouteName): string {
 
 type StaticPageContent = {
   title: string
-  paragraphs: string[]
+  sections: Array<{
+    title: string
+    paragraphs: string[]
+  }>
   email?: string
 }
 
@@ -1548,9 +1556,31 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
   if (route === 'about') {
     return {
       title: 'About WhenIsDue',
-      paragraphs: [
-        'WhenIsDue is a simple independent due date calculator. It helps people calculate calendar days, business days, invoice terms, free trial dates, return windows, and other everyday deadlines.',
-        'Saved due dates stay in your browser on your device. WhenIsDue is not an official government, legal, financial, or medical source.',
+      sections: [
+        {
+          title: 'What WhenIsDue does',
+          paragraphs: [
+            'WhenIsDue is an independent calculator website for everyday due dates. It helps with calendar days, business days, free trials, return windows, invoice terms, and other common planning dates.',
+          ],
+        },
+        {
+          title: 'Why the site exists',
+          paragraphs: [
+            'The site exists to make simple deadline math easier to check without creating an account or setting up a full productivity app.',
+          ],
+        },
+        {
+          title: 'How calculations work',
+          paragraphs: [
+            'Calculators use date-only inputs and straightforward rules for each page. Saved due dates stay in your browser on that device.',
+          ],
+        },
+        {
+          title: 'Important reminder',
+          paragraphs: [
+            'WhenIsDue is not an official government, legal, financial, tax, medical, school, employer, or service provider source. Verify important deadlines with the official source before relying on them.',
+          ],
+        },
       ],
     }
   }
@@ -1558,10 +1588,37 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
   if (route === 'privacy') {
     return {
       title: 'Privacy Policy',
-      paragraphs: [
-        'This MVP does not require an account, does not ask for personal information, and does not upload saved due dates.',
-        'Saved due dates are stored locally in your browser. Clearing browser data, using private browsing, or switching devices may remove or hide saved due dates.',
-        'If analytics or ads are added later, this page will be updated.',
+      sections: [
+        {
+          title: 'Information you enter',
+          paragraphs: [
+            'No account is required. This MVP does not ask for names, passwords, addresses, payment details, or other personal information.',
+          ],
+        },
+        {
+          title: 'Saved due dates',
+          paragraphs: [
+            'Saved due dates are stored locally in your browser on your device. Clearing browser data, using private browsing, or switching devices may remove or hide saved due dates.',
+          ],
+        },
+        {
+          title: 'Accounts',
+          paragraphs: [
+            'WhenIsDue does not currently provide user accounts, login, or cloud sync.',
+          ],
+        },
+        {
+          title: 'Analytics and ads',
+          paragraphs: [
+            'The current MVP does not use analytics or advertising cookies. If analytics or ads are added later, this privacy policy will be updated.',
+          ],
+        },
+        {
+          title: 'Contact',
+          paragraphs: [
+            'Questions about this privacy policy can be sent through the contact email listed on the Contact page.',
+          ],
+        },
       ],
     }
   }
@@ -1569,18 +1626,50 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
   if (route === 'terms') {
     return {
       title: 'Terms of Use',
-      paragraphs: [
-        'WhenIsDue provides general date calculation tools for convenience only.',
-        'You should verify important deadlines with official documents, contracts, schools, employers, agencies, or service providers.',
-        'WhenIsDue does not provide legal, financial, medical, tax, immigration, or professional advice.',
+      sections: [
+        {
+          title: 'General use',
+          paragraphs: [
+            'WhenIsDue provides general date calculation tools for convenience and planning only.',
+          ],
+        },
+        {
+          title: 'Calculator accuracy',
+          paragraphs: [
+            'The calculators use simple date rules and may not match every contract, policy, local rule, or service-specific deadline. Important deadlines should be verified with official documents, contracts, stores, schools, employers, agencies, or service providers.',
+          ],
+        },
+        {
+          title: 'No professional advice',
+          paragraphs: [
+            'WhenIsDue does not provide legal, financial, tax, medical, immigration, school, employment, or professional advice.',
+          ],
+        },
+        {
+          title: 'User responsibility',
+          paragraphs: [
+            'You are responsible for checking important dates with the official source before making decisions based on a calculated result.',
+          ],
+        },
+        {
+          title: 'Changes to the site',
+          paragraphs: [
+            'WhenIsDue may change, add, or remove calculators and content over time. These terms may be updated when the site changes.',
+          ],
+        },
       ],
     }
   }
 
   return {
     title: 'Contact',
-    paragraphs: [
-      'For questions, corrections, or feedback about WhenIsDue, contact:',
+    sections: [
+      {
+        title: 'Get in touch',
+        paragraphs: [
+          'For questions, corrections, feedback, or reporting a calculation issue with WhenIsDue, contact:',
+        ],
+      },
     ],
     email: 'bjesguerra2025@gmail.com',
   }

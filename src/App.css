@@ -1,3 +1,10 @@
+:root {
+  --accent-teal: #4c8c70;
+  --accent-teal-dark: #2f654f;
+  --warm-sand: #f5e9da;
+  --warm-sand-soft: #fbf7f0;
+}
+
 .page-shell {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
@@ -42,7 +49,7 @@
 }
 
 .site-mark-link:hover {
-  color: #0f172a;
+  color: var(--accent-teal-dark);
 }
 
 .local-time {
@@ -81,7 +88,7 @@
 }
 
 .top-nav a:hover {
-  color: #0f172a;
+  color: var(--accent-teal-dark);
   text-decoration: underline;
 }
 
@@ -112,20 +119,20 @@
 .popular-calculator-card {
   display: grid;
   max-width: 760px;
-  gap: 3px;
-  margin: -4px 0 14px;
+  gap: 2px;
+  margin: -2px 0 12px;
   border: 1px solid #e5e7eb;
-  border-left: 4px solid #64748b;
+  border-left: 3px solid #d6bfa1;
   border-radius: 4px;
-  background: #ffffff;
+  background: #fffdf9;
   color: inherit;
-  padding: 10px 13px;
+  padding: 8px 12px;
   text-decoration: none;
 }
 
 .popular-calculator-card:hover {
-  border-color: #cbd5e1;
-  border-left-color: #0f172a;
+  border-color: #d8d0c5;
+  border-left-color: var(--accent-teal);
 }
 
 .popular-calculator-card span {
@@ -153,7 +160,7 @@
 }
 
 .popular-calculator-card b {
-  color: #0f172a;
+  color: var(--accent-teal-dark);
   font-size: 0.82rem;
   font-weight: 740;
   line-height: 1.35;
@@ -169,7 +176,7 @@
 }
 
 .back-link:hover {
-  color: #0f172a;
+  color: var(--accent-teal-dark);
   text-decoration: underline;
 }
 
@@ -179,12 +186,25 @@
 
 .static-content {
   display: grid;
-  gap: 10px;
+  gap: 16px;
   max-width: 720px;
   border: 1px solid #e5e7eb;
   border-radius: 4px;
   background: #ffffff;
   padding: 18px;
+}
+
+.static-content article {
+  display: grid;
+  gap: 5px;
+}
+
+.static-content h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 760;
+  line-height: 1.3;
 }
 
 .static-content p {
@@ -195,7 +215,7 @@
 }
 
 .static-content a {
-  color: #0f172a;
+  color: var(--accent-teal-dark);
   font-weight: 720;
 }
 
@@ -275,7 +295,7 @@
 }
 
 .current-mode strong {
-  color: #0f172a;
+  color: var(--accent-teal-dark);
   font-weight: 760;
 }
 
@@ -350,11 +370,11 @@ select {
 .quick-picks {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
 }
 
 .quick-picks button {
-  min-height: 26px;
+  min-height: 30px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   background: #ffffff;
@@ -364,18 +384,18 @@ select {
   font-size: 0.74rem;
   font-weight: 720;
   cursor: pointer;
-  padding: 3px 8px;
+  padding: 4px 10px;
 }
 
 .quick-picks button:hover {
-  border-color: #94a3b8;
-  color: #0f172a;
+  border-color: var(--accent-teal);
+  color: var(--accent-teal-dark);
 }
 
 .quick-picks button.is-selected {
-  border-color: #0f172a;
-  background: #f8fafc;
-  color: #0f172a;
+  border-color: var(--accent-teal);
+  background: #eef7f1;
+  color: var(--accent-teal-dark);
 }
 
 input,
@@ -393,7 +413,7 @@ select:focus,
 button:focus-visible,
 a:focus-visible,
 .mode-option:has(input:focus-visible) {
-  outline: 2px solid #0284c7;
+  outline: 2px solid var(--accent-teal);
   outline-offset: 2px;
 }
 
@@ -433,14 +453,14 @@ a:focus-visible,
 }
 
 .mode-option:has(input:checked) {
-  border-color: #0f172a;
-  background: #f8fafc;
+  border-color: var(--accent-teal);
+  background: #f6fbf8;
   color: #0f172a;
 }
 
 .mode-option:has(input:checked)::before {
-  border-color: #0f172a;
-  background: #0f172a;
+  border-color: var(--accent-teal);
+  background: var(--accent-teal);
 }
 
 .mode-option input {
@@ -457,10 +477,10 @@ a:focus-visible,
 
 .result-panel {
   border: 1px solid #e5e7eb;
-  border-left: 5px solid #0f172a;
+  border-left: 5px solid var(--accent-teal);
   border-radius: 4px;
-  background: #f8fafc;
-  padding: 12px 15px;
+  background: linear-gradient(90deg, #f3faf5 0%, var(--warm-sand-soft) 100%);
+  padding: 14px 16px;
 }
 
 .result-panel.is-overdue {
@@ -470,7 +490,7 @@ a:focus-visible,
 
 .result-label {
   margin: 0 0 5px;
-  color: #64748b;
+  color: var(--accent-teal-dark);
   font-size: 0.68rem;
   font-weight: 760;
   letter-spacing: 0.08em;
@@ -605,9 +625,9 @@ a:focus-visible,
 }
 
 .status-comfortable {
-  border-color: #b8c7ae;
-  background: #f3f7f0;
-  color: #35530f;
+  border-color: #aac9b8;
+  background: #eef7f1;
+  color: var(--accent-teal-dark);
 }
 
 .status-soon {
@@ -636,9 +656,9 @@ a:focus-visible,
 
 .primary-button {
   min-height: 38px;
-  border: 1px solid #0f172a;
+  border: 1px solid var(--accent-teal-dark);
   border-radius: 4px;
-  background: #0f172a;
+  background: var(--accent-teal-dark);
   color: #ffffff;
   font: inherit;
   font-size: 0.92rem;
@@ -678,9 +698,9 @@ a:focus-visible,
   gap: 7px;
   margin-top: 12px;
   border: 1px solid #d9dee8;
-  border-top: 3px solid #94a3b8;
+  border-top: 3px solid var(--accent-teal);
   border-radius: 4px;
-  background: #fbfcfe;
+  background: var(--warm-sand-soft);
   padding: 10px 12px 11px;
 }
 
@@ -689,7 +709,7 @@ a:focus-visible,
 }
 
 .next-due.category-business {
-  border-top-color: #64748b;
+  border-top-color: var(--accent-teal);
 }
 
 .next-due.category-invoice {
@@ -706,8 +726,8 @@ a:focus-visible,
 
 .next-due.is-urgent {
   border-color: #b8c0cc;
-  border-top-color: #0f172a;
-  background: #f8fafc;
+  border-top-color: var(--accent-teal-dark);
+  background: #f7f4ed;
 }
 
 .next-due-kicker {
@@ -779,8 +799,8 @@ a:focus-visible,
 }
 
 .next-due-actions button:hover {
-  border-color: #94a3b8;
-  color: #0f172a;
+  border-color: var(--accent-teal);
+  color: var(--accent-teal-dark);
 }
 
 .deadline-item {
@@ -808,7 +828,7 @@ a:focus-visible,
 }
 
 .deadline-item.category-business::before {
-  background: #64748b;
+  background: var(--accent-teal);
 }
 
 .deadline-item.category-invoice::before {
@@ -918,8 +938,8 @@ a:focus-visible,
 }
 
 .deadline-actions button:hover {
-  border-color: #94a3b8;
-  color: #0f172a;
+  border-color: var(--accent-teal);
+  color: var(--accent-teal-dark);
 }
 
 .empty-state {
@@ -963,7 +983,7 @@ a:focus-visible,
 }
 
 .site-footer a:hover {
-  color: #0f172a;
+  color: var(--accent-teal-dark);
   text-decoration: underline;
 }
 
@@ -1006,7 +1026,7 @@ a:focus-visible,
   display: grid;
   gap: 4px;
   border: 1px solid #e5e7eb;
-  border-left: 4px solid #cbd5e1;
+  border-left: 4px solid #d6bfa1;
   border-radius: 4px;
   background: #ffffff;
   padding: 11px 13px;
@@ -1014,8 +1034,8 @@ a:focus-visible,
 }
 
 .calculator-link-card:hover {
-  border-color: #cbd5e1;
-  border-left-color: #0f172a;
+  border-color: #d8d0c5;
+  border-left-color: var(--accent-teal);
 }
 
 .calculator-link-card strong {
