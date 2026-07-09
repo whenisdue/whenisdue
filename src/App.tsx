@@ -215,7 +215,7 @@ function HomePage({ onNavigate }: NavigationProps) {
   return (
     <main className="page-shell home-page">
       <section className="intro" aria-labelledby="homepage-title">
-        <IdentityRow currentTime={currentTime} />
+        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} />
         <h1 id="homepage-title">When is it due?</h1>
         <p className="subtitle">
           Turn calendar days, business days, invoice terms, free trials, and return windows into exact dates.
@@ -1169,8 +1169,8 @@ type IdentityRowProps = {
   showHomeLink?: boolean
 }
 
-function IdentityRow({ currentTime, onNavigate, showHomeLink = false }: IdentityRowProps) {
-  const siteMark = showHomeLink ? (
+function IdentityRow({ currentTime, onNavigate }: IdentityRowProps) {
+  const siteMark = onNavigate ? (
     <a
       className="site-mark site-mark-link"
       href="/"
@@ -1186,13 +1186,55 @@ function IdentityRow({ currentTime, onNavigate, showHomeLink = false }: Identity
   )
 
   return (
-    <div className="identity-row">
-      {siteMark}
-      <div className="local-time" aria-label="Current local time">
-        <span>Local time</span>
-        <time dateTime={currentTime.toISOString()}>{formatCurrentTime(currentTime)}</time>
+    <header className="site-header">
+      <div className="identity-row">
+        {siteMark}
+        <div className="local-time" aria-label="Current local time">
+          <span>Local time</span>
+          <time dateTime={currentTime.toISOString()}>{formatCurrentTime(currentTime)}</time>
+        </div>
       </div>
-    </div>
+      {onNavigate ? (
+        <nav className="top-nav" aria-label="Calculator navigation">
+          <a
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            Business Days
+          </a>
+          <a
+            href="/free-trial-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/free-trial-calculator')
+            }}
+          >
+            Free Trial
+          </a>
+          <a
+            href="/return-window-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/return-window-calculator')
+            }}
+          >
+            Return Window
+          </a>
+          <a
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            Invoice Due Date
+          </a>
+        </nav>
+      ) : null}
+    </header>
   )
 }
 
@@ -1242,42 +1284,6 @@ function SiteFooter({
           }}
         >
           Contact
-        </a>
-        <a
-          href="/business-days-calculator"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/business-days-calculator')
-          }}
-        >
-          Business Days Calculator
-        </a>
-        <a
-          href="/free-trial-calculator"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/free-trial-calculator')
-          }}
-        >
-          Free Trial Calculator
-        </a>
-        <a
-          href="/return-window-calculator"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/return-window-calculator')
-          }}
-        >
-          Return Window Calculator
-        </a>
-        <a
-          href="/invoice-due-date-calculator"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/invoice-due-date-calculator')
-          }}
-        >
-          Invoice Due Date Calculator
         </a>
       </div>
       <p>
