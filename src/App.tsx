@@ -37,6 +37,7 @@ const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60',
 const businessDayQuickPicks = [1, 5, 10, 15, 30]
 const trialLengthQuickPicks = [7, 14, 30]
 const returnWindowQuickPicks = [7, 14, 30, 60, 90]
+const invoiceDueDateQuickPicks = [7, 14, 15, 30, 45, 60]
 const titleMaxLength = 80
 
 type RouteName =
@@ -44,6 +45,7 @@ type RouteName =
   | 'business-days'
   | 'free-trial'
   | 'return-window'
+  | 'invoice-due-date'
   | 'about'
   | 'privacy'
   | 'terms'
@@ -88,6 +90,10 @@ function App() {
 
   if (route === 'return-window') {
     return <ReturnWindowPage onNavigate={navigate} />
+  }
+
+  if (route === 'invoice-due-date') {
+    return <InvoiceDueDatePage onNavigate={navigate} />
   }
 
   if (route === 'about' || route === 'privacy' || route === 'terms' || route === 'contact') {
@@ -421,6 +427,17 @@ function HomePage({ onNavigate }: NavigationProps) {
           >
             <strong>Return Window Calculator</strong>
             <span>Find the last day to return an item.</span>
+          </a>
+          <a
+            className="calculator-link-card"
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            <strong>Invoice Due Date Calculator</strong>
+            <span>Calculate due dates from payment terms.</span>
           </a>
         </div>
       </section>
@@ -891,6 +908,135 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   )
 }
 
+function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
+  const currentTime = useCurrentMinute()
+  const [invoiceDate, setInvoiceDate] = useState(todayInputValue)
+  const [paymentTerms, setPaymentTerms] = useState('30')
+
+  const parsedInvoiceDate = parsePlainDate(invoiceDate)
+  const parsedPaymentTerms = parseInteger(paymentTerms)
+  const validationMessage = getInvoiceDueDateValidationMessage(parsedInvoiceDate, parsedPaymentTerms)
+  const invoiceDueDate = parsedInvoiceDate && parsedPaymentTerms !== null && !validationMessage
+    ? addCalendarDays(parsedInvoiceDate, parsedPaymentTerms)
+    : null
+  const calendarDaysFromInvoice = parsedInvoiceDate && invoiceDueDate
+    ? daysBetween(parsedInvoiceDate, invoiceDueDate)
+    : 0
+
+  return (
+    <main className="page-shell invoice-due-date-page">
+      <section className="intro" aria-labelledby="invoice-due-date-title">
+        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <a
+          className="back-link"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          Home
+        </a>
+        <h1 id="invoice-due-date-title">Invoice Due Date Calculator</h1>
+        <p className="subtitle">
+          Calculate invoice due dates from common payment terms.
+        </p>
+        <p className="intro-note">
+          Date-only planning for Net 7, Net 15, Net 30, Net 45, and Net 60 invoices.
+        </p>
+      </section>
+
+      <section className="business-workspace" aria-label="Invoice due date calculator">
+        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
+          <div className="card-heading">
+            <h2>Calculate invoice due date</h2>
+            <p>Enter the invoice date and payment terms.</p>
+          </div>
+
+          <label className="field start-field">
+            <span>Invoice date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={invoiceDate}
+              onChange={(event) => setInvoiceDate(event.target.value)}
+            />
+          </label>
+
+          <label className="field value-field">
+            <span>Payment terms in days</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              max="3650"
+              value={paymentTerms}
+              onChange={(event) => setPaymentTerms(event.target.value)}
+            />
+            <span className="quick-picks" aria-label="Quick payment term values">
+              {invoiceDueDateQuickPicks.map((quickPick) => (
+                <button
+                  className={paymentTerms === String(quickPick) ? 'is-selected' : ''}
+                  key={quickPick}
+                  type="button"
+                  onClick={() => setPaymentTerms(String(quickPick))}
+                >
+                  {quickPick}
+                </button>
+              ))}
+            </span>
+          </label>
+
+          {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
+        </form>
+
+        <section className="result-panel invoice-due-date-result">
+          <p className="result-label">Invoice due date</p>
+          {invoiceDueDate && parsedPaymentTerms !== null ? (
+            <>
+              <p className="due-date">{formatPlainDate(invoiceDueDate)}</p>
+              <div className="result-meta result-meta-stack">
+                <span>Invoice due date: {formatPlainDate(invoiceDueDate)}</span>
+                <span className="status-badge status-comfortable">
+                  {calendarDaysFromInvoice} {calendarDaysFromInvoice === 1 ? 'calendar day' : 'calendar days'} from invoice date
+                </span>
+              </div>
+              <p className="result-note">
+                Check the invoice or contract because some terms may count business days or use end-of-month rules.
+              </p>
+            </>
+          ) : (
+            <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
+          )}
+        </section>
+      </section>
+
+      <section className="business-content" aria-label="Invoice due date help">
+        <article>
+          <h2>How this calculator works</h2>
+          <p>
+            Enter the invoice date and the payment terms in days. The calculator shows the calendar date when the invoice is due. This is useful for Net 7, Net 15, Net 30, Net 45, and Net 60 payment terms.
+          </p>
+        </article>
+
+        <article>
+          <h2>Common invoice terms</h2>
+          <ul>
+            <li>Net 7</li>
+            <li>Net 15</li>
+            <li>Net 30</li>
+            <li>Net 45</li>
+            <li>Net 60</li>
+          </ul>
+        </article>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  )
+}
+
 type StaticPageRoute = Extract<RouteName, 'about' | 'privacy' | 'terms' | 'contact'>
 
 type StaticPageProps = NavigationProps & {
@@ -1040,6 +1186,15 @@ function SiteFooter({
           }}
         >
           Return Window Calculator
+        </a>
+        <a
+          href="/invoice-due-date-calculator"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/invoice-due-date-calculator')
+          }}
+        >
+          Invoice Due Date Calculator
         </a>
       </div>
       <p>
@@ -1227,6 +1382,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'return-window'
   }
 
+  if (pathname === '/invoice-due-date-calculator') {
+    return 'invoice-due-date'
+  }
+
   if (pathname === '/about') {
     return 'about'
   }
@@ -1257,6 +1416,10 @@ function getDocumentTitle(route: RouteName): string {
 
   if (route === 'return-window') {
     return 'Return Window Calculator — WhenIsDue'
+  }
+
+  if (route === 'invoice-due-date') {
+    return 'Invoice Due Date Calculator — WhenIsDue'
   }
 
   if (route === 'about') {
@@ -1530,6 +1693,25 @@ function getReturnWindowValidationMessage(
 
   if (returnWindow === null || returnWindow < 0 || returnWindow > limit) {
     return `Return window must be a whole number from 0 to ${limit}.`
+  }
+
+  return null
+}
+
+function getInvoiceDueDateValidationMessage(
+  invoiceDate: PlainDate | null,
+  paymentTerms: number | null,
+): string | null {
+  if (!invoiceDate) {
+    return 'Enter a valid date from 1900-01-01 to 2100-12-31.'
+  }
+
+  if (!isDateInSupportedRange(invoiceDate)) {
+    return 'Date must be from 1900-01-01 to 2100-12-31.'
+  }
+
+  if (paymentTerms === null || paymentTerms < 0 || paymentTerms > 3650) {
+    return 'Payment terms must be a whole number from 0 to 3650.'
   }
 
   return null
