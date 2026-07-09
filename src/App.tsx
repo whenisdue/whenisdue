@@ -187,6 +187,20 @@ function HomePage({ onNavigate }: NavigationProps) {
         </p>
       </section>
 
+      <a
+        className="popular-calculator-card"
+        href="/business-days-calculator"
+        onClick={(event) => {
+          event.preventDefault()
+          onNavigate('/business-days-calculator')
+        }}
+      >
+        <span>Popular calculator</span>
+        <strong>Business Days Calculator</strong>
+        <em>Add business days to a start date. Weekends are skipped automatically.</em>
+        <b>Open calculator →</b>
+      </a>
+
       <section className="workspace" aria-label="Deadline calculator and saved due dates">
         <form className="calculator-card" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
