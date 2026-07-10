@@ -339,6 +339,7 @@
   gap: 10px;
   padding: 20px 22px 21px;
   border-color: #cdbb9f;
+  min-height: 664px;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
     0 16px 34px rgba(14, 39, 68, 0.08);
@@ -617,6 +618,10 @@ a:focus-visible,
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
+.home-page .mode-option-copy {
+  grid-template-rows: auto auto;
+}
+
 .home-page .mode-option:hover {
   border-color: rgba(205, 189, 164, 0.78);
   background: rgba(255, 253, 248, 0.98);
@@ -703,12 +708,18 @@ a:focus-visible,
   color: #0e2744;
   font-size: 0.82rem;
   font-weight: 760;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .home-page .mode-option-helper {
   color: #657184;
   font-size: 0.71rem;
   font-weight: 620;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .home-page .mode-option:has(input:checked) .mode-option-helper {
@@ -732,6 +743,7 @@ a:focus-visible,
   background:
     linear-gradient(180deg, rgba(255, 252, 245, 0.99) 0%, rgba(249, 241, 228, 0.99) 100%);
   margin: 4px 0 2px;
+  min-height: 182px;
   padding: 24px 21px 20px 24px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
@@ -1647,6 +1659,7 @@ a:focus-visible,
   .home-page .calculator-card {
     gap: 8px;
     border-radius: 11px;
+    min-height: 0;
     padding: 12px;
   }
 
@@ -1667,6 +1680,7 @@ a:focus-visible,
   .home-page .result-panel {
     border-radius: 11px;
     margin: 1px 0;
+    min-height: 0;
     padding: 15px 12px 12px 17px;
     box-shadow:
       inset 5px 0 0 rgba(76, 140, 112, 0.88),
@@ -1720,6 +1734,7 @@ a:focus-visible,
 
   .home-page .mode-option-helper {
     font-size: 0.7rem;
+    white-space: normal;
   }
 
   .home-page .mode-option::before {
