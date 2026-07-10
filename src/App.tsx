@@ -383,60 +383,60 @@ function HomePage({ onNavigate }: NavigationProps) {
               <span>Save a result here and it will stay in this browser for next time.</span>
             </div>
           )}
-        </section>
-      </section>
 
-      <section className="popular-calculators" aria-labelledby="popular-calculators-title">
-        <div className="section-heading">
-          <h2 id="popular-calculators-title">Popular calculators</h2>
-          <p>Quick tools for common due dates.</p>
-        </div>
-        <div className="popular-calculators-grid">
-          <a
-            className="calculator-link-card"
-            href="/business-days-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/business-days-calculator')
-            }}
-          >
-            <strong>Business Days Calculator</strong>
-            <span>Add business days to a start date.</span>
-          </a>
-          <a
-            className="calculator-link-card"
-            href="/free-trial-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/free-trial-calculator')
-            }}
-          >
-            <strong>Free Trial Calculator</strong>
-            <span>Find the last safe day to cancel before renewal.</span>
-          </a>
-          <a
-            className="calculator-link-card"
-            href="/return-window-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/return-window-calculator')
-            }}
-          >
-            <strong>Return Window Calculator</strong>
-            <span>Find the last day to return an item.</span>
-          </a>
-          <a
-            className="calculator-link-card"
-            href="/invoice-due-date-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/invoice-due-date-calculator')
-            }}
-          >
-            <strong>Invoice Due Date Calculator</strong>
-            <span>Calculate due dates from payment terms.</span>
-          </a>
-        </div>
+          <section className="popular-calculators" aria-labelledby="popular-calculators-title">
+            <div className="section-heading">
+              <h2 id="popular-calculators-title">Popular calculators</h2>
+              <p>Quick tools for common due dates.</p>
+            </div>
+            <div className="popular-calculators-grid">
+              <a
+                className="calculator-link-card"
+                href="/business-days-calculator"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/business-days-calculator')
+                }}
+              >
+                <strong>Business Days Calculator</strong>
+                <span>Add business days to a start date.</span>
+              </a>
+              <a
+                className="calculator-link-card"
+                href="/free-trial-calculator"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/free-trial-calculator')
+                }}
+              >
+                <strong>Free Trial Calculator</strong>
+                <span>Find the last safe day to cancel before renewal.</span>
+              </a>
+              <a
+                className="calculator-link-card"
+                href="/return-window-calculator"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/return-window-calculator')
+                }}
+              >
+                <strong>Return Window Calculator</strong>
+                <span>Find the last day to return an item.</span>
+              </a>
+              <a
+                className="calculator-link-card"
+                href="/invoice-due-date-calculator"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/invoice-due-date-calculator')
+                }}
+              >
+                <strong>Invoice Due Date Calculator</strong>
+                <span>Calculate due dates from payment terms.</span>
+              </a>
+            </div>
+          </section>
+        </section>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
