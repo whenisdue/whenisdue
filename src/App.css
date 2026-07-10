@@ -29,11 +29,24 @@
 }
 
 .home-page .identity-row {
+  gap: 10px 16px;
   color: #0e2744;
 }
 
 .home-page .site-mark {
   color: #0e2744;
+  font-size: 0.78rem;
+  font-weight: 860;
+  letter-spacing: 0.14em;
+}
+
+.home-page .site-mark-link {
+  color: #0e2744;
+  text-decoration: none;
+}
+
+.home-page .site-mark-link:hover {
+  color: var(--accent-teal-dark);
 }
 
 .home-page .top-nav a,
@@ -41,8 +54,33 @@
   color: #657184;
 }
 
+.home-page .local-time {
+  gap: 5px;
+  color: #738093;
+  font-size: 0.74rem;
+}
+
+.home-page .local-time span {
+  font-weight: 650;
+}
+
 .home-page .local-time time {
-  color: #0e2744;
+  color: #41546c;
+  font-size: 0.86rem;
+  font-weight: 680;
+}
+
+.home-page .top-nav {
+  gap: 5px 16px;
+}
+
+.home-page .top-nav a {
+  font-size: 0.82rem;
+  font-weight: 720;
+}
+
+.home-page .top-nav a:hover {
+  color: var(--accent-teal-dark);
 }
 
 .intro {
@@ -1365,7 +1403,22 @@ a:focus-visible,
   }
 
   .home-page .identity-row {
+    gap: 4px 10px;
     margin-bottom: 0;
+  }
+
+  .home-page .site-mark {
+    font-size: 0.73rem;
+    letter-spacing: 0.12em;
+  }
+
+  .home-page .local-time {
+    gap: 4px;
+    font-size: 0.7rem;
+  }
+
+  .home-page .local-time time {
+    font-size: 0.78rem;
   }
 
   .site-header {
@@ -1379,6 +1432,14 @@ a:focus-visible,
 
   .top-nav a {
     font-size: 0.8rem;
+  }
+
+  .home-page .top-nav {
+    gap: 4px 11px;
+  }
+
+  .home-page .top-nav a {
+    font-size: 0.78rem;
   }
 
   .intro h1 {
