@@ -1763,39 +1763,46 @@ a:focus-visible,
   }
 
   .home-page .mode-field {
-    gap: 4px;
-    margin-top: 2px;
+    gap: 6px;
+    margin-top: 6px;
     padding-top: 0;
   }
 
   .home-page .mode-grid {
-    grid-template-columns: 1fr;
-    gap: 6px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .home-page .mode-option {
-    min-height: 47px;
-    padding: 7px 9px;
+    min-height: 48px;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  .home-page .mode-option:last-child {
+    grid-column: span 2;
   }
 
   .home-page .mode-option-name {
-    font-size: 0.8rem;
-  }
-
-  .home-page .mode-option-helper {
-    font-size: 0.7rem;
+    font-size: 0.82rem;
     white-space: normal;
   }
 
+  .home-page .mode-option-helper {
+    display: none;
+  }
+
   .home-page .mode-option::before {
-    width: 7px;
-    height: 7px;
-    margin-top: 3px;
-    margin-right: 7px;
+    width: 8px;
+    height: 8px;
+    margin-top: 0;
+    margin-right: 8px;
   }
 
   .home-page .mode-note {
-    margin-top: 0;
+    margin-top: 6px;
+    line-height: 1.35;
     min-height: 0;
   }
 
