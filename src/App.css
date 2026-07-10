@@ -408,9 +408,8 @@
 }
 
 .home-page .mode-field {
-  margin-top: 2px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(218, 204, 185, 0.58);
+  margin-top: 6px;
+  padding-top: 2px;
 }
 
 .title-field {
@@ -418,9 +417,8 @@
 }
 
 .home-page .title-field {
-  margin-top: 2px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(218, 204, 185, 0.58);
+  margin-top: 5px;
+  padding-top: 2px;
 }
 
 .primary-button {
@@ -1696,8 +1694,8 @@ a:focus-visible,
 
   .home-page .mode-field {
     gap: 4px;
-    margin-top: 0;
-    padding-top: 8px;
+    margin-top: 3px;
+    padding-top: 0;
   }
 
   .home-page .mode-grid {
@@ -1730,8 +1728,8 @@ a:focus-visible,
   }
 
   .home-page .title-field {
-    margin-top: 0;
-    padding-top: 8px;
+    margin-top: 3px;
+    padding-top: 0;
   }
 
   .business-save {
