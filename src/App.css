@@ -191,6 +191,7 @@
 
 .home-page .subtitle {
   max-width: 620px;
+  margin-top: 5px;
   color: #213752;
   font-size: 1.1rem;
   font-weight: 680;
@@ -206,11 +207,12 @@
 
 .home-page .intro-note {
   max-width: 620px;
+  margin-top: 2px;
   color: #5d6877;
 }
 
 .home-page .intro {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .back-link {
@@ -1458,7 +1460,7 @@ a:focus-visible,
   }
 
   .home-page .intro {
-    margin-bottom: 7px;
+    margin-bottom: 6px;
   }
 
   .home-page .identity-row {
