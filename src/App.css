@@ -138,7 +138,7 @@
 .home-page .intro h1 {
   color: #0e2744;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(3.2rem, 7.4vw, 4.6rem);
+  font-size: clamp(3rem, 6.8vw, 4.35rem);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -172,7 +172,7 @@
 }
 
 .home-page .intro {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .back-link {
@@ -242,16 +242,12 @@
 
 .home-page .workspace {
   position: relative;
-  gap: 16px;
-  margin: 0 -10px;
-  border: 1px solid rgba(218, 204, 185, 0.88);
+  grid-template-columns: minmax(0, 1.16fr) minmax(280px, 0.66fr);
+  gap: 14px;
+  margin: 0 -6px;
   border-radius: 18px;
-  background:
-    linear-gradient(135deg, rgba(255, 251, 244, 0.86), rgba(245, 233, 218, 0.42));
-  padding: 10px;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.86) inset,
-    0 20px 50px rgba(14, 39, 68, 0.08);
+  background: rgba(255, 248, 238, 0.42);
+  padding: 8px;
 }
 
 .business-workspace {
@@ -280,8 +276,10 @@
 }
 
 .home-page .dashboard {
+  border-color: rgba(218, 204, 185, 0.72);
   background:
-    linear-gradient(180deg, rgba(255, 251, 244, 0.96) 0%, rgba(255, 253, 249, 0.94) 100%);
+    linear-gradient(180deg, rgba(255, 251, 244, 0.76) 0%, rgba(255, 253, 249, 0.68) 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
 }
 
 .calculator-card {
@@ -292,8 +290,12 @@
 }
 
 .home-page .calculator-card {
-  gap: 14px;
-  padding: 22px;
+  gap: 15px;
+  padding: 22px 23px 23px;
+  border-color: #cdbb9f;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 16px 34px rgba(14, 39, 68, 0.08);
 }
 
 .business-calculator {
@@ -434,6 +436,11 @@ select {
   color: #0e2744;
 }
 
+.home-page .field span,
+.home-page .field legend {
+  color: #29415b;
+}
+
 .quick-picks {
   display: flex;
   flex-wrap: wrap;
@@ -514,19 +521,19 @@ a:focus-visible,
 }
 
 .home-page .mode-option {
-  border-color: #eadfcc;
-  background: rgba(255, 253, 248, 0.9);
+  border-color: transparent;
+  background: rgba(255, 248, 238, 0.72);
   color: #30465f;
 }
 
 .home-page .mode-option:hover {
-  border-color: #cdbda4;
-  background: #ffffff;
+  border-color: rgba(205, 189, 164, 0.78);
+  background: rgba(255, 253, 248, 0.96);
 }
 
 .home-page .mode-option:has(input:checked) {
   border-color: var(--accent-teal);
-  background: #eef7f1;
+  background: rgba(238, 247, 241, 0.94);
   color: #0e2744;
 }
 
@@ -586,7 +593,7 @@ a:focus-visible,
   border-radius: 14px;
   background:
     linear-gradient(180deg, rgba(255, 252, 245, 0.99) 0%, rgba(249, 241, 228, 0.99) 100%);
-  padding: 20px 19px 17px 22px;
+  padding: 22px 20px 18px 23px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     inset 8px 0 0 rgba(76, 140, 112, 0.9),
@@ -623,7 +630,7 @@ a:focus-visible,
   position: relative;
   z-index: 1;
   color: #0e2744;
-  font-size: 2.6rem;
+  font-size: 2.7rem;
   letter-spacing: -0.015em;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.84);
 }
@@ -888,6 +895,14 @@ a:focus-visible,
   padding-bottom: 2px;
 }
 
+.home-page .dashboard .card-heading h2 {
+  font-size: 1.02rem;
+}
+
+.home-page .dashboard .card-heading p {
+  font-size: 0.8rem;
+}
+
 .next-due {
   position: relative;
   display: grid;
@@ -905,13 +920,22 @@ a:focus-visible,
   border-color: #d5c5af;
   border-radius: 10px;
   background:
-    linear-gradient(180deg, #fffdf8 0%, #f8efe3 100%);
+    linear-gradient(180deg, rgba(255, 253, 248, 0.92) 0%, rgba(248, 239, 227, 0.78) 100%);
 }
 
 .home-page .deadline-item {
   border-bottom-color: #eadfcc;
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.home-page .deadline-item h3 {
+  color: #16324e;
+}
+
+.home-page .deadline-actions button,
+.home-page .next-due-actions button {
+  background: rgba(255, 253, 248, 0.86);
 }
 
 .next-due.category-calendar {
@@ -1162,7 +1186,7 @@ a:focus-visible,
 .home-page .empty-state {
   border-color: #d5c5af;
   border-radius: 10px;
-  background: rgba(255, 251, 244, 0.76);
+  background: rgba(255, 251, 244, 0.62);
   padding: 15px;
 }
 
@@ -1311,7 +1335,7 @@ a:focus-visible,
   }
 
   .home-page .intro {
-    margin-bottom: 8px;
+    margin-bottom: 7px;
   }
 
   .home-page .identity-row {
@@ -1336,7 +1360,7 @@ a:focus-visible,
   }
 
   .home-page .intro h1 {
-    font-size: 2.72rem;
+    font-size: 2.62rem;
     line-height: 0.96;
   }
 
@@ -1360,10 +1384,12 @@ a:focus-visible,
   }
 
   .home-page .workspace {
+    grid-template-columns: 1fr;
     gap: 10px;
-    margin: 0 -4px;
+    margin: 0 -3px;
     border-radius: 12px;
-    padding: 5px;
+    background: rgba(255, 248, 238, 0.34);
+    padding: 4px;
   }
 
   .home-page .popular-calculators {
@@ -1419,7 +1445,7 @@ a:focus-visible,
 
   .home-page .result-panel {
     border-radius: 11px;
-    padding: 13px 12px 11px 17px;
+    padding: 14px 12px 11px 17px;
     box-shadow:
       inset 5px 0 0 rgba(76, 140, 112, 0.88),
       0 10px 22px rgba(14, 39, 68, 0.07);
@@ -1437,7 +1463,7 @@ a:focus-visible,
   }
 
   .home-page .due-date {
-    font-size: 2.02rem;
+    font-size: 1.98rem;
     letter-spacing: -0.01em;
   }
 
