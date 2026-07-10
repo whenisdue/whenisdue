@@ -1791,7 +1791,7 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         ],
       },
     ],
-    email: 'bjesguerra2025@gmail.com',
+    email: 'contact.whenisdue@gmail.com',
   }
 }
 

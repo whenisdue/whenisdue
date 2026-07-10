@@ -22,9 +22,9 @@
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(circle at 10% 4%, rgba(245, 233, 218, 0.9), transparent 28%),
-    radial-gradient(circle at 92% 18%, rgba(76, 140, 112, 0.08), transparent 26%),
-    linear-gradient(180deg, #faf7f1 0%, #fffdf8 44%, #fbf7f0 100%);
+    radial-gradient(circle at 12% 3%, rgba(245, 233, 218, 0.82), transparent 30%),
+    radial-gradient(circle at 92% 18%, rgba(76, 140, 112, 0.07), transparent 28%),
+    linear-gradient(180deg, #faf6ee 0%, #fffaf2 44%, #f8efe3 100%);
   content: "";
 }
 
@@ -137,6 +137,9 @@
 
 .home-page .intro h1 {
   color: #0e2744;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.2rem, 7.4vw, 4.6rem);
+  font-weight: 700;
   letter-spacing: -0.01em;
 }
 
@@ -149,9 +152,9 @@
 }
 
 .home-page .subtitle {
-  max-width: 560px;
+  max-width: 620px;
   color: #213752;
-  font-size: 1.08rem;
+  font-size: 1.1rem;
   font-weight: 680;
 }
 
@@ -164,7 +167,7 @@
 }
 
 .home-page .intro-note {
-  max-width: 560px;
+  max-width: 620px;
   color: #5d6877;
 }
 
@@ -239,14 +242,16 @@
 
 .home-page .workspace {
   position: relative;
-  gap: 14px;
-  margin: 0 -8px;
-  border: 1px solid rgba(231, 221, 207, 0.76);
-  border-radius: 14px;
+  gap: 16px;
+  margin: 0 -10px;
+  border: 1px solid rgba(218, 204, 185, 0.88);
+  border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(255, 253, 249, 0.76), rgba(245, 233, 218, 0.34));
-  padding: 9px;
-  box-shadow: 0 18px 48px rgba(14, 39, 68, 0.07);
+    linear-gradient(135deg, rgba(255, 251, 244, 0.86), rgba(245, 233, 218, 0.42));
+  padding: 10px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.86) inset,
+    0 20px 50px rgba(14, 39, 68, 0.08);
 }
 
 .business-workspace {
@@ -265,18 +270,18 @@
 
 .home-page .calculator-card,
 .home-page .dashboard {
-  border-color: rgba(216, 208, 197, 0.92);
-  border-radius: 10px;
+  border-color: rgba(209, 194, 174, 0.9);
+  border-radius: 14px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 253, 249, 0.95) 100%);
+    linear-gradient(180deg, rgba(255, 253, 247, 0.98) 0%, rgba(255, 250, 242, 0.96) 100%);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.88) inset,
-    0 12px 28px rgba(14, 39, 68, 0.06);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 12px 26px rgba(14, 39, 68, 0.055);
 }
 
 .home-page .dashboard {
   background:
-    linear-gradient(180deg, rgba(255, 253, 249, 0.95) 0%, rgba(255, 255, 255, 0.92) 100%);
+    linear-gradient(180deg, rgba(255, 251, 244, 0.96) 0%, rgba(255, 253, 249, 0.94) 100%);
 }
 
 .calculator-card {
@@ -287,8 +292,8 @@
 }
 
 .home-page .calculator-card {
-  gap: 13px;
-  padding: 20px;
+  gap: 14px;
+  padding: 22px;
 }
 
 .business-calculator {
@@ -373,7 +378,7 @@
 
 .home-page .card-heading h2 {
   color: #0e2744;
-  font-size: 1.14rem;
+  font-size: 1.18rem;
 }
 
 .card-heading p {
@@ -424,8 +429,8 @@ select {
 
 .home-page input,
 .home-page select {
-  border-color: #d8d0c5;
-  background: #fffefa;
+  border-color: #d5c5af;
+  background: #fffdf8;
   color: #0e2744;
 }
 
@@ -509,19 +514,19 @@ a:focus-visible,
 }
 
 .home-page .mode-option {
-  border-color: #eee5d9;
-  background: #fffefa;
+  border-color: #eadfcc;
+  background: rgba(255, 253, 248, 0.9);
   color: #30465f;
 }
 
 .home-page .mode-option:hover {
-  border-color: #d8d0c5;
+  border-color: #cdbda4;
   background: #ffffff;
 }
 
 .home-page .mode-option:has(input:checked) {
   border-color: var(--accent-teal);
-  background: #f3faf5;
+  background: #eef7f1;
   color: #0e2744;
 }
 
@@ -576,16 +581,16 @@ a:focus-visible,
 .home-page .result-panel {
   position: relative;
   overflow: hidden;
-  border-color: #d6c9b8;
+  border-color: #cdbb9f;
   border-left-width: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   background:
-    linear-gradient(180deg, rgba(255, 253, 247, 0.98) 0%, rgba(250, 244, 235, 0.98) 100%);
-  padding: 18px 18px 16px 20px;
+    linear-gradient(180deg, rgba(255, 252, 245, 0.99) 0%, rgba(249, 241, 228, 0.99) 100%);
+  padding: 20px 19px 17px 22px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 7px 0 0 rgba(76, 140, 112, 0.88),
-    0 14px 30px rgba(14, 39, 68, 0.08);
+    inset 8px 0 0 rgba(76, 140, 112, 0.9),
+    0 16px 34px rgba(14, 39, 68, 0.09);
 }
 
 .home-page .result-panel::before {
@@ -593,21 +598,21 @@ a:focus-visible,
   top: 0;
   right: 0;
   left: 0;
-  height: 13px;
+  height: 14px;
   background:
-    radial-gradient(circle at 14px 6px, rgba(76, 140, 112, 0.42) 0 2px, transparent 2.6px) 0 0 / 28px 13px repeat-x,
-    linear-gradient(90deg, rgba(76, 140, 112, 0.16), rgba(245, 233, 218, 0.52));
+    radial-gradient(circle at 15px 6px, rgba(76, 140, 112, 0.48) 0 2px, transparent 2.7px) 0 0 / 30px 14px repeat-x,
+    linear-gradient(90deg, rgba(76, 140, 112, 0.18), rgba(245, 233, 218, 0.58));
   content: "";
 }
 
 .home-page .result-panel::after {
   position: absolute;
   right: 18px;
-  bottom: 14px;
-  color: rgba(76, 140, 112, 0.13);
+  bottom: 13px;
+  color: rgba(76, 140, 112, 0.14);
   content: "DUE";
   font-family: var(--mono);
-  font-size: 3rem;
+  font-size: 3.15rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   line-height: 1;
@@ -618,7 +623,7 @@ a:focus-visible,
   position: relative;
   z-index: 1;
   color: #0e2744;
-  font-size: 2.48rem;
+  font-size: 2.6rem;
   letter-spacing: -0.015em;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.84);
 }
@@ -633,10 +638,10 @@ a:focus-visible,
 .home-page .result-label {
   display: inline-flex;
   margin-top: 4px;
-  margin-bottom: 8px;
-  border: 1px solid rgba(76, 140, 112, 0.2);
+  margin-bottom: 9px;
+  border: 1px solid rgba(76, 140, 112, 0.24);
   border-radius: 999px;
-  background: rgba(238, 247, 241, 0.7);
+  background: rgba(238, 247, 241, 0.78);
   color: #2f654f;
   padding: 3px 8px;
 }
@@ -647,7 +652,7 @@ a:focus-visible,
 }
 
 .home-page .result-meta {
-  gap: 10px;
+  gap: 11px;
   color: #3f5368;
   font-size: 0.88rem;
 }
@@ -897,13 +902,16 @@ a:focus-visible,
 }
 
 .home-page .next-due {
-  border-color: #ded6ca;
+  border-color: #d5c5af;
+  border-radius: 10px;
   background:
-    linear-gradient(180deg, #fffdf9 0%, #fbf7f0 100%);
+    linear-gradient(180deg, #fffdf8 0%, #f8efe3 100%);
 }
 
 .home-page .deadline-item {
-  border-bottom-color: #ece3d7;
+  border-bottom-color: #eadfcc;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .next-due.category-calendar {
@@ -1152,8 +1160,9 @@ a:focus-visible,
 }
 
 .home-page .empty-state {
-  border-color: #d8d0c5;
-  background: rgba(255, 253, 249, 0.68);
+  border-color: #d5c5af;
+  border-radius: 10px;
+  background: rgba(255, 251, 244, 0.76);
   padding: 15px;
 }
 
@@ -1219,7 +1228,8 @@ a:focus-visible,
 }
 
 .home-page .popular-calculators {
-  border-top: 1px solid rgba(231, 221, 207, 0.72);
+  border-top: 1px solid rgba(218, 204, 185, 0.78);
+  margin-top: 22px;
   padding-top: 14px;
 }
 
@@ -1256,7 +1266,19 @@ a:focus-visible,
 }
 
 .home-page .calculator-link-card {
-  background: rgba(255, 253, 249, 0.7);
+  border-color: #e1d3c0;
+  border-left-color: #d6c6ad;
+  background: rgba(255, 251, 244, 0.72);
+}
+
+.home-page .calculator-link-card strong {
+  color: #0e2744;
+}
+
+.home-page .calculator-link-card:hover {
+  border-color: #cdbda4;
+  border-left-color: var(--accent-teal);
+  background: rgba(255, 253, 249, 0.96);
 }
 
 .calculator-link-card:hover {
@@ -1314,7 +1336,8 @@ a:focus-visible,
   }
 
   .home-page .intro h1 {
-    font-size: 2.55rem;
+    font-size: 2.72rem;
+    line-height: 0.96;
   }
 
   .subtitle {
@@ -1323,6 +1346,7 @@ a:focus-visible,
 
   .home-page .subtitle {
     margin-top: 5px;
+    font-size: 1rem;
     line-height: 1.35;
   }
 
@@ -1339,7 +1363,7 @@ a:focus-visible,
     gap: 10px;
     margin: 0 -4px;
     border-radius: 12px;
-    padding: 6px;
+    padding: 5px;
   }
 
   .home-page .popular-calculators {
@@ -1375,7 +1399,8 @@ a:focus-visible,
 
   .home-page .calculator-card {
     gap: 9px;
-    padding: 14px;
+    border-radius: 11px;
+    padding: 13px;
   }
 
   .home-page .field {
@@ -1393,8 +1418,8 @@ a:focus-visible,
   }
 
   .home-page .result-panel {
-    border-radius: 10px;
-    padding: 13px 12px 11px 16px;
+    border-radius: 11px;
+    padding: 13px 12px 11px 17px;
     box-shadow:
       inset 5px 0 0 rgba(76, 140, 112, 0.88),
       0 10px 22px rgba(14, 39, 68, 0.07);
@@ -1402,7 +1427,7 @@ a:focus-visible,
 
   .home-page .result-panel::before {
     height: 9px;
-    background-size: 22px 9px, auto;
+    background-size: 24px 9px, auto;
   }
 
   .home-page .result-panel::after {
@@ -1412,7 +1437,7 @@ a:focus-visible,
   }
 
   .home-page .due-date {
-    font-size: 1.98rem;
+    font-size: 2.02rem;
     letter-spacing: -0.01em;
   }
 
