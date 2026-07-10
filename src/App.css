@@ -1139,6 +1139,7 @@ a:focus-visible,
 .home-page .empty-state {
   border-color: #d8d0c5;
   background: rgba(255, 253, 249, 0.68);
+  padding: 15px;
 }
 
 .empty-state p {
@@ -1152,6 +1153,13 @@ a:focus-visible,
   margin-top: 5px;
   color: #64748b;
   font-size: 0.9rem;
+}
+
+.home-page .empty-state span {
+  max-width: 280px;
+  color: #5d6877;
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
 .site-footer {

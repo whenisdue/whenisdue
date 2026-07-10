@@ -355,7 +355,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         <section className="dashboard" aria-labelledby="saved-title">
           <div className="card-heading">
             <h2 id="saved-title">My due dates</h2>
-            <p>Saved in this browser on this device.</p>
+            <p>No account needed. Saved dates stay on this device.</p>
           </div>
 
           {nextDueDeadline ? (
@@ -379,7 +379,8 @@ function HomePage({ onNavigate }: NavigationProps) {
             </ul>
           ) : (
             <div className="empty-state">
-              <p>No saved due dates yet. Save a result to keep it here.</p>
+              <p>No saved due dates yet.</p>
+              <span>Save a result here and it will stay in this browser for next time.</span>
             </div>
           )}
         </section>
