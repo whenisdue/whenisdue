@@ -588,7 +588,7 @@ a:focus-visible,
 }
 
 .home-page .mode-grid {
-  gap: 6px;
+  gap: 5px;
   align-items: stretch;
 }
 
@@ -607,13 +607,13 @@ a:focus-visible,
 }
 
 .home-page .mode-option {
-  min-height: 50px;
+  min-height: 43px;
   border-color: rgba(205, 189, 164, 0.52);
   border-radius: 9px;
   background: rgba(255, 250, 242, 0.82);
   color: #30465f;
   align-items: flex-start;
-  padding: 7px 9px;
+  padding: 5px 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
@@ -664,11 +664,11 @@ a:focus-visible,
 }
 
 .home-page .mode-option::before {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   flex: 0 0 auto;
-  margin-top: 3px;
-  margin-right: 9px;
+  margin-top: 2px;
+  margin-right: 8px;
   border-color: rgba(76, 140, 112, 0.34);
   background: rgba(255, 253, 248, 0.8);
 }
@@ -700,12 +700,12 @@ a:focus-visible,
   min-width: 0;
   gap: 1px;
   color: inherit;
-  line-height: 1.2;
+  line-height: 1.12;
 }
 
 .home-page .mode-option-name {
   color: #0e2744;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 760;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -714,7 +714,7 @@ a:focus-visible,
 
 .home-page .mode-option-helper {
   color: #657184;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 620;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1739,7 +1739,7 @@ a:focus-visible,
   .home-page .mode-option::before {
     width: 7px;
     height: 7px;
-    margin-top: 4px;
+    margin-top: 3px;
     margin-right: 7px;
   }
 
