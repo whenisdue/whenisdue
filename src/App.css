@@ -576,14 +576,16 @@ a:focus-visible,
 .home-page .result-panel {
   position: relative;
   overflow: hidden;
-  border-color: #d7e5dc;
-  border-left-width: 6px;
-  border-radius: 10px;
+  border-color: #d6c9b8;
+  border-left-width: 0;
+  border-radius: 12px;
   background:
-    linear-gradient(135deg, rgba(239, 248, 242, 0.98) 0%, rgba(255, 251, 244, 0.99) 58%, rgba(245, 233, 218, 0.88) 100%);
+    linear-gradient(180deg, rgba(255, 253, 247, 0.98) 0%, rgba(250, 244, 235, 0.98) 100%);
+  padding: 18px 18px 16px 20px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    0 8px 20px rgba(47, 101, 79, 0.06);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 7px 0 0 rgba(76, 140, 112, 0.88),
+    0 14px 30px rgba(14, 39, 68, 0.08);
 }
 
 .home-page .result-panel::before {
@@ -591,23 +593,23 @@ a:focus-visible,
   top: 0;
   right: 0;
   left: 0;
-  height: 8px;
+  height: 13px;
   background:
-    radial-gradient(circle at 10px 4px, rgba(76, 140, 112, 0.52) 0 2px, transparent 2.5px) 0 0 / 24px 8px repeat-x,
-    linear-gradient(90deg, rgba(76, 140, 112, 0.18), rgba(245, 233, 218, 0.4));
+    radial-gradient(circle at 14px 6px, rgba(76, 140, 112, 0.42) 0 2px, transparent 2.6px) 0 0 / 28px 13px repeat-x,
+    linear-gradient(90deg, rgba(76, 140, 112, 0.16), rgba(245, 233, 218, 0.52));
   content: "";
 }
 
 .home-page .result-panel::after {
   position: absolute;
-  right: 16px;
-  bottom: 12px;
-  color: rgba(76, 140, 112, 0.11);
+  right: 18px;
+  bottom: 14px;
+  color: rgba(76, 140, 112, 0.13);
   content: "DUE";
   font-family: var(--mono);
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   line-height: 1;
   pointer-events: none;
 }
@@ -616,8 +618,9 @@ a:focus-visible,
   position: relative;
   z-index: 1;
   color: #0e2744;
-  font-size: 2.28rem;
+  font-size: 2.48rem;
   letter-spacing: -0.015em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.84);
 }
 
 .home-page .result-label,
@@ -628,13 +631,25 @@ a:focus-visible,
 }
 
 .home-page .result-label {
-  margin-top: 3px;
+  display: inline-flex;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(76, 140, 112, 0.2);
+  border-radius: 999px;
+  background: rgba(238, 247, 241, 0.7);
   color: #2f654f;
+  padding: 3px 8px;
 }
 
 .home-page .result-meta,
 .home-page .cancel-date strong {
   font-family: inherit;
+}
+
+.home-page .result-meta {
+  gap: 10px;
+  color: #3f5368;
+  font-size: 0.88rem;
 }
 
 .home-page .result-meta .status-badge {
@@ -1378,23 +1393,32 @@ a:focus-visible,
   }
 
   .home-page .result-panel {
-    padding: 10px 12px;
+    border-radius: 10px;
+    padding: 13px 12px 11px 16px;
+    box-shadow:
+      inset 5px 0 0 rgba(76, 140, 112, 0.88),
+      0 10px 22px rgba(14, 39, 68, 0.07);
   }
 
   .home-page .result-panel::before {
-    height: 6px;
-    background-size: 20px 6px, auto;
+    height: 9px;
+    background-size: 22px 9px, auto;
   }
 
   .home-page .result-panel::after {
     right: 10px;
     bottom: 8px;
-    font-size: 1.75rem;
+    font-size: 1.9rem;
   }
 
   .home-page .due-date {
-    font-size: 1.86rem;
+    font-size: 1.98rem;
     letter-spacing: -0.01em;
+  }
+
+  .home-page .result-label {
+    margin-bottom: 5px;
+    padding: 2px 7px;
   }
 
   .home-page .result-meta {
