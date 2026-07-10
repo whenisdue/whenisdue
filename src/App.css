@@ -336,10 +336,9 @@
 }
 
 .home-page .calculator-card {
-  gap: 10px;
-  padding: 20px 22px 21px;
+  gap: 8px;
+  padding: 18px 21px 19px;
   border-color: #cdbb9f;
-  min-height: 664px;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
     0 16px 34px rgba(14, 39, 68, 0.08);
@@ -409,8 +408,8 @@
 }
 
 .home-page .mode-field {
-  margin-top: 4px;
-  padding-top: 2px;
+  margin-top: 2px;
+  padding-top: 0;
 }
 
 .title-field {
@@ -418,8 +417,8 @@
 }
 
 .home-page .title-field {
-  margin-top: 3px;
-  padding-top: 2px;
+  margin-top: 1px;
+  padding-top: 0;
 }
 
 .primary-button {
@@ -428,7 +427,7 @@
 }
 
 .home-page .primary-button {
-  min-height: 36px;
+  min-height: 34px;
   margin-top: 0;
 }
 
@@ -519,8 +518,8 @@ select {
 }
 
 .home-page .title-field input {
-  min-height: 36px;
-  padding-block: 6px;
+  min-height: 34px;
+  padding-block: 5px;
 }
 
 .quick-picks {
@@ -589,7 +588,7 @@ a:focus-visible,
 }
 
 .home-page .mode-grid {
-  gap: 7px;
+  gap: 6px;
   align-items: stretch;
 }
 
@@ -608,13 +607,13 @@ a:focus-visible,
 }
 
 .home-page .mode-option {
-  min-height: 54px;
+  min-height: 50px;
   border-color: rgba(205, 189, 164, 0.52);
   border-radius: 9px;
   background: rgba(255, 250, 242, 0.82);
   color: #30465f;
   align-items: flex-start;
-  padding: 8px 10px;
+  padding: 7px 9px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
@@ -668,7 +667,7 @@ a:focus-visible,
   width: 8px;
   height: 8px;
   flex: 0 0 auto;
-  margin-top: 4px;
+  margin-top: 3px;
   margin-right: 9px;
   border-color: rgba(76, 140, 112, 0.34);
   background: rgba(255, 253, 248, 0.8);
@@ -715,7 +714,7 @@ a:focus-visible,
 
 .home-page .mode-option-helper {
   color: #657184;
-  font-size: 0.71rem;
+  font-size: 0.7rem;
   font-weight: 620;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -742,8 +741,7 @@ a:focus-visible,
   border-radius: 14px;
   background:
     linear-gradient(180deg, rgba(255, 252, 245, 0.99) 0%, rgba(249, 241, 228, 0.99) 100%);
-  margin: 4px 0 2px;
-  min-height: 182px;
+  margin: 3px 0 1px;
   padding: 24px 21px 20px 24px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
@@ -1714,7 +1712,7 @@ a:focus-visible,
 
   .home-page .mode-field {
     gap: 4px;
-    margin-top: 3px;
+    margin-top: 2px;
     padding-top: 0;
   }
 
@@ -1724,7 +1722,7 @@ a:focus-visible,
   }
 
   .home-page .mode-option {
-    min-height: 48px;
+    min-height: 47px;
     padding: 7px 9px;
   }
 
@@ -1749,7 +1747,7 @@ a:focus-visible,
   }
 
   .home-page .title-field {
-    margin-top: 3px;
+    margin-top: 2px;
     padding-top: 0;
   }
 
