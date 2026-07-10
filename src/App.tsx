@@ -665,15 +665,52 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const [startDate, setStartDate] = useState(todayInputValue)
   const [trialLength, setTrialLength] = useState('7')
+  const [title, setTitle] = useState(getDefaultTitle('trial'))
+  const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
+  const [storageMessage, setStorageMessage] = useState<string | null>(null)
 
   const parsedStartDate = parsePlainDate(startDate)
   const parsedTrialLength = parseInteger(trialLength)
   const validationMessage = getTrialValidationMessage(parsedStartDate, parsedTrialLength)
+  const titleValidationMessage = getSaveTitleValidationMessage(title)
   const trialEndDate = parsedStartDate && parsedTrialLength !== null && !validationMessage
     ? addCalendarDays(parsedStartDate, parsedTrialLength)
     : null
   const cancelByDate = trialEndDate ? addCalendarDays(trialEndDate, -1) : null
   const calendarDaysFromStart = parsedStartDate && trialEndDate ? daysBetween(parsedStartDate, trialEndDate) : 0
+  const canSave = Boolean(trialEndDate && parsedStartDate && !validationMessage && !titleValidationMessage)
+
+  function saveTrialDeadline() {
+    if (!trialEndDate || !parsedStartDate || titleValidationMessage) {
+      return
+    }
+
+    const nextDeadline: SavedDeadline = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      category: 'trial',
+      dueDate: toDateKey(trialEndDate),
+      startDate: toDateKey(parsedStartDate),
+      done: false,
+      createdAt: new Date().toISOString(),
+    }
+
+    if (isDuplicateSavedDeadline(savedDeadlines, nextDeadline)) {
+      setStorageMessage('This due date is already saved.')
+      return
+    }
+
+    const nextDeadlines = [nextDeadline, ...savedDeadlines]
+    const storageResult = saveSavedDeadlines(nextDeadlines)
+
+    if (!storageResult.ok) {
+      setStorageMessage(storageResult.message)
+      return
+    }
+
+    setSavedDeadlines(nextDeadlines)
+    setStorageMessage('Saved to My due dates.')
+  }
 
   return (
     <main className="page-shell free-trial-page">
@@ -756,6 +793,21 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
                 </span>
               </div>
               <p className="result-note">Always check the service terms for exact renewal timing.</p>
+              <div className="business-save">
+                <label className="field title-field">
+                  <span>Title</span>
+                  <input
+                    maxLength={titleMaxLength}
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                  />
+                  {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+                </label>
+                <button className="primary-button" type="button" disabled={!canSave} onClick={saveTrialDeadline}>
+                  Save to My due dates
+                </button>
+                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+              </div>
             </>
           ) : (
             <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
@@ -790,16 +842,53 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const [purchaseDate, setPurchaseDate] = useState(todayInputValue)
   const [returnWindow, setReturnWindow] = useState('30')
+  const [title, setTitle] = useState(getDefaultTitle('return'))
+  const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
+  const [storageMessage, setStorageMessage] = useState<string | null>(null)
 
   const parsedPurchaseDate = parsePlainDate(purchaseDate)
   const parsedReturnWindow = parseInteger(returnWindow)
   const validationMessage = getReturnWindowValidationMessage(parsedPurchaseDate, parsedReturnWindow)
+  const titleValidationMessage = getSaveTitleValidationMessage(title)
   const returnDeadline = parsedPurchaseDate && parsedReturnWindow !== null && !validationMessage
     ? addCalendarDays(parsedPurchaseDate, Math.max(parsedReturnWindow - 1, 0))
     : null
   const calendarDaysFromPurchase = parsedPurchaseDate && returnDeadline
     ? daysBetween(parsedPurchaseDate, returnDeadline)
     : 0
+  const canSave = Boolean(returnDeadline && parsedPurchaseDate && !validationMessage && !titleValidationMessage)
+
+  function saveReturnDeadline() {
+    if (!returnDeadline || !parsedPurchaseDate || titleValidationMessage) {
+      return
+    }
+
+    const nextDeadline: SavedDeadline = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      category: 'return',
+      dueDate: toDateKey(returnDeadline),
+      startDate: toDateKey(parsedPurchaseDate),
+      done: false,
+      createdAt: new Date().toISOString(),
+    }
+
+    if (isDuplicateSavedDeadline(savedDeadlines, nextDeadline)) {
+      setStorageMessage('This due date is already saved.')
+      return
+    }
+
+    const nextDeadlines = [nextDeadline, ...savedDeadlines]
+    const storageResult = saveSavedDeadlines(nextDeadlines)
+
+    if (!storageResult.ok) {
+      setStorageMessage(storageResult.message)
+      return
+    }
+
+    setSavedDeadlines(nextDeadlines)
+    setStorageMessage('Saved to My due dates.')
+  }
 
   return (
     <main className="page-shell return-window-page">
@@ -883,6 +972,21 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
               <p className="result-note">
                 Check the store's official return policy because some return windows start on delivery date, not purchase date.
               </p>
+              <div className="business-save">
+                <label className="field title-field">
+                  <span>Title</span>
+                  <input
+                    maxLength={titleMaxLength}
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                  />
+                  {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+                </label>
+                <button className="primary-button" type="button" disabled={!canSave} onClick={saveReturnDeadline}>
+                  Save to My due dates
+                </button>
+                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+              </div>
             </>
           ) : (
             <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
@@ -919,16 +1023,53 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const [invoiceDate, setInvoiceDate] = useState(todayInputValue)
   const [paymentTerms, setPaymentTerms] = useState('30')
+  const [title, setTitle] = useState(getDefaultTitle('invoice'))
+  const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
+  const [storageMessage, setStorageMessage] = useState<string | null>(null)
 
   const parsedInvoiceDate = parsePlainDate(invoiceDate)
   const parsedPaymentTerms = parseInteger(paymentTerms)
   const validationMessage = getInvoiceDueDateValidationMessage(parsedInvoiceDate, parsedPaymentTerms)
+  const titleValidationMessage = getSaveTitleValidationMessage(title)
   const invoiceDueDate = parsedInvoiceDate && parsedPaymentTerms !== null && !validationMessage
     ? addCalendarDays(parsedInvoiceDate, parsedPaymentTerms)
     : null
   const calendarDaysFromInvoice = parsedInvoiceDate && invoiceDueDate
     ? daysBetween(parsedInvoiceDate, invoiceDueDate)
     : 0
+  const canSave = Boolean(invoiceDueDate && parsedInvoiceDate && !validationMessage && !titleValidationMessage)
+
+  function saveInvoiceDeadline() {
+    if (!invoiceDueDate || !parsedInvoiceDate || titleValidationMessage) {
+      return
+    }
+
+    const nextDeadline: SavedDeadline = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      category: 'invoice',
+      dueDate: toDateKey(invoiceDueDate),
+      startDate: toDateKey(parsedInvoiceDate),
+      done: false,
+      createdAt: new Date().toISOString(),
+    }
+
+    if (isDuplicateSavedDeadline(savedDeadlines, nextDeadline)) {
+      setStorageMessage('This due date is already saved.')
+      return
+    }
+
+    const nextDeadlines = [nextDeadline, ...savedDeadlines]
+    const storageResult = saveSavedDeadlines(nextDeadlines)
+
+    if (!storageResult.ok) {
+      setStorageMessage(storageResult.message)
+      return
+    }
+
+    setSavedDeadlines(nextDeadlines)
+    setStorageMessage('Saved to My due dates.')
+  }
 
   return (
     <main className="page-shell invoice-due-date-page">
@@ -1012,6 +1153,21 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
               <p className="result-note">
                 Check the invoice or contract because some terms may count business days or use end-of-month rules.
               </p>
+              <div className="business-save">
+                <label className="field title-field">
+                  <span>Title</span>
+                  <input
+                    maxLength={titleMaxLength}
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                  />
+                  {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+                </label>
+                <button className="primary-button" type="button" disabled={!canSave} onClick={saveInvoiceDeadline}>
+                  Save to My due dates
+                </button>
+                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+              </div>
             </>
           ) : (
             <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
@@ -1963,6 +2119,18 @@ function getBusinessDaysValidationMessage(
 
   if (businessDays === null || businessDays <= 0 || businessDays > 2600) {
     return positiveWholeNumberMessage
+  }
+
+  if (title.length > titleMaxLength) {
+    return `Title must be ${titleMaxLength} characters or less.`
+  }
+
+  return null
+}
+
+function getSaveTitleValidationMessage(title: string): string | null {
+  if (!title.trim()) {
+    return 'Add a title before saving.'
   }
 
   if (title.length > titleMaxLength) {
