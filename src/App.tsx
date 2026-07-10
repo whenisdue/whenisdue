@@ -344,22 +344,25 @@ function HomePage({ onNavigate }: NavigationProps) {
             )}
           </section>
 
-          <label className="field title-field">
-            <span>Title</span>
-            <input
-              maxLength={titleMaxLength}
-              value={title}
-              onChange={(event) => {
-                setTitle(event.target.value)
-                setIsCustomTitle(true)
-              }}
-            />
-          </label>
+          <section className="calculator-save-section" aria-labelledby="save-calculation-title">
+            <h3 id="save-calculation-title">Save this calculation</h3>
+            <label className="field title-field">
+              <span>Title optional</span>
+              <input
+                maxLength={titleMaxLength}
+                value={title}
+                onChange={(event) => {
+                  setTitle(event.target.value)
+                  setIsCustomTitle(true)
+                }}
+              />
+            </label>
 
-          <button className="primary-button" type="button" disabled={!canSave} onClick={saveDeadline}>
-            Save to My due dates
-          </button>
-          {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+            <button className="primary-button" type="button" disabled={!canSave} onClick={saveDeadline}>
+              Save to My due dates
+            </button>
+            {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+          </section>
         </form>
 
         <section className="dashboard" aria-labelledby="saved-title">
