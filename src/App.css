@@ -952,7 +952,9 @@ a:focus-visible,
 }
 
 .home-page .deadline-list {
-  border-top-color: #eadfca;
+  gap: 2px;
+  margin-top: 10px;
+  border-top-color: rgba(234, 223, 204, 0.52);
 }
 
 .home-page .dashboard .card-heading {
@@ -981,25 +983,38 @@ a:focus-visible,
 }
 
 .home-page .next-due {
-  border-color: #d5c5af;
-  border-radius: 10px;
-  background:
-    linear-gradient(180deg, rgba(255, 253, 248, 0.92) 0%, rgba(248, 239, 227, 0.78) 100%);
+  gap: 8px;
+  border-color: rgba(76, 140, 112, 0.34);
+  border-top-width: 0;
+  border-left: 4px solid var(--accent-teal);
+  border-radius: 11px;
+  background: rgba(255, 253, 248, 0.78);
+  padding: 12px 12px 12px 14px;
 }
 
 .home-page .deadline-item {
-  border-bottom-color: #eadfcc;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  gap: 8px;
+  border-bottom-color: rgba(234, 223, 204, 0.58);
+  padding: 11px 0 11px 12px;
 }
 
 .home-page .deadline-item h3 {
   color: #16324e;
+  font-size: 0.94rem;
+  font-weight: 760;
 }
 
 .home-page .deadline-actions button,
 .home-page .next-due-actions button {
+  border-color: rgba(209, 194, 174, 0.86);
   background: rgba(255, 253, 248, 0.86);
+  color: #586575;
+}
+
+.home-page .deadline-actions button:hover,
+.home-page .next-due-actions button:hover {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal-dark);
 }
 
 .next-due.category-calendar {
@@ -1028,6 +1043,11 @@ a:focus-visible,
   background: #f7f4ed;
 }
 
+.home-page .next-due.is-urgent {
+  border-left-color: var(--accent-teal-dark);
+  background: rgba(255, 250, 242, 0.86);
+}
+
 .next-due-kicker {
   display: flex;
   flex-wrap: wrap;
@@ -1047,9 +1067,18 @@ a:focus-visible,
   text-transform: uppercase;
 }
 
+.home-page .next-due-label {
+  color: var(--accent-teal-dark);
+}
+
 .next-due-kicker > span {
   color: #64748b;
   font-size: 0.72rem;
+}
+
+.home-page .next-due-kicker > span {
+  color: #7a8796;
+  font-size: 0.7rem;
 }
 
 .next-due h3 {
@@ -1058,6 +1087,12 @@ a:focus-visible,
   font-size: 0.96rem;
   font-weight: 760;
   line-height: 1.2;
+}
+
+.home-page .next-due h3 {
+  color: #0e2744;
+  font-size: 1.02rem;
+  font-weight: 800;
 }
 
 .next-due-meta {
@@ -1070,12 +1105,22 @@ a:focus-visible,
   font-size: 0.82rem;
 }
 
+.home-page .next-due-meta {
+  gap: 6px;
+  color: #586575;
+  font-size: 0.8rem;
+}
+
 .next-due-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   justify-content: space-between;
+}
+
+.home-page .next-due-footer {
+  gap: 7px;
 }
 
 .next-due-actions {
@@ -1168,6 +1213,12 @@ a:focus-visible,
   font-size: 0.8rem;
 }
 
+.home-page .deadline-item p {
+  gap: 7px;
+  color: #657184;
+  font-size: 0.78rem;
+}
+
 .category-pill {
   display: inline-flex;
   align-items: center;
@@ -1218,7 +1269,15 @@ a:focus-visible,
   gap: 6px;
 }
 
+.home-page .deadline-actions {
+  gap: 7px;
+}
+
 .deadline-actions .status-badge {
+  margin-right: auto;
+}
+
+.home-page .deadline-actions .status-badge {
   margin-right: auto;
 }
 
@@ -1610,5 +1669,22 @@ a:focus-visible,
   .deadline-list {
     flex: initial;
     overflow: visible;
+  }
+
+  .home-page .next-due {
+    padding: 11px 11px 11px 13px;
+  }
+
+  .home-page .next-due-footer,
+  .home-page .deadline-actions {
+    align-items: flex-start;
+  }
+
+  .home-page .deadline-actions {
+    gap: 6px;
+  }
+
+  .home-page .deadline-actions .status-badge {
+    flex-basis: 100%;
   }
 }
