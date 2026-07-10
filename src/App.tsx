@@ -222,10 +222,10 @@ function HomePage({ onNavigate }: NavigationProps) {
         <IdentityRow currentTime={currentTime} onNavigate={onNavigate} />
         <h1 id="homepage-title">When is it due?</h1>
         <p className="subtitle">
-          Calculate due dates without counting on your fingers.
+          Calculate due dates and save them without logging in.
         </p>
         <p className="intro-note">
-          Pick a date, choose the deadline type, and get the exact day.
+          Pick a date, choose the deadline type, and keep your saved dates in this browser.
         </p>
       </section>
 
