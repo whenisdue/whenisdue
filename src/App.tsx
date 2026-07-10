@@ -33,6 +33,13 @@ type SavedDeadline = {
 
 const storageKey = 'whenisdue.savedDeadlines.v1'
 const modes: CalculatorMode[] = ['calendar', 'business', 'invoice', 'trial', 'return']
+const modeHelperText: Record<CalculatorMode, string> = {
+  calendar: 'Counts every day',
+  business: 'Skips weekends',
+  invoice: 'Net 7, 15, 30, 45, 60',
+  trial: 'Cancel before renewal',
+  return: 'Last day to return',
+}
 const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60', 'net90', 'eom']
 const businessDayQuickPicks = [1, 5, 10, 15, 30]
 const trialLengthQuickPicks = [7, 14, 30]
@@ -248,7 +255,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </label>
 
           <fieldset className="field mode-field">
-            <legend>Mode</legend>
+            <legend>Choose calculator</legend>
             <div className="mode-grid">
               {modes.map((modeOption) => (
                 <label className="mode-option" key={modeOption}>
@@ -261,7 +268,10 @@ function HomePage({ onNavigate }: NavigationProps) {
                       setMode(modeOption)
                     }}
                   />
-                  <span>{modeLabels[modeOption]}</span>
+                  <span className="mode-option-copy">
+                    <span className="mode-option-name">{modeLabels[modeOption]}</span>
+                    <span className="mode-option-helper">{modeHelperText[modeOption]}</span>
+                  </span>
                 </label>
               ))}
             </div>

@@ -577,6 +577,11 @@ a:focus-visible,
   gap: 6px;
 }
 
+.home-page .mode-grid {
+  gap: 8px;
+  align-items: stretch;
+}
+
 .mode-option {
   position: relative;
   display: flex;
@@ -592,12 +597,13 @@ a:focus-visible,
 }
 
 .home-page .mode-option {
-  min-height: 42px;
+  min-height: 58px;
   border-color: rgba(205, 189, 164, 0.52);
   border-radius: 9px;
   background: rgba(255, 250, 242, 0.82);
   color: #30465f;
-  padding: 8px 10px;
+  align-items: flex-start;
+  padding: 9px 10px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
@@ -647,6 +653,7 @@ a:focus-visible,
   width: 8px;
   height: 8px;
   flex: 0 0 auto;
+  margin-top: 4px;
   margin-right: 9px;
   border-color: rgba(76, 140, 112, 0.34);
   background: rgba(255, 253, 248, 0.8);
@@ -672,6 +679,30 @@ a:focus-visible,
 
 .home-page .mode-option span {
   font-weight: 720;
+}
+
+.home-page .mode-option-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  color: inherit;
+  line-height: 1.2;
+}
+
+.home-page .mode-option-name {
+  color: #0e2744;
+  font-size: 0.82rem;
+  font-weight: 760;
+}
+
+.home-page .mode-option-helper {
+  color: #657184;
+  font-size: 0.72rem;
+  font-weight: 620;
+}
+
+.home-page .mode-option:has(input:checked) .mode-option-helper {
+  color: #3f5368;
 }
 
 .result-panel {
@@ -1664,22 +1695,27 @@ a:focus-visible,
   }
 
   .home-page .mode-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 6px;
   }
 
   .home-page .mode-option {
-    min-height: 40px;
-    padding: 7px 8px;
+    min-height: 50px;
+    padding: 8px 9px;
   }
 
-  .home-page .mode-option span {
-    font-size: 0.78rem;
+  .home-page .mode-option-name {
+    font-size: 0.8rem;
+  }
+
+  .home-page .mode-option-helper {
+    font-size: 0.7rem;
   }
 
   .home-page .mode-option::before {
     width: 7px;
     height: 7px;
+    margin-top: 4px;
     margin-right: 7px;
   }
 
