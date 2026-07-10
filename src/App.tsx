@@ -229,20 +229,6 @@ function HomePage({ onNavigate }: NavigationProps) {
         </p>
       </section>
 
-      <a
-        className="popular-calculator-card"
-        href="/business-days-calculator"
-        onClick={(event) => {
-          event.preventDefault()
-          onNavigate('/business-days-calculator')
-        }}
-      >
-        <span>Popular calculator</span>
-        <strong>Business Days Calculator</strong>
-        <em>Add business days to a start date. Weekends are skipped automatically.</em>
-        <b>Open calculator →</b>
-      </a>
-
       <section className="workspace" aria-label="Deadline calculator and saved due dates">
         <form className="calculator-card" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
@@ -1512,6 +1498,8 @@ type RouteMetadata = {
   title: string
   description: string
   path: string
+  openGraphDescription?: string
+  twitterDescription?: string
 }
 
 function applyRouteMetadata(route: RouteName) {
@@ -1520,6 +1508,21 @@ function applyRouteMetadata(route: RouteName) {
 
   const description = getOrCreateMetaDescription()
   description.setAttribute('content', metadata.description)
+
+  const openGraphTitle = getOrCreateMetaProperty('og:title')
+  openGraphTitle.setAttribute('content', metadata.title)
+
+  const openGraphDescription = getOrCreateMetaProperty('og:description')
+  openGraphDescription.setAttribute('content', metadata.openGraphDescription ?? metadata.description)
+
+  const openGraphUrl = getOrCreateMetaProperty('og:url')
+  openGraphUrl.setAttribute('content', `https://www.whenisdue.com${metadata.path}`)
+
+  const twitterTitle = getOrCreateMetaName('twitter:title')
+  twitterTitle.setAttribute('content', metadata.title)
+
+  const twitterDescription = getOrCreateMetaName('twitter:description')
+  twitterDescription.setAttribute('content', metadata.twitterDescription ?? metadata.description)
 
   const canonical = getOrCreateCanonicalLink()
   canonical.setAttribute('href', `https://www.whenisdue.com${metadata.path}`)
@@ -1600,7 +1603,9 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   return {
     title: 'WhenIsDue — Simple Due Date Calculator',
-    description: 'Turn calendar days, business days, invoice terms, free trials, and return windows into exact due dates.',
+    description: 'Calculate calendar days, business days, invoice terms, free trial dates, return windows, and everyday deadlines.',
+    openGraphDescription: 'A simple due date calculator for everyday deadlines, business days, invoice terms, free trials, and return windows.',
+    twitterDescription: 'Calculate exact due dates for everyday deadlines.',
     path: '/',
   }
 }
@@ -1614,6 +1619,32 @@ function getOrCreateMetaDescription(): HTMLMetaElement {
 
   const meta = document.createElement('meta')
   meta.setAttribute('name', 'description')
+  document.head.append(meta)
+  return meta
+}
+
+function getOrCreateMetaName(name: string): HTMLMetaElement {
+  const existing = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)
+
+  if (existing) {
+    return existing
+  }
+
+  const meta = document.createElement('meta')
+  meta.setAttribute('name', name)
+  document.head.append(meta)
+  return meta
+}
+
+function getOrCreateMetaProperty(property: string): HTMLMetaElement {
+  const existing = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`)
+
+  if (existing) {
+    return existing
+  }
+
+  const meta = document.createElement('meta')
+  meta.setAttribute('property', property)
   document.head.append(meta)
   return meta
 }

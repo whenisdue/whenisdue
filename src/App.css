@@ -168,73 +168,8 @@
   color: #5d6877;
 }
 
-.popular-calculator-card {
-  display: grid;
-  max-width: 760px;
-  gap: 2px;
-  margin: -2px 0 12px;
-  border: 1px solid #e5e7eb;
-  border-left: 3px solid #eadfca;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.74);
-  color: inherit;
-  padding: 8px 12px;
-  text-decoration: none;
-}
-
-.home-page .popular-calculator-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.home-page .popular-calculator-card::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--accent-teal);
-  content: "";
-  opacity: 0;
-}
-
-.popular-calculator-card:hover {
-  border-color: #d8d0c5;
-  border-left-color: var(--accent-teal);
-  background: #ffffff;
-}
-
-.home-page .popular-calculator-card:hover::before {
-  opacity: 1;
-}
-
-.popular-calculator-card span {
-  color: #64748b;
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  font-weight: 760;
-  letter-spacing: 0.08em;
-  line-height: 1.2;
-  text-transform: uppercase;
-}
-
-.popular-calculator-card strong {
-  color: #0f172a;
-  font-size: 0.98rem;
-  font-weight: 760;
-  line-height: 1.25;
-}
-
-.popular-calculator-card em {
-  color: #4b5563;
-  font-size: 0.86rem;
-  font-style: normal;
-  line-height: 1.35;
-}
-
-.popular-calculator-card b {
-  color: var(--accent-teal-dark);
-  font-size: 0.82rem;
-  font-weight: 740;
-  line-height: 1.35;
+.home-page .intro {
+  margin-bottom: 12px;
 }
 
 .back-link {
@@ -310,7 +245,7 @@
   border-radius: 14px;
   background:
     linear-gradient(135deg, rgba(255, 253, 249, 0.76), rgba(245, 233, 218, 0.34));
-  padding: 8px;
+  padding: 9px;
   box-shadow: 0 18px 48px rgba(14, 39, 68, 0.07);
 }
 
@@ -1377,18 +1312,8 @@ a:focus-visible,
     line-height: 1.32;
   }
 
-  .home-page .popular-calculator-card {
-    gap: 2px;
-    margin: 0 0 10px;
-    padding: 8px 11px;
-  }
-
-  .home-page .popular-calculator-card em {
-    line-height: 1.3;
-  }
-
   .home-page .workspace {
-    gap: 12px;
+    gap: 10px;
     margin: 0 -4px;
     border-radius: 12px;
     padding: 6px;
