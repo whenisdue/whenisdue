@@ -1,7 +1,36 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/business-days-calculator",
+      "destination": "/"
+    },
+    {
+      "source": "/free-trial-calculator",
+      "destination": "/"
+    },
+    {
+      "source": "/return-window-calculator",
+      "destination": "/"
+    },
+    {
+      "source": "/invoice-due-date-calculator",
+      "destination": "/"
+    },
+    {
+      "source": "/about",
+      "destination": "/"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/"
+    },
+    {
+      "source": "/terms",
+      "destination": "/"
+    },
+    {
+      "source": "/contact",
       "destination": "/"
     }
   ]
