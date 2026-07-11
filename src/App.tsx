@@ -227,20 +227,20 @@ function HomePage({ onNavigate }: NavigationProps) {
     <main className="page-shell home-page">
       <section className="intro" aria-labelledby="homepage-title">
         <IdentityRow currentTime={currentTime} onNavigate={onNavigate} />
-        <h1 id="homepage-title">When is it due?</h1>
+        <h1 id="homepage-title">Find the exact date something is due.</h1>
         <p className="subtitle">
-          Calculate due dates and save them without logging in.
+          Enter when it starts and how many days you have. We’ll show you the due date.
         </p>
         <p className="intro-note">
-          Pick a date, choose the deadline type, and keep your saved dates in this browser.
+          You can also calculate business days, invoice deadlines, free trials, and return windows.
         </p>
       </section>
 
       <section className="workspace" aria-label="Deadline calculator and saved due dates">
         <form className="calculator-card" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
-            <h2>Deadline calculator</h2>
-            <p>Choose a start date and deadline type.</p>
+            <h2>When will it be due?</h2>
+            <p>Enter the starting date and the number of days.</p>
           </div>
 
           <label className="field start-field">
@@ -255,7 +255,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </label>
 
           <fieldset className="field mode-field">
-            <legend>Choose calculator</legend>
+            <legend>What are you calculating?</legend>
             <div className="mode-grid">
               {modes.map((modeOption) => (
                 <label className="mode-option" key={modeOption}>
@@ -308,12 +308,12 @@ function HomePage({ onNavigate }: NavigationProps) {
           )}
 
           <p className="current-mode">
-            <span>Mode</span>
+            <span>Counting method</span>
             <strong>{modeLabels[mode]}</strong>
           </p>
 
           <section className={`result-panel ${daysRemaining < 0 ? 'is-overdue' : ''}`}>
-            <p className="result-label">Answer</p>
+            <p className="result-label">Due date</p>
             {dueDate ? (
               <>
                 <p className="due-date">{formatPlainDate(dueDate)}</p>
@@ -2036,18 +2036,18 @@ function isDuplicateSavedDeadline(deadlines: SavedDeadline[], nextDeadline: Save
 
 function getAmountLabel(mode: CalculatorMode): string {
   if (mode === 'business') {
-    return 'Business days'
+    return 'How many business days?'
   }
 
   if (mode === 'trial') {
-    return 'Trial length in days'
+    return 'How many days is the trial?'
   }
 
   if (mode === 'return') {
-    return 'Return window days'
+    return 'How many days can you return it?'
   }
 
-  return 'Calendar days'
+  return 'How many days?'
 }
 
 function getStartDateLabel(mode: CalculatorMode): string {
