@@ -1584,6 +1584,62 @@ a:focus-visible,
   line-height: 1.35;
 }
 
+.mode-select {
+  display: none;
+}
+
+.save-section-heading {
+  grid-column: 1 / -1;
+}
+
+.save-section-heading h3 {
+  margin: 0;
+}
+
+.save-section-heading p {
+  margin: 3px 0 0;
+  color: #5b6675;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+@media (min-width: 821px) {
+  .home-page.page-shell {
+    padding-top: 12px;
+  }
+
+  .home-page .intro {
+    max-width: 940px;
+    margin-bottom: 8px;
+  }
+
+  .home-page .intro h1 {
+    font-size: clamp(2.8rem, 4.5vw, 3.8rem);
+    line-height: 0.98;
+  }
+
+  .home-page .subtitle {
+    margin-top: 6px;
+  }
+
+  .home-page .intro-note {
+    margin-top: 2px;
+  }
+
+  .home-page .calculator-card {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .calculator-save-section {
+    order: 5;
+  }
+
+  .home-page .mode-field {
+    order: 6;
+  }
+}
+
 @media (max-width: 820px) {
   .page-shell {
     width: min(100% - 24px, 640px);
@@ -1957,5 +2013,171 @@ a:focus-visible,
 
   .home-page .deadline-actions .status-badge {
     flex-basis: 100%;
+  }
+
+  /* Compact mobile header so the calculator begins above the fold. */
+  .home-page.page-shell {
+    width: min(100% - 20px, 640px);
+    padding-top: 10px;
+  }
+
+  .home-page .identity-row {
+    min-height: 24px;
+    margin-bottom: 0;
+  }
+
+  .home-page .local-time,
+  .home-page .top-nav {
+    display: none;
+  }
+
+  .home-page .site-mark {
+    font-size: 0.72rem;
+  }
+
+  /* Keep the product promise short and immediately understandable. */
+  .home-page .intro {
+    margin-bottom: 8px;
+  }
+
+  .home-page .intro h1 {
+    max-width: 340px;
+    margin-top: 8px;
+    font-size: clamp(2rem, 9.5vw, 2.45rem);
+    line-height: 0.98;
+  }
+
+  .home-page .subtitle {
+    margin-top: 6px;
+    font-size: 0.96rem;
+    line-height: 1.3;
+  }
+
+  .home-page .intro-note {
+    margin-top: 3px;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  /* The hero already explains the tool, so avoid repeating it in the card. */
+  .home-page .calculator-card > .card-heading {
+    display: none;
+  }
+
+  .home-page .calculator-card {
+    gap: 7px;
+    padding: 12px;
+  }
+
+  /* Use one compact selector instead of five large mobile cards. */
+  .home-page .mode-field {
+    order: 1;
+    gap: 4px;
+    margin: 0;
+  }
+
+  .home-page .mode-select {
+    display: block;
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    font-size: 0.9rem;
+  }
+
+  .home-page .mode-grid,
+  .home-page .mode-note {
+    display: none;
+  }
+
+  .home-page .start-field {
+    order: 2;
+  }
+
+  .home-page .value-field {
+    order: 3;
+  }
+
+  .home-page .current-mode {
+    display: none;
+  }
+
+  .home-page .start-field,
+  .home-page .value-field {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .home-page .start-field input,
+  .home-page .value-field input,
+  .home-page .value-field select {
+    width: 100%;
+    height: 42px;
+  }
+
+  .home-page .result-panel {
+    order: 4;
+    min-height: 92px;
+    margin: 0;
+    padding: 10px 12px 9px 16px;
+  }
+
+  .home-page .result-label {
+    margin-top: 2px;
+    margin-bottom: 3px;
+  }
+
+  .home-page .due-date {
+    font-size: 1.2rem;
+  }
+
+  .home-page .result-meta {
+    margin-top: 3px;
+  }
+
+  /* Put the important Save action directly beneath the result. */
+  .home-page .calculator-save-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(145px, 0.85fr);
+    order: 5;
+    align-items: end;
+    gap: 6px 8px;
+    margin-top: 0;
+    padding: 9px;
+  }
+
+  .home-page .save-section-heading {
+    grid-column: 1 / -1;
+  }
+
+  .home-page .save-section-heading h3 {
+    font-size: 0.86rem;
+  }
+
+  .home-page .save-section-heading p {
+    margin-top: 2px;
+    font-size: 0.72rem;
+  }
+
+  .home-page .calculator-save-section .title-field {
+    width: 100%;
+    margin: 0;
+  }
+
+  .home-page .calculator-save-section .title-field input {
+    width: 100%;
+    height: 40px;
+  }
+
+  .home-page .calculator-save-section .primary-button {
+    width: 100%;
+    height: 40px;
+    min-width: 0;
+    font-size: 0.78rem;
+    line-height: 1.15;
+    padding-inline: 8px;
+  }
+
+  .home-page .calculator-save-section .form-message {
+    grid-column: 1 / -1;
   }
 }

@@ -227,12 +227,12 @@ function HomePage({ onNavigate }: NavigationProps) {
     <main className="page-shell home-page">
       <section className="intro" aria-labelledby="homepage-title">
         <IdentityRow currentTime={currentTime} onNavigate={onNavigate} />
-        <h1 id="homepage-title">Find the exact date something is due.</h1>
+        <h1 id="homepage-title">Know exactly when it’s due.</h1>
         <p className="subtitle">
-          Enter when it starts and how many days you have. We’ll show you the due date.
+          Calculate and save due dates—no login or account needed.
         </p>
         <p className="intro-note">
-          You can also calculate business days, invoice deadlines, free trials, and return windows.
+          Enter when it starts and how many days you have. We’ll show you the exact due date.
         </p>
       </section>
 
@@ -256,6 +256,22 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           <fieldset className="field mode-field">
             <legend>What are you calculating?</legend>
+
+            <select
+              className="mode-select"
+              aria-label="What are you calculating?"
+              value={mode}
+              onChange={(event) => {
+                setMode(event.target.value as CalculatorMode)
+              }}
+            >
+              <option value="calendar">Calendar days — counts every day</option>
+              <option value="business">Business days — skips weekends</option>
+              <option value="invoice">Invoice terms</option>
+              <option value="trial">Free trial end date</option>
+              <option value="return">Return window</option>
+            </select>
+
             <div className="mode-grid">
               {modes.map((modeOption) => (
                 <label className="mode-option" key={modeOption}>
@@ -345,9 +361,13 @@ function HomePage({ onNavigate }: NavigationProps) {
           </section>
 
           <section className="calculator-save-section" aria-labelledby="save-calculation-title">
-            <h3 id="save-calculation-title">Save this calculation</h3>
+            <div className="save-section-heading">
+              <h3 id="save-calculation-title">Save this due date</h3>
+              <p>No login or account needed. It stays in this browser.</p>
+            </div>
+
             <label className="field title-field">
-              <span>Title optional</span>
+              <span>Optional name</span>
               <input
                 maxLength={titleMaxLength}
                 value={title}
