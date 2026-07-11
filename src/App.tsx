@@ -227,12 +227,12 @@ function HomePage({ onNavigate }: NavigationProps) {
     <main className="page-shell home-page">
       <section className="intro" aria-labelledby="homepage-title">
         <IdentityRow currentTime={currentTime} onNavigate={onNavigate} />
-        <h1 id="homepage-title">Know exactly when itâ€™s due.</h1>
+        <h1 id="homepage-title">Know exactly when it’s due.</h1>
         <p className="subtitle">
-          Calculate and save due datesâ€”no login or account needed.
+          Calculate and save due dates—no login or account needed.
         </p>
         <p className="intro-note">
-          Enter when it starts and how many days you have. Weâ€™ll show you the exact due date.
+          Enter when it starts and how many days you have. We’ll show you the exact due date.
         </p>
       </section>
 
@@ -265,8 +265,8 @@ function HomePage({ onNavigate }: NavigationProps) {
                 setMode(event.target.value as CalculatorMode)
               }}
             >
-              <option value="calendar">Calendar days â€” counts every day</option>
-              <option value="business">Business days â€” skips weekends</option>
+              <option value="calendar">Calendar days — counts every day</option>
+              <option value="business">Business days — skips weekends</option>
               <option value="invoice">Invoice terms</option>
               <option value="trial">Free trial end date</option>
               <option value="return">Return window</option>
@@ -1641,7 +1641,7 @@ function formatCurrentTime(date: Date): string {
     day: 'numeric',
   }).format(date)
 
-  return `${calendarDate} Â· ${time}`
+  return `${calendarDate} · ${time}`
 }
 
 function getRouteFromPath(pathname: string): RouteName {
@@ -1724,7 +1724,7 @@ function applyRouteMetadata(route: RouteName) {
 function getRouteMetadata(route: RouteName): RouteMetadata {
   if (route === 'business-days') {
     return {
-      title: 'Business Days Calculator â€” WhenIsDue',
+      title: 'Business Days Calculator — WhenIsDue',
       description: 'Add business days to a start date and find the exact due date while skipping weekends.',
       path: '/business-days-calculator',
     }
@@ -1732,7 +1732,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'free-trial') {
     return {
-      title: 'Free Trial Calculator â€” WhenIsDue',
+      title: 'Free Trial Calculator — WhenIsDue',
       description: 'Find when a free trial ends and the last safe day to cancel before renewal.',
       path: '/free-trial-calculator',
     }
@@ -1740,7 +1740,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'return-window') {
     return {
-      title: 'Return Window Calculator â€” WhenIsDue',
+      title: 'Return Window Calculator — WhenIsDue',
       description: 'Calculate the last day to return an item based on a purchase date and return window.',
       path: '/return-window-calculator',
     }
@@ -1748,7 +1748,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'invoice-due-date') {
     return {
-      title: 'Invoice Due Date Calculator â€” WhenIsDue',
+      title: 'Invoice Due Date Calculator — WhenIsDue',
       description: 'Calculate invoice due dates from common payment terms like Net 7, Net 15, Net 30, Net 45, and Net 60.',
       path: '/invoice-due-date-calculator',
     }
@@ -1756,7 +1756,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'about') {
     return {
-      title: 'About â€” WhenIsDue',
+      title: 'About — WhenIsDue',
       description: 'Learn what WhenIsDue does and how its simple due date calculators work.',
       path: '/about',
     }
@@ -1764,7 +1764,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'privacy') {
     return {
-      title: 'Privacy Policy â€” WhenIsDue',
+      title: 'Privacy Policy — WhenIsDue',
       description: 'Learn how WhenIsDue handles saved due dates, local browser storage, accounts, analytics, and ads.',
       path: '/privacy',
     }
@@ -1772,15 +1772,15 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'terms') {
     return {
-      title: 'Terms of Use â€” WhenIsDue',
-      description: 'Read the terms for using WhenIsDueâ€™s simple due date calculators.',
+      title: 'Terms of Use — WhenIsDue',
+      description: 'Read the terms for using WhenIsDue’s simple due date calculators.',
       path: '/terms',
     }
   }
 
   if (route === 'contact') {
     return {
-      title: 'Contact â€” WhenIsDue',
+      title: 'Contact — WhenIsDue',
       description: 'Contact WhenIsDue for questions, corrections, feedback, or calculation issues.',
       path: '/contact',
     }
@@ -1788,14 +1788,14 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'not-found') {
     return {
-      title: 'Page Not Found â€” WhenIsDue',
+      title: 'Page Not Found — WhenIsDue',
       description: 'That page does not exist yet. Choose a calculator or go back home.',
       path: window.location.pathname,
     }
   }
 
   return {
-    title: 'WhenIsDue â€” Simple Due Date Calculator',
+    title: 'WhenIsDue — Simple Due Date Calculator',
     description: 'Calculate calendar days, business days, invoice terms, free trial dates, return windows, and everyday deadlines.',
     openGraphDescription: 'A simple due date calculator for everyday deadlines, business days, invoice terms, free trials, and return windows.',
     twitterDescription: 'Calculate exact due dates for everyday deadlines.',
