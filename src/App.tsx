@@ -227,12 +227,12 @@ function HomePage({ onNavigate }: NavigationProps) {
     <main className="page-shell home-page">
       <section className="intro" aria-labelledby="homepage-title">
         <IdentityRow currentTime={currentTime} onNavigate={onNavigate} />
-        <h1 id="homepage-title">Know exactly when it’s due.</h1>
+        <h1 id="homepage-title">Know exactly when it's due.</h1>
         <p className="subtitle">
-          Calculate and save due dates—no login or account needed.
+          Calculate and save due dates. No login or account needed.
         </p>
         <p className="intro-note">
-          Enter when it starts and how many days you have. We’ll show you the exact due date.
+          Enter when it starts and how many days you have. We'll show you the exact due date.
         </p>
       </section>
 
@@ -265,8 +265,8 @@ function HomePage({ onNavigate }: NavigationProps) {
                 setMode(event.target.value as CalculatorMode)
               }}
             >
-              <option value="calendar">Calendar days — counts every day</option>
-              <option value="business">Business days — skips weekends</option>
+              <option value="calendar">Calendar days - counts every day</option>
+              <option value="business">Business days - skips weekends</option>
               <option value="invoice">Invoice terms</option>
               <option value="trial">Free trial end date</option>
               <option value="return">Return window</option>
@@ -854,6 +854,55 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
             <li>30-day trial</li>
           </ul>
         </article>
+
+        <article>
+          <h2>Free trial calculation example</h2>
+          <p>
+            Suppose a 14-day trial starts on May 1. Using this calculator's date-addition method, the trial end date is May 15 and the suggested cancel-by date is May 14. This treats the start date as day zero. A service may instead count the signup date as day one, so its displayed renewal date should take priority.
+          </p>
+        </article>
+
+        <article>
+          <h2>What to check before the trial renews</h2>
+          <ul>
+            <li>The exact renewal date shown in your account or confirmation email</li>
+            <li>The renewal time and time zone, not only the calendar date</li>
+            <li>Whether cancellation must be completed a day or more in advance</li>
+            <li>Whether deleting an app also cancels the subscription</li>
+            <li>Whether the service sends a cancellation confirmation</li>
+          </ul>
+        </article>
+
+        <article>
+          <h2>Free trial FAQ</h2>
+          <dl>
+            <dt>Does the signup day count as the first day?</dt>
+            <dd>This calculator adds the full trial length to the start date. Services may use a different counting convention, so check the renewal date displayed by the provider.</dd>
+            <dt>Why is the suggested cancel-by date one day earlier?</dt>
+            <dd>It provides a simple planning buffer before the calculated end date. It is not a guarantee that every provider will accept cancellation until that date.</dd>
+            <dt>Does uninstalling an app cancel a free trial?</dt>
+            <dd>Usually, uninstalling an app and cancelling its subscription are separate actions. Use the provider, App Store, or Google Play subscription controls and confirm the cancellation.</dd>
+            <dt>Can a trial renew at a specific time?</dt>
+            <dd>Yes. Some services use a particular time or time zone. This calculator works with calendar dates only.</dd>
+          </dl>
+        </article>
+
+        <article>
+          <h2>Related deadline tool</h2>
+          <p>
+            Bought something with a limited return period? Use the{' '}
+            <a
+              href="/return-window-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/return-window-calculator')
+              }}
+            >
+              Return Window Calculator
+            </a>
+            .
+          </p>
+        </article>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
@@ -1035,6 +1084,55 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             <li>90-day return window</li>
           </ul>
         </article>
+
+        <article>
+          <h2>Return window calculation example</h2>
+          <p>
+            If a 30-day return window begins on July 1, this calculator shows July 30 as the last day to return the item. It counts July 1 as day one. Some retailers begin counting on the delivery date or the day after delivery, so use the date and counting rule stated in the store's policy.
+          </p>
+        </article>
+
+        <article>
+          <h2>Common return deadline mistakes</h2>
+          <ul>
+            <li>Using the purchase date when the policy starts on the delivery date</li>
+            <li>Assuming every item follows the store's standard return window</li>
+            <li>Overlooking final-sale, clearance, personalized, or opened-item exclusions</li>
+            <li>Confusing the deadline to start a return with the deadline for the store to receive it</li>
+            <li>Waiting until the final day without checking store hours or shipping requirements</li>
+          </ul>
+        </article>
+
+        <article>
+          <h2>Return window FAQ</h2>
+          <dl>
+            <dt>Does the purchase day count as day one?</dt>
+            <dd>It does in this calculator. A retailer may count differently, especially for shipped orders.</dd>
+            <dt>Should I use the order date or delivery date?</dt>
+            <dd>Use whichever starting date the official return policy specifies. For online purchases, that is often the delivery date, but policies vary.</dd>
+            <dt>What if the last day falls on a weekend or holiday?</dt>
+            <dd>This calculator does not move the deadline. Check whether the store is open or whether an online or shipped return can be started that day.</dd>
+            <dt>Does starting an online return meet the deadline?</dt>
+            <dd>Some retailers require only that the return be initiated by the deadline; others require shipment or receipt. Check the exact wording of the policy.</dd>
+          </dl>
+        </article>
+
+        <article>
+          <h2>Related deadline tool</h2>
+          <p>
+            Need to avoid an automatic renewal instead? Use the{' '}
+            <a
+              href="/free-trial-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/free-trial-calculator')
+              }}
+            >
+              Free Trial Calculator
+            </a>
+            .
+          </p>
+        </article>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
@@ -1215,6 +1313,51 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             <li>Net 45</li>
             <li>Net 60</li>
           </ul>
+        </article>
+
+        <article>
+          <h2>Net 30 calculation example</h2>
+          <p>
+            If an invoice is dated July 1 with Net 30 terms, this calculator adds 30 calendar days and shows July 31 as the due date. The invoice date is treated as day zero. The written invoice or contract controls if it uses a different counting method.
+          </p>
+        </article>
+
+        <article>
+          <h2>Calendar days, business days, and end-of-month terms</h2>
+          <p>
+            This calculator treats a number such as 30 as calendar days. It does not automatically skip weekends or holidays, and it does not interpret end-of-month terms. If an agreement says business days, use the Business Days Calculator. If it says EOM, month-end, or a fixed day of the following month, follow that wording instead of treating it as a simple number of days.
+          </p>
+        </article>
+
+        <article>
+          <h2>Invoice due date FAQ</h2>
+          <dl>
+            <dt>What does Net 30 mean?</dt>
+            <dd>It commonly means payment is due 30 days after the invoice date, but the contract or invoice may define the starting day and counting method differently.</dd>
+            <dt>Are Net 30 terms calendar days or business days?</dt>
+            <dd>Calendar days are commonly used unless the agreement specifically says business days. Confirm the written terms.</dd>
+            <dt>What if the due date falls on a weekend or holiday?</dt>
+            <dd>This calculator leaves the date unchanged. The contract, company policy, or applicable rules may determine whether payment moves to another day.</dd>
+            <dt>Does this calculator handle EOM terms?</dt>
+            <dd>No. End-of-month terms can use different rules and should be calculated from the exact language on the invoice or agreement.</dd>
+          </dl>
+        </article>
+
+        <article>
+          <h2>Related deadline tool</h2>
+          <p>
+            If your payment terms specifically use working days, use the{' '}
+            <a
+              href="/business-days-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/business-days-calculator')
+              }}
+            >
+              Business Days Calculator
+            </a>
+            .
+          </p>
         </article>
       </section>
 
@@ -1641,7 +1784,7 @@ function formatCurrentTime(date: Date): string {
     day: 'numeric',
   }).format(date)
 
-  return `${calendarDate} · ${time}`
+  return `${calendarDate} | ${time}`
 }
 
 function getRouteFromPath(pathname: string): RouteName {
@@ -1724,7 +1867,7 @@ function applyRouteMetadata(route: RouteName) {
 function getRouteMetadata(route: RouteName): RouteMetadata {
   if (route === 'business-days') {
     return {
-      title: 'Business Days Calculator — WhenIsDue',
+      title: 'Business Days Calculator - WhenIsDue',
       description: 'Add business days to a start date and find the exact due date while skipping weekends.',
       path: '/business-days-calculator',
     }
@@ -1732,7 +1875,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'free-trial') {
     return {
-      title: 'Free Trial Calculator — WhenIsDue',
+      title: 'Free Trial Calculator - WhenIsDue',
       description: 'Find when a free trial ends and the last safe day to cancel before renewal.',
       path: '/free-trial-calculator',
     }
@@ -1740,7 +1883,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'return-window') {
     return {
-      title: 'Return Window Calculator — WhenIsDue',
+      title: 'Return Window Calculator - WhenIsDue',
       description: 'Calculate the last day to return an item based on a purchase date and return window.',
       path: '/return-window-calculator',
     }
@@ -1748,7 +1891,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'invoice-due-date') {
     return {
-      title: 'Invoice Due Date Calculator — WhenIsDue',
+      title: 'Invoice Due Date Calculator - WhenIsDue',
       description: 'Calculate invoice due dates from common payment terms like Net 7, Net 15, Net 30, Net 45, and Net 60.',
       path: '/invoice-due-date-calculator',
     }
@@ -1756,7 +1899,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'about') {
     return {
-      title: 'About — WhenIsDue',
+      title: 'About - WhenIsDue',
       description: 'Learn what WhenIsDue does and how its simple due date calculators work.',
       path: '/about',
     }
@@ -1764,7 +1907,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'privacy') {
     return {
-      title: 'Privacy Policy — WhenIsDue',
+      title: 'Privacy Policy - WhenIsDue',
       description: 'Learn how WhenIsDue handles saved due dates, local browser storage, accounts, analytics, and ads.',
       path: '/privacy',
     }
@@ -1772,15 +1915,15 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'terms') {
     return {
-      title: 'Terms of Use — WhenIsDue',
-      description: 'Read the terms for using WhenIsDue’s simple due date calculators.',
+      title: 'Terms of Use - WhenIsDue',
+      description: "Read the terms for using WhenIsDue's simple due date calculators.",
       path: '/terms',
     }
   }
 
   if (route === 'contact') {
     return {
-      title: 'Contact — WhenIsDue',
+      title: 'Contact - WhenIsDue',
       description: 'Contact WhenIsDue for questions, corrections, feedback, or calculation issues.',
       path: '/contact',
     }
@@ -1788,14 +1931,14 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'not-found') {
     return {
-      title: 'Page Not Found — WhenIsDue',
+      title: 'Page Not Found - WhenIsDue',
       description: 'That page does not exist yet. Choose a calculator or go back home.',
       path: window.location.pathname,
     }
   }
 
   return {
-    title: 'WhenIsDue — Simple Due Date Calculator',
+    title: 'WhenIsDue - Simple Due Date Calculator',
     description: 'Calculate calendar days, business days, invoice terms, free trial dates, return windows, and everyday deadlines.',
     openGraphDescription: 'A simple due date calculator for everyday deadlines, business days, invoice terms, free trials, and return windows.',
     twitterDescription: 'Calculate exact due dates for everyday deadlines.',
