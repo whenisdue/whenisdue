@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import VaWorkspacePage from './va/VaWorkspacePage'
 import {
   type CalculatorMode,
   type InvoiceTerm,
@@ -33,13 +34,6 @@ type SavedDeadline = {
 
 const storageKey = 'whenisdue.savedDeadlines.v1'
 const modes: CalculatorMode[] = ['calendar', 'business', 'invoice', 'trial', 'return']
-const modeHelperText: Record<CalculatorMode, string> = {
-  calendar: 'Counts every day',
-  business: 'Skips weekends',
-  invoice: 'Net 7, 15, 30, 45, 60',
-  trial: 'Cancel before renewal',
-  return: 'Last day to return',
-}
 const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60', 'net90', 'eom']
 const businessDayQuickPicks = [1, 5, 10, 15, 30]
 const trialLengthQuickPicks = [7, 14, 30]
@@ -54,6 +48,7 @@ type RouteName =
   | 'free-trial'
   | 'return-window'
   | 'invoice-due-date'
+  | 'workspace'
   | 'about'
   | 'privacy'
   | 'terms'
@@ -105,6 +100,10 @@ function App() {
     return <InvoiceDueDatePage onNavigate={navigate} />
   }
 
+  if (route === 'workspace') {
+    return <VaWorkspacePage onNavigate={navigate} />
+  }
+
   if (route === 'about' || route === 'privacy' || route === 'terms' || route === 'contact') {
     return <StaticPage route={route} onNavigate={navigate} />
   }
@@ -116,6 +115,7 @@ function App() {
   return <HomePage onNavigate={navigate} />
 }
 
+
 function HomePage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const [startDate, setStartDate] = useState(todayInputValue)
@@ -126,6 +126,7 @@ function HomePage({ onNavigate }: NavigationProps) {
   const [isCustomTitle, setIsCustomTitle] = useState(false)
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
+  const [copyMessage, setCopyMessage] = useState<string | null>(null)
 
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
   const parsedStartDate = parsePlainDate(startDate)
@@ -139,7 +140,9 @@ function HomePage({ onNavigate }: NavigationProps) {
   const dueDate = canCalculate && parsedStartDate
     ? getDueDateForMode(mode, parsedStartDate, safeAmount, invoiceTerm)
     : null
-  const cancelByDate = mode === 'trial' && dueDate ? getDueDateForMode('calendar', dueDate, -1, invoiceTerm) : null
+  const cancelByDate = mode === 'trial' && dueDate
+    ? getDueDateForMode('calendar', dueDate, -1, invoiceTerm)
+    : null
   const daysRemaining = dueDate ? daysBetween(today, dueDate) : 0
   const statusText = dueDate ? getStatusText(daysRemaining) : 'Enter a valid date'
 
@@ -149,7 +152,11 @@ function HomePage({ onNavigate }: NavigationProps) {
     }
   }, [isCustomTitle, mode])
 
-  const amountLabel = getAmountLabel(mode)
+  useEffect(() => {
+    setStorageMessage(null)
+    setCopyMessage(null)
+  }, [mode, startDate, dayAmount, invoiceTerm])
+
   const canSave = Boolean(dueDate && title.trim() && !validationMessage)
   const sortedSavedDeadlines = useMemo(
     () => [...savedDeadlines].sort(compareSavedDeadlines),
@@ -159,6 +166,22 @@ function HomePage({ onNavigate }: NavigationProps) {
     () => getNextDueDeadline(savedDeadlines, today),
     [savedDeadlines, today],
   )
+  const savedDeadlineGroups = useMemo(
+    () => groupSavedDeadlines(sortedSavedDeadlines, today, nextDueDeadline?.id),
+    [nextDueDeadline?.id, sortedSavedDeadlines, today],
+  )
+  const completedDeadlineCount = savedDeadlineGroups.completed.length
+
+  const modeDetails: Record<CalculatorMode, {
+    title: string
+    helper: string
+  }> = {
+    calendar: { title: 'Add days', helper: 'Find a future date' },
+    business: { title: 'Business days', helper: 'Skip weekends' },
+    invoice: { title: 'Invoice', helper: 'Calculate payment terms' },
+    trial: { title: 'Free trial', helper: 'Know when to cancel' },
+    return: { title: 'Return', helper: 'Find the last return day' },
+  }
 
   function saveDeadline() {
     if (!dueDate || !title.trim()) {
@@ -177,7 +200,7 @@ function HomePage({ onNavigate }: NavigationProps) {
     }
 
     if (isDuplicateSavedDeadline(savedDeadlines, nextDeadline)) {
-      setStorageMessage('This due date is already saved.')
+      setStorageMessage('This date is already saved.')
       return
     }
 
@@ -190,14 +213,29 @@ function HomePage({ onNavigate }: NavigationProps) {
     }
 
     setSavedDeadlines(nextDeadlines)
-    setStorageMessage(null)
+    setStorageMessage('Saved on this device.')
     setTitle(getDefaultTitle(mode))
     setIsCustomTitle(false)
   }
 
+  async function copyAnswer() {
+    if (!dueDate) {
+      return
+    }
+
+    const answer = getCopyAnswer(mode, dueDate, cancelByDate)
+
+    try {
+      await navigator.clipboard.writeText(answer)
+      setCopyMessage('Copied.')
+    } catch {
+      setCopyMessage('Copy was not available in this browser.')
+    }
+  }
+
   function toggleDone(id: string) {
     const nextDeadlines = savedDeadlines.map((deadline) =>
-        deadline.id === id ? { ...deadline, done: !deadline.done } : deadline,
+      deadline.id === id ? { ...deadline, done: !deadline.done } : deadline,
     )
     const storageResult = saveSavedDeadlines(nextDeadlines)
 
@@ -223,206 +261,312 @@ function HomePage({ onNavigate }: NavigationProps) {
     setStorageMessage(null)
   }
 
+  function clearCompletedDeadlines() {
+    const nextDeadlines = savedDeadlines.filter((deadline) => !deadline.done)
+    const storageResult = saveSavedDeadlines(nextDeadlines)
+
+    if (!storageResult.ok) {
+      setStorageMessage(storageResult.message)
+      return
+    }
+
+    setSavedDeadlines(nextDeadlines)
+    setStorageMessage(null)
+  }
+
   return (
-    <main className="page-shell home-page">
-      <section className="intro" aria-labelledby="homepage-title">
-        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} />
-        <h1 id="homepage-title">Know exactly when it's due.</h1>
-        <p className="subtitle">
-          Calculate and save due dates. No login or account needed.
-        </p>
-        <p className="intro-note">
-          Enter when it starts and how many days you have. We'll show you the exact due date.
-        </p>
+    <main className="page-shell home-page friendly-home">
+      <section className="friendly-hero" aria-labelledby="homepage-title">
+        <IdentityRow onNavigate={onNavigate} />
+        <div className="friendly-hero-copy">
+          <p className="friendly-eyebrow">
+            <span aria-hidden="true">✓</span>
+            No signup. No personal data. Just the date.
+          </p>
+          <h1 id="homepage-title">Never count the days yourself again.</h1>
+          <p className="friendly-subtitle">
+            Pick what you need, enter the starting date, and we’ll show you exactly when it is due.
+          </p>
+        </div>
       </section>
 
-      <section className="workspace" aria-label="Deadline calculator and saved due dates">
-        <form className="calculator-card" onSubmit={(event) => event.preventDefault()}>
-          <div className="card-heading">
-            <h2>When will it be due?</h2>
-            <p>Enter the starting date and the number of days.</p>
+      <section id="calculator" className="friendly-calculator" aria-label="Due date calculator">
+        <div className="scenario-section">
+          <div className="friendly-section-heading">
+            <span className="step-number">1</span>
+            <div>
+              <h2>What do you need to figure out?</h2>
+              <p>Choose the situation that sounds closest.</p>
+            </div>
           </div>
 
-          <label className="field start-field">
-            <span>{getStartDateLabel(mode)}</span>
-            <input
-              type="date"
-              min="1900-01-01"
-              max="2100-12-31"
-              value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
-            />
-          </label>
+          <div className="scenario-grid" role="radiogroup" aria-label="Calculation type">
+            {modes.map((modeOption) => {
+              const details = modeDetails[modeOption]
 
-          <fieldset className="field mode-field">
-            <legend>What are you calculating?</legend>
-
-            <select
-              className="mode-select"
-              aria-label="What are you calculating?"
-              value={mode}
-              onChange={(event) => {
-                setMode(event.target.value as CalculatorMode)
-              }}
-            >
-              <option value="calendar">Calendar days - counts every day</option>
-              <option value="business">Business days - skips weekends</option>
-              <option value="invoice">Invoice terms</option>
-              <option value="trial">Free trial end date</option>
-              <option value="return">Return window</option>
-            </select>
-
-            <div className="mode-grid">
-              {modes.map((modeOption) => (
-                <label className="mode-option" key={modeOption}>
+              return (
+                <label
+                  className={`scenario-card scenario-${modeOption}`}
+                  key={modeOption}
+                >
                   <input
                     type="radio"
                     name="mode"
                     value={modeOption}
                     checked={mode === modeOption}
-                    onChange={() => {
-                      setMode(modeOption)
-                    }}
+                    onChange={() => setMode(modeOption)}
                   />
-                  <span className="mode-option-copy">
-                    <span className="mode-option-name">{modeLabels[modeOption]}</span>
-                    <span className="mode-option-helper">{modeHelperText[modeOption]}</span>
+                  <span className="scenario-icon" aria-hidden="true"><ScenarioIcon mode={modeOption} /></span>
+                  <span className="scenario-copy">
+                    <strong>{details.title}</strong>
+                    <span>{details.helper}</span>
                   </span>
+                  <span className="scenario-check" aria-hidden="true">✓</span>
                 </label>
-              ))}
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="friendly-workspace">
+          <form className="friendly-form-card" onSubmit={(event) => event.preventDefault()}>
+            <div className="friendly-section-heading compact-heading">
+              <span className="step-number">2</span>
+              <div>
+                <h2>Tell us the details</h2>
+                <p>{getFriendlyModeInstruction(mode)}</p>
+              </div>
             </div>
-            <p className="mode-note">{getModeNote(mode)}</p>
-          </fieldset>
 
-          {mode === 'invoice' ? (
-            <label className="field value-field">
-              <span>Invoice term</span>
-              <select
-                value={invoiceTerm}
-                onChange={(event) => setInvoiceTerm(event.target.value as InvoiceTerm)}
-              >
-                {invoiceTerms.map((term) => (
-                  <option value={term} key={term}>
-                    {invoiceTermLabels[term]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : (
-            <label className="field value-field">
-              <span>{amountLabel}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max={getAmountLimit(mode)}
-                value={dayAmount}
-                onChange={(event) => setDayAmount(event.target.value)}
-              />
-              {amountValidationMessage ? <span className="field-error">{amountValidationMessage}</span> : null}
-            </label>
-          )}
+            <div className="friendly-fields">
+              <label className="field">
+                <span>{getFriendlyStartDateLabel(mode)}</span>
+                <input
+                  type="date"
+                  min="1900-01-01"
+                  max="2100-12-31"
+                  value={startDate}
+                  onChange={(event) => setStartDate(event.target.value)}
+                />
+              </label>
 
-          <p className="current-mode">
-            <span>Counting method</span>
-            <strong>{modeLabels[mode]}</strong>
-          </p>
+              {mode === 'invoice' ? (
+                <label className="field">
+                  <span>What are the payment terms?</span>
+                  <select
+                    value={invoiceTerm}
+                    onChange={(event) => setInvoiceTerm(event.target.value as InvoiceTerm)}
+                  >
+                    {invoiceTerms.map((term) => (
+                      <option value={term} key={term}>
+                        {invoiceTermLabels[term]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <label className="field">
+                  <span>{getFriendlyAmountLabel(mode)}</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    max={getAmountLimit(mode)}
+                    value={dayAmount}
+                    onChange={(event) => setDayAmount(event.target.value)}
+                  />
+                  {amountValidationMessage ? (
+                    <span className="field-error">{amountValidationMessage}</span>
+                  ) : null}
+                </label>
+              )}
+            </div>
 
-          <section className={`result-panel ${daysRemaining < 0 ? 'is-overdue' : ''}`}>
-            <p className="result-label">Due date</p>
+            <p className="friendly-counting-note">
+              <span aria-hidden="true">i</span>
+              {getFriendlyCountingNote(mode)}
+            </p>
+          </form>
+
+          <section
+            className={`calendar-result-card result-${mode} ${daysRemaining < 0 ? 'is-overdue' : ''}`}
+            aria-live="polite"
+          >
+            <div className="calendar-result-top">
+              <p className="calendar-result-kicker">{getFriendlyResultLabel(mode)}</p>
+              <span className="result-spark" aria-hidden="true">✦</span>
+            </div>
+
             {dueDate ? (
               <>
-                <p className="due-date">{formatPlainDate(dueDate)}</p>
-                {mode === 'business' ? (
-                  <div className="result-meta result-meta-stack">
-                    <span>{formatWeekday(dueDate)}</span>
-                    <span>{formatBusinessDistance(safeAmount)} from start date</span>
+                <div className="calendar-answer">
+                  <div className="date-tile" aria-hidden="true">
+                    <span>{formatMonthShort(dueDate)}</span>
+                    <strong>{dueDate.day}</strong>
+                    <small>{formatWeekday(dueDate)}</small>
+                  </div>
+                  <div className="calendar-answer-copy">
+                    <p className="calendar-weekday">{formatWeekday(dueDate)}</p>
+                    <p className="calendar-full-date">{formatPlainDate(dueDate)}</p>
                     <span className={`status-badge ${getUrgencyClass(daysRemaining)}`}>
-                      {formatCalendarDistance(daysRemaining)}
+                      {mode === 'business' ? formatBusinessDistance(safeAmount) : statusText}
                     </span>
                   </div>
-                ) : (
-                  <div className="result-meta">
-                    <span>{formatWeekday(dueDate)}</span>
-                    <span className={`status-badge ${getUrgencyClass(daysRemaining)}`}>
-                      {statusText}
-                    </span>
-                  </div>
-                )}
+                </div>
+
                 {cancelByDate ? (
-                  <p className="cancel-date">
-                    Suggested cancel-by date: <strong>{formatPlainDate(cancelByDate)}</strong>
+                  <p className="friendly-extra-result">
+                    Suggested safe cancel-by date:
+                    <strong>{formatPlainDate(cancelByDate)}</strong>
                   </p>
                 ) : null}
+
+                {mode === 'business' ? (
+                  <p className="friendly-extra-result">
+                    Weekends are skipped. Public holidays are not removed.
+                  </p>
+                ) : null}
+
+                <div className="result-actions single-action">
+                  <button className="secondary-button" type="button" onClick={copyAnswer}>
+                    Copy answer
+                  </button>
+                </div>
+                {copyMessage ? <p className="action-message">{copyMessage}</p> : null}
               </>
             ) : (
-              <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
+              <div className="result-placeholder">
+                <span aria-hidden="true">◷</span>
+                <p>{validationMessage ?? 'Enter a valid local calendar date.'}</p>
+              </div>
             )}
           </section>
+        </div>
 
-          <section className="calculator-save-section" aria-labelledby="save-calculation-title">
-            <div className="save-section-heading">
-              <h3 id="save-calculation-title">Save this due date</h3>
-              <p>No login or account needed. It stays in this browser.</p>
+        <section className="friendly-save-card" aria-labelledby="save-calculation-title">
+          <div className="save-card-copy">
+            <span className="save-icon" aria-hidden="true">⌑</span>
+            <div>
+              <h2 id="save-calculation-title">Save for later</h2>
+              <p>Saved privately on this device.</p>
             </div>
-
-            <label className="field title-field">
-              <span>Optional name</span>
-              <input
-                maxLength={titleMaxLength}
-                value={title}
-                onChange={(event) => {
-                  setTitle(event.target.value)
-                  setIsCustomTitle(true)
-                }}
-              />
-            </label>
-
-            <button className="primary-button" type="button" disabled={!canSave} onClick={saveDeadline}>
-              Save to My due dates
-            </button>
-            {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-          </section>
-        </form>
-
-        <section className="dashboard" aria-labelledby="saved-title">
-          <div className="card-heading">
-            <h2 id="saved-title">My due dates</h2>
-            <p>No account needed. Saved dates stay on this device.</p>
           </div>
 
-          {nextDueDeadline ? (
-            <NextDueSpotlight
-              deadline={nextDueDeadline}
-              onToggleDone={toggleDone}
+          <label className="field save-name-field">
+            <span>Give this date a name</span>
+            <input
+              id="save-date-title"
+              maxLength={titleMaxLength}
+              placeholder="Example: Return headphones"
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value)
+                setIsCustomTitle(true)
+              }}
             />
-          ) : null}
+          </label>
 
-          {savedDeadlines.length > 0 ? (
-            <ul className="deadline-list">
-              {sortedSavedDeadlines.map((deadline) => (
-                <SavedDeadlineItem
-                  deadline={deadline}
-                  key={deadline.id}
-                  today={today}
-                  onDelete={deleteDeadline}
-                  onToggleDone={toggleDone}
-                />
-              ))}
-            </ul>
-          ) : (
-            <div className="empty-state">
-              <p>No saved due dates yet.</p>
-              <span>Save a result here and it will stay in this browser for next time.</span>
-            </div>
-          )}
+          <button className="primary-button save-date-button" type="button" disabled={!canSave} onClick={saveDeadline}>
+            Save date
+          </button>
+          {storageMessage ? <p className="form-message save-message">{storageMessage}</p> : null}
         </section>
       </section>
 
-      <section className="popular-calculators" aria-labelledby="popular-calculators-title">
+      <section id="saved-dates" className="saved-dates-section" aria-labelledby="saved-title">
+        <div className="saved-dates-heading">
+          <div>
+            <p className="friendly-eyebrow muted-eyebrow">Your personal deadline list</p>
+            <h2 id="saved-title">Your saved dates</h2>
+            <p>See what needs attention without digging through a long list.</p>
+          </div>
+          <div className="saved-heading-actions">
+            <span className="saved-count">
+              {savedDeadlines.length} {savedDeadlines.length === 1 ? 'date' : 'dates'}
+            </span>
+            {completedDeadlineCount > 0 ? (
+              <button
+                className="clear-completed-button"
+                type="button"
+                onClick={clearCompletedDeadlines}
+              >
+                Clear completed
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        {nextDueDeadline ? (
+          <NextDueSpotlight
+            deadline={nextDueDeadline}
+            onToggleDone={toggleDone}
+          />
+        ) : null}
+
+        {savedDeadlines.length > 0 ? (
+          <div className="saved-groups">
+            <SavedDeadlineGroup
+              title="Overdue"
+              description="These dates have already passed."
+              deadlines={savedDeadlineGroups.overdue}
+              emptyMessage="Nothing overdue."
+              groupClass="group-overdue"
+              today={today}
+              onDelete={deleteDeadline}
+              onToggleDone={toggleDone}
+            />
+            <SavedDeadlineGroup
+              title="Due soon"
+              description="Due today or within the next seven days."
+              deadlines={savedDeadlineGroups.dueSoon}
+              emptyMessage="Nothing due soon."
+              groupClass="group-soon"
+              today={today}
+              onDelete={deleteDeadline}
+              onToggleDone={toggleDone}
+            />
+            <SavedDeadlineGroup
+              title="Later"
+              description="Upcoming dates more than a week away."
+              deadlines={savedDeadlineGroups.later}
+              emptyMessage="No later dates saved."
+              groupClass="group-later"
+              today={today}
+              onDelete={deleteDeadline}
+              onToggleDone={toggleDone}
+            />
+            {completedDeadlineCount > 0 ? (
+              <SavedDeadlineGroup
+                title="Completed"
+                description="Finished dates kept for reference."
+                deadlines={savedDeadlineGroups.completed}
+                emptyMessage="No completed dates."
+                groupClass="group-completed"
+                today={today}
+                onDelete={deleteDeadline}
+                onToggleDone={toggleDone}
+              />
+            ) : null}
+          </div>
+        ) : (
+          <div className="friendly-empty-state">
+            <div className="empty-calendar" aria-hidden="true">
+              <span>—</span>
+              <strong>✓</strong>
+            </div>
+            <div>
+              <h3>Your saved dates will appear here.</h3>
+              <p>Calculate a date above, give it a name, and save it for next time.</p>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <section id="more-tools" className="popular-calculators friendly-tools" aria-labelledby="popular-calculators-title">
         <div className="section-heading">
-          <h2 id="popular-calculators-title">Popular calculators</h2>
-          <p>Quick tools for common due dates.</p>
+          <p className="friendly-eyebrow muted-eyebrow">More quick tools</p>
+          <h2 id="popular-calculators-title">Common deadline calculators</h2>
+          <p>Open a focused calculator when you need a little more guidance.</p>
         </div>
         <div className="popular-calculators-grid">
           <a
@@ -433,8 +577,12 @@ function HomePage({ onNavigate }: NavigationProps) {
               onNavigate('/business-days-calculator')
             }}
           >
-            <strong>Business Days Calculator</strong>
-            <span>Add business days to a start date.</span>
+            <span className="tool-card-icon" aria-hidden="true">M–F</span>
+            <span>
+              <strong>Business days</strong>
+              <small>Skip Saturdays and Sundays</small>
+            </span>
+            <b aria-hidden="true">→</b>
           </a>
           <a
             className="calculator-link-card"
@@ -444,8 +592,12 @@ function HomePage({ onNavigate }: NavigationProps) {
               onNavigate('/free-trial-calculator')
             }}
           >
-            <strong>Free Trial Calculator</strong>
-            <span>Find the last safe day to cancel before renewal.</span>
+            <span className="tool-card-icon" aria-hidden="true">★</span>
+            <span>
+              <strong>Free trial</strong>
+              <small>Find a safe cancel-by date</small>
+            </span>
+            <b aria-hidden="true">→</b>
           </a>
           <a
             className="calculator-link-card"
@@ -455,8 +607,12 @@ function HomePage({ onNavigate }: NavigationProps) {
               onNavigate('/return-window-calculator')
             }}
           >
-            <strong>Return Window Calculator</strong>
-            <span>Find the last day to return an item.</span>
+            <span className="tool-card-icon" aria-hidden="true">↩</span>
+            <span>
+              <strong>Return window</strong>
+              <small>Find the last day to return</small>
+            </span>
+            <b aria-hidden="true">→</b>
           </a>
           <a
             className="calculator-link-card"
@@ -466,16 +622,27 @@ function HomePage({ onNavigate }: NavigationProps) {
               onNavigate('/invoice-due-date-calculator')
             }}
           >
-            <strong>Invoice Due Date Calculator</strong>
-            <span>Calculate due dates from payment terms.</span>
+            <span className="tool-card-icon" aria-hidden="true">$</span>
+            <span>
+              <strong>Invoice due date</strong>
+              <small>Calculate payment terms</small>
+            </span>
+            <b aria-hidden="true">→</b>
           </a>
         </div>
+      </section>
+
+      <section className="trust-strip" aria-label="Privacy and ease of use">
+        <span><b aria-hidden="true">✓</b> Free to use</span>
+        <span><b aria-hidden="true">⌁</b> Saved on your device</span>
+        <span><b aria-hidden="true">○</b> No signup</span>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
     </main>
   )
 }
+
 
 function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
@@ -531,7 +698,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   return (
     <main className="page-shell business-page">
       <section className="intro business-intro" aria-labelledby="business-days-title">
-        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <IdentityRow onNavigate={onNavigate} showHomeLink />
         <a
           className="back-link"
           href="/"
@@ -685,7 +852,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 }
 
 function FreeTrialPage({ onNavigate }: NavigationProps) {
-  const currentTime = useCurrentMinute()
   const [startDate, setStartDate] = useState(todayInputValue)
   const [trialLength, setTrialLength] = useState('7')
   const [title, setTitle] = useState(getDefaultTitle('trial'))
@@ -738,7 +904,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
   return (
     <main className="page-shell free-trial-page">
       <section className="intro" aria-labelledby="free-trial-title">
-        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <IdentityRow onNavigate={onNavigate} showHomeLink />
         <a
           className="back-link"
           href="/"
@@ -911,7 +1077,6 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 }
 
 function ReturnWindowPage({ onNavigate }: NavigationProps) {
-  const currentTime = useCurrentMinute()
   const [purchaseDate, setPurchaseDate] = useState(todayInputValue)
   const [returnWindow, setReturnWindow] = useState('30')
   const [title, setTitle] = useState(getDefaultTitle('return'))
@@ -965,7 +1130,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   return (
     <main className="page-shell return-window-page">
       <section className="intro" aria-labelledby="return-window-title">
-        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <IdentityRow onNavigate={onNavigate} showHomeLink />
         <a
           className="back-link"
           href="/"
@@ -1141,7 +1306,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 }
 
 function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
-  const currentTime = useCurrentMinute()
   const [invoiceDate, setInvoiceDate] = useState(todayInputValue)
   const [paymentTerms, setPaymentTerms] = useState('30')
   const [title, setTitle] = useState(getDefaultTitle('invoice'))
@@ -1195,7 +1359,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
   return (
     <main className="page-shell invoice-due-date-page">
       <section className="intro" aria-labelledby="invoice-due-date-title">
-        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <IdentityRow onNavigate={onNavigate} showHomeLink />
         <a
           className="back-link"
           href="/"
@@ -1373,13 +1537,12 @@ type StaticPageProps = NavigationProps & {
 }
 
 function StaticPage({ route, onNavigate }: StaticPageProps) {
-  const currentTime = useCurrentMinute()
   const page = getStaticPageContent(route)
 
   return (
     <main className="page-shell static-page">
       <section className="intro" aria-labelledby={`${route}-title`}>
-        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <IdentityRow onNavigate={onNavigate} showHomeLink />
         <a
           className="back-link"
           href="/"
@@ -1415,12 +1578,11 @@ function StaticPage({ route, onNavigate }: StaticPageProps) {
 }
 
 function NotFoundPage({ onNavigate }: NavigationProps) {
-  const currentTime = useCurrentMinute()
 
   return (
     <main className="page-shell static-page">
       <section className="intro" aria-labelledby="not-found-title">
-        <IdentityRow currentTime={currentTime} onNavigate={onNavigate} showHomeLink />
+        <IdentityRow onNavigate={onNavigate} showHomeLink />
         <h1 id="not-found-title">Page not found</h1>
         <p className="subtitle">
           That page does not exist yet. You can go back home or choose one of the calculators below.
@@ -1493,81 +1655,106 @@ function NotFoundPage({ onNavigate }: NavigationProps) {
 }
 
 type IdentityRowProps = {
-  currentTime: Date
   onNavigate?: (path: string) => void
   showHomeLink?: boolean
 }
 
-function IdentityRow({ currentTime, onNavigate }: IdentityRowProps) {
+function IdentityRow({ onNavigate }: IdentityRowProps) {
+  function openHomeSection(sectionId: 'calculator' | 'saved-dates' | 'more-tools') {
+    if (!onNavigate) {
+      return
+    }
+
+    if (window.location.pathname !== '/') {
+      onNavigate('/')
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.getElementById(sectionId)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      })
+    })
+  }
+
   const siteMark = onNavigate ? (
     <a
       className="site-mark site-mark-link"
       href="/"
       onClick={(event) => {
         event.preventDefault()
-        onNavigate?.('/')
+        onNavigate('/')
       }}
     >
-      WHENISDUE.COM
+      <span className="brand-calendar" aria-hidden="true">
+        <span />
+        <strong>✓</strong>
+      </span>
+      <span>WhenIsDue</span>
     </a>
   ) : (
-    <p className="site-mark">WHENISDUE.COM</p>
+    <p className="site-mark">
+      <span className="brand-calendar" aria-hidden="true">
+        <span />
+        <strong>✓</strong>
+      </span>
+      <span>WhenIsDue</span>
+    </p>
   )
 
   return (
-    <header className="site-header">
+    <header className="site-header friendly-site-header">
       <div className="identity-row">
         {siteMark}
-        <div className="local-time" aria-label="Current local time">
-          <span>Local time</span>
-          <time dateTime={currentTime.toISOString()}>{formatCurrentTime(currentTime)}</time>
-        </div>
+        {onNavigate ? (
+          <nav className="top-nav friendly-top-nav" aria-label="Main navigation">
+            <a
+              href="/#calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                openHomeSection('calculator')
+              }}
+            >
+              Calculate
+            </a>
+            <a
+              href="/#saved-dates"
+              onClick={(event) => {
+                event.preventDefault()
+                openHomeSection('saved-dates')
+              }}
+            >
+              Saved dates
+            </a>
+            <a
+              href="/#more-tools"
+              onClick={(event) => {
+                event.preventDefault()
+                openHomeSection('more-tools')
+              }}
+            >
+              More tools
+            </a>
+            <a
+              href="/workspace"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/workspace')
+              }}
+            >
+              VA Workspace
+            </a>
+          </nav>
+        ) : null}
       </div>
-      {onNavigate ? (
-        <nav className="top-nav" aria-label="Calculator navigation">
-          <a
-            href="/business-days-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/business-days-calculator')
-            }}
-          >
-            Business Days
-          </a>
-          <a
-            href="/free-trial-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/free-trial-calculator')
-            }}
-          >
-            Free Trial
-          </a>
-          <a
-            href="/return-window-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/return-window-calculator')
-            }}
-          >
-            Return Window
-          </a>
-          <a
-            href="/invoice-due-date-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/invoice-due-date-calculator')
-            }}
-          >
-            Invoice Due Date
-          </a>
-        </nav>
-      ) : null}
     </header>
   )
 }
 
-type SiteFooterProps = NavigationProps & {
+type SiteFooterProps = {
+  onNavigate: (path: string) => void
   planningNote?: string
 }
 
@@ -1652,16 +1839,23 @@ function NextDueSpotlight({ deadline, onToggleDone }: NextDueSpotlightProps) {
   const isUrgent = deadline.daysRemaining <= 2
 
   return (
-    <section className={`next-due ${categoryClass} ${isUrgent ? 'is-urgent' : ''}`}>
-      <div className="next-due-kicker">
-        <p className="next-due-label">Next due</p>
-        <span>Closest active deadline</span>
+    <section className={`next-due next-due-redesign ${categoryClass} ${isUrgent ? 'is-urgent' : ''}`}>
+      <div className="saved-date-tile spotlight-date-tile" aria-hidden="true">
+        <span>{formatMonthShort(deadline.dueDate)}</span>
+        <strong>{deadline.dueDate.day}</strong>
+        <small>{formatWeekday(deadline.dueDate)}</small>
       </div>
-      <h3>{deadline.title}</h3>
-      <p className="next-due-meta">
-        <span className={`category-pill ${categoryClass}`}>{modeLabels[deadline.category]}</span>
-        <span>Due {formatPlainDate(deadline.dueDate)}</span>
-      </p>
+      <div className="next-due-main">
+        <div className="next-due-kicker">
+          <p className="next-due-label">Next active deadline</p>
+          <span>Closest date that still needs attention</span>
+        </div>
+        <h3>{deadline.title}</h3>
+        <p className="next-due-meta">
+          <span className={`category-pill ${categoryClass}`}>{modeLabels[deadline.category]}</span>
+          <span>{formatPlainDate(deadline.dueDate)}</span>
+        </p>
+      </div>
       <div className="next-due-footer">
         <span className={`status-badge ${urgencyClass}`}>
           {formatSpotlightRemaining(deadline.daysRemaining)}
@@ -1672,6 +1866,60 @@ function NextDueSpotlight({ deadline, onToggleDone }: NextDueSpotlightProps) {
           </button>
         </div>
       </div>
+    </section>
+  )
+}
+
+type SavedDeadlineGroupKey = 'overdue' | 'dueSoon' | 'later' | 'completed'
+
+type SavedDeadlineGroups = Record<SavedDeadlineGroupKey, SavedDeadline[]>
+
+type SavedDeadlineGroupProps = {
+  title: string
+  description: string
+  deadlines: SavedDeadline[]
+  emptyMessage: string
+  groupClass: string
+  today: PlainDate
+  onDelete: (id: string) => void
+  onToggleDone: (id: string) => void
+}
+
+function SavedDeadlineGroup({
+  title,
+  description,
+  deadlines,
+  emptyMessage,
+  groupClass,
+  today,
+  onDelete,
+  onToggleDone,
+}: SavedDeadlineGroupProps) {
+  return (
+    <section className={`saved-deadline-group ${groupClass}`}>
+      <div className="saved-group-heading">
+        <div>
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
+        <span>{deadlines.length}</span>
+      </div>
+
+      {deadlines.length > 0 ? (
+        <ul className="deadline-card-grid">
+          {deadlines.map((deadline) => (
+            <SavedDeadlineItem
+              deadline={deadline}
+              key={deadline.id}
+              today={today}
+              onDelete={onDelete}
+              onToggleDone={onToggleDone}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="saved-group-empty">{emptyMessage}</p>
+      )}
     </section>
   )
 }
@@ -1696,20 +1944,36 @@ function SavedDeadlineItem({
   const categoryClass = `category-${deadline.category}`
 
   return (
-    <li className={`deadline-item ${urgencyClass} ${categoryClass} ${deadline.done ? 'is-done' : ''}`}>
-      <div>
-        <h3>{deadline.title}</h3>
+    <li className={`deadline-card ${urgencyClass} ${categoryClass} ${deadline.done ? 'is-done' : ''}`}>
+      <div className="saved-date-tile" aria-hidden="true">
+        <span>{dueDate ? formatMonthShort(dueDate) : '—'}</span>
+        <strong>{dueDate ? dueDate.day : '?'}</strong>
+        <small>{dueDate ? formatWeekday(dueDate) : 'Invalid'}</small>
+      </div>
+
+      <div className="deadline-card-copy">
+        <h4>{deadline.title}</h4>
         <p>
           <span className={`category-pill ${categoryClass}`}>{modeLabels[deadline.category]}</span>
           <span>{dueDate ? formatPlainDate(dueDate) : 'Invalid date'}</span>
         </p>
-      </div>
-      <div className="deadline-actions">
         <span className={`status-badge ${urgencyClass}`}>{status}</span>
-        <button type="button" onClick={() => onToggleDone(deadline.id)}>
-          {deadline.done ? 'Undo' : 'Done'}
+      </div>
+
+      <div className="deadline-card-actions">
+        <button
+          className="deadline-done-button"
+          type="button"
+          onClick={() => onToggleDone(deadline.id)}
+        >
+          {deadline.done ? 'Restore' : 'Mark done'}
         </button>
-        <button type="button" onClick={() => onDelete(deadline.id)}>
+        <button
+          className="deadline-delete-button"
+          type="button"
+          onClick={() => onDelete(deadline.id)}
+          aria-label={`Delete ${deadline.title}`}
+        >
           Delete
         </button>
       </div>
@@ -1720,6 +1984,136 @@ function SavedDeadlineItem({
 type NextDueDeadline = SavedDeadline & {
   dueDate: PlainDate
   daysRemaining: number
+}
+
+
+
+function ScenarioIcon({ mode }: { mode: CalculatorMode }) {
+  if (mode === 'calendar') {
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M6.5 3.5v3M17.5 3.5v3M4 8.5h16M5.5 5h13A1.5 1.5 0 0 1 20 6.5v12a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-12A1.5 1.5 0 0 1 5.5 5Z" />
+        <path d="M12 11.5v5M9.5 14h5" />
+      </svg>
+    )
+  }
+
+  if (mode === 'business') {
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M4.5 8h15A1.5 1.5 0 0 1 21 9.5v9A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5v-9A1.5 1.5 0 0 1 4.5 8Z" />
+        <path d="M3 13h18M10 13v2h4v-2" />
+      </svg>
+    )
+  }
+
+  if (mode === 'invoice') {
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M6 3.5h12v17l-2-1.25L14 20.5l-2-1.25-2 1.25-2-1.25L6 20.5v-17Z" />
+        <path d="M9 8h6M9 11.5h6M9 15h3.5" />
+      </svg>
+    )
+  }
+
+  if (mode === 'trial') {
+    return (
+      <svg viewBox="0 0 24 24" focusable="false">
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 7.5V12l3 2M8 3.75 6.5 2.5M16 3.75l1.5-1.25" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M7 8.5V6.75A2.75 2.75 0 0 1 9.75 4h4.5A2.75 2.75 0 0 1 17 6.75V8.5M5 8.5h14l-1 11H6l-1-11Z" />
+      <path d="M14.5 12.25H10a2.5 2.5 0 0 0 0 5h1.5M9.5 14.25l-2 1.5 2 1.5" />
+    </svg>
+  )
+}
+
+function getFriendlyModeInstruction(mode: CalculatorMode): string {
+  const instructions: Record<CalculatorMode, string> = {
+    calendar: 'Choose a starting date and how many calendar days to add.',
+    business: 'Choose a starting date and how many weekdays to count.',
+    invoice: 'Choose the invoice date and its payment terms.',
+    trial: 'Choose the signup date and the length of the trial.',
+    return: 'Choose the purchase date and the store’s return window.',
+  }
+
+  return instructions[mode]
+}
+
+function getFriendlyStartDateLabel(mode: CalculatorMode): string {
+  const labels: Record<CalculatorMode, string> = {
+    calendar: 'What date should we start from?',
+    business: 'What is the starting date?',
+    invoice: 'When was the invoice sent?',
+    trial: 'When did the trial start?',
+    return: 'When did you buy it?',
+  }
+
+  return labels[mode]
+}
+
+function getFriendlyAmountLabel(mode: CalculatorMode): string {
+  const labels: Record<CalculatorMode, string> = {
+    calendar: 'How many days should we add?',
+    business: 'How many business days?',
+    invoice: 'Payment terms',
+    trial: 'How many days is the trial?',
+    return: 'How many days is the return window?',
+  }
+
+  return labels[mode]
+}
+
+function getFriendlyCountingNote(mode: CalculatorMode): string {
+  const notes: Record<CalculatorMode, string> = {
+    calendar: 'We’ll count every day, including weekends.',
+    business: 'We’ll count Monday through Friday and skip weekends.',
+    invoice: 'We’ll calculate from the invoice date using the selected terms.',
+    trial: 'We’ll show the calculated end date and a safer day to cancel.',
+    return: 'We’ll count forward from the purchase date.',
+  }
+
+  return notes[mode]
+}
+
+function getFriendlyResultLabel(mode: CalculatorMode): string {
+  const labels: Record<CalculatorMode, string> = {
+    calendar: 'Your due date',
+    business: 'Business-day deadline',
+    invoice: 'Payment is due',
+    trial: 'Trial ends',
+    return: 'Last day to return',
+  }
+
+  return labels[mode]
+}
+
+function getCopyAnswer(mode: CalculatorMode, dueDate: PlainDate, cancelByDate: PlainDate | null): string {
+  if (mode === 'trial' && cancelByDate) {
+    return `The trial ends ${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}. Suggested cancel-by date: ${formatPlainDate(cancelByDate)}.`
+  }
+
+  const prefix: Record<CalculatorMode, string> = {
+    calendar: 'The due date is',
+    business: 'The business-day deadline is',
+    invoice: 'Payment is due',
+    trial: 'The trial ends',
+    return: 'The last day to return is',
+  }
+
+  return `${prefix[mode]} ${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}.`
+}
+
+function formatMonthShort(date: PlainDate): string {
+  return new Intl.DateTimeFormat(undefined, {
+    timeZone: 'UTC',
+    month: 'short',
+  }).format(new Date(Date.UTC(date.year, date.month - 1, date.day))).toUpperCase()
 }
 
 function getDefaultTitle(mode: CalculatorMode): string {
@@ -1740,6 +2134,53 @@ function getDefaultTitle(mode: CalculatorMode): string {
   }
 
   return 'Calendar deadline'
+}
+
+function groupSavedDeadlines(
+  deadlines: SavedDeadline[],
+  today: PlainDate,
+  excludedDeadlineId?: string,
+): SavedDeadlineGroups {
+  const groups: SavedDeadlineGroups = {
+    overdue: [],
+    dueSoon: [],
+    later: [],
+    completed: [],
+  }
+
+  deadlines.forEach((deadline) => {
+    if (deadline.id === excludedDeadlineId) {
+      return
+    }
+
+    if (deadline.done) {
+      groups.completed.push(deadline)
+      return
+    }
+
+    const dueDate = parsePlainDate(deadline.dueDate)
+
+    if (!dueDate) {
+      groups.later.push(deadline)
+      return
+    }
+
+    const daysRemaining = daysBetween(today, dueDate)
+
+    if (daysRemaining < 0) {
+      groups.overdue.push(deadline)
+      return
+    }
+
+    if (daysRemaining <= 7) {
+      groups.dueSoon.push(deadline)
+      return
+    }
+
+    groups.later.push(deadline)
+  })
+
+  return groups
 }
 
 function getNextDueDeadline(deadlines: SavedDeadline[], today: PlainDate): NextDueDeadline | null {
@@ -1773,19 +2214,6 @@ function getNextDueDeadline(deadlines: SavedDeadline[], today: PlainDate): NextD
   })[0]
 }
 
-function formatCurrentTime(date: Date): string {
-  const time = new Intl.DateTimeFormat(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
-  const calendarDate = new Intl.DateTimeFormat(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  }).format(date)
-
-  return `${calendarDate} | ${time}`
-}
 
 function getRouteFromPath(pathname: string): RouteName {
   if (pathname === '/') {
@@ -1806,6 +2234,10 @@ function getRouteFromPath(pathname: string): RouteName {
 
   if (pathname === '/invoice-due-date-calculator') {
     return 'invoice-due-date'
+  }
+
+  if (pathname === '/workspace') {
+    return 'workspace'
   }
 
   if (pathname === '/about') {
@@ -1840,7 +2272,10 @@ function applyRouteMetadata(route: RouteName) {
   document.title = metadata.title
 
   const robots = getOrCreateMetaName('robots')
-  robots.setAttribute('content', route === 'not-found' ? 'noindex, follow' : 'index, follow')
+  robots.setAttribute(
+    'content',
+    route === 'not-found' || route === 'workspace' ? 'noindex, follow' : 'index, follow',
+  )
 
   const description = getOrCreateMetaDescription()
   description.setAttribute('content', metadata.description)
@@ -1894,6 +2329,14 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       title: 'Invoice Due Date Calculator - WhenIsDue',
       description: 'Calculate invoice due dates from common payment terms like Net 7, Net 15, Net 30, Net 45, and Net 60.',
       path: '/invoice-due-date-calculator',
+    }
+  }
+
+  if (route === 'workspace') {
+    return {
+      title: 'VA Workspace - WhenIsDue',
+      description: 'A private browser-based client workspace for virtual assistants to organize client details and prepare follow-up workflows.',
+      path: '/workspace',
     }
   }
 
@@ -2200,38 +2643,6 @@ function isDuplicateSavedDeadline(deadlines: SavedDeadline[], nextDeadline: Save
   )
 }
 
-function getAmountLabel(mode: CalculatorMode): string {
-  if (mode === 'business') {
-    return 'How many business days?'
-  }
-
-  if (mode === 'trial') {
-    return 'How many days is the trial?'
-  }
-
-  if (mode === 'return') {
-    return 'How many days can you return it?'
-  }
-
-  return 'How many days?'
-}
-
-function getStartDateLabel(mode: CalculatorMode): string {
-  if (mode === 'trial') {
-    return 'Signup date'
-  }
-
-  if (mode === 'return') {
-    return 'Delivery date'
-  }
-
-  if (mode === 'invoice') {
-    return 'Invoice date'
-  }
-
-  return 'Start date'
-}
-
 function getAmountLimit(mode: CalculatorMode): number {
   if (mode === 'business') {
     return 2600
@@ -2370,25 +2781,6 @@ function getInvoiceDueDateValidationMessage(
   return null
 }
 
-function getModeNote(mode: CalculatorMode): string {
-  if (mode === 'business') {
-    return 'Counts Monday to Friday only. Public holidays are not removed in this MVP.'
-  }
-
-  if (mode === 'invoice') {
-    return 'Net terms usually use calendar days from the invoice date unless your agreement says otherwise.'
-  }
-
-  if (mode === 'trial') {
-    return 'Most trial periods count calendar days.'
-  }
-
-  if (mode === 'return') {
-    return 'Check whether the store counts from purchase, shipping, or delivery date.'
-  }
-
-  return 'Counts every day, including weekends.'
-}
 
 type StorageResult = {
   ok: boolean
