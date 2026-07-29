@@ -878,69 +878,11 @@ function LocalWorkspacePage({
         </section>
       ) : null}
 
-      <section className="va-backup-panel" aria-labelledby="va-backup-heading">
-        <div className="va-backup-copy">
-          <p className="va-eyebrow">Portable backup</p>
-          <h2 id="va-backup-heading">Download or restore your workspace</h2>
-          <p>
-            Backup files include clients and tasks only. Passwords and account credentials are never included.
-          </p>
-        </div>
-
-        <div className="va-backup-controls">
-          <button
-            className="va-secondary-button"
-            type="button"
-            onClick={downloadBackup}
-            disabled={restoring}
-          >
-            Download backup
-          </button>
-
-          <label className="va-restore-mode">
-            <span>Restore method</span>
-            <select
-              value={restoreMode}
-              onChange={(event) =>
-                setRestoreMode(event.target.value as 'merge' | 'replace')
-              }
-              disabled={restoring}
-            >
-              <option value="merge">Merge with current records</option>
-              <option value="replace">Replace current records</option>
-            </select>
-          </label>
-
-          <button
-            className="va-primary-button"
-            type="button"
-            onClick={() => restoreInputRef.current?.click()}
-            disabled={restoring}
-          >
-            {restoring ? 'Restoring...' : 'Restore backup'}
-          </button>
-
-          <input
-            ref={restoreInputRef}
-            className="va-hidden-file-input"
-            type="file"
-            accept="application/json,.json"
-            onChange={(event) => {
-              const file = event.target.files?.[0]
-
-              if (file) {
-                void restoreBackup(file)
-              }
-            }}
-          />
-        </div>
-      </section>
-
-      <section className="va-hero va-hero-compact">
+      <section className="va-command-header">
         <div>
-          <p className="va-eyebrow">Client deadline command center</p>
-          <h1>Know what needs action, who is waiting, and what is overdue.</h1>
-          <p>Every task can have an event due date, an earlier action date, and a separate follow-up date.</p>
+          <p className="va-eyebrow">VA Workspace</p>
+          <h1>What needs your attention?</h1>
+          <p>Review today, follow-ups, waiting items, upcoming work, and overdue tasks.</p>
         </div>
         <span className="va-local-note">Saved to your private account</span>
       </section>
@@ -1124,6 +1066,71 @@ function LocalWorkspacePage({
           )}
         </section>
       </section>
+
+      <details className="va-backup-panel">
+        <summary>
+          <div>
+            <p className="va-eyebrow">Portable backup</p>
+            <h2>Backup and restore</h2>
+            <p>Download a copy of your clients and tasks, or restore a previous backup.</p>
+          </div>
+          <span>Open tools</span>
+        </summary>
+
+        <div className="va-backup-body">
+          <p className="va-backup-privacy">
+            Backup files include clients and tasks only. Passwords and account credentials are never included.
+          </p>
+
+          <div className="va-backup-controls">
+            <button
+              className="va-secondary-button"
+              type="button"
+              onClick={downloadBackup}
+              disabled={restoring}
+            >
+              Download backup
+            </button>
+
+            <label className="va-restore-mode">
+              <span>Restore method</span>
+              <select
+                value={restoreMode}
+                onChange={(event) =>
+                  setRestoreMode(event.target.value as 'merge' | 'replace')
+                }
+                disabled={restoring}
+              >
+                <option value="merge">Merge with current records</option>
+                <option value="replace">Replace current records</option>
+              </select>
+            </label>
+
+            <button
+              className="va-primary-button"
+              type="button"
+              onClick={() => restoreInputRef.current?.click()}
+              disabled={restoring}
+            >
+              {restoring ? 'Restoring...' : 'Restore backup'}
+            </button>
+
+            <input
+              ref={restoreInputRef}
+              className="va-hidden-file-input"
+              type="file"
+              accept="application/json,.json"
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+
+                if (file) {
+                  void restoreBackup(file)
+                }
+              }}
+            />
+          </div>
+        </div>
+      </details>
 
       {message ? <p className="va-global-message" aria-live="polite">{message}</p> : null}
     </main>

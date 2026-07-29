@@ -1367,3 +1367,189 @@
     width: 100%;
   }
 }
+
+
+/* Compact signed-in workspace layout */
+.va-command-header {
+  display: flex;
+  min-height: 108px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 14px;
+  border: 1px solid var(--va-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 90% 18%, rgba(245, 215, 120, 0.22), transparent 25%),
+    linear-gradient(135deg, #fffdf8, #f7ecdc);
+  padding: 18px 20px;
+  box-shadow: 0 12px 30px rgba(58, 60, 59, 0.05);
+}
+
+.va-command-header h1 {
+  margin: 0;
+  color: var(--va-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.va-command-header p:not(.va-eyebrow) {
+  margin: 7px 0 0;
+  color: #5f6e80;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.va-summary-grid {
+  margin-top: 10px;
+}
+
+.va-summary-grid article {
+  min-height: 72px;
+  padding: 11px 13px;
+}
+
+.va-summary-grid strong {
+  font-size: 1.55rem;
+}
+
+.va-view-tabs {
+  margin-top: 10px;
+}
+
+.va-phase2-grid {
+  margin-top: 10px;
+}
+
+/* Backup tools now sit below the daily workspace and stay collapsed by default. */
+.va-backup-panel {
+  display: block;
+  min-height: 0;
+  margin-top: 16px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.va-backup-panel > summary {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 17px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.va-backup-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.va-backup-panel > summary h2 {
+  margin: 0;
+  color: var(--va-ink);
+  font-size: 0.95rem;
+}
+
+.va-backup-panel > summary p:not(.va-eyebrow) {
+  margin: 4px 0 0;
+  color: var(--va-muted);
+  font-size: 0.74rem;
+}
+
+.va-backup-panel > summary > span {
+  flex: 0 0 auto;
+  border: 1px solid #d3c2ab;
+  border-radius: 999px;
+  background: white;
+  color: #596777;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  font-weight: 760;
+}
+
+.va-backup-panel[open] > summary {
+  border-bottom: 1px solid #e5d9c8;
+}
+
+.va-backup-panel[open] > summary > span {
+  color: transparent;
+  position: relative;
+}
+
+.va-backup-panel[open] > summary > span::after {
+  position: absolute;
+  inset: 6px 10px;
+  color: #596777;
+  content: "Close tools";
+  white-space: nowrap;
+}
+
+.va-backup-body {
+  padding: 15px 17px 17px;
+}
+
+.va-backup-privacy {
+  margin: 0 0 12px;
+  color: var(--va-muted);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .va-command-header {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 620px) {
+  .va-command-header {
+    min-height: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    border-radius: 16px;
+    padding: 15px;
+  }
+
+  .va-command-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .va-command-header p:not(.va-eyebrow) {
+    font-size: 0.78rem;
+  }
+
+  .va-local-note {
+    padding: 6px 9px;
+    font-size: 0.7rem;
+  }
+
+  .va-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .va-summary-grid article {
+    min-height: 68px;
+    padding: 9px 10px;
+  }
+
+  .va-summary-grid span {
+    font-size: 0.62rem;
+  }
+
+  .va-summary-grid strong {
+    font-size: 1.4rem;
+  }
+
+  .va-view-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .va-backup-panel > summary {
+    align-items: flex-start;
+  }
+}
