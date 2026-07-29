@@ -1738,6 +1738,7 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
               More tools
             </a>
             <a
+              className="workspace-nav-link"
               href="/workspace"
               onClick={(event) => {
                 event.preventDefault()

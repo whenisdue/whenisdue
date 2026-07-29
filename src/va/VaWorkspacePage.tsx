@@ -54,6 +54,7 @@ const taskDetailsMaxLength = 1500
 function VaWorkspacePage({ onNavigate }: VaWorkspacePageProps) {
   const [session, setSession] = useState<Session | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [passwordRecovery, setPasswordRecovery] = useState(() => hasPasswordRecoveryIntent())
 
   useEffect(() => {
     let active = true
@@ -67,8 +68,17 @@ function VaWorkspacePage({ onNavigate }: VaWorkspacePageProps) {
       setAuthLoading(false)
     })
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecovery(true)
+      }
+
+      if (event === 'SIGNED_OUT') {
+        setPasswordRecovery(false)
+      }
+
       setAuthLoading(false)
     })
 
@@ -107,6 +117,19 @@ function VaWorkspacePage({ onNavigate }: VaWorkspacePageProps) {
     return (
       <AuthFrame onNavigate={onNavigate}>
         <AuthPanel />
+      </AuthFrame>
+    )
+  }
+
+  if (passwordRecovery) {
+    return (
+      <AuthFrame onNavigate={onNavigate}>
+        <UpdatePasswordPanel
+          onComplete={() => {
+            setPasswordRecovery(false)
+            window.history.replaceState(null, '', '/workspace')
+          }}
+        />
       </AuthFrame>
     )
   }
@@ -177,17 +200,25 @@ function AuthFrame({
 }
 
 function AuthPanel() {
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
+  const [mode, setMode] = useState<'sign-in' | 'sign-up' | 'forgot-password'>('sign-in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  const canSubmit = email.trim().length > 3 && password.length >= 8
+  const emailIsValid = email.trim().length > 3
+  const canSubmit =
+    mode === 'forgot-password'
+      ? emailIsValid
+      : emailIsValid && password.length >= 8
 
   async function submit() {
     if (!canSubmit) {
-      setMessage('Enter a valid email and a password with at least 8 characters.')
+      setMessage(
+        mode === 'forgot-password'
+          ? 'Enter the email address connected to your account.'
+          : 'Enter a valid email and a password with at least 8 characters.',
+      )
       return
     }
 
@@ -195,6 +226,19 @@ function AuthPanel() {
     setMessage(null)
 
     try {
+      if (mode === 'forgot-password') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${window.location.origin}/workspace`,
+        })
+
+        if (error) {
+          throw error
+        }
+
+        setMessage('Check your email for a password-reset link.')
+        return
+      }
+
       if (mode === 'sign-up') {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
@@ -228,14 +272,21 @@ function AuthPanel() {
     }
   }
 
+  const heading =
+    mode === 'sign-in'
+      ? 'Sign in'
+      : mode === 'sign-up'
+        ? 'Create a free account'
+        : 'Reset your password'
+
   return (
     <section className="va-auth-shell">
       <div className="va-auth-intro">
         <p className="va-eyebrow">Private account</p>
         <h1>Sign in before opening your VA workspace.</h1>
         <p>
-          This first stage verifies account creation, email confirmation,
-          sign-in, persistent sessions, and sign-out.
+          Your clients and tasks are stored in your private account and stay available
+          across your devices.
         </p>
       </div>
 
@@ -246,8 +297,20 @@ function AuthPanel() {
           void submit()
         }}
       >
-        <p className="va-eyebrow">{mode === 'sign-in' ? 'Welcome back' : 'Create account'}</p>
-        <h2>{mode === 'sign-in' ? 'Sign in' : 'Create a free account'}</h2>
+        <p className="va-eyebrow">
+          {mode === 'sign-in'
+            ? 'Welcome back'
+            : mode === 'sign-up'
+              ? 'Create account'
+              : 'Account recovery'}
+        </p>
+        <h2>{heading}</h2>
+
+        {mode === 'forgot-password' ? (
+          <p className="va-auth-helper">
+            Enter your account email. We will send you a secure link for choosing a new password.
+          </p>
+        ) : null}
 
         <label>
           <span>Email</span>
@@ -259,17 +322,19 @@ function AuthPanel() {
           />
         </label>
 
-        <label>
-          <span>Password</span>
-          <input
-            type="password"
-            minLength={8}
-            autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-          <small>Use at least 8 characters.</small>
-        </label>
+        {mode !== 'forgot-password' ? (
+          <label>
+            <span>Password</span>
+            <input
+              type="password"
+              minLength={8}
+              autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <small>Use at least 8 characters.</small>
+          </label>
+        ) : null}
 
         <button
           className="va-primary-button"
@@ -280,26 +345,143 @@ function AuthPanel() {
             ? 'Please wait...'
             : mode === 'sign-in'
               ? 'Sign in'
-              : 'Create account'}
+              : mode === 'sign-up'
+                ? 'Create account'
+                : 'Send reset link'}
         </button>
+
+        {mode === 'sign-in' ? (
+          <button
+            className="va-auth-forgot"
+            type="button"
+            onClick={() => {
+              setMode('forgot-password')
+              setPassword('')
+              setMessage(null)
+            }}
+          >
+            Forgot password?
+          </button>
+        ) : null}
 
         <button
           className="va-auth-switch"
           type="button"
           onClick={() => {
             setMode((current) => (current === 'sign-in' ? 'sign-up' : 'sign-in'))
+            setPassword('')
             setMessage(null)
           }}
         >
           {mode === 'sign-in'
             ? 'Need an account? Create one'
-            : 'Already have an account? Sign in'}
+            : mode === 'sign-up'
+              ? 'Already have an account? Sign in'
+              : 'Return to sign in'}
         </button>
 
         {message ? <p className="va-auth-message" aria-live="polite">{message}</p> : null}
       </form>
     </section>
   )
+}
+
+function UpdatePasswordPanel({ onComplete }: { onComplete: () => void }) {
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const canSubmit =
+    password.length >= 8 &&
+    confirmPassword.length >= 8 &&
+    password === confirmPassword
+
+  async function updatePassword() {
+    if (password.length < 8) {
+      setMessage('Use at least 8 characters.')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setMessage('The two passwords do not match.')
+      return
+    }
+
+    setSubmitting(true)
+    setMessage(null)
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password })
+
+      if (error) {
+        throw error
+      }
+
+      setMessage('Password updated. Opening your workspace...')
+
+      window.setTimeout(() => {
+        onComplete()
+      }, 700)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Password update failed.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <form
+      className="va-auth-card va-auth-card-single"
+      onSubmit={(event) => {
+        event.preventDefault()
+        void updatePassword()
+      }}
+    >
+      <p className="va-eyebrow">Account recovery</p>
+      <h2>Choose a new password</h2>
+      <p className="va-auth-helper">Use at least 8 characters and enter it twice.</p>
+
+      <label>
+        <span>New password</span>
+        <input
+          type="password"
+          minLength={8}
+          autoComplete="new-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+      </label>
+
+      <label>
+        <span>Confirm new password</span>
+        <input
+          type="password"
+          minLength={8}
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+        />
+      </label>
+
+      <button
+        className="va-primary-button"
+        type="submit"
+        disabled={!canSubmit || submitting}
+      >
+        {submitting ? 'Saving...' : 'Save new password'}
+      </button>
+
+      {message ? <p className="va-auth-message" aria-live="polite">{message}</p> : null}
+    </form>
+  )
+}
+
+function hasPasswordRecoveryIntent(): boolean {
+  const search = new URLSearchParams(window.location.search)
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+
+  return search.get('type') === 'recovery' || hash.get('type') === 'recovery'
 }
 
 function LocalWorkspacePage({

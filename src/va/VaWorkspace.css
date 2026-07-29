@@ -1176,6 +1176,32 @@
 }
 
 
+
+.va-auth-helper {
+  margin: 0;
+  color: var(--va-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.va-auth-forgot {
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--va-primary-dark);
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 760;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.va-auth-forgot:hover {
+  color: var(--va-ink);
+}
+
 /* Cloud workspace */
 .va-import-banner {
   display: flex;

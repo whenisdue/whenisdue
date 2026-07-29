@@ -2037,9 +2037,33 @@ a:focus-visible,
     margin-bottom: 0;
   }
 
-  .home-page .local-time,
-  .home-page .top-nav {
+  .home-page .local-time {
     display: none;
+  }
+
+  .home-page .top-nav {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .home-page .top-nav a:not(.workspace-nav-link) {
+    display: none;
+  }
+
+  .home-page .top-nav .workspace-nav-link {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    border: 1px solid rgba(66, 111, 97, 0.34);
+    border-radius: 999px;
+    background: #eaf3ee;
+    color: var(--friendly-primary-dark);
+    padding: 7px 11px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
   }
 
   .home-page .site-mark {
