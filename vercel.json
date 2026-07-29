@@ -32,6 +32,10 @@
     {
       "source": "/contact",
       "destination": "/"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

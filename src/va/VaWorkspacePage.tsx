@@ -1,5 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
 import './VaWorkspace.css'
+import { isSupabaseConfigured, supabase } from './supabaseClient'
+import { importLocalWorkspace, loadCloudWorkspace, syncCloudWorkspace } from './vaCloud'
 import { loadVaWorkspace, saveVaWorkspace } from './vaStorage'
 import type {
   VaClient,
@@ -7,6 +10,7 @@ import type {
   VaTask,
   VaTaskDraft,
   VaTaskStatus,
+  VaWorkspaceData,
 } from './vaTypes'
 
 type VaWorkspacePageProps = {
@@ -14,6 +18,12 @@ type VaWorkspacePageProps = {
 }
 
 type WorkspaceView = 'clients' | 'today' | 'follow-up' | 'waiting' | 'upcoming' | 'overdue' | 'completed'
+
+const emptyWorkspace: VaWorkspaceData = {
+  version: 2,
+  clients: [],
+  tasks: [],
+}
 
 const emptyClientDraft: VaClientDraft = {
   displayName: '',
@@ -40,14 +50,310 @@ const taskTitleMaxLength = 120
 const notesMaxLength = 1200
 const taskDetailsMaxLength = 1500
 
+
 function VaWorkspacePage({ onNavigate }: VaWorkspacePageProps) {
-  const [workspace, setWorkspace] = useState(loadVaWorkspace)
+  const [session, setSession] = useState<Session | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active) {
+        return
+      }
+
+      setSession(data.session)
+      setAuthLoading(false)
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession)
+      setAuthLoading(false)
+    })
+
+    return () => {
+      active = false
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  if (!isSupabaseConfigured) {
+    return (
+      <AuthFrame onNavigate={onNavigate}>
+        <section className="va-auth-card va-auth-card-single">
+          <p className="va-eyebrow">Setup needed</p>
+          <h1>Supabase is not configured.</h1>
+          <p>
+            Check VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in
+            your .env.local file, then restart the development server.
+          </p>
+        </section>
+      </AuthFrame>
+    )
+  }
+
+  if (authLoading) {
+    return (
+      <AuthFrame onNavigate={onNavigate}>
+        <section className="va-auth-card va-auth-card-single">
+          <p>Checking your account...</p>
+        </section>
+      </AuthFrame>
+    )
+  }
+
+  if (!session) {
+    return (
+      <AuthFrame onNavigate={onNavigate}>
+        <AuthPanel />
+      </AuthFrame>
+    )
+  }
+
+  return (
+    <>
+      <div className="va-auth-account-bar">
+        <div>
+          <span>Signed in as</span>
+          <strong>{session.user.email ?? 'Account user'}</strong>
+        </div>
+        <div>
+          <span className="va-auth-stage-note">Cloud sync active</span>
+          <button
+            type="button"
+            onClick={() => {
+              void supabase.auth.signOut()
+            }}
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+      <LocalWorkspacePage onNavigate={onNavigate} user={session.user} />
+    </>
+  )
+}
+
+function AuthFrame({
+  onNavigate,
+  children,
+}: {
+  onNavigate: (path: string) => void
+  children: React.ReactNode
+}) {
+  return (
+    <main className="va-page-shell">
+      <header className="va-topbar">
+        <a
+          className="va-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <span className="va-brand-mark" aria-hidden="true">✓</span>
+          <span>WhenIsDue</span>
+        </a>
+
+        <nav className="va-topbar-actions" aria-label="Workspace navigation">
+          <a
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            Calculators
+          </a>
+          <span aria-current="page">VA Workspace</span>
+        </nav>
+      </header>
+
+      {children}
+    </main>
+  )
+}
+
+function AuthPanel() {
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const canSubmit = email.trim().length > 3 && password.length >= 8
+
+  async function submit() {
+    if (!canSubmit) {
+      setMessage('Enter a valid email and a password with at least 8 characters.')
+      return
+    }
+
+    setSubmitting(true)
+    setMessage(null)
+
+    try {
+      if (mode === 'sign-up') {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/workspace`,
+          },
+        })
+
+        if (error) {
+          throw error
+        }
+
+        if (!data.session) {
+          setMessage('Check your email to confirm the account, then return here to sign in.')
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        })
+
+        if (error) {
+          throw error
+        }
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Authentication failed.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="va-auth-shell">
+      <div className="va-auth-intro">
+        <p className="va-eyebrow">Private account</p>
+        <h1>Sign in before opening your VA workspace.</h1>
+        <p>
+          This first stage verifies account creation, email confirmation,
+          sign-in, persistent sessions, and sign-out.
+        </p>
+      </div>
+
+      <form
+        className="va-auth-card"
+        onSubmit={(event) => {
+          event.preventDefault()
+          void submit()
+        }}
+      >
+        <p className="va-eyebrow">{mode === 'sign-in' ? 'Welcome back' : 'Create account'}</p>
+        <h2>{mode === 'sign-in' ? 'Sign in' : 'Create a free account'}</h2>
+
+        <label>
+          <span>Email</span>
+          <input
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input
+            type="password"
+            minLength={8}
+            autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <small>Use at least 8 characters.</small>
+        </label>
+
+        <button
+          className="va-primary-button"
+          type="submit"
+          disabled={!canSubmit || submitting}
+        >
+          {submitting
+            ? 'Please wait...'
+            : mode === 'sign-in'
+              ? 'Sign in'
+              : 'Create account'}
+        </button>
+
+        <button
+          className="va-auth-switch"
+          type="button"
+          onClick={() => {
+            setMode((current) => (current === 'sign-in' ? 'sign-up' : 'sign-in'))
+            setMessage(null)
+          }}
+        >
+          {mode === 'sign-in'
+            ? 'Need an account? Create one'
+            : 'Already have an account? Sign in'}
+        </button>
+
+        {message ? <p className="va-auth-message" aria-live="polite">{message}</p> : null}
+      </form>
+    </section>
+  )
+}
+
+function LocalWorkspacePage({
+  onNavigate,
+  user,
+}: VaWorkspacePageProps & { user: User }) {
+  const [localSnapshot] = useState(loadVaWorkspace)
+  const [workspace, setWorkspace] = useState<VaWorkspaceData>(emptyWorkspace)
+  const [workspaceLoading, setWorkspaceLoading] = useState(true)
   const [view, setView] = useState<WorkspaceView>('clients')
   const [clientDraft, setClientDraft] = useState<VaClientDraft>(emptyClientDraft)
   const [taskDraft, setTaskDraft] = useState<VaTaskDraft>(emptyTaskDraft)
   const [editingClientId, setEditingClientId] = useState<string | null>(null)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
+  const syncQueue = useRef<Promise<void>>(Promise.resolve())
+
+  useEffect(() => {
+    let active = true
+    setWorkspaceLoading(true)
+
+    loadCloudWorkspace(user)
+      .then((cloudWorkspace) => {
+        if (!active) {
+          return
+        }
+
+        setWorkspace(cloudWorkspace)
+
+        const cloudHasRecords =
+          cloudWorkspace.clients.length > 0 || cloudWorkspace.tasks.length > 0
+        const browserHasRecords =
+          localSnapshot.clients.length > 0 || localSnapshot.tasks.length > 0
+
+        if (cloudHasRecords || !browserHasRecords) {
+          saveVaWorkspace(cloudWorkspace)
+        }
+      })
+      .catch((error: unknown) => {
+        if (active) {
+          setMessage(getErrorMessage(error))
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setWorkspaceLoading(false)
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [localSnapshot, user])
 
   const today = getTodayKey()
 
@@ -74,17 +380,51 @@ function VaWorkspacePage({ onNavigate }: VaWorkspacePageProps) {
     taskDraft.title.trim().length > 0 &&
     Boolean(taskDraft.dueDate || taskDraft.actionDate || taskDraft.followUpDate)
 
-  function persist(nextWorkspace: typeof workspace, successMessage?: string) {
-    const result = saveVaWorkspace(nextWorkspace)
+  const cloudIsEmpty = workspace.clients.length === 0 && workspace.tasks.length === 0
+  const localHasRecords =
+    localSnapshot.clients.length > 0 || localSnapshot.tasks.length > 0
 
-    if (!result.ok) {
-      setMessage(result.message)
-      return false
-    }
+  function persist(nextWorkspace: VaWorkspaceData, successMessage?: string) {
+    const localResult = saveVaWorkspace(nextWorkspace)
 
     setWorkspace(nextWorkspace)
-    setMessage(successMessage ?? null)
+    setMessage(localResult.ok ? successMessage ?? null : localResult.message)
+
+    syncQueue.current = syncQueue.current
+      .then(() => syncCloudWorkspace(user, nextWorkspace))
+      .catch((error: unknown) => {
+        setMessage(`Cloud sync failed: ${getErrorMessage(error)}`)
+      })
+
     return true
+  }
+
+  async function importBrowserRecords() {
+    if (importing) {
+      return
+    }
+
+    const confirmed = window.confirm(
+      'Copy the clients and tasks saved in this browser into your private cloud account?',
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setImporting(true)
+    setMessage(null)
+
+    try {
+      const imported = await importLocalWorkspace(user, localSnapshot)
+      setWorkspace(imported)
+      saveVaWorkspace(imported)
+      setMessage('Browser records copied to your cloud account.')
+    } catch (error) {
+      setMessage(getErrorMessage(error))
+    } finally {
+      setImporting(false)
+    }
   }
 
   function saveClient() {
@@ -217,6 +557,17 @@ function VaWorkspacePage({ onNavigate }: VaWorkspacePageProps) {
     }
   }
 
+  if (workspaceLoading) {
+    return (
+      <main className="va-page-shell">
+        <div className="va-cloud-loading">
+          <span aria-hidden="true" />
+          <p>Loading your cloud workspace...</p>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="va-page-shell">
       <header className="va-topbar">
@@ -236,13 +587,36 @@ function VaWorkspacePage({ onNavigate }: VaWorkspacePageProps) {
         </nav>
       </header>
 
+      {cloudIsEmpty && localHasRecords ? (
+        <section className="va-import-banner">
+          <div>
+            <p className="va-eyebrow">Browser records found</p>
+            <h2>Copy your existing records into this account.</h2>
+            <p>
+              {safeCount(localSnapshot.clients.length)} clients and{' '}
+              {safeCount(localSnapshot.tasks.length)} tasks are available to import.
+            </p>
+          </div>
+          <button
+            className="va-primary-button"
+            type="button"
+            onClick={() => {
+              void importBrowserRecords()
+            }}
+            disabled={importing}
+          >
+            {importing ? 'Importing...' : 'Import browser records'}
+          </button>
+        </section>
+      ) : null}
+
       <section className="va-hero va-hero-compact">
         <div>
           <p className="va-eyebrow">Client deadline command center</p>
           <h1>Know what needs action, who is waiting, and what is overdue.</h1>
           <p>Every task can have an event due date, an earlier action date, and a separate follow-up date.</p>
         </div>
-        <span className="va-local-note">Saved only in this browser</span>
+        <span className="va-local-note">Saved to your private account</span>
       </section>
 
       <section className="va-summary-grid">
@@ -699,6 +1073,24 @@ function createId(): string {
   return typeof crypto.randomUUID === 'function'
     ? crypto.randomUUID()
     : `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message
+  }
+
+  return 'Something went wrong. Please try again.'
 }
 
 export default VaWorkspacePage
