@@ -498,6 +498,9 @@ function LocalWorkspacePage({
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [importing, setImporting] = useState(false)
+  const [restoring, setRestoring] = useState(false)
+  const [restoreMode, setRestoreMode] = useState<'merge' | 'replace'>('merge')
+  const restoreInputRef = useRef<HTMLInputElement | null>(null)
   const syncQueue = useRef<Promise<void>>(Promise.resolve())
 
   useEffect(() => {
@@ -606,6 +609,89 @@ function LocalWorkspacePage({
       setMessage(getErrorMessage(error))
     } finally {
       setImporting(false)
+    }
+  }
+
+
+  function downloadBackup() {
+    const backup = {
+      format: 'whenisdue-va-backup',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      workspace,
+    }
+
+    const fileContents = JSON.stringify(backup, null, 2)
+    const blob = new Blob([fileContents], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = `whenisdue-backup-${getTodayKey()}.json`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+
+    setMessage(
+      `Backup downloaded: ${safeCount(workspace.clients.length)} clients and ${safeCount(workspace.tasks.length)} tasks.`,
+    )
+  }
+
+  async function restoreBackup(file: File) {
+    if (restoring) {
+      return
+    }
+
+    setRestoring(true)
+    setMessage(null)
+
+    try {
+      const text = await file.text()
+      const parsed: unknown = JSON.parse(text)
+      const importedWorkspace = parseBackupWorkspace(parsed)
+      const clientCount = safeCount(importedWorkspace.clients.length)
+      const taskCount = safeCount(importedWorkspace.tasks.length)
+      const actionWord = restoreMode === 'replace' ? 'replace' : 'merge with'
+
+      const confirmed = window.confirm(
+        `This backup contains ${clientCount} ${clientCount === 1 ? 'client' : 'clients'} and ${taskCount} ${taskCount === 1 ? 'task' : 'tasks'}.\n\nContinue and ${actionWord} your current workspace?`,
+      )
+
+      if (!confirmed) {
+        setMessage('Restore cancelled. No records were changed.')
+        return
+      }
+
+      const nextWorkspace =
+        restoreMode === 'replace'
+          ? importedWorkspace
+          : mergeWorkspaces(workspace, importedWorkspace)
+
+      const localResult = saveVaWorkspace(nextWorkspace)
+
+      if (!localResult.ok) {
+        throw new Error(localResult.message ?? 'The restored backup could not be saved in this browser.')
+      }
+
+      setWorkspace(nextWorkspace)
+
+      syncQueue.current = syncQueue.current.then(() =>
+        syncCloudWorkspace(user, nextWorkspace),
+      )
+      await syncQueue.current
+
+      setMessage(
+        `Backup restored. Your account now has ${safeCount(nextWorkspace.clients.length)} clients and ${safeCount(nextWorkspace.tasks.length)} tasks.`,
+      )
+    } catch (error) {
+      setMessage(`Restore failed: ${getErrorMessage(error)}`)
+    } finally {
+      setRestoring(false)
+
+      if (restoreInputRef.current) {
+        restoreInputRef.current.value = ''
+      }
     }
   }
 
@@ -791,6 +877,64 @@ function LocalWorkspacePage({
           </button>
         </section>
       ) : null}
+
+      <section className="va-backup-panel" aria-labelledby="va-backup-heading">
+        <div className="va-backup-copy">
+          <p className="va-eyebrow">Portable backup</p>
+          <h2 id="va-backup-heading">Download or restore your workspace</h2>
+          <p>
+            Backup files include clients and tasks only. Passwords and account credentials are never included.
+          </p>
+        </div>
+
+        <div className="va-backup-controls">
+          <button
+            className="va-secondary-button"
+            type="button"
+            onClick={downloadBackup}
+            disabled={restoring}
+          >
+            Download backup
+          </button>
+
+          <label className="va-restore-mode">
+            <span>Restore method</span>
+            <select
+              value={restoreMode}
+              onChange={(event) =>
+                setRestoreMode(event.target.value as 'merge' | 'replace')
+              }
+              disabled={restoring}
+            >
+              <option value="merge">Merge with current records</option>
+              <option value="replace">Replace current records</option>
+            </select>
+          </label>
+
+          <button
+            className="va-primary-button"
+            type="button"
+            onClick={() => restoreInputRef.current?.click()}
+            disabled={restoring}
+          >
+            {restoring ? 'Restoring...' : 'Restore backup'}
+          </button>
+
+          <input
+            ref={restoreInputRef}
+            className="va-hidden-file-input"
+            type="file"
+            accept="application/json,.json"
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+
+              if (file) {
+                void restoreBackup(file)
+              }
+            }}
+          />
+        </div>
+      </section>
 
       <section className="va-hero va-hero-compact">
         <div>
@@ -1257,6 +1401,184 @@ function createId(): string {
     : `item-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+
+
+function parseBackupWorkspace(value: unknown): VaWorkspaceData {
+  const candidate =
+    isRecord(value) && value.format === 'whenisdue-va-backup'
+      ? value.workspace
+      : value
+
+  if (!isRecord(candidate)) {
+    throw new Error('This file is not a valid WhenIsDue workspace backup.')
+  }
+
+  if (candidate.version !== 2) {
+    throw new Error('This backup uses an unsupported workspace version.')
+  }
+
+  if (!Array.isArray(candidate.clients) || !Array.isArray(candidate.tasks)) {
+    throw new Error('The backup is missing its clients or tasks list.')
+  }
+
+  const clients = candidate.clients.map(validateBackupClient)
+  const clientIds = new Set(clients.map((client) => client.id))
+  const tasks = candidate.tasks.map((task, index) =>
+    validateBackupTask(task, clientIds, index),
+  )
+
+  return { version: 2, clients, tasks }
+}
+
+function validateBackupClient(value: unknown, index: number): VaClient {
+  if (!isRecord(value)) {
+    throw new Error(`Client ${index + 1} is invalid.`)
+  }
+
+  return {
+    id: requireBackupString(value.id, `Client ${index + 1} ID`, 160),
+    displayName: requireBackupString(
+      value.displayName,
+      `Client ${index + 1} name`,
+      nameMaxLength,
+    ),
+    contactName: optionalBackupString(value.contactName, 80),
+    email: optionalBackupString(value.email, 160),
+    phone: optionalBackupString(value.phone, 60),
+    serviceType: optionalBackupString(value.serviceType, 100),
+    notes: optionalBackupString(value.notes, notesMaxLength),
+    active: typeof value.active === 'boolean' ? value.active : true,
+    createdAt: requireBackupDate(value.createdAt, `Client ${index + 1} created date`),
+    updatedAt: requireBackupDate(value.updatedAt, `Client ${index + 1} updated date`),
+  }
+}
+
+function validateBackupTask(
+  value: unknown,
+  clientIds: Set<string>,
+  index: number,
+): VaTask {
+  if (!isRecord(value)) {
+    throw new Error(`Task ${index + 1} is invalid.`)
+  }
+
+  const clientId = requireBackupString(value.clientId, `Task ${index + 1} client`, 160)
+
+  if (!clientIds.has(clientId)) {
+    throw new Error(`Task ${index + 1} refers to a client missing from the backup.`)
+  }
+
+  const status = value.status
+
+  if (status !== 'needs-action' && status !== 'waiting' && status !== 'completed') {
+    throw new Error(`Task ${index + 1} has an invalid status.`)
+  }
+
+  const task: VaTask = {
+    id: requireBackupString(value.id, `Task ${index + 1} ID`, 160),
+    clientId,
+    title: requireBackupString(value.title, `Task ${index + 1} title`, taskTitleMaxLength),
+    details: optionalBackupString(value.details, taskDetailsMaxLength),
+    dueDate: optionalBackupDateKey(value.dueDate, `Task ${index + 1} due date`),
+    actionDate: optionalBackupDateKey(value.actionDate, `Task ${index + 1} action date`),
+    followUpDate: optionalBackupDateKey(value.followUpDate, `Task ${index + 1} follow-up date`),
+    status,
+    createdAt: requireBackupDate(value.createdAt, `Task ${index + 1} created date`),
+    updatedAt: requireBackupDate(value.updatedAt, `Task ${index + 1} updated date`),
+  }
+
+  if (!task.dueDate && !task.actionDate && !task.followUpDate) {
+    throw new Error(`Task ${index + 1} does not contain any date.`)
+  }
+
+  return task
+}
+
+function mergeWorkspaces(
+  current: VaWorkspaceData,
+  imported: VaWorkspaceData,
+): VaWorkspaceData {
+  const usedClientIds = new Set(current.clients.map((client) => client.id))
+  const usedTaskIds = new Set(current.tasks.map((task) => task.id))
+  const clientIdMap = new Map<string, string>()
+
+  const importedClients = imported.clients.map((client) => {
+    const id = createUniqueId(usedClientIds)
+    clientIdMap.set(client.id, id)
+    usedClientIds.add(id)
+    return { ...client, id }
+  })
+
+  const importedTasks = imported.tasks.map((task) => {
+    const clientId = clientIdMap.get(task.clientId)
+
+    if (!clientId) {
+      throw new Error(`The task "${task.title}" has no matching imported client.`)
+    }
+
+    const id = createUniqueId(usedTaskIds)
+    usedTaskIds.add(id)
+    return { ...task, id, clientId }
+  })
+
+  return {
+    version: 2,
+    clients: [...importedClients, ...current.clients],
+    tasks: [...importedTasks, ...current.tasks],
+  }
+}
+
+function createUniqueId(usedIds: Set<string>): string {
+  let id = createId()
+  while (usedIds.has(id)) id = createId()
+  return id
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function requireBackupString(value: unknown, label: string, maxLength: number): string {
+  if (typeof value !== 'string') throw new Error(`${label} is missing.`)
+  const normalized = value.trim()
+  if (normalized.length === 0 || normalized.length > maxLength) {
+    throw new Error(`${label} is invalid.`)
+  }
+  return normalized
+}
+
+function optionalBackupString(value: unknown, maxLength: number): string {
+  return typeof value === 'string' ? value.trim().slice(0, maxLength) : ''
+}
+
+function requireBackupDate(value: unknown, label: string): string {
+  if (typeof value !== 'string' || !Number.isFinite(Date.parse(value))) {
+    throw new Error(`${label} is invalid.`)
+  }
+  return value
+}
+
+function optionalBackupDateKey(value: unknown, label: string): string {
+  if (value === '' || value === null || value === undefined) return ''
+  if (typeof value !== 'string' || !isDateKey(value)) {
+    throw new Error(`${label} is invalid.`)
+  }
+  return value
+}
+
+function isDateKey(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  return (
+    Number.isFinite(year) &&
+    Number.isFinite(month) &&
+    Number.isFinite(day) &&
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  )
+}
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
