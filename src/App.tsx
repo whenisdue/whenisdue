@@ -146,6 +146,22 @@ function HomePage({ onNavigate }: NavigationProps) {
   const statusText = dueDate ? getStatusText(daysRemaining) : 'Enter a valid date'
 
   useEffect(() => {
+    function handleHomeHistoryFocus() {
+      if (window.location.pathname === '/' && !window.location.hash) {
+        window.requestAnimationFrame(() => {
+          document.getElementById('homepage-title')?.focus({ preventScroll: true })
+        })
+      }
+    }
+
+    window.addEventListener('popstate', handleHomeHistoryFocus)
+
+    return () => {
+      window.removeEventListener('popstate', handleHomeHistoryFocus)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!isCustomTitle) {
       setTitle(getDefaultTitle(mode))
     }
@@ -303,7 +319,7 @@ function HomePage({ onNavigate }: NavigationProps) {
               <span aria-hidden="true">✓</span>
               Two simple ways to stay ahead of a deadline
             </p>
-            <h1 id="homepage-title">Calculate a due date—or manage every client deadline.</h1>
+            <h1 id="homepage-title" tabIndex={-1}>Calculate a due date—or manage every client deadline.</h1>
             <p className="friendly-subtitle">
               Get a quick answer immediately, or open a private VA workspace for tasks,
               follow-ups, waiting items, and overdue work.
@@ -1544,7 +1560,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
         </form>
 
-        <section className="result-panel invoice-due-date-result">
+        <section className="result-panel invoice-due-date-result" aria-live="polite">
           <p className="result-label">Invoice due date</p>
           {invoiceDueDate ? (
             <>
@@ -1615,7 +1631,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         <article>
           <h2>Calendar days, business days, and end-of-month terms</h2>
           <p>
-            This calculator treats a number such as 30 as calendar days. It does not automatically skip weekends or holidays, and it does not interpret end-of-month terms. If an agreement says business days, use the Business Days Calculator. If it says EOM, month-end, or a fixed day of the following month, follow that wording instead of treating it as a simple number of days.
+            This calculator treats Net terms such as 30 as calendar days and supports EOM by returning the last calendar day of the invoice month. It does not automatically skip weekends or holidays. Some agreements use different month-end rules, such as EOM + 15 or a fixed day of the following month, so always confirm the exact invoice or contract wording.
           </p>
         </article>
 
@@ -1629,7 +1645,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             <dt>What if the due date falls on a weekend or holiday?</dt>
             <dd>This calculator leaves the date unchanged. The contract, company policy, or applicable rules may determine whether payment moves to another day.</dd>
             <dt>Does this calculator handle EOM terms?</dt>
-            <dd>No. End-of-month terms can use different rules and should be calculated from the exact language on the invoice or agreement.</dd>
+            <dd>Yes. The EOM option returns the last calendar day of the invoice month. It does not currently calculate variations such as EOM + 15 or other custom month-end terms.</dd>
           </dl>
         </article>
 
@@ -3037,6 +3053,25 @@ function getReturnWindowValidationMessage(
   const limit = getAmountLimit('return')
 
   if (returnWindow === null || returnWindow <= 0 || returnWindow > limit) {
+    return positiveWholeNumberMessage
+  }
+
+  return null
+}
+
+function getInvoiceDueDateValidationMessage(
+  invoiceDate: PlainDate | null,
+  paymentTerms: number | null,
+): string | null {
+  if (!invoiceDate) {
+    return 'Enter a valid date from 1900-01-01 to 2100-12-31.'
+  }
+
+  if (!isDateInSupportedRange(invoiceDate)) {
+    return 'Date must be from 1900-01-01 to 2100-12-31.'
+  }
+
+  if (paymentTerms === null || paymentTerms <= 0 || paymentTerms > 3650) {
     return positiveWholeNumberMessage
   }
 

@@ -1392,7 +1392,12 @@ function ViewButton({
   count: number
 }) {
   return (
-    <button className={currentView === viewName ? 'is-selected' : ''} type="button" onClick={() => setView(viewName)}>
+    <button
+      className={currentView === viewName ? 'is-selected' : ''}
+      type="button"
+      aria-current={currentView === viewName ? 'page' : undefined}
+      onClick={() => setView(viewName)}
+    >
       <span>{label}</span><b>{safeCount(count)}</b>
     </button>
   )
