@@ -1701,3 +1701,665 @@
 .va-task-actions .va-delete-button,.va-client-actions .va-delete-button{margin-left:8px;border-color:#e6c9c6;color:#984a43}
 @media(max-width:860px){.va-daily-header{align-items:flex-start;flex-direction:column}.va-daily-header-actions{width:100%;flex-wrap:wrap}.va-daily-header-actions .va-local-note{width:100%;box-sizing:border-box;border:0;background:transparent;padding:0}}
 @media(max-width:620px){.va-auth-account-bar{min-height:46px;flex-direction:row;align-items:center;overflow:hidden}.va-auth-account-bar>div:first-child span{display:none}.va-auth-account-bar strong{display:block;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.va-auth-stage-note{display:none}.va-daily-header{gap:14px;margin-top:7px;padding:8px 1px 13px}.va-daily-header h1{font-size:1.9rem}.va-daily-header-actions{display:grid;grid-template-columns:1fr 1fr}.va-daily-header-actions .va-local-note{display:none}.va-priority-summary{grid-template-columns:1fr;border-radius:12px}.va-priority-summary button{min-height:52px;padding:8px 12px}.va-priority-summary button+button{border-top:1px solid var(--va-border);border-left:0}.va-priority-summary strong{font-size:1.4rem}.va-daily-work{margin-top:8px}.va-daily-work .va-main-panel{padding:14px}.va-list-heading{align-items:flex-start}.va-task-card{padding:13px}.va-task-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.va-task-actions button{width:100%}.va-task-actions .va-delete-button{grid-column:1/-1;margin-left:0}.va-compact-tabs{margin-inline:-2px;padding-bottom:8px}.va-form-drawer .va-form-actions{position:sticky;bottom:-24px;z-index:2;margin:18px -15px -24px;border-top:1px solid var(--va-border);background:#fffdf9;padding:12px 15px 16px}.va-form-drawer .va-form-actions button{min-height:44px}}
+
+
+/* Functional semantic color system */
+.va-page-shell {
+  --va-ink: #18324b;
+  --va-muted: #5f6e7f;
+  --va-primary: #245c4a;
+  --va-primary-dark: #245c4a;
+  --va-primary-hover: #1d493b;
+  --va-secondary: #6f9487;
+  --va-border: #d9ccba;
+
+  --va-action: #245c4a;
+  --va-action-tint: #e5f2ec;
+  --va-followup: #6a5578;
+  --va-followup-tint: #f2edf5;
+  --va-waiting: #7a571c;
+  --va-waiting-tint: #fbf3df;
+  --va-overdue: #963e38;
+  --va-overdue-tint: #fcedea;
+  --va-upcoming: #49697b;
+  --va-upcoming-tint: #edf3f6;
+  --va-completed: #626c78;
+  --va-completed-tint: #f3f4f4;
+  --va-info: #355f70;
+  --va-info-tint: #eaf2f5;
+  --va-destructive: #842e2a;
+  --va-destructive-tint: #fbe9e7;
+}
+
+.va-primary-button {
+  border-color: var(--va-primary);
+  background: var(--va-primary);
+}
+
+.va-primary-button:hover:not(:disabled) {
+  border-color: var(--va-primary-hover);
+  background: var(--va-primary-hover);
+}
+
+.va-primary-button:disabled {
+  border-color: #d7d2ca;
+  background: #e4e1db;
+  color: #76736e;
+  opacity: 1;
+}
+
+/* Priority strip: neutral at zero, semantic only when meaningful. */
+.va-priority-summary button {
+  position: relative;
+  color: var(--va-muted);
+}
+
+.va-priority-summary button span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.va-priority-summary button i {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 999px;
+  background: #f4f1eb;
+  color: #6b7785;
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.va-priority-summary button.has-count::before,
+.va-priority-summary button.is-selected::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  content: "";
+}
+
+.va-priority-summary .is-action.has-count,
+.va-priority-summary .is-action.is-selected {
+  background: var(--va-action-tint);
+  color: var(--va-action);
+}
+
+.va-priority-summary .is-action.has-count::before,
+.va-priority-summary .is-action.is-selected::before {
+  background: var(--va-action);
+}
+
+.va-priority-summary .is-action.has-count i,
+.va-priority-summary .is-action.is-selected i {
+  background: #d5e9df;
+  color: var(--va-action);
+}
+
+.va-priority-summary .is-followup.has-count,
+.va-priority-summary .is-followup.is-selected {
+  background: var(--va-followup-tint);
+  color: var(--va-followup);
+}
+
+.va-priority-summary .is-followup.has-count::before,
+.va-priority-summary .is-followup.is-selected::before {
+  background: var(--va-followup);
+}
+
+.va-priority-summary .is-followup.has-count i,
+.va-priority-summary .is-followup.is-selected i {
+  background: #e7ddec;
+  color: var(--va-followup);
+}
+
+.va-priority-summary .is-overdue-summary.has-count,
+.va-priority-summary .is-overdue-summary.is-selected {
+  background: var(--va-overdue-tint);
+  color: var(--va-overdue);
+}
+
+.va-priority-summary .is-overdue-summary.has-count::before,
+.va-priority-summary .is-overdue-summary.is-selected::before {
+  background: var(--va-overdue);
+}
+
+.va-priority-summary .is-overdue-summary.has-count i,
+.va-priority-summary .is-overdue-summary.is-selected i {
+  background: #f5d8d4;
+  color: var(--va-overdue);
+}
+
+/* Task surfaces and status edges */
+.va-task-card {
+  border-color: #e5ddd2;
+  border-left-color: var(--va-action);
+}
+
+.va-task-card.status-waiting {
+  border-left-color: #a97829;
+  background: #fffdf8;
+}
+
+.va-task-card.is-overdue {
+  border-color: #e8bdb8;
+  border-left-color: var(--va-overdue);
+  background: #fffafa;
+}
+
+.va-task-card.status-completed {
+  border-color: #dde0e2;
+  border-left-color: #c4c9cd;
+  background: var(--va-completed-tint);
+  opacity: 1;
+}
+
+.va-task-card.status-completed h3 {
+  color: var(--va-completed);
+}
+
+.va-task-card.status-completed .va-task-card-head > span {
+  background: #e6e8e9;
+  color: var(--va-completed);
+}
+
+.va-task-card.status-waiting .va-task-card-head > span {
+  background: var(--va-waiting-tint);
+  color: var(--va-waiting);
+}
+
+.va-task-card.is-overdue .va-task-card-head > span {
+  background: var(--va-overdue-tint);
+  color: var(--va-overdue);
+}
+
+/* The three date meanings are now visually distinct. */
+.va-task-dates .va-date-item {
+  position: relative;
+  border: 1px solid transparent;
+  background: #f4f1eb;
+}
+
+.va-date-item span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.va-date-item span i {
+  font-style: normal;
+  font-size: 0.68rem;
+}
+
+.va-date-item.date-action {
+  border-color: #d7e8df;
+  background: #f3f8f5;
+}
+
+.va-date-item.date-action span,
+.va-date-item.date-action small {
+  color: var(--va-action);
+}
+
+.va-date-item.date-followup {
+  border-color: #e5dce9;
+  background: #f7f3f9;
+}
+
+.va-date-item.date-followup span,
+.va-date-item.date-followup small {
+  color: var(--va-followup);
+}
+
+.va-date-item.date-due {
+  border-color: #e4ded5;
+  background: #faf9f7;
+}
+
+.va-date-item.date-due span {
+  color: #6a6f75;
+}
+
+.va-date-item.is-overdue-date {
+  border-color: #efc9c5;
+  background: var(--va-overdue-tint);
+}
+
+.va-date-item.is-overdue-date span,
+.va-date-item.is-overdue-date strong {
+  color: var(--va-overdue);
+}
+
+.va-date-item small {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 2px 6px;
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
+/* Action hierarchy */
+.va-task-actions {
+  align-items: center;
+}
+
+.va-task-actions > button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.va-task-actions .va-needs-action-button:hover,
+.va-task-actions .va-complete-button:hover,
+.va-task-actions .va-restore-button:hover {
+  border-color: #cfe2d8;
+  background: var(--va-action-tint);
+  color: var(--va-action);
+}
+
+.va-task-actions .va-waiting-button:hover {
+  border-color: #ecd9ad;
+  background: var(--va-waiting-tint);
+  color: var(--va-waiting);
+}
+
+.va-task-more {
+  position: relative;
+  margin-left: auto;
+}
+
+.va-task-more summary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--va-muted);
+  padding: 8px 10px;
+  font-size: 0.72rem;
+  font-weight: 760;
+  cursor: pointer;
+  list-style: none;
+}
+
+.va-task-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.va-task-more summary::after {
+  margin-left: 5px;
+  content: "•••";
+  letter-spacing: 0.04em;
+}
+
+.va-task-more summary:hover {
+  background: #f4f1eb;
+  color: var(--va-ink);
+}
+
+.va-task-more > div {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 10;
+  display: grid;
+  min-width: 170px;
+  gap: 3px;
+  border: 1px solid var(--va-border);
+  border-radius: 11px;
+  background: white;
+  padding: 6px;
+  box-shadow: 0 12px 30px rgba(24, 50, 75, 0.14);
+}
+
+.va-task-more button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--va-ink);
+  padding: 8px 10px;
+  text-align: left;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 720;
+  cursor: pointer;
+}
+
+.va-task-more button:hover {
+  background: #f4f1eb;
+}
+
+.va-task-more .va-delete-button {
+  margin: 0;
+  color: var(--va-destructive);
+}
+
+.va-task-more .va-delete-button:hover {
+  background: var(--va-destructive-tint);
+  color: var(--va-destructive);
+}
+
+/* Utilities recede. */
+.va-backup-panel {
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.va-backup-panel > summary {
+  padding-inline: 3px;
+}
+
+.va-auth-stage-note,
+.va-global-message {
+  background: var(--va-info-tint);
+  color: var(--va-info);
+}
+
+.va-auth-account-bar {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.va-compact-tabs button.is-selected {
+  border-bottom-color: var(--va-primary);
+  color: var(--va-primary);
+}
+
+/* Accessible interaction states */
+.va-page-shell button:focus-visible,
+.va-page-shell a:focus-visible,
+.va-page-shell input:focus-visible,
+.va-page-shell select:focus-visible,
+.va-page-shell textarea:focus-visible,
+.va-task-more summary:focus-visible {
+  outline: 3px solid #6f9487;
+  outline-offset: 3px;
+}
+
+@media (max-width: 620px) {
+  .va-priority-summary button.has-count::before,
+  .va-priority-summary button.is-selected::before {
+    top: 0;
+    right: auto;
+    bottom: 0;
+  }
+
+  .va-task-actions {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .va-task-actions > button {
+    flex: 1 1 calc(50% - 4px);
+  }
+
+  .va-task-more {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+
+  .va-task-more summary {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+
+  .va-task-more > div {
+    right: 0;
+    bottom: calc(100% + 6px);
+    left: 0;
+  }
+
+  .va-date-item small {
+    margin-top: 4px;
+  }
+}
+
+
+/* Persistent workspace navigation architecture */
+.va-workspace-layout {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 12px;
+}
+
+.va-desktop-sidebar {
+  position: sticky;
+  top: 12px;
+  display: grid;
+  max-height: calc(100vh - 24px);
+  gap: 14px;
+  overflow-y: auto;
+  border-right: 1px solid var(--va-border);
+  padding: 10px 16px 12px 0;
+}
+
+.va-sidebar-heading span {
+  color: var(--va-muted);
+  font-size: 0.7rem;
+}
+
+.va-sidebar-nav {
+  display: grid;
+  gap: 4px;
+}
+
+.va-sidebar-nav button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--va-muted);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 760;
+  text-align: left;
+  cursor: pointer;
+}
+
+.va-sidebar-nav button:hover {
+  background: #f4f1eb;
+  color: var(--va-ink);
+}
+
+.va-sidebar-nav button.is-selected {
+  background: var(--va-action-tint);
+  color: var(--va-action);
+}
+
+.va-sidebar-nav b {
+  display: inline-grid;
+  min-width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: white;
+  color: inherit;
+  font-size: 0.65rem;
+}
+
+.va-desktop-sidebar .va-backup-panel {
+  margin-top: auto;
+  border-top: 1px solid var(--va-border);
+}
+
+.va-desktop-sidebar .va-backup-panel > summary {
+  min-height: 58px;
+  padding: 12px 2px;
+}
+
+.va-desktop-sidebar .va-backup-panel > summary p {
+  display: none;
+}
+
+.va-desktop-sidebar .va-backup-panel > summary > span {
+  display: none;
+}
+
+.va-desktop-sidebar .va-backup-body {
+  padding: 12px 0 0;
+}
+
+.va-desktop-sidebar .va-backup-controls {
+  grid-template-columns: 1fr;
+}
+
+.va-workspace-main {
+  min-width: 0;
+}
+
+.va-workspace-main .va-daily-header {
+  margin-top: 0;
+}
+
+.va-mobile-switcher {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .va-workspace-layout {
+    display: block;
+    margin-top: 8px;
+  }
+
+  .va-desktop-sidebar {
+    display: none;
+  }
+
+  .va-mobile-switcher {
+    position: sticky;
+    top: 0;
+    z-index: 45;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+    margin: 8px -2px 0;
+    border-top: 1px solid var(--va-border);
+    border-bottom: 1px solid var(--va-border);
+    background: rgba(255, 249, 241, 0.96);
+    padding: 7px 2px;
+    backdrop-filter: blur(12px);
+  }
+
+  .va-mobile-switcher > button,
+  .va-mobile-more > summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--va-muted);
+    padding: 6px;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 760;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .va-mobile-switcher > button.is-selected {
+    background: var(--va-action-tint);
+    color: var(--va-action);
+  }
+
+  .va-mobile-switcher b {
+    display: inline-grid;
+    min-width: 21px;
+    height: 21px;
+    place-items: center;
+    border-radius: 999px;
+    background: #f4f1eb;
+    font-size: 0.6rem;
+  }
+
+  .va-mobile-more {
+    position: relative;
+  }
+
+  .va-mobile-more > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .va-mobile-more > div {
+    position: absolute;
+    top: calc(100% + 7px);
+    right: 0;
+    z-index: 60;
+    display: grid;
+    min-width: 210px;
+    gap: 4px;
+    border: 1px solid var(--va-border);
+    border-radius: 12px;
+    background: white;
+    padding: 7px;
+    box-shadow: 0 16px 34px rgba(24, 50, 75, 0.16);
+  }
+
+  .va-mobile-more button {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--va-muted);
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 760;
+    cursor: pointer;
+  }
+
+  .va-mobile-more button.is-selected {
+    background: var(--va-action-tint);
+    color: var(--va-action);
+  }
+
+  .va-priority-summary {
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 620px) {
+  .va-daily-header {
+    padding-top: 5px;
+  }
+
+  .va-daily-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .va-daily-header p:not(.va-eyebrow) {
+    display: none;
+  }
+
+  .va-mobile-switcher {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .va-mobile-switcher > button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

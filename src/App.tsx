@@ -183,6 +183,18 @@ function HomePage({ onNavigate }: NavigationProps) {
     return: { title: 'Return', helper: 'Find the last return day' },
   }
 
+  function focusHomeSection(sectionId: string, headingId: string) {
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+
+    window.setTimeout(() => {
+      const heading = document.getElementById(headingId)
+      heading?.focus({ preventScroll: true })
+    }, 450)
+  }
+
   function saveDeadline() {
     if (!dueDate || !title.trim()) {
       return
@@ -276,93 +288,69 @@ function HomePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell home-page friendly-home">
-      <section className="workspace-first-hero" aria-labelledby="homepage-title">
+      <a className="skip-to-calculator" href="#calculator" onClick={(event) => { event.preventDefault(); focusHomeSection('calculator', 'calculator-heading') }}>Skip to calculator</a>
+      <section className="dual-intent-hero" aria-labelledby="homepage-title">
         <IdentityRow onNavigate={onNavigate} />
 
-        <div className="workspace-first-hero-grid">
-          <div className="workspace-first-copy">
+        <div className="dual-intent-grid">
+          <div className="dual-intent-copy">
             <p className="friendly-eyebrow">
               <span aria-hidden="true">✓</span>
-              Built for virtual assistants managing multiple clients
+              Two simple ways to stay ahead of a deadline
             </p>
-            <h1 id="homepage-title">Know what needs attention for every client.</h1>
+            <h1 id="homepage-title">Calculate a due date—or manage every client deadline.</h1>
             <p className="friendly-subtitle">
-              Keep tasks, deadlines, waiting items, and follow-ups in one calm daily workspace.
+              Get a quick answer immediately, or open a private VA workspace for tasks,
+              follow-ups, waiting items, and overdue work.
             </p>
 
-            <div className="workspace-first-actions">
+            <div className="dual-intent-actions">
               <a
-                className="workspace-primary-cta"
+                className="calculator-primary-choice"
+                href="#calculator"
+                onClick={(event) => {
+                  event.preventDefault()
+                  focusHomeSection('calculator', 'calculator-heading')
+                }}
+              >
+                Calculate a due date
+              </a>
+              <a
+                className="workspace-secondary-choice"
                 href="/workspace"
                 onClick={(event) => {
                   event.preventDefault()
                   onNavigate('/workspace')
                 }}
               >
-                Create your workspace
-              </a>
-              <a className="workspace-secondary-cta" href="#workspace-preview">
-                See how it works
+                Manage client deadlines
               </a>
             </div>
 
             <p className="workspace-trust-line">
-              Private account <span aria-hidden="true">·</span> Cloud-synced
-              <span aria-hidden="true">·</span> Export your data anytime
+              Free calculators <span aria-hidden="true">·</span> Private VA account
+              <span aria-hidden="true">·</span> Export your workspace anytime
             </p>
-
-            <a className="calculator-jump-link" href="#calculator">
-              Need a quick date calculation? Use the free calculators ↓
-            </a>
           </div>
 
-          <div
-            id="workspace-preview"
-            className="workspace-product-preview"
-            aria-label="Preview of the WhenIsDue Today workspace"
-          >
-            <div className="preview-window-bar">
-              <span className="preview-brand-dot" aria-hidden="true">✓</span>
-              <strong>Today</strong>
-              <span>Saved and synced</span>
-            </div>
-
-            <div className="preview-summary-row">
-              <div><span>Needs attention</span><strong>3</strong></div>
-              <div><span>Follow-ups due</span><strong>2</strong></div>
-              <div><span>Overdue</span><strong>1</strong></div>
-            </div>
-
-            <div className="preview-task-list">
-              <article className="preview-task preview-task-action">
-                <div><span>RICHARD</span><strong>Confirm Friday’s appointment</strong></div>
-                <b>Needs action</b>
-                <p><span>Action today</span><span>Due Aug 1</span></p>
-              </article>
-              <article className="preview-task preview-task-waiting">
-                <div><span>ACME STUDIO</span><strong>Approval for revised content calendar</strong></div>
-                <b>Waiting</b>
-                <p><span>Follow up today</span><span>Waiting on client</span></p>
-              </article>
-              <article className="preview-task preview-task-overdue">
-                <div><span>JAN</span><strong>Send updated appointment summary</strong></div>
-                <b>Overdue</b>
-                <p><span>Action Jul 29</span><span>Follow up today</span></p>
-              </article>
-            </div>
+          <div className="dual-intent-proof" aria-label="WhenIsDue product choices">
+            <article className="intent-proof-card proof-calculator">
+              <span className="intent-proof-icon" aria-hidden="true">◷</span>
+              <div>
+                <p>Quick utility</p>
+                <h2>Find the exact date</h2>
+                <span>Calendar days, business days, invoices, trials, and returns.</span>
+              </div>
+            </article>
+            <article className="intent-proof-card proof-workspace">
+              <span className="intent-proof-icon" aria-hidden="true">✓</span>
+              <div>
+                <p>Daily workspace</p>
+                <h2>Know what needs attention</h2>
+                <span>Keep every client’s next action, due date, and follow-up together.</span>
+              </div>
+            </article>
           </div>
-        </div>
-      </section>
-
-      <section className="workspace-story" aria-labelledby="workspace-story-title">
-        <div>
-          <p className="friendly-eyebrow muted-eyebrow">Start every morning knowing</p>
-          <h2 id="workspace-story-title">What to do, who is waiting, and what could be missed.</h2>
-        </div>
-        <div className="workspace-story-steps">
-          <article><span>1</span><h3>Add your clients</h3><p>Keep each client’s active work and follow-ups together.</p></article>
-          <article><span>2</span><h3>Capture the next action</h3><p>Separate the action date, actual due date, and follow-up date.</p></article>
-          <article><span>3</span><h3>Work from Today</h3><p>Open one view and see what needs attention first.</p></article>
         </div>
       </section>
 
@@ -371,7 +359,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           <div className="friendly-section-heading">
             <span className="step-number">1</span>
             <div>
-              <h2>Quick deadline calculators</h2>
+              <h2 id="calculator-heading" tabIndex={-1}>Quick deadline calculators</h2>
               <p>Use these free tools when you only need to calculate a date.</p>
             </div>
           </div>
@@ -636,6 +624,68 @@ function HomePage({ onNavigate }: NavigationProps) {
             </div>
           </div>
         )}
+      </section>
+
+      <section id="workspace-preview" className="workspace-showcase" aria-labelledby="workspace-showcase-title">
+        <div className="workspace-showcase-copy">
+          <p className="friendly-eyebrow muted-eyebrow">For virtual assistants</p>
+          <h2 id="workspace-showcase-title">Start every morning knowing what needs attention.</h2>
+          <p>
+            Separate the day you should act, the real deadline, and the day you need to
+            follow up. Then work from one clear Today view.
+          </p>
+          <a
+            className="workspace-primary-cta"
+            href="/workspace"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/workspace')
+            }}
+          >
+            Create your workspace
+          </a>
+        </div>
+
+        <div
+          className="workspace-product-preview"
+          aria-label="Preview of the WhenIsDue Today workspace"
+        >
+          <div className="preview-window-bar">
+            <span className="preview-brand-dot" aria-hidden="true">✓</span>
+            <strong>Today</strong>
+            <span>Saved and synced</span>
+          </div>
+
+          <div className="preview-summary-row">
+            <div><span>Needs attention</span><strong>3</strong></div>
+            <div><span>Follow-ups due</span><strong>2</strong></div>
+            <div><span>Overdue</span><strong>1</strong></div>
+          </div>
+
+          <div className="preview-task-list">
+            <article className="preview-task preview-task-action">
+              <div><span>RICHARD</span><strong>Confirm Friday’s appointment</strong></div>
+              <b>Needs action</b>
+              <p><span>Action today</span><span>Due Aug 1</span></p>
+            </article>
+            <article className="preview-task preview-task-waiting">
+              <div><span>ACME STUDIO</span><strong>Approval for revised content calendar</strong></div>
+              <b>Waiting</b>
+              <p><span>Follow up today</span><span>Waiting on client</span></p>
+            </article>
+            <article className="preview-task preview-task-overdue">
+              <div><span>JAN</span><strong>Send updated appointment summary</strong></div>
+              <b>Overdue</b>
+              <p><span>Action Jul 29</span><span>Follow up today</span></p>
+            </article>
+          </div>
+        </div>
+
+        <div className="workspace-story-steps">
+          <article><span>1</span><h3>Add your clients</h3><p>Keep each client’s active work and follow-ups together.</p></article>
+          <article><span>2</span><h3>Capture the next action</h3><p>Separate the action date, actual due date, and follow-up date.</p></article>
+          <article><span>3</span><h3>Work from Today</h3><p>Open one view and see what needs attention first.</p></article>
+        </div>
       </section>
 
       <section id="more-tools" className="popular-calculators friendly-tools" aria-labelledby="popular-calculators-title">

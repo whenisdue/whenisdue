@@ -884,7 +884,92 @@ function LocalWorkspacePage({
         </section>
       ) : null}
 
-      <section className="va-daily-header">
+      <div className="va-workspace-layout">
+        <aside className="va-desktop-sidebar" aria-label="Workspace navigation">
+          <div className="va-sidebar-heading">
+            <p className="va-eyebrow">Workspace views</p>
+            <span>Switch without scrolling</span>
+          </div>
+
+          <nav className="va-sidebar-nav">
+            <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
+            <ViewButton label="Follow-ups" viewName="follow-up" currentView={view} setView={setView} count={followUpCount} />
+            <ViewButton label="Waiting" viewName="waiting" currentView={view} setView={setView} count={waitingCount} />
+            <ViewButton label="Upcoming" viewName="upcoming" currentView={view} setView={setView} count={upcomingCount} />
+            <ViewButton label="Overdue" viewName="overdue" currentView={view} setView={setView} count={overdueCount} />
+            <ViewButton label="Clients" viewName="clients" currentView={view} setView={setView} count={activeClients} />
+            <ViewButton label="Completed" viewName="completed" currentView={view} setView={setView} count={completedCount} />
+          </nav>
+
+          <details className="va-backup-panel">
+        <summary>
+          <div>
+            <p className="va-eyebrow">Portable backup</p>
+            <h2>Backup and restore</h2>
+            <p>Download a copy of your clients and tasks, or restore a previous backup.</p>
+          </div>
+          <span>Open tools</span>
+        </summary>
+
+        <div className="va-backup-body">
+          <p className="va-backup-privacy">
+            Backup files include clients and tasks only. Passwords and account credentials are never included.
+          </p>
+
+          <div className="va-backup-controls">
+            <button
+              className="va-secondary-button"
+              type="button"
+              onClick={downloadBackup}
+              disabled={restoring}
+            >
+              Download backup
+            </button>
+
+            <label className="va-restore-mode">
+              <span>Restore method</span>
+              <select
+                value={restoreMode}
+                onChange={(event) =>
+                  setRestoreMode(event.target.value as 'merge' | 'replace')
+                }
+                disabled={restoring}
+              >
+                <option value="merge">Merge with current records</option>
+                <option value="replace">Replace current records</option>
+              </select>
+            </label>
+
+            <button
+              className="va-primary-button"
+              type="button"
+              onClick={() => restoreInputRef.current?.click()}
+              disabled={restoring}
+            >
+              {restoring ? 'Restoring...' : 'Restore backup'}
+            </button>
+
+            <input
+              ref={restoreInputRef}
+              className="va-hidden-file-input"
+              type="file"
+              accept="application/json,.json"
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+
+                if (file) {
+                  void restoreBackup(file)
+                }
+              }}
+            />
+          </div>
+        </div>
+          </details>
+
+        </aside>
+
+        <div className="va-workspace-main">
+          <section className="va-daily-header">
         <div>
           <p className="va-eyebrow">VA Workspace</p>
           <h1>Start every day knowing what needs attention.</h1>
@@ -897,13 +982,50 @@ function LocalWorkspacePage({
         </div>
       </section>
 
-      <section className="va-priority-summary" aria-label="Daily priority summary">
-        <button className={view === 'today' ? 'is-selected' : ''} type="button" onClick={() => setView('today')}><span>Needs attention today</span><strong>{safeCount(todayCount)}</strong></button>
-        <button className={view === 'follow-up' ? 'is-selected' : ''} type="button" onClick={() => setView('follow-up')}><span>Follow-ups due</span><strong>{safeCount(followUpCount)}</strong></button>
-        <button className={view === 'overdue' ? 'is-selected' : ''} type="button" onClick={() => setView('overdue')}><span>Overdue</span><strong>{safeCount(overdueCount)}</strong></button>
+          <nav className="va-mobile-switcher" aria-label="Workspace views">
+            <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
+            <ViewButton label="Follow-ups" viewName="follow-up" currentView={view} setView={setView} count={followUpCount} />
+            <ViewButton label="Waiting" viewName="waiting" currentView={view} setView={setView} count={waitingCount} />
+
+            <details className="va-mobile-more">
+              <summary>More <span aria-hidden="true">⌄</span></summary>
+              <div>
+                <ViewButton label="Upcoming" viewName="upcoming" currentView={view} setView={setView} count={upcomingCount} />
+                <ViewButton label="Overdue" viewName="overdue" currentView={view} setView={setView} count={overdueCount} />
+                <ViewButton label="Clients" viewName="clients" currentView={view} setView={setView} count={activeClients} />
+                <ViewButton label="Completed" viewName="completed" currentView={view} setView={setView} count={completedCount} />
+              </div>
+            </details>
+          </nav>
+
+          <section className="va-priority-summary" aria-label="Daily priority summary">
+        <button
+          className={`is-action ${view === 'today' ? 'is-selected' : ''} ${todayCount > 0 ? 'has-count' : 'is-zero'}`}
+          type="button"
+          onClick={() => setView('today')}
+        >
+          <span><i aria-hidden="true">✓</i> Needs attention today</span>
+          <strong>{safeCount(todayCount)}</strong>
+        </button>
+        <button
+          className={`is-followup ${view === 'follow-up' ? 'is-selected' : ''} ${followUpCount > 0 ? 'has-count' : 'is-zero'}`}
+          type="button"
+          onClick={() => setView('follow-up')}
+        >
+          <span><i aria-hidden="true">↩</i> Follow-ups due</span>
+          <strong>{safeCount(followUpCount)}</strong>
+        </button>
+        <button
+          className={`is-overdue-summary ${view === 'overdue' ? 'is-selected' : ''} ${overdueCount > 0 ? 'has-count' : 'is-zero'}`}
+          type="button"
+          onClick={() => setView('overdue')}
+        >
+          <span><i aria-hidden="true">!</i> Overdue</span>
+          <strong>{safeCount(overdueCount)}</strong>
+        </button>
       </section>
 
-      <section className="va-daily-work">
+          <section className="va-daily-work">
         {formPanel ? (
           <div
             className="va-form-overlay"
@@ -1247,85 +1369,14 @@ function LocalWorkspacePage({
         </section>
       </section>
 
-      <nav className="va-compact-tabs" aria-label="Workspace views">
-        <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
-        <ViewButton label="Follow-ups due" viewName="follow-up" currentView={view} setView={setView} count={followUpCount} />
-        <ViewButton label="Waiting on others" viewName="waiting" currentView={view} setView={setView} count={waitingCount} />
-        <ViewButton label="Upcoming" viewName="upcoming" currentView={view} setView={setView} count={upcomingCount} />
-        <ViewButton label="Overdue" viewName="overdue" currentView={view} setView={setView} count={overdueCount} />
-        <ViewButton label="Clients" viewName="clients" currentView={view} setView={setView} count={activeClients} />
-        <ViewButton label="Completed" viewName="completed" currentView={view} setView={setView} count={completedCount} />
-      </nav>
-
-      <details className="va-backup-panel">
-        <summary>
-          <div>
-            <p className="va-eyebrow">Portable backup</p>
-            <h2>Backup and restore</h2>
-            <p>Download a copy of your clients and tasks, or restore a previous backup.</p>
-          </div>
-          <span>Open tools</span>
-        </summary>
-
-        <div className="va-backup-body">
-          <p className="va-backup-privacy">
-            Backup files include clients and tasks only. Passwords and account credentials are never included.
-          </p>
-
-          <div className="va-backup-controls">
-            <button
-              className="va-secondary-button"
-              type="button"
-              onClick={downloadBackup}
-              disabled={restoring}
-            >
-              Download backup
-            </button>
-
-            <label className="va-restore-mode">
-              <span>Restore method</span>
-              <select
-                value={restoreMode}
-                onChange={(event) =>
-                  setRestoreMode(event.target.value as 'merge' | 'replace')
-                }
-                disabled={restoring}
-              >
-                <option value="merge">Merge with current records</option>
-                <option value="replace">Replace current records</option>
-              </select>
-            </label>
-
-            <button
-              className="va-primary-button"
-              type="button"
-              onClick={() => restoreInputRef.current?.click()}
-              disabled={restoring}
-            >
-              {restoring ? 'Restoring...' : 'Restore backup'}
-            </button>
-
-            <input
-              ref={restoreInputRef}
-              className="va-hidden-file-input"
-              type="file"
-              accept="application/json,.json"
-              onChange={(event) => {
-                const file = event.target.files?.[0]
-
-                if (file) {
-                  void restoreBackup(file)
-                }
-              }}
-            />
-          </div>
         </div>
-      </details>
+      </div>
 
       {message ? <p className="va-global-message" aria-live="polite">{message}</p> : null}
     </main>
   )
 }
+
 
 function ViewButton({
   label,
@@ -1412,40 +1463,91 @@ function TaskCard({
       </div>
 
       <div className="va-task-dates">
-        <DateItem label="Action" value={task.actionDate} />
-        <DateItem label="Due" value={task.dueDate} />
-        <DateItem label="Follow up" value={task.followUpDate} />
+        <DateItem kind="action" label="Action" value={task.actionDate} today={today} />
+        <DateItem kind="due" label="Due" value={task.dueDate} overdue={Boolean(task.dueDate && task.dueDate < today && task.status !== 'completed')} />
+        <DateItem kind="followup" label="Follow up" value={task.followUpDate} today={today} />
       </div>
 
       {task.details ? <p className="va-task-details">{task.details}</p> : null}
 
       <div className="va-task-actions">
-        <button type="button" onClick={() => onEdit(task)}>Edit</button>
         {currentView === 'completed' ? (
           <button
             className="va-restore-button"
             type="button"
             onClick={() => onStatusChange(task.id, 'needs-action')}
           >
-            Restore to Needs Action
+            ↻ Restore to needs action
           </button>
         ) : (
           <>
-            {task.status !== 'needs-action' ? <button type="button" onClick={() => onStatusChange(task.id, 'needs-action')}>Needs action</button> : null}
-            {task.status !== 'waiting' ? <button type="button" onClick={() => onStatusChange(task.id, 'waiting')}>Waiting</button> : null}
-            {task.status !== 'completed' ? <button type="button" onClick={() => onStatusChange(task.id, 'completed')}>Complete</button> : null}
+            {task.status !== 'needs-action' ? (
+              <button
+                className="va-needs-action-button"
+                type="button"
+                onClick={() => onStatusChange(task.id, 'needs-action')}
+              >
+                ✓ Needs action
+              </button>
+            ) : null}
+            {task.status !== 'waiting' ? (
+              <button
+                className="va-waiting-button"
+                type="button"
+                onClick={() => onStatusChange(task.id, 'waiting')}
+              >
+                ◷ Waiting
+              </button>
+            ) : null}
+            {task.status !== 'completed' ? (
+              <button
+                className="va-complete-button"
+                type="button"
+                onClick={() => onStatusChange(task.id, 'completed')}
+              >
+                ✓ Complete
+              </button>
+            ) : null}
           </>
         )}
-        <button className="va-delete-button" type="button" onClick={() => onDelete(task)}>
-          {currentView === 'completed' ? 'Delete permanently' : 'Delete'}
-        </button>
+
+        <details className="va-task-more">
+          <summary aria-label={`More actions for ${task.title}`}>More</summary>
+          <div>
+            <button type="button" onClick={() => onEdit(task)}>Edit task</button>
+            <button className="va-delete-button" type="button" onClick={() => onDelete(task)}>
+              {currentView === 'completed' ? 'Delete permanently' : 'Delete task'}
+            </button>
+          </div>
+        </details>
       </div>
     </article>
   )
 }
 
-function DateItem({ label, value }: { label: string; value: string }) {
-  return <div><span>{label}</span><strong>{value ? formatDateKey(value) : '—'}</strong></div>
+function DateItem({
+  kind,
+  label,
+  value,
+  today,
+  overdue = false,
+}: {
+  kind: 'action' | 'due' | 'followup'
+  label: string
+  value: string
+  today?: string
+  overdue?: boolean
+}) {
+  const isToday = Boolean(value && today && value === today)
+  const icon = kind === 'action' ? '✓' : kind === 'followup' ? '↩' : overdue ? '!' : '◷'
+
+  return (
+    <div className={`va-date-item date-${kind} ${overdue ? 'is-overdue-date' : ''}`}>
+      <span><i aria-hidden="true">{icon}</i>{label}</span>
+      <strong>{value ? formatDateKey(value) : '—'}</strong>
+      {isToday ? <small>Today</small> : null}
+    </div>
+  )
 }
 
 function EmptyState({ title, message }: { title: string; message: string }) {
