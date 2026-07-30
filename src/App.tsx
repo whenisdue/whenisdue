@@ -146,26 +146,54 @@ function HomePage({ onNavigate }: NavigationProps) {
   const statusText = dueDate ? getStatusText(daysRemaining) : 'Enter a valid date'
 
   useEffect(() => {
-    function handleHomeHistoryFocus() {
-  if (window.location.pathname === '/' && !window.location.hash) {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'auto',
-    })
+    function restoreHomeLocation() {
+      window.requestAnimationFrame(() => {
+        if (window.location.hash === '#calculator') {
+          const calculator = document.getElementById('calculator')
+          const calculatorHeading = document.getElementById('calculator-heading')
 
-    window.requestAnimationFrame(() => {
-      document
-        .getElementById('homepage-title')
-        ?.focus({ preventScroll: true })
-    })
-  }
-}
+          if (!calculator || !calculatorHeading) {
+            return
+          }
 
-    window.addEventListener('popstate', handleHomeHistoryFocus)
+          const calculatorTop =
+            calculator.getBoundingClientRect().top +
+            window.scrollY -
+            80
+
+          window.scrollTo({
+            top: Math.max(calculatorTop, 0),
+            left: 0,
+            behavior: 'auto',
+          })
+
+          calculatorHeading.focus({
+            preventScroll: true,
+          })
+
+          return
+        }
+
+        if (window.location.pathname === '/' && !window.location.hash) {
+          window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'auto',
+          })
+
+          document.getElementById('homepage-title')?.focus({
+            preventScroll: true,
+          })
+        }
+      })
+    }
+
+    window.addEventListener('popstate', restoreHomeLocation)
+    window.addEventListener('hashchange', restoreHomeLocation)
 
     return () => {
-      window.removeEventListener('popstate', handleHomeHistoryFocus)
+      window.removeEventListener('popstate', restoreHomeLocation)
+      window.removeEventListener('hashchange', restoreHomeLocation)
     }
   }, [])
 
@@ -207,25 +235,34 @@ function HomePage({ onNavigate }: NavigationProps) {
   }
 
   function focusHomeSection(sectionId: string, headingId: string) {
-  const nextHash = `#${sectionId}`
+    const section = document.getElementById(sectionId)
+    const heading = document.getElementById(headingId)
 
-  if (window.location.hash !== nextHash) {
-    window.history.pushState(null, '', `/${nextHash}`)
+    if (!section || !heading) {
+      return
+    }
+
+    if (window.location.hash !== `#${sectionId}`) {
+      window.history.pushState(null, '', `/#${sectionId}`)
+    }
+
+    const sectionTop =
+      section.getBoundingClientRect().top +
+      window.scrollY -
+      80
+
+    window.scrollTo({
+      top: Math.max(sectionTop, 0),
+      left: 0,
+      behavior: 'smooth',
+    })
+
+    window.setTimeout(() => {
+      heading.focus({
+        preventScroll: true,
+      })
+    }, 450)
   }
-
-  const section = document.getElementById(sectionId)
-
-  section?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
-  })
-
-  window.setTimeout(() => {
-    document
-      .getElementById(headingId)
-      ?.focus({ preventScroll: true })
-  }, 450)
-}
 
   function saveDeadline() {
     if (!dueDate || !title.trim()) {
