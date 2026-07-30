@@ -557,6 +557,7 @@ function LocalWorkspacePage({
   const todayCount = filterTasksForView(workspace.tasks, 'today', today).length
   const followUpCount = filterTasksForView(workspace.tasks, 'follow-up', today).length
   const waitingCount = filterTasksForView(workspace.tasks, 'waiting', today).length
+  const upcomingCount = filterTasksForView(workspace.tasks, 'upcoming', today).length
   const overdueCount = filterTasksForView(workspace.tasks, 'overdue', today).length
   const completedCount = filterTasksForView(workspace.tasks, 'completed', today).length
 
@@ -883,67 +884,26 @@ function LocalWorkspacePage({
         </section>
       ) : null}
 
-      <section className="va-command-header">
+      <section className="va-daily-header">
         <div>
           <p className="va-eyebrow">VA Workspace</p>
-          <h1>Your daily follow-up command center</h1>
-          <p>Start with Today, then check follow-ups, waiting items, upcoming work, and anything overdue.</p>
+          <h1>Start every day knowing what needs attention.</h1>
+          <p>Today’s work comes first. Use the other views when you need to look ahead or follow up.</p>
         </div>
-        <span className="va-local-note">Saved to your private account</span>
+        <div className="va-daily-header-actions">
+          <span className="va-local-note">Saved and synced to your account</span>
+          <button className="va-primary-button" type="button" onClick={() => { setEditingTaskId(null); setTaskDraft(emptyTaskDraft); setFormPanel('task') }}>+ Add task</button>
+          <button className="va-secondary-button" type="button" onClick={() => { setEditingClientId(null); setClientDraft(emptyClientDraft); setFormPanel('client') }}>+ Add client</button>
+        </div>
       </section>
 
-      <section className="va-summary-grid">
-        <SummaryCard label="Active clients" value={activeClients} />
-        <SummaryCard label="Needs action today" value={todayCount} />
-        <SummaryCard label="Follow-ups today" value={followUpCount} />
-        <SummaryCard label="Waiting" value={waitingCount} />
-        <SummaryCard label="Overdue" value={overdueCount} />
-        <SummaryCard label="Completed" value={completedCount} />
+      <section className="va-priority-summary" aria-label="Daily priority summary">
+        <button className={view === 'today' ? 'is-selected' : ''} type="button" onClick={() => setView('today')}><span>Needs attention today</span><strong>{safeCount(todayCount)}</strong></button>
+        <button className={view === 'follow-up' ? 'is-selected' : ''} type="button" onClick={() => setView('follow-up')}><span>Follow-ups due</span><strong>{safeCount(followUpCount)}</strong></button>
+        <button className={view === 'overdue' ? 'is-selected' : ''} type="button" onClick={() => setView('overdue')}><span>Overdue</span><strong>{safeCount(overdueCount)}</strong></button>
       </section>
 
-      <nav className="va-view-tabs" aria-label="Workspace views">
-        <ViewButton label="Clients" viewName="clients" currentView={view} setView={setView} count={workspace.clients.length} />
-        <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
-        <ViewButton label="Follow up" viewName="follow-up" currentView={view} setView={setView} count={followUpCount} />
-        <ViewButton label="Waiting" viewName="waiting" currentView={view} setView={setView} count={waitingCount} />
-        <ViewButton label="Upcoming" viewName="upcoming" currentView={view} setView={setView} count={filterTasksForView(workspace.tasks, 'upcoming', today).length} />
-        <ViewButton label="Overdue" viewName="overdue" currentView={view} setView={setView} count={overdueCount} />
-        <ViewButton label="Completed" viewName="completed" currentView={view} setView={setView} count={completedCount} />
-      </nav>
-
-      <section className="va-work-area">
-        <div className="va-quick-actions" aria-label="Create workspace records">
-          <div>
-            <p className="va-eyebrow">Quick capture</p>
-            <h2>Keep the work list visible.</h2>
-            <p>Open a form only when you need to create or edit something.</p>
-          </div>
-          <div className="va-quick-action-buttons">
-            <button
-              className="va-primary-button"
-              type="button"
-              onClick={() => {
-                setEditingTaskId(null)
-                setTaskDraft(emptyTaskDraft)
-                setFormPanel('task')
-              }}
-            >
-              + Quick task
-            </button>
-            <button
-              className="va-secondary-button"
-              type="button"
-              onClick={() => {
-                setEditingClientId(null)
-                setClientDraft(emptyClientDraft)
-                setFormPanel('client')
-              }}
-            >
-              + Add client
-            </button>
-          </div>
-        </div>
-
+      <section className="va-daily-work">
         {formPanel ? (
           <div
             className="va-form-overlay"
@@ -1023,7 +983,7 @@ function LocalWorkspacePage({
                     </label>
 
                     <label>
-                      <span>Task or event *</span>
+                      <span>What needs to happen? *</span>
                       <input
                         autoFocus
                         maxLength={taskTitleMaxLength}
@@ -1089,7 +1049,7 @@ function LocalWorkspacePage({
                     </label>
 
                     <label>
-                      <span>Details</span>
+                      <span>Notes and instructions</span>
                       <textarea
                         maxLength={taskDetailsMaxLength}
                         placeholder="Confirmation number, contact instructions, or other notes"
@@ -1254,7 +1214,7 @@ function LocalWorkspacePage({
             ) : (
               <EmptyState
                 title="No clients yet"
-                message="Use Add client to create the first client record."
+                message="Add the first client you manage. Then keep their tasks, deadlines, and follow-ups together."
               />
             )
           ) : visibleTasks.length > 0 ? (
@@ -1279,13 +1239,23 @@ function LocalWorkspacePage({
               title={`Nothing in ${getViewTitle(view).toLowerCase()}`}
               message={
                 view === 'today'
-                  ? 'No action or event dates are scheduled for today. Use Quick task to capture new work.'
+                  ? 'You’re clear for today. Review upcoming work, or add a follow-up while it’s on your mind.'
                   : 'Tasks will appear here automatically based on their dates and status.'
               }
             />
           )}
         </section>
       </section>
+
+      <nav className="va-compact-tabs" aria-label="Workspace views">
+        <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
+        <ViewButton label="Follow-ups due" viewName="follow-up" currentView={view} setView={setView} count={followUpCount} />
+        <ViewButton label="Waiting on others" viewName="waiting" currentView={view} setView={setView} count={waitingCount} />
+        <ViewButton label="Upcoming" viewName="upcoming" currentView={view} setView={setView} count={upcomingCount} />
+        <ViewButton label="Overdue" viewName="overdue" currentView={view} setView={setView} count={overdueCount} />
+        <ViewButton label="Clients" viewName="clients" currentView={view} setView={setView} count={activeClients} />
+        <ViewButton label="Completed" viewName="completed" currentView={view} setView={setView} count={completedCount} />
+      </nav>
 
       <details className="va-backup-panel">
         <summary>
@@ -1355,10 +1325,6 @@ function LocalWorkspacePage({
       {message ? <p className="va-global-message" aria-live="polite">{message}</p> : null}
     </main>
   )
-}
-
-function SummaryCard({ label, value }: { label: string; value: number }) {
-  return <article><span>{label}</span><strong>{safeCount(value)}</strong></article>
 }
 
 function ViewButton({
@@ -1567,8 +1533,8 @@ function getViewTitle(view: WorkspaceView): string {
   const labels: Record<WorkspaceView, string> = {
     clients: 'Your clients',
     today: 'Today',
-    'follow-up': 'Follow up',
-    waiting: 'Waiting',
+    'follow-up': 'Follow-ups due',
+    waiting: 'Waiting on others',
     upcoming: 'Upcoming',
     overdue: 'Overdue',
     completed: 'Completed',

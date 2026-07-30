@@ -1679,3 +1679,25 @@
     padding: 18px 15px 24px;
   }
 }
+
+/* Daily-work-first hierarchy */
+.va-daily-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:12px;border-bottom:1px solid var(--va-border);padding:12px 2px 16px}
+.va-daily-header h1{margin:0;color:var(--va-ink);font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.75rem,3.2vw,2.65rem);letter-spacing:-.04em;line-height:1}
+.va-daily-header p:not(.va-eyebrow){max-width:680px;margin:7px 0 0;color:var(--va-muted);font-size:.84rem;line-height:1.45}
+.va-daily-header-actions{display:flex;flex:0 0 auto;align-items:center;gap:8px}
+.va-daily-header-actions .va-primary-button,.va-daily-header-actions .va-secondary-button{min-height:44px}
+.va-priority-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px;border:1px solid var(--va-border);border-radius:14px;overflow:hidden;background:rgba(255,253,249,.72)}
+.va-priority-summary button{display:flex;min-height:64px;align-items:center;justify-content:space-between;gap:10px;border:0;background:transparent;color:#617083;padding:10px 16px;font:inherit;cursor:pointer}
+.va-priority-summary button+button{border-left:1px solid var(--va-border)}
+.va-priority-summary button.is-selected{background:#eaf3ee;color:var(--va-primary-dark)}
+.va-priority-summary span{font-size:.74rem;font-weight:760}.va-priority-summary strong{color:var(--va-ink);font-family:Georgia,"Times New Roman",serif;font-size:1.7rem}
+.va-daily-work{position:relative;margin-top:10px}.va-daily-work .va-main-panel{min-height:360px;border-radius:16px;padding:18px}.va-daily-work .va-task-list,.va-daily-work .va-client-list{margin-top:14px}
+.va-compact-tabs{display:flex;gap:6px;margin-top:10px;padding:2px 0 5px;overflow-x:auto;scrollbar-width:thin}
+.va-compact-tabs button{display:inline-flex;min-height:44px;flex:0 0 auto;align-items:center;gap:8px;border:0;border-bottom:2px solid transparent;background:transparent;color:#687789;padding:8px 10px;font:inherit;font-size:.74rem;font-weight:760;cursor:pointer;white-space:nowrap}
+.va-compact-tabs button.is-selected{border-bottom-color:var(--va-primary);color:var(--va-primary-dark)}
+.va-compact-tabs b{display:inline-grid;min-width:23px;height:23px;place-items:center;border-radius:999px;background:#f0e7da;font-family:var(--mono);font-size:.64rem}
+.va-task-card-head h3{font-size:1.08rem}.va-task-dates strong{font-size:.78rem}.va-task-details{font-size:.82rem}
+.va-task-actions button,.va-client-actions button,.va-auth-account-bar button{min-height:44px;padding:8px 11px;font-size:.72rem}
+.va-task-actions .va-delete-button,.va-client-actions .va-delete-button{margin-left:8px;border-color:#e6c9c6;color:#984a43}
+@media(max-width:860px){.va-daily-header{align-items:flex-start;flex-direction:column}.va-daily-header-actions{width:100%;flex-wrap:wrap}.va-daily-header-actions .va-local-note{width:100%;box-sizing:border-box;border:0;background:transparent;padding:0}}
+@media(max-width:620px){.va-auth-account-bar{min-height:46px;flex-direction:row;align-items:center;overflow:hidden}.va-auth-account-bar>div:first-child span{display:none}.va-auth-account-bar strong{display:block;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.va-auth-stage-note{display:none}.va-daily-header{gap:14px;margin-top:7px;padding:8px 1px 13px}.va-daily-header h1{font-size:1.9rem}.va-daily-header-actions{display:grid;grid-template-columns:1fr 1fr}.va-daily-header-actions .va-local-note{display:none}.va-priority-summary{grid-template-columns:1fr;border-radius:12px}.va-priority-summary button{min-height:52px;padding:8px 12px}.va-priority-summary button+button{border-top:1px solid var(--va-border);border-left:0}.va-priority-summary strong{font-size:1.4rem}.va-daily-work{margin-top:8px}.va-daily-work .va-main-panel{padding:14px}.va-list-heading{align-items:flex-start}.va-task-card{padding:13px}.va-task-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.va-task-actions button{width:100%}.va-task-actions .va-delete-button{grid-column:1/-1;margin-left:0}.va-compact-tabs{margin-inline:-2px;padding-bottom:8px}.va-form-drawer .va-form-actions{position:sticky;bottom:-24px;z-index:2;margin:18px -15px -24px;border-top:1px solid var(--va-border);background:#fffdf9;padding:12px 15px 16px}.va-form-drawer .va-form-actions button{min-height:44px}}

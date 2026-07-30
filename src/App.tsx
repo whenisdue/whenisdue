@@ -276,27 +276,103 @@ function HomePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell home-page friendly-home">
-      <section className="friendly-hero" aria-labelledby="homepage-title">
+      <section className="workspace-first-hero" aria-labelledby="homepage-title">
         <IdentityRow onNavigate={onNavigate} />
-        <div className="friendly-hero-copy">
-          <p className="friendly-eyebrow">
-            <span aria-hidden="true">✓</span>
-            Use the calculators without signing up. VA Workspace accounts are optional.
-          </p>
-          <h1 id="homepage-title">Never count the days yourself again.</h1>
-          <p className="friendly-subtitle">
-            Pick what you need, enter the starting date, and we’ll show you exactly when it is due.
-          </p>
+
+        <div className="workspace-first-hero-grid">
+          <div className="workspace-first-copy">
+            <p className="friendly-eyebrow">
+              <span aria-hidden="true">✓</span>
+              Built for virtual assistants managing multiple clients
+            </p>
+            <h1 id="homepage-title">Know what needs attention for every client.</h1>
+            <p className="friendly-subtitle">
+              Keep tasks, deadlines, waiting items, and follow-ups in one calm daily workspace.
+            </p>
+
+            <div className="workspace-first-actions">
+              <a
+                className="workspace-primary-cta"
+                href="/workspace"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/workspace')
+                }}
+              >
+                Create your workspace
+              </a>
+              <a className="workspace-secondary-cta" href="#workspace-preview">
+                See how it works
+              </a>
+            </div>
+
+            <p className="workspace-trust-line">
+              Private account <span aria-hidden="true">·</span> Cloud-synced
+              <span aria-hidden="true">·</span> Export your data anytime
+            </p>
+
+            <a className="calculator-jump-link" href="#calculator">
+              Need a quick date calculation? Use the free calculators ↓
+            </a>
+          </div>
+
+          <div
+            id="workspace-preview"
+            className="workspace-product-preview"
+            aria-label="Preview of the WhenIsDue Today workspace"
+          >
+            <div className="preview-window-bar">
+              <span className="preview-brand-dot" aria-hidden="true">✓</span>
+              <strong>Today</strong>
+              <span>Saved and synced</span>
+            </div>
+
+            <div className="preview-summary-row">
+              <div><span>Needs attention</span><strong>3</strong></div>
+              <div><span>Follow-ups due</span><strong>2</strong></div>
+              <div><span>Overdue</span><strong>1</strong></div>
+            </div>
+
+            <div className="preview-task-list">
+              <article className="preview-task preview-task-action">
+                <div><span>RICHARD</span><strong>Confirm Friday’s appointment</strong></div>
+                <b>Needs action</b>
+                <p><span>Action today</span><span>Due Aug 1</span></p>
+              </article>
+              <article className="preview-task preview-task-waiting">
+                <div><span>ACME STUDIO</span><strong>Approval for revised content calendar</strong></div>
+                <b>Waiting</b>
+                <p><span>Follow up today</span><span>Waiting on client</span></p>
+              </article>
+              <article className="preview-task preview-task-overdue">
+                <div><span>JAN</span><strong>Send updated appointment summary</strong></div>
+                <b>Overdue</b>
+                <p><span>Action Jul 29</span><span>Follow up today</span></p>
+              </article>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="calculator" className="friendly-calculator" aria-label="Due date calculator">
+      <section className="workspace-story" aria-labelledby="workspace-story-title">
+        <div>
+          <p className="friendly-eyebrow muted-eyebrow">Start every morning knowing</p>
+          <h2 id="workspace-story-title">What to do, who is waiting, and what could be missed.</h2>
+        </div>
+        <div className="workspace-story-steps">
+          <article><span>1</span><h3>Add your clients</h3><p>Keep each client’s active work and follow-ups together.</p></article>
+          <article><span>2</span><h3>Capture the next action</h3><p>Separate the action date, actual due date, and follow-up date.</p></article>
+          <article><span>3</span><h3>Work from Today</h3><p>Open one view and see what needs attention first.</p></article>
+        </div>
+      </section>
+
+      <section id="calculator" className="friendly-calculator calculator-secondary-section" aria-label="Quick deadline calculators">
         <div className="scenario-section">
           <div className="friendly-section-heading">
             <span className="step-number">1</span>
             <div>
-              <h2>What do you need to figure out?</h2>
-              <p>Choose the situation that sounds closest.</p>
+              <h2>Quick deadline calculators</h2>
+              <p>Use these free tools when you only need to calculate a date.</p>
             </div>
           </div>
 
@@ -2382,10 +2458,10 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
   }
 
   return {
-    title: 'WhenIsDue - Simple Due Date Calculator',
-    description: 'Calculate calendar days, business days, invoice terms, free trial dates, return windows, and everyday deadlines.',
-    openGraphDescription: 'A simple due date calculator for everyday deadlines, business days, invoice terms, free trials, and return windows.',
-    twitterDescription: 'Calculate exact due dates for everyday deadlines.',
+    title: 'WhenIsDue - Client Follow-Up Workspace for Virtual Assistants',
+    description: 'A daily client task and follow-up workspace for virtual assistants, with free deadline calculators for quick date planning.',
+    openGraphDescription: 'Know what needs attention across every client with a private daily follow-up workspace for virtual assistants.',
+    twitterDescription: 'A daily client task and follow-up workspace for virtual assistants.',
     path: '/',
   }
 }
