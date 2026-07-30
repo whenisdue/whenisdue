@@ -3059,26 +3059,6 @@ function getReturnWindowValidationMessage(
   return null
 }
 
-function getInvoiceDueDateValidationMessage(
-  invoiceDate: PlainDate | null,
-  paymentTerms: number | null,
-): string | null {
-  if (!invoiceDate) {
-    return 'Enter a valid date from 1900-01-01 to 2100-12-31.'
-  }
-
-  if (!isDateInSupportedRange(invoiceDate)) {
-    return 'Date must be from 1900-01-01 to 2100-12-31.'
-  }
-
-  if (paymentTerms === null || paymentTerms <= 0 || paymentTerms > 3650) {
-    return positiveWholeNumberMessage
-  }
-
-  return null
-}
-
-
 type StorageResult = {
   ok: boolean
   message: string | null
