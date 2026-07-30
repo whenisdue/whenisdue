@@ -4484,3 +4484,40 @@ a:focus-visible,
     height: 72px;
   }
 }
+
+
+/* Trust-page readability */
+.static-page {
+  max-width: 980px;
+}
+
+.static-content {
+  max-width: 860px;
+  gap: 20px;
+  border-radius: 14px;
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.static-content article {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ece5da;
+}
+
+.static-content article:last-of-type {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.static-content h2 {
+  font-size: 1.08rem;
+}
+
+.static-content p {
+  font-size: 0.94rem;
+}
+
+@media (max-width: 620px) {
+  .static-content {
+    padding: 18px 16px;
+  }
+}

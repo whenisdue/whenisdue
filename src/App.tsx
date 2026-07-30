@@ -281,7 +281,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         <div className="friendly-hero-copy">
           <p className="friendly-eyebrow">
             <span aria-hidden="true">✓</span>
-            No signup. No personal data. Just the date.
+            Use the calculators without signing up. VA Workspace accounts are optional.
           </p>
           <h1 id="homepage-title">Never count the days yourself again.</h1>
           <p className="friendly-subtitle">
@@ -634,8 +634,8 @@ function HomePage({ onNavigate }: NavigationProps) {
 
       <section className="trust-strip" aria-label="Privacy and ease of use">
         <span><b aria-hidden="true">✓</b> Free to use</span>
-        <span><b aria-hidden="true">⌁</b> Saved on your device</span>
-        <span><b aria-hidden="true">○</b> No signup</span>
+        <span><b aria-hidden="true">⌁</b> Calculator dates stay on this device</span>
+        <span><b aria-hidden="true">○</b> VA Workspace uses a private account</span>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
@@ -1804,7 +1804,7 @@ function SiteFooter({
         </a>
       </div>
       <p>
-        Saved items stay in this browser only. If you clear browser data, use private browsing, or switch devices, they may not be there later.
+        Calculator dates are saved in this browser only. VA Workspace records are stored in the signed-in account and can be exported through Backup and restore.
       </p>
       <p>
         {planningNote}
@@ -2336,7 +2336,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
   if (route === 'workspace') {
     return {
       title: 'VA Workspace - WhenIsDue',
-      description: 'A private browser-based client workspace for virtual assistants to organize client details and prepare follow-up workflows.',
+      description: 'A private cloud-synced client and follow-up workspace for virtual assistants.',
       path: '/workspace',
     }
   }
@@ -2452,6 +2452,8 @@ type StaticPageContent = {
 }
 
 function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
+  const contactEmail = 'contact.whenisdue@gmail.com'
+
   if (route === 'about') {
     return {
       title: 'About WhenIsDue',
@@ -2459,28 +2461,36 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         {
           title: 'What WhenIsDue does',
           paragraphs: [
-            'WhenIsDue is an independent calculator website for everyday due dates. It helps with calendar days, business days, free trials, return windows, invoice terms, and other common planning dates.',
+            'WhenIsDue provides simple due-date calculators and a separate VA Workspace for organizing client tasks, action dates, follow-ups, waiting items, and completed work.',
           ],
         },
         {
-          title: 'Why the site exists',
+          title: 'Two different storage models',
           paragraphs: [
-            'The site exists to make simple deadline math easier to check without creating an account or setting up a full productivity app.',
+            'The public calculators can be used without an account. Dates saved from the calculators remain in the browser on that device.',
+            'The VA Workspace requires an account. Its client and task records are stored in a private cloud workspace so they can be accessed after signing in on another supported device or browser.',
           ],
         },
         {
-          title: 'How calculations work',
+          title: 'Independent service',
           paragraphs: [
-            'Calculators use date-only inputs and straightforward rules for each page. Saved due dates stay in your browser on that device.',
+            'WhenIsDue is operated independently under the name WhenIsDue. It is not affiliated with Supabase or with any government, legal, financial, medical, school, employer, retailer, or service provider.',
           ],
         },
         {
           title: 'Important reminder',
           paragraphs: [
-            'WhenIsDue is not an official government, legal, financial, tax, medical, school, employer, or service provider source. Verify important deadlines with the official source before relying on them.',
+            'Calculations and workspace information are provided for organization and planning. Verify important deadlines, appointments, policies, and obligations with the original or official source.',
+          ],
+        },
+        {
+          title: 'Contact',
+          paragraphs: [
+            `Questions, support requests, privacy requests, and account-deletion requests can be sent to ${contactEmail}.`,
           ],
         },
       ],
+      email: contactEmail,
     }
   }
 
@@ -2489,36 +2499,99 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
       title: 'Privacy Policy',
       sections: [
         {
-          title: 'Information you enter',
+          title: 'Effective date',
           paragraphs: [
-            'No account is required. This MVP does not ask for names, passwords, addresses, payment details, or other personal information.',
+            'This Privacy Policy is effective July 30, 2026. It explains how WhenIsDue handles information used by the public calculators and the VA Workspace.',
           ],
         },
         {
-          title: 'Saved due dates',
+          title: 'Public calculators',
           paragraphs: [
-            'Saved due dates are stored locally in your browser on your device. Clearing browser data, using private browsing, or switching devices may remove or hide saved due dates.',
+            'The public due-date calculators do not require an account. Dates and labels that you choose to save through those calculators are stored in your browser on that device.',
+            'Clearing browser data, using private browsing, changing browsers, or switching devices may remove or hide calculator records. These calculator records are separate from VA Workspace cloud records.',
           ],
         },
         {
-          title: 'Accounts',
+          title: 'VA Workspace account information',
           paragraphs: [
-            'WhenIsDue does not currently provide user accounts, login, or cloud sync.',
+            'Creating a VA Workspace account requires an email address and password. Authentication is provided through Supabase. WhenIsDue does not display your password and does not include passwords in workspace backup files.',
+            'Authentication may use session information in your browser to keep you signed in and to determine which workspace records your account is authorized to access.',
           ],
         },
         {
-          title: 'Analytics and ads',
+          title: 'VA Workspace records',
           paragraphs: [
-            'The current MVP does not use analytics or advertising cookies. If analytics or ads are added later, this privacy policy will be updated.',
+            'The VA Workspace may contain client names, contact details, service descriptions, notes, task titles, task details, dates, and statuses that you choose to enter.',
+            'Workspace records are stored using Supabase cloud services and are associated with the signed-in account. A browser copy may also be kept locally to support the current workspace and migration features.',
+          ],
+        },
+        {
+          title: 'How information is used',
+          paragraphs: [
+            'Information is used to provide account access, save and synchronize workspace records, restore backups, respond to support requests, investigate technical or security issues, and operate and improve WhenIsDue.',
+            'WhenIsDue does not sell VA Workspace records or use client records for advertising.',
+          ],
+        },
+        {
+          title: 'Service providers and access',
+          paragraphs: [
+            'WhenIsDue uses service providers, including Supabase for authentication and database services and Vercel for website hosting and deployment. These providers process information as needed to operate the service.',
+            'The WhenIsDue operator may be technically able to access stored records when reasonably necessary for support, security, legal compliance, account deletion, or service administration. Users should avoid entering information that is not necessary for their work.',
+          ],
+        },
+        {
+          title: 'Security',
+          paragraphs: [
+            'WhenIsDue uses account authentication and database access controls intended to separate each user’s workspace. No online service can guarantee absolute security, and users are responsible for protecting their account password and devices.',
+            'Do not share passwords through email or support messages. WhenIsDue will not ask you to send your password.',
+          ],
+        },
+        {
+          title: 'Backups, export, and retention',
+          paragraphs: [
+            'Workspace users can download a JSON backup containing their clients and tasks. Backup files do not intentionally include passwords, authentication tokens, or Supabase project keys.',
+            'Workspace records are generally retained while the account remains active or as needed to provide the service. Some limited information may be retained when reasonably necessary for security, fraud prevention, dispute resolution, legal obligations, or recovery from backups.',
+          ],
+        },
+        {
+          title: 'Your choices and rights',
+          paragraphs: [
+            'You may edit or delete workspace records, download a backup, and request account deletion. Depending on applicable law, you may also have rights to request access, correction, objection, portability, erasure, or blocking of personal information.',
+            `To make a privacy or account-deletion request, email ${contactEmail} from the email address associated with the account. WhenIsDue may request reasonable verification before acting on the request.`,
+          ],
+        },
+        {
+          title: 'Account deletion',
+          paragraphs: [
+            'Verified account-deletion requests are handled manually. WhenIsDue aims to delete the account and associated active workspace records within 30 days, unless limited retention is required or permitted for legal, security, fraud-prevention, dispute, or backup-recovery purposes.',
+          ],
+        },
+        {
+          title: 'Client information entered by workspace users',
+          paragraphs: [
+            'Workspace users decide what information to enter about their clients. Users are responsible for having an appropriate reason and authority to store that information and for following confidentiality, contractual, professional, and privacy obligations that apply to their work.',
+          ],
+        },
+        {
+          title: 'Children',
+          paragraphs: [
+            'WhenIsDue is not designed to collect personal information directly from children. Do not create an account or enter a child’s personal information unless you have the authority and lawful basis to do so.',
+          ],
+        },
+        {
+          title: 'Policy changes',
+          paragraphs: [
+            'This policy may be updated as the service changes. The effective date will be revised when material changes are published.',
           ],
         },
         {
           title: 'Contact',
           paragraphs: [
-            'Questions about this privacy policy can be sent through the contact email listed on the Contact page.',
+            `Privacy questions and requests can be sent to ${contactEmail}.`,
           ],
         },
       ],
+      email: contactEmail,
     }
   }
 
@@ -2527,50 +2600,119 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
       title: 'Terms of Use',
       sections: [
         {
-          title: 'General use',
+          title: 'Effective date and operator',
           paragraphs: [
-            'WhenIsDue provides general date calculation tools for convenience and planning only.',
+            'These Terms are effective July 30, 2026. The service is operated under the name WhenIsDue.',
           ],
         },
         {
-          title: 'Calculator accuracy',
+          title: 'Acceptance',
           paragraphs: [
-            'The calculators use simple date rules and may not match every contract, policy, local rule, or service-specific deadline. Important deadlines should be verified with official documents, contracts, stores, schools, employers, agencies, or service providers.',
+            'By using WhenIsDue, you agree to these Terms and the Privacy Policy. If you do not agree, do not use the service.',
+          ],
+        },
+        {
+          title: 'Public calculators',
+          paragraphs: [
+            'The calculators provide general date calculations for convenience and planning. Results may not account for holidays, time zones, provider-specific counting rules, contract language, local law, or special circumstances.',
+            'You are responsible for checking important dates against the original agreement, receipt, invoice, policy, calendar, or official source.',
+          ],
+        },
+        {
+          title: 'VA Workspace accounts',
+          paragraphs: [
+            'You are responsible for providing accurate account information, maintaining the confidentiality of your password, securing your devices, and notifying WhenIsDue if you believe your account has been compromised.',
+            'You may not access another person’s account or attempt to bypass authentication, database access controls, rate limits, or other safeguards.',
+          ],
+        },
+        {
+          title: 'Client and workspace information',
+          paragraphs: [
+            'You retain responsibility for the information you enter. You must have an appropriate right, permission, or lawful basis to store and use client information in the workspace.',
+            'Do not use WhenIsDue to store information when doing so would violate a contract, professional duty, confidentiality obligation, privacy requirement, or applicable law.',
+          ],
+        },
+        {
+          title: 'Acceptable use',
+          paragraphs: [
+            'Do not use WhenIsDue for unlawful activity, harassment, fraud, unauthorized surveillance, malicious code, interference with the service, credential theft, or attempts to access data that does not belong to you.',
+          ],
+        },
+        {
+          title: 'Backups and availability',
+          paragraphs: [
+            'Workspace export tools are provided as an additional safeguard, but users remain responsible for downloading backups appropriate to their needs.',
+            'WhenIsDue may be changed, suspended, interrupted, or discontinued. Continuous availability, perfect synchronization, permanent storage, and error-free operation are not guaranteed.',
+          ],
+        },
+        {
+          title: 'Deletion and termination',
+          paragraphs: [
+            `You may request account deletion by emailing ${contactEmail} from the email address associated with the account. Verified requests are generally processed within 30 days.`,
+            'WhenIsDue may restrict or terminate access when reasonably necessary to protect users, comply with law, investigate misuse, or secure the service.',
           ],
         },
         {
           title: 'No professional advice',
           paragraphs: [
-            'WhenIsDue does not provide legal, financial, tax, medical, immigration, school, employment, or professional advice.',
+            'WhenIsDue does not provide legal, financial, tax, medical, employment, privacy-compliance, or other professional advice. Obtain qualified advice when the consequences of a deadline or data-handling decision are significant.',
           ],
         },
         {
-          title: 'User responsibility',
+          title: 'Disclaimer and limitation',
           paragraphs: [
-            'You are responsible for checking important dates with the official source before making decisions based on a calculated result.',
+            'The service is provided on an “as is” and “as available” basis to the extent permitted by law. WhenIsDue does not guarantee that calculations, reminders, stored records, synchronization, exports, or other features will always be complete, accurate, available, or suitable for a particular purpose.',
+            'To the extent permitted by applicable law, WhenIsDue is not responsible for indirect, incidental, special, consequential, or business losses resulting from use of or inability to use the service.',
           ],
         },
         {
-          title: 'Changes to the site',
+          title: 'Governing law',
           paragraphs: [
-            'WhenIsDue may change, add, or remove calculators and content over time. These terms may be updated when the site changes.',
+            'These Terms are governed by the laws of the Republic of the Philippines, without regard to conflict-of-law principles.',
+            'Nothing in these Terms limits rights that cannot legally be waived under applicable law.',
+          ],
+        },
+        {
+          title: 'Changes',
+          paragraphs: [
+            'These Terms may be updated as WhenIsDue changes. Continued use after revised Terms are published means you accept the revised Terms.',
+          ],
+        },
+        {
+          title: 'Contact',
+          paragraphs: [
+            `Questions about these Terms can be sent to ${contactEmail}.`,
           ],
         },
       ],
+      email: contactEmail,
     }
   }
 
   return {
-    title: 'Contact',
+    title: 'Contact WhenIsDue',
     sections: [
       {
-        title: 'Get in touch',
+        title: 'Support and feedback',
         paragraphs: [
-          'For questions, corrections, feedback, or reporting a calculation issue with WhenIsDue, contact:',
+          'Use the email below for technical problems, corrections, feature feedback, privacy questions, and general support.',
+        ],
+      },
+      {
+        title: 'Account deletion and privacy requests',
+        paragraphs: [
+          'Send the request from the email address associated with your VA Workspace account. Include a clear request such as “Delete my WhenIsDue account.”',
+          'Do not send your password, authentication code, Supabase key, or confidential client records by email.',
+        ],
+      },
+      {
+        title: 'Response expectations',
+        paragraphs: [
+          'WhenIsDue currently provides email support only. Response times are not guaranteed, but verified account-deletion requests are generally processed within 30 days.',
         ],
       },
     ],
-    email: 'contact.whenisdue@gmail.com',
+    email: contactEmail,
   }
 }
 

@@ -1553,3 +1553,129 @@
     align-items: flex-start;
   }
 }
+
+
+/* Today-first workspace and compact creation flow */
+.va-work-area {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.va-quick-actions {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--va-border);
+  border-radius: 16px;
+  background: rgba(255, 253, 249, 0.84);
+  padding: 12px 15px;
+}
+
+.va-quick-actions h2 {
+  margin: 0;
+  color: var(--va-ink);
+  font-size: 0.98rem;
+}
+
+.va-quick-actions p:not(.va-eyebrow) {
+  margin: 3px 0 0;
+  color: var(--va-muted);
+  font-size: 0.73rem;
+}
+
+.va-quick-action-buttons {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.va-form-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(18, 35, 49, 0.38);
+  padding: 12px;
+}
+
+.va-form-drawer {
+  width: min(480px, 100%);
+  height: 100%;
+  overflow-y: auto;
+  border: 1px solid #d7c7b1;
+  border-radius: 20px;
+  background: #fffdf9;
+  padding: 20px;
+  box-shadow: -18px 0 48px rgba(25, 43, 56, 0.18);
+}
+
+.va-form-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.va-form-drawer-head h2 {
+  margin: 0;
+  color: var(--va-ink);
+  font-size: 1.35rem;
+}
+
+.va-drawer-close {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #d8c8b2;
+  border-radius: 10px;
+  background: white;
+  color: #647180;
+  font: inherit;
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.va-form-drawer .va-form-fields {
+  margin-top: 18px;
+}
+
+.va-form-drawer .va-date-grid {
+  grid-template-columns: 1fr;
+}
+
+.va-main-panel {
+  min-height: 420px;
+}
+
+@media (max-width: 700px) {
+  .va-quick-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .va-quick-action-buttons {
+    width: 100%;
+  }
+
+  .va-quick-action-buttons button {
+    flex: 1 1 0;
+  }
+
+  .va-form-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .va-form-drawer {
+    width: 100%;
+    height: min(88vh, 760px);
+    border-radius: 20px 20px 0 0;
+    padding: 18px 15px 24px;
+  }
+}

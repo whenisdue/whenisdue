@@ -491,7 +491,8 @@ function LocalWorkspacePage({
   const [localSnapshot] = useState(loadVaWorkspace)
   const [workspace, setWorkspace] = useState<VaWorkspaceData>(emptyWorkspace)
   const [workspaceLoading, setWorkspaceLoading] = useState(true)
-  const [view, setView] = useState<WorkspaceView>('clients')
+  const [view, setView] = useState<WorkspaceView>('today')
+  const [formPanel, setFormPanel] = useState<'task' | 'client' | null>(null)
   const [clientDraft, setClientDraft] = useState<VaClientDraft>(emptyClientDraft)
   const [taskDraft, setTaskDraft] = useState<VaTaskDraft>(emptyTaskDraft)
   const [editingClientId, setEditingClientId] = useState<string | null>(null)
@@ -712,6 +713,7 @@ function LocalWorkspacePage({
     if (persist({ ...workspace, clients }, editingClientId ? 'Client updated.' : 'Client saved.')) {
       setClientDraft(emptyClientDraft)
       setEditingClientId(null)
+      setFormPanel(null)
     }
   }
 
@@ -726,6 +728,7 @@ function LocalWorkspacePage({
       active: client.active,
     })
     setEditingClientId(client.id)
+    setFormPanel('client')
     setView('clients')
     setMessage(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -782,6 +785,7 @@ function LocalWorkspacePage({
         clientId: normalized.clientId,
       })
       setEditingTaskId(null)
+      setFormPanel(null)
     }
   }
 
@@ -796,6 +800,7 @@ function LocalWorkspacePage({
       status: task.status,
     })
     setEditingTaskId(task.id)
+    setFormPanel('task')
     setMessage(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -881,8 +886,8 @@ function LocalWorkspacePage({
       <section className="va-command-header">
         <div>
           <p className="va-eyebrow">VA Workspace</p>
-          <h1>What needs your attention?</h1>
-          <p>Review today, follow-ups, waiting items, upcoming work, and overdue tasks.</p>
+          <h1>Your daily follow-up command center</h1>
+          <p>Start with Today, then check follow-ups, waiting items, upcoming work, and anything overdue.</p>
         </div>
         <span className="va-local-note">Saved to your private account</span>
       </section>
@@ -906,120 +911,316 @@ function LocalWorkspacePage({
         <ViewButton label="Completed" viewName="completed" currentView={view} setView={setView} count={completedCount} />
       </nav>
 
-      <section className="va-phase2-grid">
-        <div className="va-form-stack">
-          <form className="va-panel" onSubmit={(event) => {
-            event.preventDefault()
-            saveTask()
-          }}>
-            <div className="va-section-heading">
-              <p className="va-eyebrow">{editingTaskId ? 'Editing task' : 'New client task'}</p>
-              <h2>{editingTaskId ? 'Update task' : 'Add a due plan'}</h2>
-              <p>Use only the dates that apply. At least one date is required.</p>
-            </div>
-
-            <div className="va-form-fields">
-              <label>
-                <span>Client *</span>
-                <select value={taskDraft.clientId} onChange={(event) => setTaskDraft({ ...taskDraft, clientId: event.target.value })}>
-                  <option value="">Choose a client</option>
-                  {sortedClients.map((client) => (
-                    <option key={client.id} value={client.id}>{client.displayName}</option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                <span>Task or event *</span>
-                <input
-                  maxLength={taskTitleMaxLength}
-                  placeholder="Example: Chemotherapy appointment"
-                  value={taskDraft.title}
-                  onChange={(event) => setTaskDraft({ ...taskDraft, title: event.target.value })}
-                />
-              </label>
-
-              <div className="va-date-grid">
-                <label>
-                  <span>Action date</span>
-                  <input type="date" value={taskDraft.actionDate} onChange={(event) => setTaskDraft({ ...taskDraft, actionDate: event.target.value })} />
-                  <small>When the VA should act</small>
-                </label>
-                <label>
-                  <span>Event due date</span>
-                  <input type="date" value={taskDraft.dueDate} onChange={(event) => setTaskDraft({ ...taskDraft, dueDate: event.target.value })} />
-                  <small>The actual deadline or event</small>
-                </label>
-                <label>
-                  <span>Follow-up date</span>
-                  <input type="date" value={taskDraft.followUpDate} onChange={(event) => setTaskDraft({ ...taskDraft, followUpDate: event.target.value })} />
-                  <small>When to check again</small>
-                </label>
-              </div>
-
-              <label>
-                <span>Status</span>
-                <select value={taskDraft.status} onChange={(event) => setTaskDraft({ ...taskDraft, status: event.target.value as VaTaskStatus })}>
-                  <option value="needs-action">Needs action</option>
-                  <option value="waiting">Waiting</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </label>
-
-              <label>
-                <span>Details</span>
-                <textarea
-                  maxLength={taskDetailsMaxLength}
-                  placeholder="Confirmation number, contact instructions, transportation details, or other notes"
-                  value={taskDraft.details}
-                  onChange={(event) => setTaskDraft({ ...taskDraft, details: event.target.value })}
-                />
-                <small>{safeCount(taskDraft.details.length)} / {taskDetailsMaxLength}</small>
-              </label>
-            </div>
-
-            <div className="va-form-actions">
-              <button className="va-primary-button" type="submit" disabled={!canSaveTask}>
-                {editingTaskId ? 'Save task changes' : 'Add task'}
-              </button>
-              {editingTaskId ? (
-                <button className="va-secondary-button" type="button" onClick={() => {
-                  setEditingTaskId(null)
-                  setTaskDraft(emptyTaskDraft)
-                }}>Cancel</button>
-              ) : null}
-            </div>
-          </form>
-
-          <form className="va-panel va-client-mini-form" onSubmit={(event) => {
-            event.preventDefault()
-            saveClient()
-          }}>
-            <div className="va-section-heading">
-              <p className="va-eyebrow">{editingClientId ? 'Editing client' : 'Client setup'}</p>
-              <h2>{editingClientId ? 'Update client' : 'Add another client'}</h2>
-            </div>
-            <div className="va-form-fields">
-              <label>
-                <span>Client or household name *</span>
-                <input maxLength={nameMaxLength} value={clientDraft.displayName} onChange={(event) => setClientDraft({ ...clientDraft, displayName: event.target.value })} />
-              </label>
-              <div className="va-two-column-fields">
-                <label><span>Email</span><input type="email" value={clientDraft.email} onChange={(event) => setClientDraft({ ...clientDraft, email: event.target.value })} /></label>
-                <label><span>Phone</span><input type="tel" value={clientDraft.phone} onChange={(event) => setClientDraft({ ...clientDraft, phone: event.target.value })} /></label>
-              </div>
-              <label><span>Service type</span><input value={clientDraft.serviceType} onChange={(event) => setClientDraft({ ...clientDraft, serviceType: event.target.value })} /></label>
-              <label><span>Notes</span><textarea maxLength={notesMaxLength} value={clientDraft.notes} onChange={(event) => setClientDraft({ ...clientDraft, notes: event.target.value })} /></label>
-            </div>
-            <div className="va-form-actions">
-              <button className="va-primary-button" type="submit" disabled={!canSaveClient}>{editingClientId ? 'Save client changes' : 'Add client'}</button>
-              {editingClientId ? <button className="va-secondary-button" type="button" onClick={() => {
+      <section className="va-work-area">
+        <div className="va-quick-actions" aria-label="Create workspace records">
+          <div>
+            <p className="va-eyebrow">Quick capture</p>
+            <h2>Keep the work list visible.</h2>
+            <p>Open a form only when you need to create or edit something.</p>
+          </div>
+          <div className="va-quick-action-buttons">
+            <button
+              className="va-primary-button"
+              type="button"
+              onClick={() => {
+                setEditingTaskId(null)
+                setTaskDraft(emptyTaskDraft)
+                setFormPanel('task')
+              }}
+            >
+              + Quick task
+            </button>
+            <button
+              className="va-secondary-button"
+              type="button"
+              onClick={() => {
                 setEditingClientId(null)
                 setClientDraft(emptyClientDraft)
-              }}>Cancel</button> : null}
-            </div>
-          </form>
+                setFormPanel('client')
+              }}
+            >
+              + Add client
+            </button>
+          </div>
         </div>
+
+        {formPanel ? (
+          <div
+            className="va-form-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setFormPanel(null)
+                setEditingTaskId(null)
+                setEditingClientId(null)
+              }
+            }}
+          >
+            <section
+              className="va-form-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="va-form-drawer-title"
+            >
+              <div className="va-form-drawer-head">
+                <div>
+                  <p className="va-eyebrow">
+                    {formPanel === 'task'
+                      ? editingTaskId
+                        ? 'Editing task'
+                        : 'Quick capture'
+                      : editingClientId
+                        ? 'Editing client'
+                        : 'Client setup'}
+                  </p>
+                  <h2 id="va-form-drawer-title">
+                    {formPanel === 'task'
+                      ? editingTaskId
+                        ? 'Update task'
+                        : 'Add a task'
+                      : editingClientId
+                        ? 'Update client'
+                        : 'Add a client'}
+                  </h2>
+                </div>
+                <button
+                  className="va-drawer-close"
+                  type="button"
+                  aria-label="Close form"
+                  onClick={() => {
+                    setFormPanel(null)
+                    setEditingTaskId(null)
+                    setEditingClientId(null)
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              {formPanel === 'task' ? (
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    saveTask()
+                  }}
+                >
+                  <div className="va-form-fields">
+                    <label>
+                      <span>Client *</span>
+                      <select
+                        value={taskDraft.clientId}
+                        onChange={(event) =>
+                          setTaskDraft({ ...taskDraft, clientId: event.target.value })
+                        }
+                      >
+                        <option value="">Choose a client</option>
+                        {sortedClients.map((client) => (
+                          <option key={client.id} value={client.id}>
+                            {client.displayName}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label>
+                      <span>Task or event *</span>
+                      <input
+                        autoFocus
+                        maxLength={taskTitleMaxLength}
+                        placeholder="Example: Confirm Friday appointment"
+                        value={taskDraft.title}
+                        onChange={(event) =>
+                          setTaskDraft({ ...taskDraft, title: event.target.value })
+                        }
+                      />
+                    </label>
+
+                    <div className="va-date-grid">
+                      <label>
+                        <span>Action date</span>
+                        <input
+                          type="date"
+                          value={taskDraft.actionDate}
+                          onChange={(event) =>
+                            setTaskDraft({ ...taskDraft, actionDate: event.target.value })
+                          }
+                        />
+                        <small>When the VA should act</small>
+                      </label>
+                      <label>
+                        <span>Event due date</span>
+                        <input
+                          type="date"
+                          value={taskDraft.dueDate}
+                          onChange={(event) =>
+                            setTaskDraft({ ...taskDraft, dueDate: event.target.value })
+                          }
+                        />
+                        <small>The actual deadline or event</small>
+                      </label>
+                      <label>
+                        <span>Follow-up date</span>
+                        <input
+                          type="date"
+                          value={taskDraft.followUpDate}
+                          onChange={(event) =>
+                            setTaskDraft({ ...taskDraft, followUpDate: event.target.value })
+                          }
+                        />
+                        <small>When to check again</small>
+                      </label>
+                    </div>
+
+                    <label>
+                      <span>Status</span>
+                      <select
+                        value={taskDraft.status}
+                        onChange={(event) =>
+                          setTaskDraft({
+                            ...taskDraft,
+                            status: event.target.value as VaTaskStatus,
+                          })
+                        }
+                      >
+                        <option value="needs-action">Needs action</option>
+                        <option value="waiting">Waiting</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      <span>Details</span>
+                      <textarea
+                        maxLength={taskDetailsMaxLength}
+                        placeholder="Confirmation number, contact instructions, or other notes"
+                        value={taskDraft.details}
+                        onChange={(event) =>
+                          setTaskDraft({ ...taskDraft, details: event.target.value })
+                        }
+                      />
+                      <small>
+                        {safeCount(taskDraft.details.length)} / {taskDetailsMaxLength}
+                      </small>
+                    </label>
+                  </div>
+
+                  <div className="va-form-actions">
+                    <button
+                      className="va-primary-button"
+                      type="submit"
+                      disabled={!canSaveTask}
+                    >
+                      {editingTaskId ? 'Save task changes' : 'Add task'}
+                    </button>
+                    <button
+                      className="va-secondary-button"
+                      type="button"
+                      onClick={() => {
+                        setFormPanel(null)
+                        setEditingTaskId(null)
+                        setTaskDraft(emptyTaskDraft)
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    saveClient()
+                  }}
+                >
+                  <div className="va-form-fields">
+                    <label>
+                      <span>Client or household name *</span>
+                      <input
+                        autoFocus
+                        maxLength={nameMaxLength}
+                        value={clientDraft.displayName}
+                        onChange={(event) =>
+                          setClientDraft({
+                            ...clientDraft,
+                            displayName: event.target.value,
+                          })
+                        }
+                      />
+                    </label>
+
+                    <div className="va-two-column-fields">
+                      <label>
+                        <span>Email</span>
+                        <input
+                          type="email"
+                          value={clientDraft.email}
+                          onChange={(event) =>
+                            setClientDraft({ ...clientDraft, email: event.target.value })
+                          }
+                        />
+                      </label>
+                      <label>
+                        <span>Phone</span>
+                        <input
+                          type="tel"
+                          value={clientDraft.phone}
+                          onChange={(event) =>
+                            setClientDraft({ ...clientDraft, phone: event.target.value })
+                          }
+                        />
+                      </label>
+                    </div>
+
+                    <label>
+                      <span>Service type</span>
+                      <input
+                        value={clientDraft.serviceType}
+                        onChange={(event) =>
+                          setClientDraft({
+                            ...clientDraft,
+                            serviceType: event.target.value,
+                          })
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>Notes</span>
+                      <textarea
+                        maxLength={notesMaxLength}
+                        value={clientDraft.notes}
+                        onChange={(event) =>
+                          setClientDraft({ ...clientDraft, notes: event.target.value })
+                        }
+                      />
+                    </label>
+                  </div>
+
+                  <div className="va-form-actions">
+                    <button
+                      className="va-primary-button"
+                      type="submit"
+                      disabled={!canSaveClient}
+                    >
+                      {editingClientId ? 'Save client changes' : 'Add client'}
+                    </button>
+                    <button
+                      className="va-secondary-button"
+                      type="button"
+                      onClick={() => {
+                        setFormPanel(null)
+                        setEditingClientId(null)
+                        setClientDraft(emptyClientDraft)
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </section>
+          </div>
+        ) : null}
 
         <section className="va-panel va-main-panel">
           <div className="va-section-heading va-list-heading">
@@ -1028,7 +1229,9 @@ function LocalWorkspacePage({
               <h2>{getViewTitle(view)}</h2>
               <p>{getViewDescription(view)}</p>
             </div>
-            <span className="va-directory-count">{safeCount(view === 'clients' ? sortedClients.length : visibleTasks.length)}</span>
+            <span className="va-directory-count">
+              {safeCount(view === 'clients' ? sortedClients.length : visibleTasks.length)}
+            </span>
           </div>
 
           {view === 'clients' ? (
@@ -1038,31 +1241,48 @@ function LocalWorkspacePage({
                   <ClientCard
                     key={client.id}
                     client={client}
-                    taskCount={workspace.tasks.filter((task) => task.clientId === client.id).length}
+                    taskCount={
+                      workspace.tasks.filter((task) => task.clientId === client.id)
+                        .length
+                    }
                     onEdit={editClient}
                     onToggle={toggleClient}
                     onDelete={deleteClient}
                   />
                 ))}
               </div>
-            ) : <EmptyState title="No clients yet" message="Add a client before creating a task." />
+            ) : (
+              <EmptyState
+                title="No clients yet"
+                message="Use Add client to create the first client record."
+              />
+            )
+          ) : visibleTasks.length > 0 ? (
+            <div className="va-task-list">
+              {visibleTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  client={workspace.clients.find(
+                    (client) => client.id === task.clientId,
+                  )}
+                  today={today}
+                  currentView={view}
+                  onEdit={editTask}
+                  onStatusChange={updateTaskStatus}
+                  onDelete={deleteTask}
+                />
+              ))}
+            </div>
           ) : (
-            visibleTasks.length > 0 ? (
-              <div className="va-task-list">
-                {visibleTasks.map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    client={workspace.clients.find((client) => client.id === task.clientId)}
-                    today={today}
-                    currentView={view}
-                    onEdit={editTask}
-                    onStatusChange={updateTaskStatus}
-                    onDelete={deleteTask}
-                  />
-                ))}
-              </div>
-            ) : <EmptyState title={`Nothing in ${getViewTitle(view).toLowerCase()}`} message="Tasks will appear here automatically based on their dates and status." />
+            <EmptyState
+              title={`Nothing in ${getViewTitle(view).toLowerCase()}`}
+              message={
+                view === 'today'
+                  ? 'No action or event dates are scheduled for today. Use Quick task to capture new work.'
+                  : 'Tasks will appear here automatically based on their dates and status.'
+              }
+            />
           )}
         </section>
       </section>
