@@ -38,7 +38,6 @@ const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60',
 const businessDayQuickPicks = [1, 5, 10, 15, 30]
 const trialLengthQuickPicks = [7, 14, 30]
 const returnWindowQuickPicks = [7, 14, 30, 60, 90]
-const invoiceDueDateQuickPicks = [7, 14, 15, 30, 45, 60]
 const titleMaxLength = 80
 const positiveWholeNumberMessage = 'Enter a whole number greater than 0.'
 
@@ -184,6 +183,12 @@ function HomePage({ onNavigate }: NavigationProps) {
   }
 
   function focusHomeSection(sectionId: string, headingId: string) {
+    const nextHash = `#${sectionId}`
+
+    if (window.location.hash !== nextHash) {
+      window.history.pushState(null, '', `/${nextHash}`)
+    }
+
     document.getElementById(sectionId)?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
@@ -225,7 +230,7 @@ function HomePage({ onNavigate }: NavigationProps) {
     }
 
     setSavedDeadlines(nextDeadlines)
-    setStorageMessage('Saved on this device.')
+    setStorageMessage('Saved to My due dates.')
     setTitle(getDefaultTitle(mode))
     setIsCustomTitle(false)
   }
@@ -541,7 +546,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         <div className="saved-dates-heading">
           <div>
             <p className="friendly-eyebrow muted-eyebrow">Your personal deadline list</p>
-            <h2 id="saved-title">Your saved dates</h2>
+            <h2 id="saved-title" tabIndex={-1}>Your saved dates</h2>
             <p>See what needs attention without digging through a long list.</p>
           </div>
           <div className="saved-heading-actions">
@@ -691,7 +696,7 @@ function HomePage({ onNavigate }: NavigationProps) {
       <section id="more-tools" className="popular-calculators friendly-tools" aria-labelledby="popular-calculators-title">
         <div className="section-heading">
           <p className="friendly-eyebrow muted-eyebrow">More quick tools</p>
-          <h2 id="popular-calculators-title">Common deadline calculators</h2>
+          <h2 id="popular-calculators-title" tabIndex={-1}>Common deadline calculators</h2>
           <p>Open a focused calculator when you need a little more guidance.</p>
         </div>
         <div className="popular-calculators-grid">
@@ -1433,17 +1438,16 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
 function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
   const [invoiceDate, setInvoiceDate] = useState(todayInputValue)
-  const [paymentTerms, setPaymentTerms] = useState('30')
+  const [invoiceTerm, setInvoiceTerm] = useState<InvoiceTerm>('net30')
   const [title, setTitle] = useState(getDefaultTitle('invoice'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
 
   const parsedInvoiceDate = parsePlainDate(invoiceDate)
-  const parsedPaymentTerms = parseInteger(paymentTerms)
-  const validationMessage = getInvoiceDueDateValidationMessage(parsedInvoiceDate, parsedPaymentTerms)
+  const validationMessage = getValidationMessage('invoice', parsedInvoiceDate, 0, title)
   const titleValidationMessage = getSaveTitleValidationMessage(title)
-  const invoiceDueDate = parsedInvoiceDate && parsedPaymentTerms !== null && !validationMessage
-    ? addCalendarDays(parsedInvoiceDate, parsedPaymentTerms)
+  const invoiceDueDate = parsedInvoiceDate && !validationMessage
+    ? getDueDateForMode('invoice', parsedInvoiceDate, 0, invoiceTerm)
     : null
   const calendarDaysFromInvoice = parsedInvoiceDate && invoiceDueDate
     ? daysBetween(parsedInvoiceDate, invoiceDueDate)
@@ -1501,7 +1505,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           Calculate invoice due dates from common payment terms.
         </p>
         <p className="intro-note">
-          Date-only planning for Net 7, Net 15, Net 30, Net 45, and Net 60 invoices.
+          Date-only planning for Net 7, 15, 30, 45, 60, 90, and end-of-month invoices.
         </p>
       </section>
 
@@ -1524,27 +1528,17 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           </label>
 
           <label className="field value-field">
-            <span>Payment terms in days</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="1"
-              max="3650"
-              value={paymentTerms}
-              onChange={(event) => setPaymentTerms(event.target.value)}
-            />
-            <span className="quick-picks" aria-label="Quick payment term values">
-              {invoiceDueDateQuickPicks.map((quickPick) => (
-                <button
-                  className={paymentTerms === String(quickPick) ? 'is-selected' : ''}
-                  key={quickPick}
-                  type="button"
-                  onClick={() => setPaymentTerms(String(quickPick))}
-                >
-                  {quickPick}
-                </button>
+            <span>Payment terms</span>
+            <select
+              value={invoiceTerm}
+              onChange={(event) => setInvoiceTerm(event.target.value as InvoiceTerm)}
+            >
+              {invoiceTerms.map((term) => (
+                <option value={term} key={term}>
+                  {invoiceTermLabels[term]}
+                </option>
               ))}
-            </span>
+            </select>
           </label>
 
           {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
@@ -1552,17 +1546,21 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
         <section className="result-panel invoice-due-date-result">
           <p className="result-label">Invoice due date</p>
-          {invoiceDueDate && parsedPaymentTerms !== null ? (
+          {invoiceDueDate ? (
             <>
               <p className="due-date">{formatPlainDate(invoiceDueDate)}</p>
               <div className="result-meta result-meta-stack">
                 <span>Invoice due date: {formatPlainDate(invoiceDueDate)}</span>
                 <span className="status-badge status-comfortable">
-                  {calendarDaysFromInvoice} {calendarDaysFromInvoice === 1 ? 'calendar day' : 'calendar days'} from invoice date
+                  {invoiceTermLabels[invoiceTerm]}
+                  {invoiceTerm === 'eom'
+                    ? ' · End of invoice month'
+                    : ` · ${calendarDaysFromInvoice} ${calendarDaysFromInvoice === 1 ? 'calendar day' : 'calendar days'} from invoice date`}
                 </span>
               </div>
               <p className="result-note">
-                Check the invoice or contract because some terms may count business days or use end-of-month rules.
+                Calendar-day terms are used for Net invoices. EOM means the last calendar day of the invoice month.
+                Check the invoice or contract if weekends, holidays, or a different EOM rule apply.
               </p>
               <div className="business-save">
                 <label className="field title-field">
@@ -1590,7 +1588,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         <article>
           <h2>How this calculator works</h2>
           <p>
-            Enter the invoice date and the payment terms in days. The calculator shows the calendar date when the invoice is due. This is useful for Net 7, Net 15, Net 30, Net 45, and Net 60 payment terms.
+            Enter the invoice date and choose the payment terms. The calculator uses the same Net 7, Net 15, Net 30, Net 45, Net 60, Net 90, and EOM rules as the homepage calculator.
           </p>
         </article>
 
@@ -1602,6 +1600,8 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             <li>Net 30</li>
             <li>Net 45</li>
             <li>Net 60</li>
+            <li>Net 90</li>
+            <li>EOM — last calendar day of the invoice month</li>
           </ul>
         </article>
 
@@ -1791,16 +1791,28 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
       return
     }
 
+    const focusTargetId =
+      sectionId === 'calculator'
+        ? 'calculator-heading'
+        : sectionId === 'saved-dates'
+          ? 'saved-title'
+          : 'popular-calculators-title'
+
     if (window.location.pathname !== '/') {
       onNavigate('/')
     }
 
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
+        window.history.pushState(null, '', `/#${sectionId}`)
         document.getElementById(sectionId)?.scrollIntoView({
           behavior: 'smooth',
           block: 'start',
         })
+
+        window.setTimeout(() => {
+          document.getElementById(focusTargetId)?.focus({ preventScroll: true })
+        }, 450)
       })
     })
   }
@@ -3025,25 +3037,6 @@ function getReturnWindowValidationMessage(
   const limit = getAmountLimit('return')
 
   if (returnWindow === null || returnWindow <= 0 || returnWindow > limit) {
-    return positiveWholeNumberMessage
-  }
-
-  return null
-}
-
-function getInvoiceDueDateValidationMessage(
-  invoiceDate: PlainDate | null,
-  paymentTerms: number | null,
-): string | null {
-  if (!invoiceDate) {
-    return 'Enter a valid date from 1900-01-01 to 2100-12-31.'
-  }
-
-  if (!isDateInSupportedRange(invoiceDate)) {
-    return 'Date must be from 1900-01-01 to 2100-12-31.'
-  }
-
-  if (paymentTerms === null || paymentTerms <= 0 || paymentTerms > 3650) {
     return positiveWholeNumberMessage
   }
 

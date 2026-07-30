@@ -891,7 +891,7 @@ function LocalWorkspacePage({
             <span>Switch without scrolling</span>
           </div>
 
-          <nav className="va-sidebar-nav">
+          <nav className="va-sidebar-nav" aria-label="Workspace views">
             <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
             <ViewButton label="Follow-ups" viewName="follow-up" currentView={view} setView={setView} count={followUpCount} />
             <ViewButton label="Waiting" viewName="waiting" currentView={view} setView={setView} count={waitingCount} />

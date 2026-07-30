@@ -2363,3 +2363,15 @@
     white-space: nowrap;
   }
 }
+
+
+/* Remaining mobile navigation target refinement */
+@media (max-width: 900px) {
+  .va-topbar-actions a {
+    min-height: 44px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

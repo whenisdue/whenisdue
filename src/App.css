@@ -5068,3 +5068,71 @@ textarea:focus-visible {
     font-size: 2rem;
   }
 }
+
+
+/* Invoice consistency and final navigation refinement */
+#saved-title:focus,
+#popular-calculators-title:focus {
+  outline: none;
+}
+
+#saved-title:focus-visible,
+#popular-calculators-title:focus-visible {
+  outline: 3px solid #6f9487;
+  outline-offset: 5px;
+}
+
+@media (max-width: 820px) {
+  .home-page .top-nav .workspace-nav-link {
+    min-height: 44px;
+    box-sizing: border-box;
+    padding-block: 5px;
+  }
+}
+
+@media (max-width: 620px) {
+  .dual-intent-grid {
+    gap: 14px;
+    padding-top: 12px;
+    padding-bottom: 14px;
+  }
+
+  .dual-intent-copy .friendly-subtitle {
+    margin-top: 10px;
+    line-height: 1.42;
+  }
+
+  .dual-intent-actions {
+    gap: 7px;
+    margin-top: 15px;
+  }
+
+  .dual-intent-copy .workspace-trust-line {
+    margin-top: 9px;
+  }
+
+  .dual-intent-proof {
+    gap: 6px;
+  }
+
+  .intent-proof-card {
+    gap: 8px;
+    padding: 9px 10px;
+  }
+
+  .intent-proof-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .intent-proof-card h2 {
+    font-size: 0.88rem;
+  }
+
+  .intent-proof-card div > span {
+    margin-top: 2px;
+    font-size: 0.66rem;
+    line-height: 1.3;
+  }
+}
