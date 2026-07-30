@@ -4855,7 +4855,7 @@ textarea:focus-visible {
 }
 
 .intent-proof-card + .intent-proof-card {
-  margin-left: 34px;
+  margin-left: 0;
 }
 
 .intent-proof-icon {
