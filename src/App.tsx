@@ -147,12 +147,20 @@ function HomePage({ onNavigate }: NavigationProps) {
 
   useEffect(() => {
     function handleHomeHistoryFocus() {
-      if (window.location.pathname === '/' && !window.location.hash) {
-        window.requestAnimationFrame(() => {
-          document.getElementById('homepage-title')?.focus({ preventScroll: true })
-        })
-      }
-    }
+  if (window.location.pathname === '/' && !window.location.hash) {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'auto',
+    })
+
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById('homepage-title')
+        ?.focus({ preventScroll: true })
+    })
+  }
+}
 
     window.addEventListener('popstate', handleHomeHistoryFocus)
 
@@ -199,22 +207,25 @@ function HomePage({ onNavigate }: NavigationProps) {
   }
 
   function focusHomeSection(sectionId: string, headingId: string) {
-    const nextHash = `#${sectionId}`
+  const nextHash = `#${sectionId}`
 
-    if (window.location.hash !== nextHash) {
-      window.history.pushState(null, '', `/${nextHash}`)
-    }
-
-    document.getElementById(sectionId)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
-
-    window.setTimeout(() => {
-      const heading = document.getElementById(headingId)
-      heading?.focus({ preventScroll: true })
-    }, 450)
+  if (window.location.hash !== nextHash) {
+    window.history.pushState(null, '', `/${nextHash}`)
   }
+
+  const section = document.getElementById(sectionId)
+
+  section?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
+
+  window.setTimeout(() => {
+    document
+      .getElementById(headingId)
+      ?.focus({ preventScroll: true })
+  }, 450)
+}
 
   function saveDeadline() {
     if (!dueDate || !title.trim()) {
@@ -552,7 +563,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </label>
 
           <button className="primary-button save-date-button" type="button" disabled={!canSave} onClick={saveDeadline}>
-            Save date
+            Save to My due dates
           </button>
           {storageMessage ? <p className="form-message save-message">{storageMessage}</p> : null}
         </section>
