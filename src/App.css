@@ -5146,3 +5146,532 @@ textarea:focus-visible {
   outline: 3px solid #6f9487;
   outline-offset: 6px;
 }
+
+
+/* ========================================================================== */
+/* VA-FIRST HOMEPAGE                                                          */
+/* ========================================================================== */
+
+.va-home-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 28px;
+  color: #18324b;
+}
+
+.va-home-page::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 10% 2%, rgba(244, 197, 155, 0.2), transparent 30%),
+    radial-gradient(circle at 92% 16%, rgba(66, 111, 97, 0.1), transparent 27%),
+    linear-gradient(180deg, #fffdf9 0%, #fff8ee 54%, #f8eee1 100%);
+  content: "";
+}
+
+.va-home-header {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgba(198, 181, 157, 0.52);
+  padding-bottom: 10px;
+}
+
+.va-home-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #18324b;
+  font-size: 1rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.va-home-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.va-home-nav a {
+  border-radius: 999px;
+  color: #5d6b7c;
+  padding: 9px 12px;
+  font-size: 0.82rem;
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.va-home-nav a:hover {
+  background: #f2e9dc;
+  color: #31564b;
+}
+
+.va-home-nav .va-home-nav-cta {
+  background: #31564b;
+  color: #fff;
+}
+
+.va-home-nav .va-home-nav-cta:hover {
+  background: #24473e;
+  color: #fff;
+}
+
+.va-home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(420px, 0.98fr);
+  gap: clamp(36px, 6vw, 76px);
+  align-items: center;
+  min-height: 650px;
+  padding: 62px 0 54px;
+}
+
+.va-home-hero-copy {
+  max-width: 650px;
+}
+
+.va-home-eyebrow,
+.va-home-section-heading > p,
+.va-home-final-cta p {
+  margin: 0 0 10px;
+  color: #31564b;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.va-home-hero h1 {
+  margin: 0;
+  color: #18324b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 5.7vw, 5.2rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.va-home-lead {
+  max-width: 620px;
+  margin: 22px 0 0;
+  color: #56677a;
+  font-size: clamp(1.02rem, 1.7vw, 1.2rem);
+  line-height: 1.58;
+}
+
+.va-home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 13px 18px;
+  margin-top: 28px;
+}
+
+.va-home-primary,
+.va-home-final-cta > a {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: #31564b;
+  color: #fff;
+  padding: 11px 19px;
+  font-size: 0.92rem;
+  font-weight: 820;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(49, 86, 75, 0.18);
+}
+
+.va-home-primary:hover,
+.va-home-final-cta > a:hover {
+  background: #24473e;
+}
+
+.va-home-secondary {
+  color: #31564b;
+  font-size: 0.9rem;
+  font-weight: 780;
+  text-decoration: none;
+}
+
+.va-home-secondary:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.va-home-trust {
+  margin: 18px 0 0;
+  color: #718092;
+  font-size: 0.78rem;
+  font-weight: 680;
+}
+
+.va-queue-preview {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  border: 1px solid #d8c9b5;
+  border-radius: 24px;
+  background: rgba(255, 253, 249, 0.94);
+  padding: 18px;
+  box-shadow: 0 28px 64px rgba(38, 54, 67, 0.13);
+}
+
+.va-queue-preview::after {
+  position: absolute;
+  right: -18px;
+  bottom: -18px;
+  width: 96px;
+  height: 96px;
+  z-index: -1;
+  border-radius: 24px;
+  background: rgba(244, 197, 155, 0.26);
+  content: "";
+  transform: rotate(8deg);
+}
+
+.va-queue-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 3px 3px 10px;
+  border-bottom: 1px solid #ede3d5;
+}
+
+.va-queue-preview-header div {
+  display: grid;
+  gap: 3px;
+}
+
+.va-queue-preview-header span {
+  color: #718092;
+  font-size: 0.72rem;
+  font-weight: 760;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.va-queue-preview-header strong {
+  color: #18324b;
+  font-size: 1rem;
+}
+
+.va-preview-date {
+  border-radius: 999px;
+  background: #f2ece3;
+  padding: 6px 10px;
+}
+
+.va-preview-task {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e7dccd;
+  border-radius: 15px;
+  background: #fff;
+  padding: 13px 14px;
+}
+
+.va-preview-task-primary {
+  border-color: rgba(49, 86, 75, 0.42);
+  border-left: 5px solid #31564b;
+  background: #f4f8f5;
+  padding: 16px 16px 16px 18px;
+}
+
+.va-preview-task p {
+  margin: 0;
+  color: #9b4f3f;
+  font-size: 0.72rem;
+  font-weight: 840;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.va-preview-task h2,
+.va-preview-task h3 {
+  margin: 0;
+  color: #18324b;
+  line-height: 1.25;
+}
+
+.va-preview-task h2 { font-size: 1.08rem; }
+.va-preview-task h3 { font-size: 0.95rem; }
+
+.va-preview-task > span {
+  color: #6d7a89;
+  font-size: 0.78rem;
+}
+
+.va-preview-task > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.va-preview-task button {
+  min-height: 34px;
+  border: 1px solid #b9c9c1;
+  border-radius: 9px;
+  background: #fff;
+  color: #31564b;
+  padding: 6px 9px;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 780;
+}
+
+.va-home-workflow,
+.va-home-benefits {
+  display: grid;
+  gap: 24px;
+  padding: 72px 0;
+}
+
+.va-home-workflow {
+  border-top: 1px solid rgba(198, 181, 157, 0.45);
+}
+
+.va-home-section-heading {
+  max-width: 720px;
+}
+
+.va-home-section-heading h2,
+.va-home-final-cta h2 {
+  margin: 0;
+  color: #18324b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 3.8vw, 3.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1.03;
+}
+
+.va-home-section-heading > span {
+  display: block;
+  margin-top: 12px;
+  color: #667587;
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.va-workflow-grid,
+.va-benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.va-workflow-grid article,
+.va-benefit-grid article {
+  border: 1px solid #dfd2c1;
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.78);
+  padding: 20px;
+}
+
+.va-workflow-grid article > span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: #31564b;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.va-workflow-grid h3 {
+  margin: 16px 0 0;
+  color: #18324b;
+  font-size: 1rem;
+}
+
+.va-workflow-grid p {
+  margin: 8px 0 0;
+  color: #687789;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.va-benefit-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.va-benefit-grid article {
+  display: grid;
+  gap: 5px;
+}
+
+.va-benefit-grid strong {
+  color: #18324b;
+  font-size: 1rem;
+}
+
+.va-benefit-grid span {
+  color: #687789;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.va-home-final-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 24px;
+  border-radius: 24px;
+  background: #18324b;
+  padding: clamp(28px, 5vw, 48px);
+}
+
+.va-home-final-cta p,
+.va-home-final-cta h2 {
+  color: #fff;
+}
+
+.va-home-final-cta h2 {
+  max-width: 720px;
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+}
+
+.va-home-final-cta > a {
+  flex: 0 0 auto;
+  background: #f3c99f;
+  color: #18324b;
+  box-shadow: none;
+}
+
+.va-home-final-cta > a:hover {
+  background: #f7d8b8;
+}
+
+.va-home-calculator-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+  border: 1px solid #ded1c0;
+  border-radius: 16px;
+  background: rgba(255, 253, 249, 0.72);
+  padding: 17px 18px;
+}
+
+.va-home-calculator-note > div {
+  display: grid;
+  gap: 3px;
+}
+
+.va-home-calculator-note strong { color: #18324b; }
+.va-home-calculator-note span { color: #708092; font-size: 0.82rem; }
+.va-home-calculator-note a { color: #31564b; font-size: 0.84rem; font-weight: 800; white-space: nowrap; }
+
+.calculator-hub-page .dual-intent-grid {
+  grid-template-columns: 1fr;
+}
+
+.calculator-hub-page .dual-intent-proof {
+  display: none;
+}
+
+.calculator-hub-page .dual-intent-actions .workspace-secondary-choice {
+  background: transparent;
+}
+
+@media (max-width: 900px) {
+  .va-home-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding-top: 46px;
+  }
+
+  .va-home-hero-copy {
+    max-width: 760px;
+  }
+
+  .va-workflow-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .va-home-page {
+    width: min(100% - 20px, 1180px);
+    padding-top: 10px;
+  }
+
+  .va-home-header {
+    min-height: 44px;
+  }
+
+  .va-home-nav a:not(.va-home-nav-cta) {
+    display: none;
+  }
+
+  .va-home-nav .va-home-nav-cta {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 11px;
+    font-size: 0.74rem;
+  }
+
+  .va-home-hero {
+    gap: 30px;
+    padding: 36px 0 48px;
+  }
+
+  .va-home-hero h1 {
+    font-size: clamp(2.65rem, 13vw, 4rem);
+  }
+
+  .va-home-lead {
+    margin-top: 17px;
+    font-size: 1rem;
+  }
+
+  .va-home-actions {
+    display: grid;
+    margin-top: 22px;
+  }
+
+  .va-home-primary {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .va-queue-preview {
+    border-radius: 19px;
+    padding: 13px;
+  }
+
+  .va-preview-task-primary {
+    padding: 14px;
+  }
+
+  .va-home-workflow,
+  .va-home-benefits {
+    padding: 52px 0;
+  }
+
+  .va-benefit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .va-home-final-cta,
+  .va-home-calculator-note {
+    display: grid;
+  }
+
+  .va-home-final-cta > a,
+  .va-home-calculator-note > a {
+    justify-self: start;
+  }
+}
