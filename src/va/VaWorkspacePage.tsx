@@ -178,8 +178,11 @@ function AuthFrame({
             onNavigate('/')
           }}
         >
-          <span className="va-brand-mark" aria-hidden="true">✓</span>
-          <span>WhenIsDue</span>
+          <img
+            className="whenisdue-brand-logo"
+            src="/whenisdue-logo.png"
+            alt="WhenIsDue"
+          />
         </a>
 
         <nav className="va-topbar-actions" aria-label="Workspace navigation">
@@ -202,7 +205,10 @@ function AuthFrame({
 }
 
 function AuthPanel() {
-  const [mode, setMode] = useState<'sign-in' | 'sign-up' | 'forgot-password'>('sign-in')
+  const [mode, setMode] = useState<'sign-in' | 'sign-up' | 'forgot-password'>(() => {
+    const requestedMode = new URLSearchParams(window.location.search).get('mode')
+    return requestedMode === 'sign-up' ? 'sign-up' : 'sign-in'
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState<string | null>(null)
@@ -370,7 +376,12 @@ function AuthPanel() {
           className="va-auth-switch"
           type="button"
           onClick={() => {
-            setMode((current) => (current === 'sign-in' ? 'sign-up' : 'sign-in'))
+            setMode((current) => {
+              const nextMode = current === 'sign-in' ? 'sign-up' : 'sign-in'
+              const nextUrl = nextMode === 'sign-up' ? '/workspace?mode=sign-up' : '/workspace'
+              window.history.replaceState(null, '', nextUrl)
+              return nextMode
+            })
             setPassword('')
             setMessage(null)
           }}
@@ -1023,8 +1034,11 @@ function LocalWorkspacePage({
           event.preventDefault()
           onNavigate('/')
         }}>
-          <span className="va-brand-mark" aria-hidden="true">✓</span>
-          <span>WhenIsDue</span>
+          <img
+            className="whenisdue-brand-logo"
+            src="/whenisdue-logo.png"
+            alt="WhenIsDue"
+          />
         </a>
         <nav className="va-topbar-actions" aria-label="Workspace navigation">
           <a href="/" onClick={(event) => {

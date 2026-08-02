@@ -260,3 +260,265 @@
     animation: none;
   }
 }
+
+
+
+/* Research-led signed-out homepage */
+.va-home-audience {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0 0 20px;
+  border: 1px solid rgba(36, 92, 74, 0.2);
+  border-radius: 999px;
+  background: #e8f3ed;
+  color: #245c4a;
+  padding: 9px 14px;
+  font-size: 0.82rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.va-question-demo {
+  min-height: 94px;
+  margin-bottom: 20px;
+}
+
+.va-question-demo > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #788697;
+  font-size: 0.76rem;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+}
+
+.va-question-demo p {
+  min-height: 48px;
+  margin: 0;
+  color: #496171;
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.va-question-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: #245c4a;
+  animation: va-question-blink 850ms steps(1) infinite;
+}
+
+@keyframes va-question-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.va-compact-public-copy h1 {
+  max-width: 620px;
+  font-size: clamp(3rem, 5.6vw, 5.35rem);
+  line-height: 0.98;
+}
+
+.va-compact-public-copy .va-home-subheadline {
+  max-width: 570px;
+  margin-top: 18px;
+  color: #5b6d80;
+  font-size: 1.08rem;
+  line-height: 1.55;
+}
+
+.va-public-home-compact .va-home-actions {
+  margin-top: 26px;
+}
+
+.va-public-home-compact .va-home-primary {
+  min-width: 180px;
+  justify-content: center;
+}
+
+.va-compact-public-hero {
+  padding-bottom: 58px;
+}
+
+.va-public-home-compact .va-footer {
+  margin-top: 0;
+}
+
+.va-compact-benefits {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .va-question-demo {
+    min-height: 82px;
+  }
+}
+
+@media (max-width: 640px) {
+  .va-home-audience {
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    font-size: 0.74rem;
+  }
+
+  .va-question-demo {
+    min-height: 78px;
+    margin-bottom: 15px;
+  }
+
+  .va-question-demo p {
+    min-height: 42px;
+    font-size: 1.08rem;
+  }
+
+  .va-compact-public-copy h1 {
+    font-size: clamp(2.55rem, 12vw, 3.8rem);
+  }
+
+  .va-compact-public-copy .va-home-subheadline {
+    font-size: 0.98rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .va-question-cursor {
+    animation: none;
+  }
+}
+
+
+
+/* Hero spacing and CTA visibility refinements */
+.va-public-home-compact .va-home-header {
+  margin-bottom: 0;
+}
+
+.va-public-home-compact .va-compact-public-hero {
+  min-height: auto;
+  align-items: start;
+  padding-top: clamp(24px, 3.5vh, 40px);
+  padding-bottom: 36px;
+}
+
+.va-public-home-compact .va-compact-public-copy h1 {
+  max-width: 580px;
+  font-size: clamp(2.7rem, 4.9vw, 4.65rem);
+  line-height: 0.98;
+}
+
+.va-public-home-compact .va-home-audience {
+  margin-bottom: 14px;
+}
+
+.va-public-home-compact .va-question-demo {
+  min-height: 78px;
+  margin-bottom: 12px;
+}
+
+.va-public-home-compact .va-question-demo > span {
+  margin-bottom: 5px;
+}
+
+.va-public-home-compact .va-question-demo p {
+  min-height: 42px;
+}
+
+.va-public-home-compact .va-compact-public-copy .va-home-subheadline {
+  margin-top: 14px;
+}
+
+.va-public-home-compact .va-home-actions {
+  margin-top: 20px;
+}
+
+.va-public-home-compact .va-home-trust {
+  margin-top: 12px;
+}
+
+.va-public-home-compact .va-compact-product-proof {
+  margin-top: 6px;
+}
+
+.va-public-home-compact .va-compact-proof-heading {
+  justify-content: flex-start;
+}
+
+@media (max-width: 860px) {
+  .va-public-home-compact .va-compact-public-hero {
+    padding-top: 22px;
+  }
+
+  .va-public-home-compact .va-compact-product-proof {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .va-public-home-compact .va-compact-public-hero {
+    padding-top: 18px;
+    padding-bottom: 26px;
+  }
+
+  .va-public-home-compact .va-compact-public-copy h1 {
+    font-size: clamp(2.35rem, 11vw, 3.35rem);
+  }
+
+  .va-public-home-compact .va-question-demo {
+    min-height: 72px;
+    margin-bottom: 10px;
+  }
+
+  .va-public-home-compact .va-home-actions {
+    margin-top: 18px;
+  }
+}
+
+
+
+/* New and returning account paths */
+.va-home-returning {
+  margin: 12px 0 0;
+  color: #6b7888;
+  font-size: .84rem;
+  line-height: 1.4;
+}
+
+.va-home-returning a {
+  color: #245c4a;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.va-home-returning a:hover {
+  color: #183f34;
+}
+
+@media (max-width: 640px) {
+  .va-home-returning {
+    text-align: center;
+  }
+}
+
+
+
+/* Official WhenIsDue brand identity */
+.va-home-brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.va-home-brand .whenisdue-brand-logo {
+  display: block;
+  width: auto;
+  height: 34px;
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .va-home-brand .whenisdue-brand-logo {
+    height: 30px;
+  }
+}

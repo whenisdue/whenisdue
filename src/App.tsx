@@ -173,6 +173,60 @@ function App() {
   return <HomePage onNavigate={navigate} />
 }
 
+const vaHomepageQuestions = [
+  'Who am I still waiting on?',
+  'What did I promise to send?',
+  'Which follow-up is overdue?',
+  'What needs my attention first?',
+  'Can I finish the day without forgetting something?',
+]
+
+function RotatingVaQuestion() {
+  const [questionIndex, setQuestionIndex] = useState(0)
+  const [visibleText, setVisibleText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
+  useEffect(() => {
+    const question = vaHomepageQuestions[questionIndex]
+    const isComplete = visibleText === question
+    const isEmpty = visibleText.length === 0
+
+    const delay = deleting ? 38 : 72
+    const pause = isComplete && !deleting ? 3500 : isEmpty && deleting ? 500 : delay
+
+    const timer = window.setTimeout(() => {
+      if (isComplete && !deleting) {
+        setDeleting(true)
+        return
+      }
+
+      if (deleting && isEmpty) {
+        setDeleting(false)
+        setQuestionIndex((current) => (current + 1) % vaHomepageQuestions.length)
+        return
+      }
+
+      setVisibleText(
+        deleting
+          ? question.slice(0, Math.max(0, visibleText.length - 1))
+          : question.slice(0, visibleText.length + 1),
+      )
+    }, pause)
+
+    return () => window.clearTimeout(timer)
+  }, [deleting, questionIndex, visibleText])
+
+  return (
+    <div className="va-question-demo" aria-hidden="true">
+      <span>VAs ask themselves every day</span>
+      <p>
+        “{visibleText}
+        <b className="va-question-cursor">|</b>”
+      </p>
+    </div>
+  )
+}
+
 function HomePage({ onNavigate }: NavigationProps) {
   return (
     <main className="page-shell va-home-page va-public-home-compact">
@@ -185,11 +239,11 @@ function HomePage({ onNavigate }: NavigationProps) {
             onNavigate('/')
           }}
         >
-          <span className="brand-calendar" aria-hidden="true">
-            <span />
-            <strong>✓</strong>
-          </span>
-          <span>WhenIsDue</span>
+          <img
+            className="whenisdue-brand-logo"
+            src="/whenisdue-logo.png"
+            alt="WhenIsDue"
+          />
         </a>
 
         <nav className="va-home-nav" aria-label="Main navigation">
@@ -202,38 +256,34 @@ function HomePage({ onNavigate }: NavigationProps) {
           >
             Calculators
           </a>
-          <a
-            className="va-home-nav-cta"
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            Sign in
-          </a>
         </nav>
       </header>
 
       <section className="va-compact-public-hero" aria-labelledby="homepage-title">
         <div className="va-compact-public-copy">
-          <p className="va-home-eyebrow">Built for virtual assistants</p>
-          <h1 id="homepage-title">Know what needs your attention across every client.</h1>
-          <p>
-            WhenIsDue puts deadlines, follow-ups, waiting items, and today’s work into
-            one ordered action queue.
+          <p className="va-home-audience">For virtual assistants</p>
+
+          <RotatingVaQuestion />
+
+          <h1 id="homepage-title">Know what needs attention today.</h1>
+          <p className="va-home-subheadline">
+            See what is due, waiting, and ready for follow-up across every client.
+          </p>
+
+          <p className="sr-only">
+            WhenIsDue is a daily client-action workspace for virtual assistants.
           </p>
 
           <div className="va-home-actions">
             <a
               className="va-home-primary"
-              href="/workspace"
+              href="/workspace?mode=sign-up"
               onClick={(event) => {
                 event.preventDefault()
-                onNavigate('/workspace')
+                onNavigate('/workspace?mode=sign-up')
               }}
             >
-              Create or open my workspace
+              Create a free account
             </a>
             <a
               className="va-home-secondary"
@@ -247,6 +297,19 @@ function HomePage({ onNavigate }: NavigationProps) {
             </a>
           </div>
 
+          <p className="va-home-returning">
+            Already have an account?{' '}
+            <a
+              href="/workspace"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/workspace')
+              }}
+            >
+              Sign in
+            </a>
+          </p>
+
           <p className="va-home-trust">Private account · Cloud synced · Export anytime</p>
         </div>
 
@@ -256,7 +319,6 @@ function HomePage({ onNavigate }: NavigationProps) {
               <span>Today</span>
               <strong>3 actions need you</strong>
             </div>
-            <b>Start here</b>
           </div>
 
           <article className="va-compact-proof-task is-first">
@@ -277,21 +339,6 @@ function HomePage({ onNavigate }: NavigationProps) {
             <span>Acme Studio</span>
           </article>
         </div>
-      </section>
-
-      <section className="va-compact-benefits" aria-label="How WhenIsDue helps">
-        <article>
-          <strong>Open one queue</strong>
-          <span>See urgent work and follow-ups together.</span>
-        </article>
-        <article>
-          <strong>Choose the outcome</strong>
-          <span>Finish it, wait on someone, or reschedule.</span>
-        </article>
-        <article>
-          <strong>Move to the next action</strong>
-          <span>Keep working until you are caught up.</span>
-        </article>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
