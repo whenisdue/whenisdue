@@ -497,6 +497,7 @@ function LocalWorkspacePage({
   const [formPanel, setFormPanel] = useState<'task' | 'client' | null>(null)
   const [waitingTaskId, setWaitingTaskId] = useState<string | null>(null)
   const [waitingCheckDate, setWaitingCheckDate] = useState('')
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [clientDraft, setClientDraft] = useState<VaClientDraft>(emptyClientDraft)
   const [taskDraft, setTaskDraft] = useState<VaTaskDraft>(emptyTaskDraft)
   const [editingClientId, setEditingClientId] = useState<string | null>(null)
@@ -819,14 +820,30 @@ function LocalWorkspacePage({
     }
   }
 
-  function saveTask() {
+  function saveTask(form?: HTMLFormElement) {
     if (!canSaveTask) {
       setMessage('Choose a client, add a task title, and enter at least one date.')
       return
     }
 
     const now = new Date().toISOString()
-    const normalized = normalizeTaskDraft(taskDraft)
+    const submittedDates = form ? new FormData(form) : null
+    const draftForSave: VaTaskDraft = {
+      ...taskDraft,
+      actionDate: readFormDate(submittedDates, 'actionDate', taskDraft.actionDate),
+      dueDate: readFormDate(submittedDates, 'dueDate', taskDraft.dueDate),
+      followUpDate: readFormDate(submittedDates, 'followUpDate', taskDraft.followUpDate),
+    }
+    if (
+      draftForSave.actionDate &&
+      draftForSave.dueDate &&
+      draftForSave.dueDate < draftForSave.actionDate
+    ) {
+      setMessage('The due date cannot be earlier than the scheduled date.')
+      return
+    }
+
+    const normalized = normalizeTaskDraft(draftForSave)
     const existingTask = editingTaskId
       ? workspace.tasks.find((task) => task.id === editingTaskId)
       : undefined
@@ -913,12 +930,18 @@ function LocalWorkspacePage({
     }
   }
 
-  function confirmWaitingStatus() {
+  function confirmWaitingStatus(form?: HTMLFormElement) {
     if (!waitingTaskId) {
       return
     }
 
-    if (!waitingCheckDate) {
+    const submittedDate = readFormDate(
+      form ? new FormData(form) : null,
+      'waitingCheckDate',
+      waitingCheckDate,
+    )
+
+    if (!submittedDate) {
       setMessage('Choose when this task should return for follow-up.')
       return
     }
@@ -928,14 +951,14 @@ function LocalWorkspacePage({
         ? {
             ...task,
             status: 'waiting' as VaTaskStatus,
-            followUpDate: waitingCheckDate,
+            followUpDate: submittedDate,
             updatedAt: new Date().toISOString(),
           }
         : task,
     )
 
-    const returnsToday = waitingCheckDate <= today
-    const formattedDate = formatDateKey(waitingCheckDate)
+    const returnsToday = submittedDate <= today
+    const formattedDate = formatDateKey(submittedDate)
 
     persist(
       { ...workspace, tasks },
@@ -950,19 +973,36 @@ function LocalWorkspacePage({
   }
 
   function deleteTask(task: VaTask) {
-    if (!window.confirm(`Delete "${task.title}"?`)) {
+    setDeletingTaskId(task.id)
+    setMessage(null)
+  }
+
+  function confirmDeleteTask() {
+    if (!deletingTaskId) {
       return
     }
 
-    persist({
-      ...workspace,
-      tasks: workspace.tasks.filter((item) => item.id !== task.id),
-    })
+    const task = workspace.tasks.find((item) => item.id === deletingTaskId)
 
-    if (editingTaskId === task.id) {
+    if (!task) {
+      setDeletingTaskId(null)
+      return
+    }
+
+    persist(
+      {
+        ...workspace,
+        tasks: workspace.tasks.filter((item) => item.id !== deletingTaskId),
+      },
+      `Deleted "${task.title}".`,
+    )
+
+    if (editingTaskId === deletingTaskId) {
       setTaskDraft(emptyTaskDraft)
       setEditingTaskId(null)
     }
+
+    setDeletingTaskId(null)
   }
 
   if (workspaceLoading) {
@@ -1053,6 +1093,63 @@ function LocalWorkspacePage({
       </section>
 
       <section className="va-daily-work">
+        {deletingTaskId ? (
+          <div
+            className="va-form-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setDeletingTaskId(null)
+              }
+            }}
+          >
+            <section
+              className="va-form-drawer"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="delete-task-dialog-title"
+              aria-describedby="delete-task-dialog-description"
+            >
+              <div className="va-form-drawer-head">
+                <div>
+                  <p className="va-eyebrow">Confirm deletion</p>
+                  <h2 id="delete-task-dialog-title">Delete this task permanently?</h2>
+                </div>
+                <button
+                  className="va-drawer-close"
+                  type="button"
+                  aria-label="Close delete confirmation"
+                  onClick={() => setDeletingTaskId(null)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <p id="delete-task-dialog-description">
+                {workspace.tasks.find((task) => task.id === deletingTaskId)?.title ??
+                  'This task'} will be removed from this account. This action cannot be undone.
+              </p>
+
+              <div className="va-form-actions">
+                <button
+                  className="va-delete-button"
+                  type="button"
+                  onClick={confirmDeleteTask}
+                >
+                  Delete permanently
+                </button>
+                <button
+                  className="va-secondary-button"
+                  type="button"
+                  onClick={() => setDeletingTaskId(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </section>
+          </div>
+        ) : null}
+
         {waitingTaskId ? (
           <div
             className="va-form-overlay"
@@ -1072,8 +1169,8 @@ function LocalWorkspacePage({
             >
               <div className="va-form-drawer-head">
                 <div>
-                  <p className="va-eyebrow">Waiting on someone else</p>
-                  <h2 id="waiting-dialog-title">When should this return to Today?</h2>
+                  <p className="va-eyebrow">Waiting on client</p>
+                  <h2 id="waiting-dialog-title">When should you follow up?</h2>
                 </div>
                 <button
                   className="va-drawer-close"
@@ -1091,29 +1188,30 @@ function LocalWorkspacePage({
               <form
                 onSubmit={(event) => {
                   event.preventDefault()
-                  confirmWaitingStatus()
+                  confirmWaitingStatus(event.currentTarget)
                 }}
               >
                 <div className="va-form-fields">
                   <label>
-                    <span>Check again *</span>
+                    <span>Follow up on *</span>
                     <input
                       autoFocus
                       required
                       type="date"
+                      name="waitingCheckDate"
                       min={today}
                       value={waitingCheckDate}
                       onChange={(event) => setWaitingCheckDate(event.target.value)}
                     />
                     <small>
-                      This task will leave the active queue and automatically return on this date.
+                      The task will leave Today and return automatically on this date.
                     </small>
                   </label>
                 </div>
 
                 <div className="va-form-actions">
                   <button className="va-primary-button" type="submit" disabled={!waitingCheckDate}>
-                    Save waiting status
+                    Move to Waiting
                   </button>
                   <button
                     className="va-secondary-button"
@@ -1185,10 +1283,14 @@ function LocalWorkspacePage({
               </div>
 
               {formPanel === 'task' ? (
-                <form
+                <>
+                  <p className="va-task-form-intro">
+                    Choose the client, write the task, and choose when it should appear in Today.
+                  </p>
+                  <form
                   onSubmit={(event) => {
                     event.preventDefault()
-                    saveTask()
+                    saveTask(event.currentTarget)
                   }}
                 >
                   <div className="va-form-fields">
@@ -1216,12 +1318,12 @@ function LocalWorkspacePage({
                           setFormPanel('client')
                         }}
                       >
-                        + Create a new client
+                        + Add a new client
                       </button>
                     </label>
 
                     <label>
-                      <span>What needs to happen? *</span>
+                      <span>Task *</span>
                       <input
                         autoFocus
                         maxLength={taskTitleMaxLength}
@@ -1235,71 +1337,51 @@ function LocalWorkspacePage({
 
                     <div className="va-date-grid">
                       <label>
-                        <span>Show in Today</span>
+                        <span>Schedule for *</span>
                         <input
                           type="date"
+                          name="actionDate"
                           value={taskDraft.actionDate}
                           onChange={(event) =>
                             setTaskDraft({ ...taskDraft, actionDate: event.target.value })
                           }
                         />
-                        <small>The day this should enter your Today queue</small>
-                      </label>
-                      <label>
-                        <span>Deadline</span>
-                        <input
-                          type="date"
-                          value={taskDraft.dueDate}
-                          onChange={(event) =>
-                            setTaskDraft({ ...taskDraft, dueDate: event.target.value })
-                          }
-                        />
-                        <small>The actual deadline or event</small>
-                      </label>
-                      <label>
-                        <span>Check again</span>
-                        <input
-                          type="date"
-                          value={taskDraft.followUpDate}
-                          onChange={(event) =>
-                            setTaskDraft({ ...taskDraft, followUpDate: event.target.value })
-                          }
-                        />
-                        <small>When to check again</small>
+                        <small>This task will appear in Today on this date.</small>
                       </label>
                     </div>
 
-                    <label>
-                      <span>Status</span>
-                      <select
-                        value={taskDraft.status}
-                        onChange={(event) =>
-                          setTaskDraft({
-                            ...taskDraft,
-                            status: event.target.value as VaTaskStatus,
-                          })
-                        }
-                      >
-                        <option value="needs-action">Needs action</option>
-                        <option value="waiting">Waiting</option>
-                        <option value="completed">Completed</option>
-                      </select>
-                    </label>
+                    <details className="va-task-optional-details">
+                      <summary>Optional details</summary>
+                      <div className="va-task-optional-body">
+                        <label>
+                          <span>Due date</span>
+                          <input
+                            type="date"
+                            name="dueDate"
+                            value={taskDraft.dueDate}
+                            onChange={(event) =>
+                              setTaskDraft({ ...taskDraft, dueDate: event.target.value })
+                            }
+                          />
+                          <small>Use this only when the client gave you a deadline.</small>
+                        </label>
 
-                    <label>
-                      <span>Notes and instructions</span>
-                      <textarea
-                        maxLength={taskDetailsMaxLength}
-                        placeholder="Confirmation number, contact instructions, or other notes"
-                        value={taskDraft.details}
-                        onChange={(event) =>
-                          setTaskDraft({ ...taskDraft, details: event.target.value })
-                        }
-                      />
-                      <small>
-                        {safeCount(taskDraft.details.length)} / {taskDetailsMaxLength}
-                      </small>
-                    </label>
+                        <label>
+                          <span>Notes</span>
+                          <textarea
+                            maxLength={taskDetailsMaxLength}
+                            placeholder="Add a confirmation number, instructions, or other useful details"
+                            value={taskDraft.details}
+                            onChange={(event) =>
+                              setTaskDraft({ ...taskDraft, details: event.target.value })
+                            }
+                          />
+                          <small>
+                            {safeCount(taskDraft.details.length)} / {taskDetailsMaxLength}
+                          </small>
+                        </label>
+                      </div>
+                    </details>
                   </div>
 
                   <div className="va-form-actions">
@@ -1308,7 +1390,7 @@ function LocalWorkspacePage({
                       type="submit"
                       disabled={!canSaveTask}
                     >
-                      {editingTaskId ? 'Save task changes' : 'Add task'}
+                      {editingTaskId ? 'Save changes' : 'Add task'}
                     </button>
                     <button
                       className="va-secondary-button"
@@ -1322,7 +1404,8 @@ function LocalWorkspacePage({
                       Cancel
                     </button>
                   </div>
-                </form>
+                  </form>
+                </>
               ) : (
                 <form
                   onSubmit={(event) => {
@@ -1823,6 +1906,20 @@ function compareTasksForView(first: VaTask, second: VaTask, view: WorkspaceView,
   const secondDate = getPrimaryTaskDate(second) || '9999-12-31'
   if (firstDate !== secondDate) return firstDate.localeCompare(secondDate)
   return second.updatedAt.localeCompare(first.updatedAt)
+}
+
+function readFormDate(
+  formData: FormData | null,
+  fieldName: string,
+  fallback: string,
+): string {
+  const submitted = formData?.get(fieldName)
+
+  if (typeof submitted !== 'string') {
+    return fallback
+  }
+
+  return isDateKey(submitted) ? submitted : ''
 }
 
 function getTaskDateSummary(task: VaTask): string {
