@@ -13,6 +13,12 @@ export type VaClient = {
 
 export type VaTaskStatus = 'needs-action' | 'waiting' | 'completed'
 
+export type VaTaskResponsibility =
+  | 'va'
+  | 'client'
+  | 'third-party'
+  | 'unclear'
+
 export type VaTask = {
   id: string
   clientId: string
@@ -22,6 +28,7 @@ export type VaTask = {
   actionDate: string
   followUpDate: string
   status: VaTaskStatus
+  responsibility: VaTaskResponsibility
   createdAt: string
   updatedAt: string
 }

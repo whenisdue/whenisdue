@@ -10,6 +10,7 @@ import type {
   VaClientDraft,
   VaTask,
   VaTaskDraft,
+  VaTaskResponsibility,
   VaTaskStatus,
   VaWorkspaceData,
 } from './vaTypes'
@@ -45,6 +46,7 @@ const emptyTaskDraft: VaTaskDraft = {
   actionDate: '',
   followUpDate: '',
   status: 'needs-action',
+  responsibility: 'va',
 }
 
 const nameMaxLength = 80
@@ -508,6 +510,8 @@ function LocalWorkspacePage({
   const [formPanel, setFormPanel] = useState<'task' | 'client' | null>(null)
   const [waitingTaskId, setWaitingTaskId] = useState<string | null>(null)
   const [waitingCheckDate, setWaitingCheckDate] = useState('')
+  const [waitingResponsibility, setWaitingResponsibility] =
+    useState<VaTaskResponsibility>('client')
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [clientDraft, setClientDraft] = useState<VaClientDraft>(emptyClientDraft)
   const [taskDraft, setTaskDraft] = useState<VaTaskDraft>(emptyTaskDraft)
@@ -580,10 +584,16 @@ function LocalWorkspacePage({
   const completedCount = filterTasksForView(workspace.tasks, 'completed', today).length
 
   const canSaveClient = clientDraft.displayName.trim().length > 0
+  const taskIsWaitingOnSomeone = isWaitingResponsibility(
+    taskDraft.responsibility,
+  )
+
   const canSaveTask =
     taskDraft.clientId.trim().length > 0 &&
     taskDraft.title.trim().length > 0 &&
-    Boolean(taskDraft.dueDate || taskDraft.actionDate || taskDraft.followUpDate)
+    (taskIsWaitingOnSomeone
+      ? Boolean(taskDraft.followUpDate)
+      : Boolean(taskDraft.actionDate || taskDraft.dueDate))
 
   const cloudIsEmpty = workspace.clients.length === 0 && workspace.tasks.length === 0
   const localHasRecords =
@@ -841,10 +851,41 @@ function LocalWorkspacePage({
     const submittedDates = form ? new FormData(form) : null
     const draftForSave: VaTaskDraft = {
       ...taskDraft,
-      actionDate: readFormDate(submittedDates, 'actionDate', taskDraft.actionDate),
-      dueDate: readFormDate(submittedDates, 'dueDate', taskDraft.dueDate),
-      followUpDate: readFormDate(submittedDates, 'followUpDate', taskDraft.followUpDate),
+      actionDate: readFormDate(
+        submittedDates,
+        'actionDate',
+        taskDraft.actionDate,
+      ),
+      dueDate: readFormDate(
+        submittedDates,
+        'dueDate',
+        taskDraft.dueDate,
+      ),
+      followUpDate: readFormDate(
+        submittedDates,
+        'followUpDate',
+        taskDraft.followUpDate,
+      ),
     }
+
+    const waitingOnSomeone = isWaitingResponsibility(
+      draftForSave.responsibility,
+    )
+
+    if (waitingOnSomeone && !draftForSave.followUpDate) {
+      setMessage('Choose when you want this item to return for follow-up.')
+      return
+    }
+
+    if (
+      !waitingOnSomeone &&
+      !draftForSave.actionDate &&
+      !draftForSave.dueDate
+    ) {
+      setMessage('Choose when this item should appear in Today.')
+      return
+    }
+
     if (
       draftForSave.actionDate &&
       draftForSave.dueDate &&
@@ -852,6 +893,19 @@ function LocalWorkspacePage({
     ) {
       setMessage('The due date cannot be earlier than the scheduled date.')
       return
+    }
+
+    draftForSave.status = waitingOnSomeone
+      ? 'waiting'
+      : draftForSave.status === 'completed'
+        ? 'completed'
+        : 'needs-action'
+
+    if (
+      draftForSave.responsibility === 'unclear' &&
+      !draftForSave.actionDate
+    ) {
+      draftForSave.actionDate = today
     }
 
     const normalized = normalizeTaskDraft(draftForSave)
@@ -906,6 +960,7 @@ function LocalWorkspacePage({
       actionDate: task.actionDate,
       followUpDate: task.followUpDate,
       status: task.status,
+      responsibility: task.responsibility,
     })
     setEditingTaskId(task.id)
     setFormPanel('task')
@@ -918,21 +973,36 @@ function LocalWorkspacePage({
       const task = workspace.tasks.find((item) => item.id === taskId)
 
       setWaitingTaskId(taskId)
-      setWaitingCheckDate(task?.followUpDate || getSuggestedCheckDate(today))
+      setWaitingCheckDate(
+        task?.followUpDate || getSuggestedCheckDate(today),
+      )
+      setWaitingResponsibility(
+        task && isWaitingResponsibility(task.responsibility)
+          ? task.responsibility
+          : 'client',
+      )
       setMessage(null)
       return
     }
 
     const tasks = workspace.tasks.map((task) =>
       task.id === taskId
-        ? { ...task, status, updatedAt: new Date().toISOString() }
+        ? {
+            ...task,
+            status,
+            responsibility:
+              status === 'needs-action'
+                ? ('va' as VaTaskResponsibility)
+                : task.responsibility,
+            updatedAt: new Date().toISOString(),
+          }
         : task,
     )
 
     const successMessage =
       status === 'completed'
         ? 'Task completed and moved to History.'
-        : 'Task returned to Today.'
+        : 'The next action is yours again. This item returned to Today.'
 
     persist({ ...workspace, tasks }, successMessage)
 
@@ -962,6 +1032,7 @@ function LocalWorkspacePage({
         ? {
             ...task,
             status: 'waiting' as VaTaskStatus,
+            responsibility: waitingResponsibility,
             followUpDate: submittedDate,
             updatedAt: new Date().toISOString(),
           }
@@ -980,6 +1051,7 @@ function LocalWorkspacePage({
 
     setWaitingTaskId(null)
     setWaitingCheckDate('')
+    setWaitingResponsibility('client')
     setView(returnsToday ? 'today' : 'waiting')
   }
 
@@ -1172,6 +1244,7 @@ function LocalWorkspacePage({
               if (event.target === event.currentTarget) {
                 setWaitingTaskId(null)
                 setWaitingCheckDate('')
+                setWaitingResponsibility('client')
               }
             }}
           >
@@ -1183,8 +1256,8 @@ function LocalWorkspacePage({
             >
               <div className="va-form-drawer-head">
                 <div>
-                  <p className="va-eyebrow">Waiting on client</p>
-                  <h2 id="waiting-dialog-title">When should you follow up?</h2>
+                  <p className="va-eyebrow">Someone else owns the next step</p>
+                  <h2 id="waiting-dialog-title">Who are you waiting for?</h2>
                 </div>
                 <button
                   className="va-drawer-close"
@@ -1193,6 +1266,7 @@ function LocalWorkspacePage({
                   onClick={() => {
                     setWaitingTaskId(null)
                     setWaitingCheckDate('')
+                    setWaitingResponsibility('client')
                   }}
                 >
                   ×
@@ -1206,6 +1280,24 @@ function LocalWorkspacePage({
                 }}
               >
                 <div className="va-form-fields">
+                  <label>
+                    <span>Waiting for *</span>
+                    <select
+                      value={waitingResponsibility}
+                      onChange={(event) =>
+                        setWaitingResponsibility(
+                          event.target.value as VaTaskResponsibility,
+                        )
+                      }
+                    >
+                      <option value="client">The client</option>
+                      <option value="third-party">Someone else</option>
+                    </select>
+                    <small>
+                      Choose who currently owes the next action.
+                    </small>
+                  </label>
+
                   <label>
                     <span>Follow up on *</span>
                     <input
@@ -1225,7 +1317,7 @@ function LocalWorkspacePage({
 
                 <div className="va-form-actions">
                   <button className="va-primary-button" type="submit" disabled={!waitingCheckDate}>
-                    Move to Waiting
+                    Save as Waiting
                   </button>
                   <button
                     className="va-secondary-button"
@@ -1233,6 +1325,7 @@ function LocalWorkspacePage({
                     onClick={() => {
                       setWaitingTaskId(null)
                       setWaitingCheckDate('')
+                      setWaitingResponsibility('client')
                     }}
                   >
                     Cancel
@@ -1349,19 +1442,79 @@ function LocalWorkspacePage({
                       />
                     </label>
 
+                    <label>
+                      <span>Who owns the next step? *</span>
+                      <select
+                        value={taskDraft.responsibility}
+                        onChange={(event) => {
+                          const responsibility =
+                            event.target.value as VaTaskResponsibility
+                          const waiting = isWaitingResponsibility(responsibility)
+
+                          setTaskDraft({
+                            ...taskDraft,
+                            responsibility,
+                            status: waiting ? 'waiting' : 'needs-action',
+                            actionDate: waiting ? '' : taskDraft.actionDate || today,
+                            followUpDate: waiting
+                              ? taskDraft.followUpDate || getSuggestedCheckDate(today)
+                              : '',
+                          })
+                        }}
+                      >
+                        <option value="va">I need to do this</option>
+                        <option value="client">The client needs to respond</option>
+                        <option value="third-party">
+                          Someone else needs to respond
+                        </option>
+                        <option value="unclear">
+                          I’m not sure who owns the next step
+                        </option>
+                      </select>
+                      <small>
+                        This decides whether the item stays active or moves to Waiting.
+                      </small>
+                    </label>
+
                     <div className="va-date-grid">
-                      <label>
-                        <span>Schedule for *</span>
-                        <input
-                          type="date"
-                          name="actionDate"
-                          value={taskDraft.actionDate}
-                          onChange={(event) =>
-                            setTaskDraft({ ...taskDraft, actionDate: event.target.value })
-                          }
-                        />
-                        <small>This task will appear in Today on this date.</small>
-                      </label>
+                      {isWaitingResponsibility(taskDraft.responsibility) ? (
+                        <label>
+                          <span>Follow up on *</span>
+                          <input
+                            type="date"
+                            name="followUpDate"
+                            min={today}
+                            value={taskDraft.followUpDate}
+                            onChange={(event) =>
+                              setTaskDraft({
+                                ...taskDraft,
+                                followUpDate: event.target.value,
+                              })
+                            }
+                          />
+                          <small>
+                            This item will stay in Waiting and return to Today on this date.
+                          </small>
+                        </label>
+                      ) : (
+                        <label>
+                          <span>Show in Today *</span>
+                          <input
+                            type="date"
+                            name="actionDate"
+                            value={taskDraft.actionDate}
+                            onChange={(event) =>
+                              setTaskDraft({
+                                ...taskDraft,
+                                actionDate: event.target.value,
+                              })
+                            }
+                          />
+                          <small>
+                            Choose when you want this item to appear in your Today list.
+                          </small>
+                        </label>
+                      )}
                     </div>
 
                     <details className="va-task-optional-details">
@@ -1778,6 +1931,11 @@ function TaskCard({
         <div>
           <h3>{task.title}</h3>
           <p className="va-task-client">{client?.displayName ?? 'Unknown client'}</p>
+          <p
+            className={`va-task-responsibility responsibility-${task.responsibility}`}
+          >
+            {getResponsibilityLabel(task.responsibility)}
+          </p>
         </div>
         {relevantDate ? <span className="va-task-relevant-date">{relevantDate}</span> : null}
       </div>
@@ -1801,7 +1959,7 @@ function TaskCard({
             </button>
             {task.status !== 'waiting' ? (
               <button className="va-waiting-button" type="button" onClick={() => onStatusChange(task.id, 'waiting')}>
-                Waiting on client
+                Waiting on someone
               </button>
             ) : (
               <button className="va-needs-action-button" type="button" onClick={() => onStatusChange(task.id, 'needs-action')}>
@@ -1841,7 +1999,15 @@ function getTaskPriorityReason(task: VaTask, today: string): { label: string; ki
   if (task.dueDate === today) return { label: 'Deadline today', kind: 'today' }
   if (task.followUpDate === today) return { label: 'Follow up today', kind: 'today' }
   if (task.actionDate === today) return { label: 'Planned for today', kind: 'today' }
-  if (task.status === 'waiting') return { label: 'Waiting on client', kind: 'waiting' }
+  if (task.status === 'waiting') {
+    return {
+      label:
+        task.responsibility === 'third-party'
+          ? 'Waiting on someone else'
+          : 'Waiting on client',
+      kind: 'waiting',
+    }
+  }
   return { label: 'Later', kind: 'later' }
 }
 
@@ -1998,7 +2164,8 @@ function workspacesMatch(
         task.dueDate === cloudTask.dueDate &&
         task.actionDate === cloudTask.actionDate &&
         task.followUpDate === cloudTask.followUpDate &&
-        task.status === cloudTask.status,
+        task.status === cloudTask.status &&
+        task.responsibility === cloudTask.responsibility,
     )
   })
 
@@ -2104,6 +2271,7 @@ function normalizeTaskDraft(draft: VaTaskDraft): VaTaskDraft {
     actionDate: draft.actionDate,
     followUpDate: draft.followUpDate,
     status: draft.status,
+    responsibility: draft.responsibility,
   }
 }
 
@@ -2250,9 +2418,16 @@ function validateBackupTask(
     details: optionalBackupString(value.details, taskDetailsMaxLength),
     dueDate: optionalBackupDateKey(value.dueDate, `Task ${index + 1} due date`),
     actionDate: optionalBackupDateKey(value.actionDate, `Task ${index + 1} action date`),
-    followUpDate: optionalBackupDateKey(value.followUpDate, `Task ${index + 1} follow-up date`),
+    followUpDate: optionalBackupDateKey(
+      value.followUpDate,
+      `Task ${index + 1} follow-up date`,
+    ),
     status,
-    createdAt: requireBackupDate(value.createdAt, `Task ${index + 1} created date`),
+    responsibility: parseTaskResponsibility(value.responsibility),
+    createdAt: requireBackupDate(
+      value.createdAt,
+      `Task ${index + 1} created date`,
+    ),
     updatedAt: requireBackupDate(value.updatedAt, `Task ${index + 1} updated date`),
   }
 
@@ -2347,6 +2522,38 @@ function isDateKey(value: string): boolean {
     date.getUTCMonth() === month - 1 &&
     date.getUTCDate() === day
   )
+}
+
+function isWaitingResponsibility(
+  responsibility: VaTaskResponsibility,
+): boolean {
+  return (
+    responsibility === 'client' ||
+    responsibility === 'third-party'
+  )
+}
+
+function parseTaskResponsibility(
+  value: unknown,
+): VaTaskResponsibility {
+  return value === 'client' ||
+    value === 'third-party' ||
+    value === 'unclear'
+    ? value
+    : 'va'
+}
+
+function getResponsibilityLabel(
+  responsibility: VaTaskResponsibility,
+): string {
+  const labels: Record<VaTaskResponsibility, string> = {
+    va: 'You need to do this',
+    client: 'Waiting for the client',
+    'third-party': 'Waiting for someone else',
+    unclear: 'Needs clarification',
+  }
+
+  return labels[responsibility]
 }
 
 function getErrorMessage(error: unknown): string {

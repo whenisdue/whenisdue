@@ -127,7 +127,7 @@ function App() {
 
   function navigate(path: string) {
     window.history.pushState(null, '', path)
-    setRoute(getRouteFromPath(path))
+    setRoute(getRouteFromPath(new URL(path, window.location.origin).pathname))
     window.scrollTo({ top: 0 })
   }
 
@@ -254,15 +254,6 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         <nav className="va-home-nav" aria-label="Main navigation">
           <a
-            href="/typing"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/typing')
-            }}
-          >
-            Typing Trainer
-          </a>
-          <a
             href="/calculators"
             onClick={(event) => {
               event.preventDefault()
@@ -326,6 +317,33 @@ function HomePage({ onNavigate }: NavigationProps) {
           </p>
 
           <p className="va-home-trust">Private account · Cloud synced · Export anytime</p>
+
+          <aside
+            className="va-typing-promo"
+            aria-labelledby="va-typing-promo-title"
+          >
+            <div>
+              <p className="va-typing-promo-kicker">Free VA tool</p>
+
+              <h2 id="va-typing-promo-title">
+                Type faster. Work with less friction.
+              </h2>
+
+              <p>
+                Build speed and accuracy for emails, chat replies, and client work.
+              </p>
+            </div>
+
+            <a
+              href="/typing"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/typing')
+              }}
+            >
+              Start practicing
+            </a>
+          </aside>
         </div>
 
         <div className="va-compact-product-proof" aria-label="Example of the Today action queue">

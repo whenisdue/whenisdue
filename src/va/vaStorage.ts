@@ -1,4 +1,9 @@
-import type { VaClient, VaTask, VaWorkspaceData } from './vaTypes'
+import type {
+  VaClient,
+  VaTask,
+  VaTaskResponsibility,
+  VaWorkspaceData,
+} from './vaTypes'
 
 export const vaWorkspaceStorageKey = 'whenisdue.vaWorkspace.v1'
 
@@ -24,7 +29,7 @@ export function loadVaWorkspace(): VaWorkspaceData {
     const parsed: unknown = JSON.parse(storedValue)
 
     if (isVaWorkspaceV2(parsed)) {
-      return parsed
+      return normalizeWorkspace(parsed)
     }
 
     if (isVaWorkspaceV1(parsed)) {
@@ -142,9 +147,36 @@ function isVaTask(value: unknown): value is VaTask {
     isDateKeyOrEmpty(task.actionDate) &&
     typeof task.followUpDate === 'string' &&
     isDateKeyOrEmpty(task.followUpDate) &&
-    (task.status === 'needs-action' || task.status === 'waiting' || task.status === 'completed') &&
+    (task.status === 'needs-action' ||
+      task.status === 'waiting' ||
+      task.status === 'completed') &&
+    (task.responsibility === undefined ||
+      isVaTaskResponsibility(task.responsibility)) &&
     typeof task.createdAt === 'string' &&
     typeof task.updatedAt === 'string'
+  )
+}
+
+function normalizeWorkspace(workspace: VaWorkspaceData): VaWorkspaceData {
+  return {
+    ...workspace,
+    tasks: workspace.tasks.map((task) => ({
+      ...task,
+      responsibility: isVaTaskResponsibility(task.responsibility)
+        ? task.responsibility
+        : 'va',
+    })),
+  }
+}
+
+function isVaTaskResponsibility(
+  value: unknown,
+): value is VaTaskResponsibility {
+  return (
+    value === 'va' ||
+    value === 'client' ||
+    value === 'third-party' ||
+    value === 'unclear'
   )
 }
 

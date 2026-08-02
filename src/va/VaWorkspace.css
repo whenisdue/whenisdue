@@ -2333,3 +2333,42 @@
     padding-inline: 10px;
   }
 }
+
+/* Promise Ledger — responsibility ownership */
+
+.va-task-responsibility {
+  display: inline-flex;
+  width: fit-content;
+  margin: 7px 0 0 !important;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.66rem !important;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.va-task-responsibility.responsibility-va {
+  background: var(--va-action-tint);
+  color: var(--va-action) !important;
+}
+
+.va-task-responsibility.responsibility-client {
+  background: var(--va-waiting-tint);
+  color: var(--va-waiting) !important;
+}
+
+.va-task-responsibility.responsibility-third-party {
+  background: var(--va-followup-tint);
+  color: var(--va-followup) !important;
+}
+
+.va-task-responsibility.responsibility-unclear {
+  background: var(--va-overdue-tint);
+  color: var(--va-overdue) !important;
+}
+
+.va-form-drawer select + small {
+  color: #7c8998;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}

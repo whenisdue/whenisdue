@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient'
 import type {
   VaClient,
   VaTask,
+  VaTaskResponsibility,
   VaTaskStatus,
   VaWorkspaceData,
 } from './vaTypes'
@@ -31,6 +32,7 @@ type TaskRow = {
   action_date: string | null
   follow_up_date: string | null
   status: VaTaskStatus
+  responsibility: VaTaskResponsibility | null
   created_at: string
   updated_at: string
 }
@@ -208,6 +210,7 @@ function toTaskRow(user: User, task: VaTask): TaskRow {
     action_date: task.actionDate || null,
     follow_up_date: task.followUpDate || null,
     status: task.status,
+    responsibility: task.responsibility,
     created_at: task.createdAt,
     updated_at: task.updatedAt,
   }
@@ -238,9 +241,23 @@ function fromTaskRow(row: TaskRow): VaTask {
     actionDate: row.action_date ?? '',
     followUpDate: row.follow_up_date ?? '',
     status: row.status,
+    responsibility: isVaTaskResponsibility(row.responsibility)
+      ? row.responsibility
+      : 'va',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
+}
+
+function isVaTaskResponsibility(
+  value: unknown,
+): value is VaTaskResponsibility {
+  return (
+    value === 'va' ||
+    value === 'client' ||
+    value === 'third-party' ||
+    value === 'unclear'
+  )
 }
 
 function isUuid(value: string): boolean {
