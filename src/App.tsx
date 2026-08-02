@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import './VaHomeCompact.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
+import VaTypingTrainerPage from './typing/VaTypingTrainerPage'
 import { isSupabaseConfigured, supabase } from './va/supabaseClient'
 import {
   type CalculatorMode,
@@ -51,6 +52,7 @@ type RouteName =
   | 'return-window'
   | 'invoice-due-date'
   | 'workspace'
+  | 'typing'
   | 'about'
   | 'privacy'
   | 'terms'
@@ -153,6 +155,10 @@ function App() {
     return <VaWorkspacePage onNavigate={navigate} />
   }
 
+  if (route === 'typing') {
+    return <VaTypingTrainerPage onNavigate={navigate} />
+  }
+
   if (route === 'about' || route === 'privacy' || route === 'terms' || route === 'contact') {
     return <StaticPage route={route} onNavigate={navigate} />
   }
@@ -247,6 +253,15 @@ function HomePage({ onNavigate }: NavigationProps) {
         </a>
 
         <nav className="va-home-nav" aria-label="Main navigation">
+          <a
+            href="/typing"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/typing')
+            }}
+          >
+            Typing Trainer
+          </a>
           <a
             href="/calculators"
             onClick={(event) => {
@@ -2638,6 +2653,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'workspace'
   }
 
+  if (pathname === '/typing') {
+    return 'typing'
+  }
+
   if (pathname === '/about') {
     return 'about'
   }
@@ -2735,6 +2754,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       title: 'Invoice Due Date Calculator - WhenIsDue',
       description: 'Calculate invoice due dates from common payment terms like Net 7, Net 15, Net 30, Net 45, and Net 60.',
       path: '/invoice-due-date-calculator',
+    }
+  }
+
+  if (route === 'typing') {
+    return {
+      title: 'Free VA Typing Test and Practice | WhenIsDue',
+      description: 'Practice realistic virtual assistant typing tests with professional emails, office passages, timed sessions, WPM, accuracy, and mistake analysis.',
+      openGraphDescription: 'A free typing trainer for virtual assistant applicants with realistic work passages and timed practice.',
+      twitterDescription: 'Practice VA typing tests with realistic emails, WPM, accuracy, and local progress history.',
+      path: '/typing',
     }
   }
 
