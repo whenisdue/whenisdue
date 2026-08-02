@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import './VaHomeCompact.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
+import { isSupabaseConfigured, supabase } from './va/supabaseClient'
 import {
   type CalculatorMode,
   type InvoiceTerm,
@@ -43,6 +45,7 @@ const positiveWholeNumberMessage = 'Enter a whole number greater than 0.'
 
 type RouteName =
   | 'home'
+  | 'calculators'
   | 'business-days'
   | 'free-trial'
   | 'return-window'
@@ -60,6 +63,9 @@ type NavigationProps = {
 
 function App() {
   const [route, setRoute] = useState<RouteName>(() => getRouteFromPath(window.location.pathname))
+  const [homeAuthState, setHomeAuthState] = useState<'checking' | 'signed-in' | 'signed-out'>(
+    isSupabaseConfigured ? 'checking' : 'signed-out',
+  )
 
   useEffect(() => {
     function handlePopState() {
@@ -74,6 +80,46 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setHomeAuthState('signed-out')
+      return
+    }
+
+    let active = true
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active) {
+        return
+      }
+
+      setHomeAuthState(data.session ? 'signed-in' : 'signed-out')
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!active) {
+        return
+      }
+
+      setHomeAuthState(nextSession ? 'signed-in' : 'signed-out')
+    })
+
+    return () => {
+      active = false
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (route !== 'home' || homeAuthState !== 'signed-in') {
+      return
+    }
+
+    window.history.replaceState(null, '', '/workspace')
+    setRoute('workspace')
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [homeAuthState, route])
+
+  useEffect(() => {
     applyRouteMetadata(route)
   }, [route])
 
@@ -81,6 +127,10 @@ function App() {
     window.history.pushState(null, '', path)
     setRoute(getRouteFromPath(path))
     window.scrollTo({ top: 0 })
+  }
+
+  if (route === 'calculators') {
+    return <CalculatorHubPage onNavigate={navigate} />
   }
 
   if (route === 'business-days') {
@@ -111,11 +161,145 @@ function App() {
     return <NotFoundPage onNavigate={navigate} />
   }
 
+  if (homeAuthState === 'checking') {
+    return (
+      <main className="va-home-session-check">
+        <span aria-hidden="true" />
+        <p>Opening WhenIsDue...</p>
+      </main>
+    )
+  }
+
   return <HomePage onNavigate={navigate} />
 }
 
-
 function HomePage({ onNavigate }: NavigationProps) {
+  return (
+    <main className="page-shell va-home-page va-public-home-compact">
+      <header className="va-home-header">
+        <a
+          className="va-home-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <span className="brand-calendar" aria-hidden="true">
+            <span />
+            <strong>✓</strong>
+          </span>
+          <span>WhenIsDue</span>
+        </a>
+
+        <nav className="va-home-nav" aria-label="Main navigation">
+          <a
+            href="/calculators"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/calculators')
+            }}
+          >
+            Calculators
+          </a>
+          <a
+            className="va-home-nav-cta"
+            href="/workspace"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/workspace')
+            }}
+          >
+            Sign in
+          </a>
+        </nav>
+      </header>
+
+      <section className="va-compact-public-hero" aria-labelledby="homepage-title">
+        <div className="va-compact-public-copy">
+          <p className="va-home-eyebrow">Built for virtual assistants</p>
+          <h1 id="homepage-title">Know what needs your attention across every client.</h1>
+          <p>
+            WhenIsDue puts deadlines, follow-ups, waiting items, and today’s work into
+            one ordered action queue.
+          </p>
+
+          <div className="va-home-actions">
+            <a
+              className="va-home-primary"
+              href="/workspace"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/workspace')
+              }}
+            >
+              Create or open my workspace
+            </a>
+            <a
+              className="va-home-secondary"
+              href="/calculators"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/calculators')
+              }}
+            >
+              Use a free calculator
+            </a>
+          </div>
+
+          <p className="va-home-trust">Private account · Cloud synced · Export anytime</p>
+        </div>
+
+        <div className="va-compact-product-proof" aria-label="Example of the Today action queue">
+          <div className="va-compact-proof-heading">
+            <div>
+              <span>Today</span>
+              <strong>3 actions need you</strong>
+            </div>
+            <b>Start here</b>
+          </div>
+
+          <article className="va-compact-proof-task is-first">
+            <p>Follow-up overdue by 2 days</p>
+            <h2>Confirm Friday’s appointment</h2>
+            <span>Richard</span>
+          </article>
+
+          <article className="va-compact-proof-task">
+            <p>Deadline today</p>
+            <h3>Send updated appointment summary</h3>
+            <span>Jan</span>
+          </article>
+
+          <article className="va-compact-proof-task">
+            <p>Scheduled for today</p>
+            <h3>Review revised content calendar</h3>
+            <span>Acme Studio</span>
+          </article>
+        </div>
+      </section>
+
+      <section className="va-compact-benefits" aria-label="How WhenIsDue helps">
+        <article>
+          <strong>Open one queue</strong>
+          <span>See urgent work and follow-ups together.</span>
+        </article>
+        <article>
+          <strong>Choose the outcome</strong>
+          <span>Finish it, wait on someone, or reschedule.</span>
+        </article>
+        <article>
+          <strong>Move to the next action</strong>
+          <span>Keep working until you are caught up.</span>
+        </article>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  )
+}
+
+function CalculatorHubPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const [startDate, setStartDate] = useState(todayInputValue)
   const [mode, setMode] = useState<CalculatorMode>('calendar')
@@ -174,7 +358,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           return
         }
 
-        if (window.location.pathname === '/' && !window.location.hash) {
+        if (window.location.pathname === '/calculators' && !window.location.hash) {
           window.scrollTo({
             top: 0,
             left: 0,
@@ -243,7 +427,7 @@ function HomePage({ onNavigate }: NavigationProps) {
     }
 
     if (window.location.hash !== `#${sectionId}`) {
-      window.history.pushState(null, '', `/#${sectionId}`)
+      window.history.pushState(null, '', `/calculators#${sectionId}`)
     }
 
     const sectionTop =
@@ -356,7 +540,7 @@ function HomePage({ onNavigate }: NavigationProps) {
   }
 
   return (
-    <main className="page-shell home-page friendly-home">
+    <main className="page-shell home-page friendly-home calculator-hub-page">
       <a className="skip-to-calculator" href="#calculator" onClick={(event) => { event.preventDefault(); focusHomeSection('calculator', 'calculator-heading') }}>Skip to calculator</a>
       <section className="dual-intent-hero" aria-labelledby="homepage-title">
         <IdentityRow onNavigate={onNavigate} />
@@ -365,12 +549,11 @@ function HomePage({ onNavigate }: NavigationProps) {
           <div className="dual-intent-copy">
             <p className="friendly-eyebrow">
               <span aria-hidden="true">✓</span>
-              Two simple ways to stay ahead of a deadline
+              Free deadline calculators
             </p>
-            <h1 id="homepage-title" tabIndex={-1}>Calculate a due date—or manage every client deadline.</h1>
+            <h1 id="homepage-title" tabIndex={-1}>Calculate a date quickly and accurately.</h1>
             <p className="friendly-subtitle">
-              Get a quick answer immediately, or open a private VA workspace for tasks,
-              follow-ups, waiting items, and overdue work.
+              Choose a calculator, enter the details, and get a clear date without creating an account.
             </p>
 
             <div className="dual-intent-actions">
@@ -392,7 +575,7 @@ function HomePage({ onNavigate }: NavigationProps) {
                   onNavigate('/workspace')
                 }}
               >
-                Manage client deadlines
+                Open VA Workspace
               </a>
             </div>
 
@@ -1850,37 +2033,6 @@ type IdentityRowProps = {
 }
 
 function IdentityRow({ onNavigate }: IdentityRowProps) {
-  function openHomeSection(sectionId: 'calculator' | 'saved-dates' | 'more-tools') {
-    if (!onNavigate) {
-      return
-    }
-
-    const focusTargetId =
-      sectionId === 'calculator'
-        ? 'calculator-heading'
-        : sectionId === 'saved-dates'
-          ? 'saved-title'
-          : 'popular-calculators-title'
-
-    if (window.location.pathname !== '/') {
-      onNavigate('/')
-    }
-
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        window.history.pushState(null, '', `/#${sectionId}`)
-        document.getElementById(sectionId)?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        })
-
-        window.setTimeout(() => {
-          document.getElementById(focusTargetId)?.focus({ preventScroll: true })
-        }, 450)
-      })
-    })
-  }
-
   const siteMark = onNavigate ? (
     <a
       className="site-mark site-mark-link"
@@ -1913,31 +2065,22 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
         {onNavigate ? (
           <nav className="top-nav friendly-top-nav" aria-label="Main navigation">
             <a
-              href="/#calculator"
+              href="/"
               onClick={(event) => {
                 event.preventDefault()
-                openHomeSection('calculator')
+                onNavigate('/')
               }}
             >
-              Calculate
+              Home
             </a>
             <a
-              href="/#saved-dates"
+              href="/calculators"
               onClick={(event) => {
                 event.preventDefault()
-                openHomeSection('saved-dates')
+                onNavigate('/calculators')
               }}
             >
-              Saved dates
-            </a>
-            <a
-              href="/#more-tools"
-              onClick={(event) => {
-                event.preventDefault()
-                openHomeSection('more-tools')
-              }}
-            >
-              More tools
+              Calculators
             </a>
             <a
               className="workspace-nav-link"
@@ -1955,6 +2098,7 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
     </header>
   )
 }
+
 
 type SiteFooterProps = {
   onNavigate: (path: string) => void
@@ -2423,6 +2567,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'home'
   }
 
+  if (pathname === '/calculators') {
+    return 'calculators'
+  }
+
   if (pathname === '/business-days-calculator') {
     return 'business-days'
   }
@@ -2503,6 +2651,14 @@ function applyRouteMetadata(route: RouteName) {
 }
 
 function getRouteMetadata(route: RouteName): RouteMetadata {
+  if (route === 'calculators') {
+    return {
+      title: 'Free Deadline Calculators - WhenIsDue',
+      description: 'Use free calculators for calendar days, business days, invoice due dates, free trials, and return windows.',
+      path: '/calculators',
+    }
+  }
+
   if (route === 'business-days') {
     return {
       title: 'Business Days Calculator - WhenIsDue',
@@ -2584,10 +2740,10 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
   }
 
   return {
-    title: 'WhenIsDue - Client Follow-Up Workspace for Virtual Assistants',
-    description: 'A daily client task and follow-up workspace for virtual assistants, with free deadline calculators for quick date planning.',
-    openGraphDescription: 'Know what needs attention across every client with a private daily follow-up workspace for virtual assistants.',
-    twitterDescription: 'A daily client task and follow-up workspace for virtual assistants.',
+    title: 'WhenIsDue - Daily Client Action Workspace for Virtual Assistants',
+    description: 'One ordered daily queue for virtual assistants to manage client actions, deadlines, waiting items, and follow-ups.',
+    openGraphDescription: 'Open one workspace and know the next client action, deadline, or follow-up that needs your attention.',
+    twitterDescription: 'A daily client action queue for virtual assistants.',
     path: '/',
   }
 }
@@ -2663,7 +2819,7 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         {
           title: 'What WhenIsDue does',
           paragraphs: [
-            'WhenIsDue provides simple due-date calculators and a separate VA Workspace for organizing client tasks, action dates, follow-ups, waiting items, and completed work.',
+            'WhenIsDue is a daily client-action workspace for virtual assistants. It organizes tasks, deadlines, waiting items, and follow-ups into one clear queue. Free deadline calculators remain available as supporting tools.',
           ],
         },
         {
