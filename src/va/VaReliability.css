@@ -1,0 +1,87 @@
+.va-sync-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 0;
+  border: 1px solid #d8dee8;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+}
+
+.va-sync-status > span {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+.va-sync-status > div {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 2px;
+}
+
+.va-sync-status strong {
+  color: #18324b;
+  font-size: 0.82rem;
+}
+
+.va-sync-status small {
+  color: #667488;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.va-sync-saving {
+  border-color: #d9c783;
+  background: #fffbed;
+}
+
+.va-sync-saving > span {
+  background: #b7791f;
+  animation: va-sync-pulse 900ms ease-in-out infinite alternate;
+}
+
+.va-sync-saved {
+  border-color: #b8d7c7;
+  background: #f2f8f5;
+}
+
+.va-sync-saved > span {
+  background: #3f7a61;
+}
+
+.va-sync-error {
+  border-color: #efb8b8;
+  background: #fff4f4;
+}
+
+.va-sync-error > span {
+  background: #b42318;
+}
+
+@keyframes va-sync-pulse {
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (max-width: 680px) {
+  .va-sync-status {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .va-sync-status button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .va-sync-saving > span {
+    animation: none;
+  }
+}

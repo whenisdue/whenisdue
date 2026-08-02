@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import './VaWorkspace.css'
+import './VaReliability.css'
 import { isSupabaseConfigured, supabase } from './supabaseClient'
 import { importLocalWorkspace, loadCloudWorkspace, syncCloudWorkspace } from './vaCloud'
 import { loadVaWorkspace, saveVaWorkspace } from './vaStorage'
@@ -18,6 +19,7 @@ type VaWorkspacePageProps = {
 }
 
 type WorkspaceView = 'clients' | 'today' | 'follow-up' | 'waiting' | 'upcoming' | 'overdue' | 'completed'
+type SyncStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 const emptyWorkspace: VaWorkspaceData = {
   version: 2,
@@ -493,16 +495,22 @@ function LocalWorkspacePage({
   const [workspaceLoading, setWorkspaceLoading] = useState(true)
   const [view, setView] = useState<WorkspaceView>('today')
   const [formPanel, setFormPanel] = useState<'task' | 'client' | null>(null)
+  const [waitingTaskId, setWaitingTaskId] = useState<string | null>(null)
+  const [waitingCheckDate, setWaitingCheckDate] = useState('')
   const [clientDraft, setClientDraft] = useState<VaClientDraft>(emptyClientDraft)
   const [taskDraft, setTaskDraft] = useState<VaTaskDraft>(emptyTaskDraft)
   const [editingClientId, setEditingClientId] = useState<string | null>(null)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
+  const [syncError, setSyncError] = useState<string | null>(null)
+  const [failedWorkspace, setFailedWorkspace] = useState<VaWorkspaceData | null>(null)
   const [importing, setImporting] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [restoreMode, setRestoreMode] = useState<'merge' | 'replace'>('merge')
   const restoreInputRef = useRef<HTMLInputElement | null>(null)
   const syncQueue = useRef<Promise<void>>(Promise.resolve())
+  const syncRevision = useRef(0)
 
   useEffect(() => {
     let active = true
@@ -572,16 +580,63 @@ function LocalWorkspacePage({
   function persist(nextWorkspace: VaWorkspaceData, successMessage?: string) {
     const localResult = saveVaWorkspace(nextWorkspace)
 
+    if (!localResult.ok) {
+      setMessage(localResult.message)
+      setSyncStatus('error')
+      setSyncError(localResult.message)
+      setFailedWorkspace(nextWorkspace)
+      return false
+    }
+
+    const revision = syncRevision.current + 1
+    syncRevision.current = revision
+
     setWorkspace(nextWorkspace)
-    setMessage(localResult.ok ? successMessage ?? null : localResult.message)
+    setMessage(successMessage ?? 'Saved in this browser. Syncing to your account...')
+    setSyncStatus('saving')
+    setSyncError(null)
+    setFailedWorkspace(null)
 
     syncQueue.current = syncQueue.current
-      .then(() => syncCloudWorkspace(user, nextWorkspace))
+      .catch(() => undefined)
+      .then(async () => {
+        await syncCloudWorkspace(user, nextWorkspace)
+        const verifiedWorkspace = await loadCloudWorkspace(user)
+
+        if (!workspacesMatch(nextWorkspace, verifiedWorkspace)) {
+          throw new Error(
+            'The cloud copy did not match the dates and statuses you saved. Please retry.',
+          )
+        }
+
+        if (syncRevision.current === revision) {
+          setWorkspace(verifiedWorkspace)
+          saveVaWorkspace(verifiedWorkspace)
+          setSyncStatus('saved')
+          setSyncError(null)
+          setFailedWorkspace(null)
+          setMessage(successMessage ? `${successMessage} Cloud sync confirmed.` : 'Cloud sync confirmed.')
+        }
+      })
       .catch((error: unknown) => {
-        setMessage(`Cloud sync failed: ${getErrorMessage(error)}`)
+        if (syncRevision.current === revision) {
+          const errorMessage = getErrorMessage(error)
+          setSyncStatus('error')
+          setSyncError(errorMessage)
+          setFailedWorkspace(nextWorkspace)
+          setMessage(`Cloud sync failed: ${errorMessage}`)
+        }
       })
 
     return true
+  }
+
+  function retryCloudSync() {
+    if (!failedWorkspace) {
+      return
+    }
+
+    persist(failedWorkspace, 'Retrying the last saved change.')
   }
 
   async function importBrowserRecords() {
@@ -772,19 +827,45 @@ function LocalWorkspacePage({
 
     const now = new Date().toISOString()
     const normalized = normalizeTaskDraft(taskDraft)
-    const tasks = editingTaskId
-      ? workspace.tasks.map((task) =>
-          task.id === editingTaskId ? { ...task, ...normalized, updatedAt: now } : task,
-        )
-      : [{ ...normalized, id: createId(), createdAt: now, updatedAt: now }, ...workspace.tasks]
+    const existingTask = editingTaskId
+      ? workspace.tasks.find((task) => task.id === editingTaskId)
+      : undefined
+    const savedTask: VaTask = editingTaskId
+      ? {
+          ...(existingTask ?? {
+            id: editingTaskId,
+            createdAt: now,
+          }),
+          ...normalized,
+          id: editingTaskId,
+          updatedAt: now,
+          createdAt: existingTask?.createdAt ?? now,
+        }
+      : {
+          ...normalized,
+          id: createId(),
+          createdAt: now,
+          updatedAt: now,
+        }
 
-    if (persist({ ...workspace, tasks }, editingTaskId ? 'Task updated.' : 'Task saved.')) {
+    const tasks = editingTaskId
+      ? workspace.tasks.map((task) => (task.id === editingTaskId ? savedTask : task))
+      : [savedTask, ...workspace.tasks]
+
+    const placement = getTaskPlacement(savedTask, today)
+    const dateSummary = getTaskDateSummary(savedTask)
+    const successMessage = editingTaskId
+      ? `Task updated. ${dateSummary} ${placement.message}`
+      : `Task added. ${dateSummary} ${placement.message}`
+
+    if (persist({ ...workspace, tasks }, successMessage)) {
       setTaskDraft({
         ...emptyTaskDraft,
         clientId: normalized.clientId,
       })
       setEditingTaskId(null)
       setFormPanel(null)
+      setView(placement.view)
     }
   }
 
@@ -805,12 +886,67 @@ function LocalWorkspacePage({
   }
 
   function updateTaskStatus(taskId: string, status: VaTaskStatus) {
+    if (status === 'waiting') {
+      const task = workspace.tasks.find((item) => item.id === taskId)
+
+      setWaitingTaskId(taskId)
+      setWaitingCheckDate(task?.followUpDate || getSuggestedCheckDate(today))
+      setMessage(null)
+      return
+    }
+
     const tasks = workspace.tasks.map((task) =>
       task.id === taskId
         ? { ...task, status, updatedAt: new Date().toISOString() }
         : task,
     )
-    persist({ ...workspace, tasks })
+
+    const successMessage =
+      status === 'completed'
+        ? 'Task completed and moved to History.'
+        : 'Task returned to Today.'
+
+    persist({ ...workspace, tasks }, successMessage)
+
+    if (status === 'needs-action') {
+      setView('today')
+    }
+  }
+
+  function confirmWaitingStatus() {
+    if (!waitingTaskId) {
+      return
+    }
+
+    if (!waitingCheckDate) {
+      setMessage('Choose when this task should return for follow-up.')
+      return
+    }
+
+    const tasks = workspace.tasks.map((task) =>
+      task.id === waitingTaskId
+        ? {
+            ...task,
+            status: 'waiting' as VaTaskStatus,
+            followUpDate: waitingCheckDate,
+            updatedAt: new Date().toISOString(),
+          }
+        : task,
+    )
+
+    const returnsToday = waitingCheckDate <= today
+    const formattedDate = formatDateKey(waitingCheckDate)
+
+    persist(
+      { ...workspace, tasks },
+      returnsToday
+        ? `Waiting status saved. This task is in Today because its check-in date is ${formattedDate}.`
+        : `Waiting status saved. This task will return to Today on ${formattedDate}.`,
+    )
+
+    setWaitingTaskId(null)
+    setWaitingCheckDate('')
+    setView(returnsToday ? 'today' : 'waiting')
   }
 
   function deleteTask(task: VaTask) {
@@ -889,8 +1025,21 @@ function LocalWorkspacePage({
           <p>{getDailySummary(view, todayCount, waitingCount, upcomingCount, completedCount)}</p>
         </div>
         <div className="va-daily-header-actions">
+          {view === 'clients' ? (
+            <button
+              className="va-primary-button"
+              type="button"
+              onClick={() => {
+                setEditingClientId(null)
+                setClientDraft(emptyClientDraft)
+                setFormPanel('client')
+              }}
+            >
+              + Add client
+            </button>
+          ) : null}
           <button
-            className="va-primary-button"
+            className={view === 'clients' ? 'va-secondary-button' : 'va-primary-button'}
             type="button"
             onClick={() => {
               setEditingTaskId(null)
@@ -904,6 +1053,84 @@ function LocalWorkspacePage({
       </section>
 
       <section className="va-daily-work">
+        {waitingTaskId ? (
+          <div
+            className="va-form-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setWaitingTaskId(null)
+                setWaitingCheckDate('')
+              }
+            }}
+          >
+            <section
+              className="va-form-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="waiting-dialog-title"
+            >
+              <div className="va-form-drawer-head">
+                <div>
+                  <p className="va-eyebrow">Waiting on someone else</p>
+                  <h2 id="waiting-dialog-title">When should this return to Today?</h2>
+                </div>
+                <button
+                  className="va-drawer-close"
+                  type="button"
+                  aria-label="Close waiting dialog"
+                  onClick={() => {
+                    setWaitingTaskId(null)
+                    setWaitingCheckDate('')
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  confirmWaitingStatus()
+                }}
+              >
+                <div className="va-form-fields">
+                  <label>
+                    <span>Check again *</span>
+                    <input
+                      autoFocus
+                      required
+                      type="date"
+                      min={today}
+                      value={waitingCheckDate}
+                      onChange={(event) => setWaitingCheckDate(event.target.value)}
+                    />
+                    <small>
+                      This task will leave the active queue and automatically return on this date.
+                    </small>
+                  </label>
+                </div>
+
+                <div className="va-form-actions">
+                  <button className="va-primary-button" type="submit" disabled={!waitingCheckDate}>
+                    Save waiting status
+                  </button>
+                  <button
+                    className="va-secondary-button"
+                    type="button"
+                    onClick={() => {
+                      setWaitingTaskId(null)
+                      setWaitingCheckDate('')
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        ) : null}
+
         {formPanel ? (
           <div
             className="va-form-overlay"
@@ -980,6 +1207,17 @@ function LocalWorkspacePage({
                           </option>
                         ))}
                       </select>
+                      <button
+                        className="va-secondary-button"
+                        type="button"
+                        onClick={() => {
+                          setEditingClientId(null)
+                          setClientDraft(emptyClientDraft)
+                          setFormPanel('client')
+                        }}
+                      >
+                        + Create a new client
+                      </button>
                     </label>
 
                     <label>
@@ -1322,6 +1560,39 @@ function LocalWorkspacePage({
         </div>
       </details>
 
+      <section
+        className={`va-sync-status va-sync-${syncStatus}`}
+        aria-live="polite"
+        aria-label="Cloud synchronization status"
+      >
+        <span aria-hidden="true" />
+        <div>
+          <strong>
+            {syncStatus === 'saving'
+              ? 'Saving to cloud'
+              : syncStatus === 'saved'
+                ? 'Cloud copy verified'
+                : syncStatus === 'error'
+                  ? 'Cloud sync needs attention'
+                  : 'Cloud sync ready'}
+          </strong>
+          <small>
+            {syncStatus === 'saving'
+              ? 'Keep this tab open until saving finishes.'
+              : syncStatus === 'saved'
+                ? 'The server copy matches the dates and statuses shown here.'
+                : syncStatus === 'error'
+                  ? syncError ?? 'The last change is still saved in this browser.'
+                  : 'Changes will be verified after every save.'}
+          </small>
+        </div>
+        {syncStatus === 'error' && failedWorkspace ? (
+          <button className="va-secondary-button" type="button" onClick={retryCloudSync}>
+            Retry sync
+          </button>
+        ) : null}
+      </section>
+
       {message ? <p className="va-global-message" aria-live="polite">{message}</p> : null}
     </main>
   )
@@ -1443,15 +1714,20 @@ function TaskCard({
           </>
         )}
 
-        <details className="va-task-more">
-          <summary aria-label={`More actions for ${task.title}`}>More</summary>
-          <div>
-            <button type="button" onClick={() => onEdit(task)}>Edit task</button>
-            <button className="va-delete-button" type="button" onClick={() => onDelete(task)}>
-              {currentView === 'completed' ? 'Delete permanently' : 'Delete task'}
-            </button>
-          </div>
-        </details>
+        <button
+          className="va-secondary-button"
+          type="button"
+          onClick={() => onEdit(task)}
+        >
+          Edit
+        </button>
+        <button
+          className="va-delete-button"
+          type="button"
+          onClick={() => onDelete(task)}
+        >
+          {currentView === 'completed' ? 'Delete permanently' : 'Delete'}
+        </button>
       </div>
     </article>
   )
@@ -1547,6 +1823,129 @@ function compareTasksForView(first: VaTask, second: VaTask, view: WorkspaceView,
   const secondDate = getPrimaryTaskDate(second) || '9999-12-31'
   if (firstDate !== secondDate) return firstDate.localeCompare(secondDate)
   return second.updatedAt.localeCompare(first.updatedAt)
+}
+
+function getTaskDateSummary(task: VaTask): string {
+  const parts: string[] = []
+
+  if (task.actionDate) {
+    parts.push(`Show in Today: ${formatDateKey(task.actionDate)}.`)
+  }
+
+  if (task.dueDate) {
+    parts.push(`Deadline: ${formatDateKey(task.dueDate)}.`)
+  }
+
+  if (task.followUpDate) {
+    parts.push(`Check again: ${formatDateKey(task.followUpDate)}.`)
+  }
+
+  return parts.length > 0 ? parts.join(' ') : 'No dates were saved.'
+}
+
+function workspacesMatch(
+  expected: VaWorkspaceData,
+  actual: VaWorkspaceData,
+): boolean {
+  if (
+    expected.clients.length !== actual.clients.length ||
+    expected.tasks.length !== actual.tasks.length
+  ) {
+    return false
+  }
+
+  const expectedClients = [...expected.clients].sort((a, b) => a.id.localeCompare(b.id))
+  const actualClients = [...actual.clients].sort((a, b) => a.id.localeCompare(b.id))
+  const expectedTasks = [...expected.tasks].sort((a, b) => a.id.localeCompare(b.id))
+  const actualTasks = [...actual.tasks].sort((a, b) => a.id.localeCompare(b.id))
+
+  const clientsMatch = expectedClients.every((client, index) => {
+    const cloudClient = actualClients[index]
+
+    return Boolean(
+      cloudClient &&
+        client.id === cloudClient.id &&
+        client.displayName === cloudClient.displayName &&
+        client.contactName === cloudClient.contactName &&
+        client.email === cloudClient.email &&
+        client.phone === cloudClient.phone &&
+        client.serviceType === cloudClient.serviceType &&
+        client.notes === cloudClient.notes &&
+        client.active === cloudClient.active,
+    )
+  })
+
+  const tasksMatch = expectedTasks.every((task, index) => {
+    const cloudTask = actualTasks[index]
+
+    return Boolean(
+      cloudTask &&
+        task.id === cloudTask.id &&
+        task.clientId === cloudTask.clientId &&
+        task.title === cloudTask.title &&
+        task.details === cloudTask.details &&
+        task.dueDate === cloudTask.dueDate &&
+        task.actionDate === cloudTask.actionDate &&
+        task.followUpDate === cloudTask.followUpDate &&
+        task.status === cloudTask.status,
+    )
+  })
+
+  return clientsMatch && tasksMatch
+}
+
+function getSuggestedCheckDate(today: string): string {
+  const date = new Date(`${today}T00:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + 1)
+  return date.toISOString().slice(0, 10)
+}
+
+function getTaskPlacement(
+  task: VaTask,
+  today: string,
+): { view: WorkspaceView; message: string } {
+  if (task.status === 'completed') {
+    return { view: 'completed', message: 'It is now in History.' }
+  }
+
+  if (task.status === 'waiting') {
+    if (task.followUpDate && task.followUpDate <= today) {
+      return {
+        view: 'today',
+        message: `${getTaskPriorityReason(task, today).label}. It now appears in Today.`,
+      }
+    }
+
+    if (task.followUpDate) {
+      return {
+        view: 'waiting',
+        message: `It is waiting and will return to Today on ${formatDateKey(task.followUpDate)}.`,
+      }
+    }
+
+    return {
+      view: 'waiting',
+      message: 'It is in Waiting without a check-in date.',
+    }
+  }
+
+  const appearsToday = Boolean(
+    (task.actionDate && task.actionDate <= today) ||
+      (task.dueDate && task.dueDate <= today) ||
+      (task.followUpDate && task.followUpDate <= today),
+  )
+
+  if (appearsToday) {
+    return {
+      view: 'today',
+      message: `${getTaskPriorityReason(task, today).label}. It now appears in Today.`,
+    }
+  }
+
+  return {
+    view: 'upcoming',
+    message: 'It is scheduled for Later.',
+  }
 }
 
 function formatWorkspaceDate(today: string): string {
