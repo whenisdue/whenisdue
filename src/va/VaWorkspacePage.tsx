@@ -1033,6 +1033,7 @@ function LocalWorkspacePage({
             ...task,
             status: 'waiting' as VaTaskStatus,
             responsibility: waitingResponsibility,
+            actionDate: '',
             followUpDate: submittedDate,
             updatedAt: new Date().toISOString(),
           }
@@ -1113,6 +1114,15 @@ function LocalWorkspacePage({
           />
         </a>
         <nav className="va-topbar-actions" aria-label="Workspace navigation">
+          <a
+            href="/typing"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/typing')
+            }}
+          >
+            Typing Practice
+          </a>
           <a href="/" onClick={(event) => {
             event.preventDefault()
             onNavigate('/')
@@ -1392,7 +1402,7 @@ function LocalWorkspacePage({
               {formPanel === 'task' ? (
                 <>
                   <p className="va-task-form-intro">
-                    Choose the client, write the task, and choose when it should appear in Today.
+                    Choose the client, write the task, and decide when you plan to work on it.
                   </p>
                   <form
                   onSubmit={(event) => {
@@ -1443,7 +1453,7 @@ function LocalWorkspacePage({
                     </label>
 
                     <label>
-                      <span>Who owns the next step? *</span>
+                      <span>Who needs to act next? *</span>
                       <select
                         value={taskDraft.responsibility}
                         onChange={(event) => {
@@ -1465,10 +1475,10 @@ function LocalWorkspacePage({
                         <option value="va">I need to do this</option>
                         <option value="client">The client needs to respond</option>
                         <option value="third-party">
-                          Someone else needs to respond
+                          Another person or company needs to respond
                         </option>
                         <option value="unclear">
-                          I’m not sure who owns the next step
+                          I’m not sure who needs to act next
                         </option>
                       </select>
                       <small>
@@ -1479,7 +1489,7 @@ function LocalWorkspacePage({
                     <div className="va-date-grid">
                       {isWaitingResponsibility(taskDraft.responsibility) ? (
                         <label>
-                          <span>Follow up on *</span>
+                          <span>Check back on *</span>
                           <input
                             type="date"
                             name="followUpDate"
@@ -1493,12 +1503,12 @@ function LocalWorkspacePage({
                             }
                           />
                           <small>
-                            This item will stay in Waiting and return to Today on this date.
+                            Choose the day you want this waiting task to return to Today.
                           </small>
                         </label>
                       ) : (
                         <label>
-                          <span>Show in Today *</span>
+                          <span>Work on this date *</span>
                           <input
                             type="date"
                             name="actionDate"
@@ -1511,7 +1521,7 @@ function LocalWorkspacePage({
                             }
                           />
                           <small>
-                            Choose when you want this item to appear in your Today list.
+                            Choose the day you want this task to appear in your Today list.
                           </small>
                         </label>
                       )}
@@ -1530,7 +1540,7 @@ function LocalWorkspacePage({
                               setTaskDraft({ ...taskDraft, dueDate: event.target.value })
                             }
                           />
-                          <small>Use this only when the client gave you a deadline.</small>
+                          <small>The final deadline for this task.</small>
                         </label>
 
                         <label>
@@ -1729,8 +1739,16 @@ function LocalWorkspacePage({
               title={`Nothing in ${getViewTitle(view).toLowerCase()}`}
               message={
                 view === 'today'
-                  ? 'You’re clear for today. Review upcoming work, or add a follow-up while it’s on your mind.'
+                  ? 'You’re clear for today. Review upcoming work, add a follow-up, or use the free time to practice typing.'
                   : 'Tasks will appear here automatically based on their dates and status.'
+              }
+              action={
+                view === 'today'
+                  ? {
+                      label: 'Practice typing',
+                      onClick: () => onNavigate('/typing'),
+                    }
+                  : undefined
               }
             />
           )}
@@ -1988,36 +2006,143 @@ function TaskCard({
   )
 }
 
-function getTaskPriorityReason(task: VaTask, today: string): { label: string; kind: 'overdue' | 'today' | 'waiting' | 'later' | 'done' } {
-  if (task.status === 'completed') return { label: 'Completed', kind: 'done' }
-  if (task.status === 'waiting' && task.followUpDate && task.followUpDate <= today) {
-    return { label: task.followUpDate < today ? `Follow-up overdue by ${daysBetweenKeys(task.followUpDate, today)} ${daysBetweenKeys(task.followUpDate, today) === 1 ? 'day' : 'days'}` : 'Follow up today', kind: task.followUpDate < today ? 'overdue' : 'today' }
+function getTaskPriorityReason(
+  task: VaTask,
+  today: string,
+): {
+  label: string
+  kind: 'overdue' | 'today' | 'waiting' | 'later' | 'done'
+} {
+  if (task.status === 'completed') {
+    return { label: 'Completed', kind: 'done' }
   }
-  if (task.dueDate && task.dueDate < today) return { label: `Deadline overdue by ${daysBetweenKeys(task.dueDate, today)} ${daysBetweenKeys(task.dueDate, today) === 1 ? 'day' : 'days'}`, kind: 'overdue' }
-  if (task.followUpDate && task.followUpDate < today) return { label: `Follow-up overdue by ${daysBetweenKeys(task.followUpDate, today)} ${daysBetweenKeys(task.followUpDate, today) === 1 ? 'day' : 'days'}`, kind: 'overdue' }
-  if (task.actionDate && task.actionDate < today) return { label: `Planned action overdue by ${daysBetweenKeys(task.actionDate, today)} ${daysBetweenKeys(task.actionDate, today) === 1 ? 'day' : 'days'}`, kind: 'overdue' }
-  if (task.dueDate === today) return { label: 'Deadline today', kind: 'today' }
-  if (task.followUpDate === today) return { label: 'Follow up today', kind: 'today' }
-  if (task.actionDate === today) return { label: 'Planned for today', kind: 'today' }
+
   if (task.status === 'waiting') {
+    if (task.followUpDate && task.followUpDate < today) {
+      const daysOverdue = daysBetweenKeys(
+        task.followUpDate,
+        today,
+      )
+
+      return {
+        label: `Follow-up overdue by ${daysOverdue} ${
+          daysOverdue === 1 ? 'day' : 'days'
+        }`,
+        kind: 'overdue',
+      }
+    }
+
+    if (task.followUpDate === today) {
+      return {
+        label: 'Check back today',
+        kind: 'today',
+      }
+    }
+
     return {
       label:
         task.responsibility === 'third-party'
-          ? 'Waiting on someone else'
-          : 'Waiting on client',
+          ? 'Waiting for someone else'
+          : 'Waiting for the client',
       kind: 'waiting',
     }
   }
+
+  if (task.dueDate && task.dueDate < today) {
+    const daysOverdue = daysBetweenKeys(
+      task.dueDate,
+      today,
+    )
+
+    return {
+      label: `Deadline overdue by ${daysOverdue} ${
+        daysOverdue === 1 ? 'day' : 'days'
+      }`,
+      kind: 'overdue',
+    }
+  }
+
+  if (task.followUpDate && task.followUpDate < today) {
+    const daysOverdue = daysBetweenKeys(
+      task.followUpDate,
+      today,
+    )
+
+    return {
+      label: `Follow-up overdue by ${daysOverdue} ${
+        daysOverdue === 1 ? 'day' : 'days'
+      }`,
+      kind: 'overdue',
+    }
+  }
+
+  if (task.actionDate && task.actionDate < today) {
+    const daysOverdue = daysBetweenKeys(
+      task.actionDate,
+      today,
+    )
+
+    return {
+      label: `Planned action overdue by ${daysOverdue} ${
+        daysOverdue === 1 ? 'day' : 'days'
+      }`,
+      kind: 'overdue',
+    }
+  }
+
+  if (task.dueDate === today) {
+    return { label: 'Deadline today', kind: 'today' }
+  }
+
+  if (task.followUpDate === today) {
+    return { label: 'Check back today', kind: 'today' }
+  }
+
+  if (task.actionDate === today) {
+    return { label: 'Planned for today', kind: 'today' }
+  }
+
   return { label: 'Later', kind: 'later' }
 }
 
-function getRelevantTaskDate(task: VaTask, today: string): string | null {
+function getRelevantTaskDate(
+  task: VaTask,
+  today: string,
+): string | null {
+  if (task.status === 'waiting') {
+    return task.followUpDate
+      ? `Check back ${formatDateKey(task.followUpDate)}`
+      : null
+  }
+
   const reason = getTaskPriorityReason(task, today)
-  if (reason.label.startsWith('Deadline') && task.dueDate) return `Due ${formatDateKey(task.dueDate)}`
-  if (reason.label.includes('Follow') && task.followUpDate) return `Check ${formatDateKey(task.followUpDate)}`
-  if (task.actionDate) return `Work on ${formatDateKey(task.actionDate)}`
-  if (task.dueDate) return `Due ${formatDateKey(task.dueDate)}`
-  if (task.followUpDate) return `Check ${formatDateKey(task.followUpDate)}`
+
+  if (
+    reason.label.startsWith('Deadline') &&
+    task.dueDate
+  ) {
+    return `Due ${formatDateKey(task.dueDate)}`
+  }
+
+  if (
+    reason.label.includes('Follow') &&
+    task.followUpDate
+  ) {
+    return `Check back ${formatDateKey(task.followUpDate)}`
+  }
+
+  if (task.actionDate) {
+    return `Work on ${formatDateKey(task.actionDate)}`
+  }
+
+  if (task.dueDate) {
+    return `Due ${formatDateKey(task.dueDate)}`
+  }
+
+  if (task.followUpDate) {
+    return `Check back ${formatDateKey(task.followUpDate)}`
+  }
+
   return null
 }
 
@@ -2027,8 +2152,35 @@ function daysBetweenKeys(start: string, end: string): number {
   return Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 86_400_000))
 }
 
-function EmptyState({ title, message }: { title: string; message: string }) {
-  return <div className="va-empty-state"><span>＋</span><h3>{title}</h3><p>{message}</p></div>
+function EmptyState({
+  title,
+  message,
+  action,
+}: {
+  title: string
+  message: string
+  action?: {
+    label: string
+    onClick: () => void
+  }
+}) {
+  return (
+    <div className="va-empty-state">
+      <span>＋</span>
+      <h3>{title}</h3>
+      <p>{message}</p>
+
+      {action ? (
+        <button
+          className="va-secondary-button"
+          type="button"
+          onClick={action.onClick}
+        >
+          {action.label}
+        </button>
+      ) : null}
+    </div>
+  )
 }
 
 function filterTasksForView(tasks: VaTask[], view: WorkspaceView, today: string): VaTask[] {
@@ -2048,12 +2200,27 @@ function filterTasksForView(tasks: VaTask[], view: WorkspaceView, today: string)
     })
   }
   return tasks.filter((task) => {
-    if (task.status === 'completed' || task.status === 'waiting') return false
-    return Boolean(
-      (task.actionDate && task.actionDate > today) ||
-      (task.dueDate && task.dueDate > today) ||
-      (task.followUpDate && task.followUpDate > today)
+    if (
+      task.status === 'completed' ||
+      task.status === 'waiting'
+    ) {
+      return false
+    }
+
+    const belongsInToday = Boolean(
+      (task.actionDate && task.actionDate <= today) ||
+        (task.dueDate && task.dueDate <= today) ||
+        (task.followUpDate &&
+          task.followUpDate <= today),
     )
+
+    if (belongsInToday) {
+      return false
+    }
+
+    const nextDate = getPrimaryTaskDate(task)
+
+    return Boolean(nextDate && nextDate > today)
   })
 }
 
