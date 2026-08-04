@@ -65,7 +65,7 @@ export function buildTypingText(category: TypingCategory, seed: number): string 
   const pool = passagePools[category]
   const blocks: string[] = []
 
-  for (let round = 0; round < 5; round += 1) {
+  for (let round = 0; round < 3; round += 1) {
     const order = shuffledIndexes(pool.length, seed + round * 97)
     for (const index of order) {
       blocks.push(pool[index])
