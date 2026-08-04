@@ -235,13 +235,13 @@
 
 .typing-viewport {
   position: relative;
-  height: 248px;
+  height: 220px;
   overflow: hidden auto;
   border: 1px solid #e7dccb;
   border-radius: 16px;
   background: #fffdf9;
   cursor: text;
-  padding: 38px 42px;
+  padding: 32px 42px;
   scroll-behavior: auto;
 }
 
@@ -251,19 +251,29 @@
 }
 
 .typing-copy {
-  color: #9fa8af;
-  font-family: var(--mono);
+  position: relative;
   width: 100%;
   max-width: 100%;
-  color: #9fa8af;
-  font-size: clamp(1.12rem, 1.65vw, 1.48rem);
-  font-weight: 560;
-  letter-spacing: 0;
-  line-height: 1.68;
+  color: #a3a7aa;
+  font-family:
+    "SFMono-Regular",
+    "Cascadia Code",
+    "Roboto Mono",
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  font-size: clamp(1.15rem, 1.65vw, 1.42rem);
+  font-weight: 450;
+  letter-spacing: -0.015em;
+  line-height: 1.55;
   text-align: left;
   overflow-wrap: normal;
   word-break: normal;
   user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
 }
 
 .typing-word {
@@ -274,9 +284,6 @@
 .typing-character {
   position: relative;
   border-radius: 3px;
-  transition:
-    color 55ms linear,
-    background-color 55ms linear;
 }
 
 .typing-character.is-untouched {
@@ -284,7 +291,7 @@
 }
 
 .typing-character.is-correct {
-  color: #294a3e;
+  color: #3f5f53;
 }
 
 .typing-character.is-incorrect {
@@ -295,16 +302,24 @@
   text-underline-offset: 3px;
 }
 
-.typing-character.is-active::before {
+.typing-smooth-caret {
   position: absolute;
-  top: 0.08em;
-  bottom: 0.08em;
+  top: 0.1em;
   left: -1px;
   width: 2px;
+  height: 1.3em;
   border-radius: 999px;
   background: #2f654f;
-  content: "";
+  pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  transform-origin: top left;
+  transition: transform 65ms cubic-bezier(0.2, 0, 0.2, 1);
+  will-change: transform;
   animation: typing-caret-blink 950ms step-end infinite;
+}
+
+.typing-smooth-caret.is-positioning {
+  transition: none;
 }
 
 @keyframes typing-caret-blink {
@@ -598,7 +613,8 @@
     transition: none;
   }
 
-  .typing-character.is-active::before {
+  .typing-smooth-caret {
+    transition: none;
     animation: none;
   }
 }

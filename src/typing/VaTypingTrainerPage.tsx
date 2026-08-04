@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type RefObject,
 } from 'react'
 import './VaTypingTrainerPage.css'
 import { buildTypingText, typingCategoryLabels } from './typingPassages'
@@ -33,7 +34,7 @@ type TestMetrics = {
 }
 
 const durations: TestDurationSeconds[] = [60, 180, 300]
-const heartbeatMs = 100
+const heartbeatMs = 250
 
 function safeNumber(value: number, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback
@@ -102,9 +103,11 @@ function getAssessment(metrics: TestMetrics): string {
 const TypingText = memo(function TypingText({
   targetText,
   registerCharacter,
+  caretRef,
 }: {
   targetText: string
   registerCharacter: (index: number, element: HTMLSpanElement | null) => void
+  caretRef: RefObject<HTMLSpanElement | null>
 }) {
   const segments: Array<{ text: string; startIndex: number }> = []
   const matcher = /\S+\s*/g
@@ -132,7 +135,7 @@ const TypingText = memo(function TypingText({
 
               return (
                 <span
-                  className={`typing-character ${index === 0 ? 'is-active' : 'is-untouched'}`}
+                  className="typing-character is-untouched"
                   data-character-index={index}
                   key={`${index}-${character}`}
                   ref={(element) => registerCharacter(index, element)}
@@ -144,6 +147,8 @@ const TypingText = memo(function TypingText({
           </span>
         )
       })}
+
+      <span ref={caretRef} className="typing-smooth-caret" />
     </div>
   )
 })
@@ -165,6 +170,7 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const typingViewportRef = useRef<HTMLDivElement>(null)
   const characterRefs = useRef<Array<HTMLSpanElement | null>>([])
+  const caretRef = useRef<HTMLSpanElement>(null)
   const typedTextRef = useRef('')
   const correctedMistakesRef = useRef(0)
   const startMsRef = useRef<number | null>(null)
@@ -194,7 +200,7 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
   }, [])
 
   const updateCharacterClass = useCallback(
-    (index: number, className: 'is-active' | 'is-correct' | 'is-incorrect' | 'is-untouched') => {
+    (index: number, className: 'is-correct' | 'is-incorrect' | 'is-untouched') => {
       const element = characterRefs.current[index]
 
       if (!element) {
@@ -205,6 +211,45 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
     },
     [],
   )
+
+  const moveCaretToCharacter = useCallback((index: number, animate = true) => {
+    const caret = caretRef.current
+    const characters = characterRefs.current
+
+    if (!caret || characters.length === 0) {
+      return
+    }
+
+    const target = characters[index]
+    let x = 0
+    let y = 0
+
+    if (target) {
+      x = target.offsetLeft
+      y = target.offsetTop
+    } else {
+      const lastCharacter = characters[characters.length - 1]
+
+      if (!lastCharacter) {
+        return
+      }
+
+      x = lastCharacter.offsetLeft + lastCharacter.offsetWidth
+      y = lastCharacter.offsetTop
+    }
+
+    if (!animate) {
+      caret.classList.add('is-positioning')
+    }
+
+    caret.style.transform = `translate3d(${x}px, ${y}px, 0)`
+
+    if (!animate) {
+      window.requestAnimationFrame(() => {
+        caret.classList.remove('is-positioning')
+      })
+    }
+  }, [])
 
   const keepCaretVisible = useCallback((index: number) => {
     if (scrollFrameRef.current !== null) {
@@ -231,9 +276,11 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
 
   const resetRenderedCharacters = useCallback(() => {
     for (let index = 0; index < characterRefs.current.length; index += 1) {
-      updateCharacterClass(index, index === 0 ? 'is-active' : 'is-untouched')
+      updateCharacterClass(index, 'is-untouched')
     }
-  }, [updateCharacterClass])
+
+    moveCaretToCharacter(0, false)
+  }, [moveCaretToCharacter, updateCharacterClass])
 
   const resetTest = useCallback(() => {
     typedTextRef.current = ''
@@ -334,9 +381,10 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
 
     window.requestAnimationFrame(() => {
       typingViewportRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+      moveCaretToCharacter(0, false)
       focusInput()
     })
-  }, [focusInput, setPhaseState, targetText])
+  }, [focusInput, moveCaretToCharacter, setPhaseState, targetText])
 
   useEffect(() => {
     return () => {
@@ -374,14 +422,13 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
       const currentIndex = currentText.length
       const removedIndex = currentIndex - 1
 
-      updateCharacterClass(currentIndex, 'is-untouched')
-
       if (currentText[removedIndex] !== targetText[removedIndex]) {
         correctedMistakesRef.current += 1
       }
 
       typedTextRef.current = currentText.slice(0, -1)
-      updateCharacterClass(removedIndex, 'is-active')
+      updateCharacterClass(removedIndex, 'is-untouched')
+      moveCaretToCharacter(removedIndex)
       keepCaretVisible(removedIndex)
       return
     }
@@ -409,7 +456,7 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
     typedTextRef.current += event.key
 
     const nextIndex = typedTextRef.current.length
-    updateCharacterClass(nextIndex, 'is-active')
+    moveCaretToCharacter(nextIndex)
     keepCaretVisible(nextIndex)
   }
 
@@ -552,7 +599,11 @@ export default function VaTypingTrainerPage({ onNavigate }: NavigationProps) {
           aria-label="Typing passage. Start typing to begin the timer."
           onClick={focusInput}
         >
-          <TypingText targetText={targetText} registerCharacter={registerCharacter} />
+          <TypingText
+            targetText={targetText}
+            registerCharacter={registerCharacter}
+            caretRef={caretRef}
+          />
 
           <textarea
             ref={inputRef}
