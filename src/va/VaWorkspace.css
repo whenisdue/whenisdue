@@ -3106,3 +3106,173 @@
   }
 }
 
+
+
+/* Friction audit fixes */
+.va-workspace,
+.va-workspace-shell,
+.va-daily-dashboard,
+.va-daily-header,
+.va-daily-header-right,
+.va-time-panel,
+.va-time-card,
+.va-main-panel,
+.va-client-card,
+.va-task-card {
+  min-width: 0;
+}
+
+.va-workspace {
+  overflow-x: clip;
+}
+
+.va-client-open-work {
+  margin-top: 12px;
+  border: 1px solid var(--va-border);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.va-client-open-work summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 11px;
+  color: var(--va-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.va-client-open-work summary::-webkit-details-marker {
+  display: none;
+}
+
+.va-client-open-work summary span {
+  display: inline-grid;
+  min-width: 24px;
+  min-height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: #f0e7da;
+  color: var(--va-ink);
+  font-size: 0.63rem;
+}
+
+.va-client-open-work ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0 11px 8px;
+  list-style: none;
+}
+
+.va-client-open-work li {
+  padding: 9px 0;
+  border-top: 1px solid var(--va-border);
+}
+
+.va-client-open-work li strong,
+.va-client-open-work li small {
+  display: block;
+}
+
+.va-client-open-work li strong {
+  color: var(--va-ink);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.va-client-open-work li small {
+  margin-top: 3px;
+  color: var(--va-muted);
+  font-size: 0.64rem;
+}
+
+.va-client-no-open-work {
+  margin: 12px 0 0;
+  color: var(--va-muted);
+  font-size: 0.7rem;
+}
+
+.va-inline-timezone-picker select {
+  max-width: 210px;
+}
+
+@media (max-width: 620px) {
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .va-daily-header-right {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .va-time-panel {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .va-time-card {
+    width: auto;
+    min-width: 0;
+    min-height: 74px;
+    padding: 10px 12px;
+  }
+
+  .va-time-card + .va-time-card {
+    border-top: 1px solid var(--va-border);
+    border-left: 0;
+  }
+
+  .va-client-clock-select select,
+  .va-inline-timezone-picker select,
+  .va-client-time-card select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .va-compact-tabs {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    margin-inline: 0;
+    overflow: visible;
+    padding: 3px 0 6px;
+  }
+
+  .va-compact-tabs button {
+    min-width: 0;
+    min-height: 48px;
+    justify-content: center;
+    gap: 3px;
+    overflow: hidden;
+    padding: 6px 2px;
+    font-size: 0.61rem;
+  }
+
+  .va-compact-tabs button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .va-compact-tabs b {
+    min-width: 20px;
+    width: 20px;
+    height: 20px;
+    font-size: 0.56rem;
+  }
+
+  .va-task-actions > button,
+  .va-client-actions > button,
+  .va-task-text-button {
+    min-height: 44px !important;
+  }
+}

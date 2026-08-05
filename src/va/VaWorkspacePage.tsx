@@ -1273,7 +1273,7 @@ function LocalWorkspacePage({
                   </strong>
 
                   <label className="va-client-clock-select">
-                    <span className="sr-only">Choose client clock</span>
+                    <span className="sr-only">Choose a client</span>
                     <select
                       value={selectedClockClient?.id ?? ''}
                       onChange={(event) => setClockClientId(event.target.value)}
@@ -1286,32 +1286,35 @@ function LocalWorkspacePage({
                     </select>
                   </label>
 
-                  {selectedClockClient?.timeZone ? (
-                    <small>
-                      {getBusinessHourLabel(clockNow, selectedClockClient.timeZone)}
-                    </small>
-                  ) : (
-                    <label className="va-inline-timezone-picker">
-                      <span>Timezone not set</span>
-                      <select
-                        value=""
-                        onChange={(event) => {
-                          const timeZone = event.target.value
-
-                          if (selectedClockClient && timeZone) {
-                            saveClientTimeZone(selectedClockClient.id, timeZone)
-                          }
-                        }}
-                      >
-                        <option value="">Choose timezone</option>
-                        {getSupportedTimeZones().map((timeZone) => (
-                          <option key={timeZone} value={timeZone}>
-                            {formatTimeZoneLabel(timeZone)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
+                  <label className="va-inline-timezone-picker">
+                    <span>
+                      {selectedClockClient?.timeZone
+                        ? getBusinessHourLabel(
+                            clockNow,
+                            selectedClockClient.timeZone,
+                          )
+                        : 'Timezone not set'}
+                    </span>
+                    <select
+                      aria-label="Client timezone"
+                      value={selectedClockClient?.timeZone ?? ''}
+                      onChange={(event) => {
+                        if (selectedClockClient) {
+                          saveClientTimeZone(
+                            selectedClockClient.id,
+                            event.target.value,
+                          )
+                        }
+                      }}
+                    >
+                      <option value="">Choose timezone</option>
+                      {getTimeZoneOptions().map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </>
               ) : (
                 <>
@@ -1429,7 +1432,7 @@ function LocalWorkspacePage({
             >
               <div className="va-form-drawer-head">
                 <div>
-                  <p className="va-eyebrow">Someone else owns the next step</p>
+                  <p className="va-eyebrow">Someone else needs to act next</p>
                   <h2 id="waiting-dialog-title">Who are you waiting for?</h2>
                 </div>
                 <button
@@ -1467,7 +1470,7 @@ function LocalWorkspacePage({
                       <option value="third-party">Someone else</option>
                     </select>
                     <small>
-                      Choose who currently owes the next action.
+                      Who needs to reply or act next?
                     </small>
                   </label>
 
@@ -1710,7 +1713,7 @@ function LocalWorkspacePage({
                       <summary>Optional details</summary>
                       <div className="va-task-optional-body">
                         <label>
-                          <span>Due date</span>
+                          <span>Final deadline</span>
                           <input
                             type="date"
                             name="dueDate"
@@ -1782,7 +1785,7 @@ function LocalWorkspacePage({
                 >
                   <div className="va-form-fields">
                     <label>
-                      <span>Client or household name *</span>
+                      <span>Client name *</span>
                       <input
                         autoFocus
                         maxLength={nameMaxLength}
@@ -1844,9 +1847,9 @@ function LocalWorkspacePage({
                         }
                       >
                         <option value="">Not set</option>
-                        {getSupportedTimeZones().map((timeZone) => (
-                          <option key={timeZone} value={timeZone}>
-                            {formatTimeZoneLabel(timeZone)}
+                        {getTimeZoneOptions().map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
                           </option>
                         ))}
                       </select>
@@ -2037,7 +2040,7 @@ function LocalWorkspacePage({
             </div>
 
             <p className="va-close-day-note">
-              Before signing off, make sure every open item is either planned,
+              Before you finish work today, make sure every open item is either planned,
               waiting on someone, or clearly marked for clarification.
             </p>
           </div>
@@ -2055,7 +2058,7 @@ function LocalWorkspacePage({
       <details className="va-backup-panel">
         <summary>
           <div>
-            <p className="va-eyebrow">Portable backup</p>
+            <p className="va-eyebrow">Download a backup</p>
             <h2>Backup and restore</h2>
             <p>Download a copy of your clients and tasks, or restore a previous backup.</p>
           </div>
@@ -2078,7 +2081,7 @@ function LocalWorkspacePage({
             </button>
 
             <label className="va-restore-mode">
-              <span>Restore method</span>
+              <span>How should this backup be restored?</span>
               <select
                 value={restoreMode}
                 onChange={(event) => {
@@ -2088,8 +2091,8 @@ function LocalWorkspacePage({
                 }}
                 disabled={restoring}
               >
-                <option value="merge">Merge with current records</option>
-                <option value="replace">Replace current records</option>
+                <option value="merge">Keep current clients and tasks</option>
+                <option value="replace">Replace all clients and tasks</option>
               </select>
             </label>
 
@@ -2169,7 +2172,7 @@ function LocalWorkspacePage({
             {syncStatus === 'saving'
               ? 'Keep this tab open until saving finishes.'
               : syncStatus === 'saved'
-                ? 'The server copy matches the dates and statuses shown here.'
+                ? 'Your cloud copy matches this screen.'
                 : syncStatus === 'error'
                   ? syncError ?? 'The last change is still saved in this browser.'
                   : 'Changes will be verified after every save.'}
@@ -2287,6 +2290,36 @@ function ClientCard({
         </div>
       </dl>
 
+      {openTasks.length > 0 ? (
+        <details className="va-client-open-work">
+          <summary>
+            View work
+            <span>{safeCount(openTasks.length)}</span>
+          </summary>
+          <ul>
+            {[...openTasks]
+              .sort((a, b) =>
+                getClientTaskSortDate(a).localeCompare(getClientTaskSortDate(b)),
+              )
+              .map((task) => (
+                <li key={task.id}>
+                  <div>
+                    <strong>{task.title}</strong>
+                    <small>
+                      {task.status === 'waiting' ? 'Waiting' : 'Needs action'}
+                      {getClientTaskDateLabel(task)
+                        ? ` · ${getClientTaskDateLabel(task)}`
+                        : ''}
+                    </small>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        </details>
+      ) : (
+        <p className="va-client-no-open-work">No open work</p>
+      )}
+
       <div className="va-client-actions">
         <button type="button" onClick={() => onEdit(client)}>Edit</button>
         <button type="button" onClick={() => onToggle(client.id)}>
@@ -2302,6 +2335,33 @@ function ClientCard({
       </div>
     </article>
   )
+}
+
+function getClientTaskSortDate(task: VaTask): string {
+  return (
+    (task.status === 'waiting' ? task.followUpDate : task.actionDate) ||
+    task.dueDate ||
+    '9999-12-31'
+  )
+}
+
+function getClientTaskDateLabel(task: VaTask): string {
+  const date =
+    (task.status === 'waiting' ? task.followUpDate : task.actionDate) ||
+    task.dueDate
+
+  if (!date) {
+    return ''
+  }
+
+  const prefix =
+    task.status === 'waiting'
+      ? 'Check back'
+      : task.actionDate
+        ? 'Do'
+        : 'Deadline'
+
+  return `${prefix} ${formatDateKey(date)}`
 }
 
 function TaskCard({
@@ -2624,7 +2684,7 @@ function groupWaitingTasks(
     {
       key: 'soon',
       label: 'Follow up soon',
-      description: 'Returning within the next 3 days.',
+      description: 'Check back within 3 days.',
       tasks: [],
     },
     {
@@ -2893,46 +2953,54 @@ function getTaskPlacement(
   }
 }
 
-let cachedTimeZones: string[] | null = null
+type TimeZoneOption = {
+  value: string
+  label: string
+}
 
-function getSupportedTimeZones(): string[] {
-  if (cachedTimeZones) {
-    return cachedTimeZones
-  }
+const commonTimeZones: TimeZoneOption[] = [
+  { value: 'America/Los_Angeles', label: 'Los Angeles, USA (Pacific Time)' },
+  { value: 'America/Denver', label: 'Denver, USA (Mountain Time)' },
+  { value: 'America/Chicago', label: 'Chicago, USA (Central Time)' },
+  { value: 'America/New_York', label: 'New York, USA (Eastern Time)' },
+  { value: 'America/Phoenix', label: 'Phoenix, USA' },
+  { value: 'America/Anchorage', label: 'Anchorage, USA' },
+  { value: 'Pacific/Honolulu', label: 'Honolulu, USA' },
+  { value: 'America/Toronto', label: 'Toronto, Canada' },
+  { value: 'America/Vancouver', label: 'Vancouver, Canada' },
+  { value: 'America/Edmonton', label: 'Edmonton, Canada' },
+  { value: 'America/Winnipeg', label: 'Winnipeg, Canada' },
+  { value: 'Europe/London', label: 'London, United Kingdom' },
+  { value: 'Europe/Dublin', label: 'Dublin, Ireland' },
+  { value: 'Europe/Paris', label: 'Paris, France' },
+  { value: 'Europe/Berlin', label: 'Berlin, Germany' },
+  { value: 'Europe/Amsterdam', label: 'Amsterdam, Netherlands' },
+  { value: 'Asia/Dubai', label: 'Dubai, UAE' },
+  { value: 'Asia/Kolkata', label: 'India' },
+  { value: 'Asia/Manila', label: 'Manila, Philippines' },
+  { value: 'Asia/Singapore', label: 'Singapore' },
+  { value: 'Asia/Kuala_Lumpur', label: 'Kuala Lumpur, Malaysia' },
+  { value: 'Asia/Jakarta', label: 'Jakarta, Indonesia' },
+  { value: 'Asia/Bangkok', label: 'Bangkok, Thailand' },
+  { value: 'Asia/Hong_Kong', label: 'Hong Kong' },
+  { value: 'Asia/Tokyo', label: 'Tokyo, Japan' },
+  { value: 'Asia/Seoul', label: 'Seoul, South Korea' },
+  { value: 'Australia/Perth', label: 'Perth, Australia' },
+  { value: 'Australia/Brisbane', label: 'Brisbane, Australia' },
+  { value: 'Australia/Adelaide', label: 'Adelaide, Australia' },
+  { value: 'Australia/Sydney', label: 'Sydney, Australia' },
+  { value: 'Pacific/Auckland', label: 'Auckland, New Zealand' },
+]
 
-  const fallback = [
-    'America/Los_Angeles',
-    'America/Denver',
-    'America/Chicago',
-    'America/New_York',
-    'America/Toronto',
-    'Europe/London',
-    'Asia/Dubai',
-    'Asia/Manila',
-    'Asia/Singapore',
-    'Asia/Tokyo',
-    'Australia/Perth',
-    'Australia/Brisbane',
-    'Australia/Sydney',
-    'Pacific/Auckland',
-  ]
-
-  const supportedValuesOf = (
-    Intl as typeof Intl & {
-      supportedValuesOf?: (key: 'timeZone') => string[]
-    }
-  ).supportedValuesOf
-
-  cachedTimeZones =
-    typeof supportedValuesOf === 'function'
-      ? supportedValuesOf('timeZone')
-      : fallback
-
-  return cachedTimeZones
+function getTimeZoneOptions(): TimeZoneOption[] {
+  return commonTimeZones
 }
 
 function formatTimeZoneLabel(timeZone: string): string {
-  return timeZone.replaceAll('_', ' ')
+  return (
+    commonTimeZones.find((option) => option.value === timeZone)?.label ??
+    timeZone.replaceAll('_', ' ')
+  )
 }
 
 function formatClockTime(date: Date, timeZone?: string): string {
@@ -3036,7 +3104,7 @@ function getViewDescription(view: WorkspaceView): string {
     today: 'Action dates and event due dates scheduled for today.',
     'follow-up': 'Items that should be checked again today.',
     waiting: 'Items currently waiting on another person or organization.',
-    upcoming: 'Future active work sorted by the next relevant date.',
+    upcoming: 'Future work, soonest first.',
     overdue: 'Active items whose next relevant date has already passed.',
     completed: 'Finished tasks kept for reference. Restore one if it needs attention again.',
   }
