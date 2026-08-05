@@ -3482,3 +3482,132 @@
     grid-row: 2;
   }
 }
+
+
+/* Waiting Radar and Resume Marker */
+.va-waiting-radar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+  padding: 11px;
+  border: 1px solid var(--va-border);
+  border-radius: 12px;
+  background: rgba(239, 247, 244, 0.72);
+}
+
+.va-waiting-radar > div {
+  min-width: 0;
+}
+
+.va-waiting-radar span,
+.va-resume-marker span {
+  display: block;
+  color: var(--va-muted);
+  font-size: 0.61rem;
+  font-weight: 820;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.va-waiting-radar strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--va-ink);
+  font-size: 0.74rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.va-waiting-radar > p {
+  grid-column: 1 / -1;
+  margin: 1px 0 0;
+  color: var(--va-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.va-resume-marker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 11px;
+  border: 1px dashed var(--va-border);
+  border-radius: 11px;
+  background: rgba(255, 253, 249, 0.7);
+}
+
+.va-resume-marker > div {
+  min-width: 0;
+}
+
+.va-resume-marker p {
+  margin: 3px 0 0;
+  color: var(--va-ink);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.va-resume-marker button,
+.va-snooze-presets button {
+  min-height: 36px;
+  border: 1px solid var(--va-border);
+  border-radius: 9px;
+  background: white;
+  color: var(--va-primary);
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.va-small-dialog {
+  max-width: 520px;
+}
+
+.va-snooze-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 620px) {
+  .va-waiting-radar {
+    grid-template-columns: 1fr;
+  }
+
+  .va-waiting-radar > p {
+    grid-column: 1;
+  }
+
+  .va-task-outcomes {
+    grid-template-columns: 1fr;
+  }
+
+  .va-task-outcomes > button {
+    width: 100%;
+    min-height: 48px !important;
+  }
+
+  .va-resume-marker {
+    align-items: flex-start;
+  }
+
+  .va-resume-marker button {
+    min-width: 64px;
+    min-height: 44px;
+  }
+
+  .va-snooze-presets {
+    grid-template-columns: 1fr;
+  }
+
+  .va-snooze-presets button {
+    min-height: 44px;
+  }
+}

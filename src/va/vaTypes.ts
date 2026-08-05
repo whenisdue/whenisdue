@@ -28,6 +28,9 @@ export type VaTask = {
   dueDate: string
   actionDate: string
   followUpDate: string
+  waitingFor: string
+  waitingSince: string
+  nextStep: string
   status: VaTaskStatus
   responsibility: VaTaskResponsibility
   createdAt: string

@@ -249,6 +249,117 @@ assert.match(
   'Move to Today must clear the follow-up date',
 )
 
+function moveTaskToWaiting(
+  task,
+  today,
+  followUpDate,
+  waitingFor,
+) {
+  return {
+    ...task,
+    status: 'waiting',
+    responsibility: 'client',
+    actionDate: '',
+    followUpDate,
+    waitingFor,
+    waitingSince: task.waitingSince || today,
+  }
+}
+
+function snoozeWaitingTask(task, followUpDate) {
+  return {
+    ...task,
+    followUpDate,
+  }
+}
+
+const radarSourceTask = {
+  id: 'radar-source',
+  status: 'needs-action',
+  responsibility: 'va',
+  actionDate: today,
+  followUpDate: '',
+  dueDate: '2026-08-10',
+  waitingFor: '',
+  waitingSince: '',
+  nextStep: 'Attach the corrected invoice',
+}
+
+const waitingRadarTask = moveTaskToWaiting(
+  radarSourceTask,
+  today,
+  '2026-08-05',
+  'client approval',
+)
+
+assert.equal(waitingRadarTask.status, 'waiting')
+assert.equal(waitingRadarTask.actionDate, '')
+assert.equal(
+  waitingRadarTask.followUpDate,
+  '2026-08-05',
+)
+assert.equal(
+  waitingRadarTask.waitingFor,
+  'client approval',
+)
+assert.equal(waitingRadarTask.waitingSince, today)
+assert.equal(
+  waitingRadarTask.dueDate,
+  '2026-08-10',
+)
+assert.equal(
+  waitingRadarTask.nextStep,
+  'Attach the corrected invoice',
+)
+
+const snoozedRadarTask = snoozeWaitingTask(
+  waitingRadarTask,
+  '2026-08-08',
+)
+
+assert.equal(
+  snoozedRadarTask.followUpDate,
+  '2026-08-08',
+)
+assert.equal(
+  snoozedRadarTask.waitingSince,
+  today,
+)
+assert.equal(
+  snoozedRadarTask.dueDate,
+  '2026-08-10',
+)
+assert.equal(
+  snoozedRadarTask.waitingFor,
+  'client approval',
+)
+
+assert.equal(
+  workspaceSource.includes(
+    'waitingSince: task.waitingSince || today',
+  ),
+  true,
+  'Moving to Waiting must record when the wait started',
+)
+
+assert.match(
+  workspaceSource,
+  /waitingFor:\s*waitingFor\.trim\(\)/,
+  'Moving to Waiting must save what the task is waiting for',
+)
+
+assert.match(
+  workspaceSource,
+  /nextStep:\s*nextStepDraft\.trim\(\)/,
+  'Resume Marker must save the next step',
+)
+
+assert.match(
+  workspaceSource,
+  /Snooze this item/,
+  'Waiting tasks must provide Snooze',
+)
+
 console.log('✓ Queue integrity checks passed')
 console.log('  Overdue deadline appears first')
 console.log('  Overdue follow-up appears in Today')
@@ -260,3 +371,7 @@ console.log('  Move to Today sets the action date to today')
 console.log('  Move to Today clears the old follow-up date')
 console.log('  Move to Today keeps the final deadline')
 console.log('  Date inputs keep immediate state handlers')
+console.log('  Moving to Waiting records the wait start')
+console.log('  Waiting reason is preserved')
+console.log('  Snooze changes only the check-back date')
+console.log('  Resume Marker is stored on the task')

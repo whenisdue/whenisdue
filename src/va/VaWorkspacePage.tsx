@@ -46,6 +46,9 @@ const emptyTaskDraft: VaTaskDraft = {
   dueDate: '',
   actionDate: '',
   followUpDate: '',
+  waitingFor: '',
+  waitingSince: '',
+  nextStep: '',
   status: 'needs-action',
   responsibility: 'va',
 }
@@ -513,8 +516,13 @@ function LocalWorkspacePage({
   const [formPanel, setFormPanel] = useState<'task' | 'client' | null>(null)
   const [waitingTaskId, setWaitingTaskId] = useState<string | null>(null)
   const [waitingCheckDate, setWaitingCheckDate] = useState('')
+  const [waitingFor, setWaitingFor] = useState('')
   const [waitingResponsibility, setWaitingResponsibility] =
     useState<VaTaskResponsibility>('client')
+  const [snoozeTaskId, setSnoozeTaskId] = useState<string | null>(null)
+  const [snoozeDate, setSnoozeDate] = useState('')
+  const [nextStepTaskId, setNextStepTaskId] = useState<string | null>(null)
+  const [nextStepDraft, setNextStepDraft] = useState('')
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [clientDraft, setClientDraft] = useState<VaClientDraft>(emptyClientDraft)
   const [taskDraft, setTaskDraft] = useState<VaTaskDraft>(emptyTaskDraft)
@@ -1034,6 +1042,9 @@ function LocalWorkspacePage({
       dueDate: task.dueDate,
       actionDate: task.actionDate,
       followUpDate: task.followUpDate,
+      waitingFor: task.waitingFor,
+      waitingSince: task.waitingSince,
+      nextStep: task.nextStep,
       status: task.status,
       responsibility: task.responsibility,
     })
@@ -1051,6 +1062,7 @@ function LocalWorkspacePage({
       setWaitingCheckDate(
         task?.followUpDate || getSuggestedCheckDate(today),
       )
+      setWaitingFor(task?.waitingFor || '')
       setWaitingResponsibility(
         task && isWaitingResponsibility(task.responsibility)
           ? task.responsibility
@@ -1077,6 +1089,14 @@ function LocalWorkspacePage({
               status === 'needs-action'
                 ? ''
                 : task.followUpDate,
+            waitingFor:
+              status === 'needs-action'
+                ? ''
+                : task.waitingFor,
+            waitingSince:
+              status === 'needs-action'
+                ? ''
+                : task.waitingSince,
             updatedAt: new Date().toISOString(),
           }
         : task,
@@ -1118,6 +1138,8 @@ function LocalWorkspacePage({
             responsibility: waitingResponsibility,
             actionDate: '',
             followUpDate: submittedDate,
+            waitingFor: waitingFor.trim(),
+            waitingSince: task.waitingSince || today,
             updatedAt: new Date().toISOString(),
           }
         : task,
@@ -1135,8 +1157,79 @@ function LocalWorkspacePage({
 
     setWaitingTaskId(null)
     setWaitingCheckDate('')
+    setWaitingFor('')
     setWaitingResponsibility('client')
     setView(returnsToday ? 'today' : 'waiting')
+  }
+
+  function openSnooze(task: VaTask) {
+    setSnoozeTaskId(task.id)
+    setSnoozeDate(getRelativeDateKey(today, 1))
+    setMessage(null)
+  }
+
+  function saveSnooze(form?: HTMLFormElement) {
+    if (!snoozeTaskId) {
+      return
+    }
+
+    const submittedDate = readFormDate(
+      form ? new FormData(form) : null,
+      'snoozeDate',
+      snoozeDate,
+    )
+
+    if (!submittedDate) {
+      setMessage('Choose when you want to check this item again.')
+      return
+    }
+
+    const tasks = workspace.tasks.map((task) =>
+      task.id === snoozeTaskId
+        ? {
+            ...task,
+            followUpDate: submittedDate,
+            updatedAt: new Date().toISOString(),
+          }
+        : task,
+    )
+
+    persist(
+      { ...workspace, tasks },
+      `Snoozed until ${formatDateKey(submittedDate)}.`,
+    )
+    setSnoozeTaskId(null)
+    setSnoozeDate('')
+    setView(submittedDate <= today ? 'today' : 'waiting')
+  }
+
+  function openNextStep(task: VaTask) {
+    setNextStepTaskId(task.id)
+    setNextStepDraft(task.nextStep)
+    setMessage(null)
+  }
+
+  function saveNextStep() {
+    if (!nextStepTaskId) {
+      return
+    }
+
+    const tasks = workspace.tasks.map((task) =>
+      task.id === nextStepTaskId
+        ? {
+            ...task,
+            nextStep: nextStepDraft.trim(),
+            updatedAt: new Date().toISOString(),
+          }
+        : task,
+    )
+
+    persist(
+      { ...workspace, tasks },
+      nextStepDraft.trim() ? 'Next step saved.' : 'Next step cleared.',
+    )
+    setNextStepTaskId(null)
+    setNextStepDraft('')
   }
 
   function deleteTask(task: VaTask) {
@@ -1420,6 +1513,7 @@ function LocalWorkspacePage({
               if (event.target === event.currentTarget) {
                 setWaitingTaskId(null)
                 setWaitingCheckDate('')
+                setWaitingFor('')
                 setWaitingResponsibility('client')
               }
             }}
@@ -1475,9 +1569,22 @@ function LocalWorkspacePage({
                   </label>
 
                   <label>
-                    <span>Follow up on *</span>
+                    <span>Waiting for…</span>
                     <input
                       autoFocus
+                      maxLength={160}
+                      placeholder="Example: client approval"
+                      value={waitingFor}
+                      onChange={(event) => setWaitingFor(event.target.value)}
+                    />
+                    <small>
+                      Add a short reminder so you know what response is missing.
+                    </small>
+                  </label>
+
+                  <label>
+                    <span>Follow up on *</span>
+                    <input
                       required
                       type="date"
                       name="waitingCheckDate"
@@ -1501,6 +1608,7 @@ function LocalWorkspacePage({
                     onClick={() => {
                       setWaitingTaskId(null)
                       setWaitingCheckDate('')
+                      setWaitingFor('')
                       setWaitingResponsibility('client')
                     }}
                   >
@@ -1508,6 +1616,178 @@ function LocalWorkspacePage({
                   </button>
                 </div>
               </form>
+            </section>
+          </div>
+        ) : null}
+
+        {snoozeTaskId ? (
+          <div
+            className="va-form-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setSnoozeTaskId(null)
+                setSnoozeDate('')
+              }
+            }}
+          >
+            <section
+              className="va-form-drawer va-small-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="snooze-dialog-title"
+            >
+              <div className="va-form-drawer-head">
+                <div>
+                  <p className="va-eyebrow">Check again later</p>
+                  <h2 id="snooze-dialog-title">Snooze this item</h2>
+                </div>
+                <button
+                  className="va-drawer-close"
+                  type="button"
+                  aria-label="Close snooze dialog"
+                  onClick={() => {
+                    setSnoozeTaskId(null)
+                    setSnoozeDate('')
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="va-snooze-presets">
+                <button
+                  type="button"
+                  onClick={() => setSnoozeDate(getRelativeDateKey(today, 1))}
+                >
+                  Tomorrow
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSnoozeDate(getRelativeDateKey(today, 3))}
+                >
+                  In 3 days
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSnoozeDate(getNextMondayKey(today))}
+                >
+                  Next Monday
+                </button>
+              </div>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  saveSnooze(event.currentTarget)
+                }}
+              >
+                <div className="va-form-fields">
+                  <label>
+                    <span>Check back on</span>
+                    <input
+                      required
+                      type="date"
+                      name="snoozeDate"
+                      min={today}
+                      value={snoozeDate}
+                      onInput={(event) => {
+                        const value = event.currentTarget.value
+                        setSnoozeDate(value)
+                      }}
+                      onChange={(event) => {
+                        const value = event.currentTarget.value
+                        setSnoozeDate(value)
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="va-form-actions">
+                  <button
+                    className="va-primary-button"
+                    type="submit"
+                    disabled={!snoozeDate}
+                  >
+                    Save snooze
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        ) : null}
+
+        {nextStepTaskId ? (
+          <div
+            className="va-form-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setNextStepTaskId(null)
+                setNextStepDraft('')
+              }
+            }}
+          >
+            <section
+              className="va-form-drawer va-small-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="next-step-dialog-title"
+            >
+              <div className="va-form-drawer-head">
+                <div>
+                  <p className="va-eyebrow">Resume marker</p>
+                  <h2 id="next-step-dialog-title">What is the next step?</h2>
+                </div>
+                <button
+                  className="va-drawer-close"
+                  type="button"
+                  aria-label="Close next-step dialog"
+                  onClick={() => {
+                    setNextStepTaskId(null)
+                    setNextStepDraft('')
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="va-form-fields">
+                <label>
+                  <span>Next step</span>
+                  <textarea
+                    autoFocus
+                    maxLength={300}
+                    rows={3}
+                    placeholder="Example: Attach the corrected invoice and send it to Maria."
+                    value={nextStepDraft}
+                    onChange={(event) => setNextStepDraft(event.target.value)}
+                  />
+                  <small>
+                    Keep this short so you can resume quickly after an interruption.
+                  </small>
+                </label>
+              </div>
+
+              <div className="va-form-actions">
+                <button
+                  className="va-primary-button"
+                  type="button"
+                  onClick={saveNextStep}
+                >
+                  Save next step
+                </button>
+                {nextStepDraft ? (
+                  <button
+                    className="va-secondary-button"
+                    type="button"
+                    onClick={() => {
+                      setNextStepDraft('')
+                    }}
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
             </section>
           </div>
         ) : null}
@@ -1962,6 +2242,8 @@ function LocalWorkspacePage({
                           currentView={view}
                           onEdit={editTask}
                           onStatusChange={updateTaskStatus}
+                          onSnooze={openSnooze}
+                          onEditNextStep={openNextStep}
                           onDelete={deleteTask}
                         />
                       ))}
@@ -1982,6 +2264,8 @@ function LocalWorkspacePage({
                     currentView={view}
                     onEdit={editTask}
                     onStatusChange={updateTaskStatus}
+                    onSnooze={openSnooze}
+                    onEditNextStep={openNextStep}
                     onDelete={deleteTask}
                   />
                 ))}
@@ -2371,6 +2655,8 @@ function TaskCard({
   currentView,
   onEdit,
   onStatusChange,
+  onSnooze,
+  onEditNextStep,
   onDelete,
 }: {
   task: VaTask
@@ -2379,6 +2665,8 @@ function TaskCard({
   currentView: WorkspaceView
   onEdit: (task: VaTask) => void
   onStatusChange: (id: string, status: VaTaskStatus) => void
+  onSnooze: (task: VaTask) => void
+  onEditNextStep: (task: VaTask) => void
   onDelete: (task: VaTask) => void
 }) {
   const reason = getTaskPriorityReason(task, today)
@@ -2418,6 +2706,38 @@ function TaskCard({
         </div>
       </div>
 
+      {task.status === 'waiting' ? (
+        <section className="va-waiting-radar" aria-label="Waiting status">
+          <div>
+            <span>Waiting for</span>
+            <strong>{task.waitingFor || getWaitingPersonLabel(task.responsibility)}</strong>
+          </div>
+          <div>
+            <span>Waiting time</span>
+            <strong>{getWaitingAgeLabel(task, today)}</strong>
+          </div>
+          <div>
+            <span>Check back</span>
+            <strong>{getCheckBackLabel(task.followUpDate, today)}</strong>
+          </div>
+          {client?.timeZone ? (
+            <p>{getContactWindowLabel(new Date(), client.timeZone)}</p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {task.status !== 'completed' ? (
+        <section className="va-resume-marker">
+          <div>
+            <span>Next step</span>
+            <p>{task.nextStep || 'Add one short line so you can resume quickly.'}</p>
+          </div>
+          <button type="button" onClick={() => onEditNextStep(task)}>
+            {task.nextStep ? 'Edit' : 'Add'}
+          </button>
+        </section>
+      ) : null}
+
       {task.details ? (
         <details className="va-task-details-disclosure">
           <summary>View notes</summary>
@@ -2444,11 +2764,18 @@ function TaskCard({
               Move to Today
             </button>
             <button
+              className="va-waiting-button va-task-secondary-action"
+              type="button"
+              onClick={() => onSnooze(task)}
+            >
+              Snooze
+            </button>
+            <button
               className="va-complete-button va-task-secondary-action"
               type="button"
               onClick={() => onStatusChange(task.id, 'completed')}
             >
-              Done
+              Done waiting
             </button>
           </>
         ) : (
@@ -2487,6 +2814,61 @@ function TaskCard({
       </div>
     </article>
   )
+}
+
+function getWaitingPersonLabel(
+  responsibility: VaTaskResponsibility,
+): string {
+  return responsibility === 'third-party' ? 'Someone else' : 'The client'
+}
+
+function getWaitingAgeLabel(task: VaTask, today: string): string {
+  if (!task.waitingSince) {
+    return 'Waiting'
+  }
+
+  const days = Math.max(0, daysBetweenKeys(task.waitingSince, today))
+
+  if (days === 0) {
+    return 'Waiting today'
+  }
+
+  return `Waiting ${days} ${days === 1 ? 'day' : 'days'}`
+}
+
+function getCheckBackLabel(date: string, today: string): string {
+  if (!date) {
+    return 'No date'
+  }
+
+  if (date < today) {
+    const days = daysBetweenKeys(date, today)
+    return `${days} ${days === 1 ? 'day' : 'days'} overdue`
+  }
+
+  if (date === today) {
+    return 'Today'
+  }
+
+  if (date === getRelativeDateKey(today, 1)) {
+    return 'Tomorrow'
+  }
+
+  return formatDateKey(date)
+}
+
+function getContactWindowLabel(date: Date, timeZone: string): string {
+  return getBusinessHourLabel(date, timeZone) === 'Good time to call'
+    ? 'Good time to contact'
+    : 'Client is outside work hours'
+}
+
+function getNextMondayKey(today: string): string {
+  const date = new Date(`${today}T00:00:00Z`)
+  const day = date.getUTCDay()
+  const daysUntilMonday = day === 1 ? 7 : (8 - day) % 7
+  date.setUTCDate(date.getUTCDate() + daysUntilMonday)
+  return date.toISOString().slice(0, 10)
 }
 
 function getTaskPriorityReason(
@@ -2871,6 +3253,9 @@ function workspacesMatch(
         task.dueDate === cloudTask.dueDate &&
         task.actionDate === cloudTask.actionDate &&
         task.followUpDate === cloudTask.followUpDate &&
+        task.waitingFor === cloudTask.waitingFor &&
+        task.waitingSince === cloudTask.waitingSince &&
+        task.nextStep === cloudTask.nextStep &&
         task.status === cloudTask.status &&
         task.responsibility === cloudTask.responsibility,
     )
@@ -3079,6 +3464,9 @@ function normalizeTaskDraft(draft: VaTaskDraft): VaTaskDraft {
     dueDate: draft.dueDate,
     actionDate: draft.actionDate,
     followUpDate: draft.followUpDate,
+    waitingFor: draft.waitingFor.trim(),
+    waitingSince: draft.waitingSince,
+    nextStep: draft.nextStep.trim(),
     status: draft.status,
     responsibility: draft.responsibility,
   }
@@ -3232,6 +3620,12 @@ function validateBackupTask(
       value.followUpDate,
       `Task ${index + 1} follow-up date`,
     ),
+    waitingFor: optionalBackupString(value.waitingFor, 160),
+    waitingSince: optionalBackupDateKey(
+      value.waitingSince,
+      `Task ${index + 1} waiting since date`,
+    ),
+    nextStep: optionalBackupString(value.nextStep, 300),
     status,
     responsibility: parseTaskResponsibility(value.responsibility),
     createdAt: requireBackupDate(

@@ -32,6 +32,9 @@ type TaskRow = {
   due_date: string | null
   action_date: string | null
   follow_up_date: string | null
+  waiting_for: string | null
+  waiting_since: string | null
+  next_step: string | null
   status: VaTaskStatus
   responsibility: VaTaskResponsibility | null
   created_at: string
@@ -211,6 +214,9 @@ function toTaskRow(user: User, task: VaTask): TaskRow {
     due_date: task.dueDate || null,
     action_date: task.actionDate || null,
     follow_up_date: task.followUpDate || null,
+    waiting_for: task.waitingFor || null,
+    waiting_since: task.waitingSince || null,
+    next_step: task.nextStep || null,
     status: task.status,
     responsibility: task.responsibility,
     created_at: task.createdAt,
@@ -243,6 +249,9 @@ function fromTaskRow(row: TaskRow): VaTask {
     dueDate: row.due_date ?? '',
     actionDate: row.action_date ?? '',
     followUpDate: row.follow_up_date ?? '',
+    waitingFor: row.waiting_for ?? '',
+    waitingSince: row.waiting_since ?? '',
+    nextStep: row.next_step ?? '',
     status: row.status,
     responsibility: isVaTaskResponsibility(row.responsibility)
       ? row.responsibility
