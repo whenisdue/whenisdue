@@ -524,6 +524,7 @@ function LocalWorkspacePage({
   const [importing, setImporting] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [restoreMode, setRestoreMode] = useState<'merge' | 'replace'>('merge')
+  const [replaceConfirmation, setReplaceConfirmation] = useState('')
   const restoreInputRef = useRef<HTMLInputElement | null>(null)
   const syncQueue = useRef<Promise<void>>(Promise.resolve())
   const syncRevision = useRef(0)
@@ -577,11 +578,48 @@ function LocalWorkspacePage({
     [today, view, workspace.tasks],
   )
 
+  const waitingGroups = useMemo(
+    () => groupWaitingTasks(visibleTasks, today),
+    [today, visibleTasks],
+  )
+
   const activeClients = workspace.clients.filter((client) => client.active).length
   const todayCount = filterTasksForView(workspace.tasks, 'today', today).length
   const waitingCount = filterTasksForView(workspace.tasks, 'waiting', today).length
   const upcomingCount = filterTasksForView(workspace.tasks, 'upcoming', today).length
   const completedCount = filterTasksForView(workspace.tasks, 'completed', today).length
+  const tomorrow = getRelativeDateKey(today, 1)
+  const nextWeek = getRelativeDateKey(today, 7)
+  const completedTodayCount = workspace.tasks.filter(
+    (task) =>
+      task.status === 'completed' &&
+      getLocalDateKeyFromIso(task.updatedAt) === today,
+  ).length
+  const stillOpenCount = workspace.tasks.filter(
+    (task) => task.status !== 'completed',
+  ).length
+  const waitingOnOthersCount = workspace.tasks.filter(
+    (task) => task.status === 'waiting',
+  ).length
+  const returningTomorrowCount = workspace.tasks.filter(
+    (task) =>
+      task.status === 'waiting' &&
+      task.followUpDate === tomorrow,
+  ).length
+  const upcomingDeadlineCount = workspace.tasks.filter(
+    (task) =>
+      task.status !== 'completed' &&
+      Boolean(
+        task.dueDate &&
+          task.dueDate > today &&
+          task.dueDate <= nextWeek,
+      ),
+  ).length
+  const unclearCount = workspace.tasks.filter(
+    (task) =>
+      task.status !== 'completed' &&
+      task.responsibility === 'unclear',
+  ).length
 
   const canSaveClient = clientDraft.displayName.trim().length > 0
   const taskIsWaitingOnSomeone = isWaitingResponsibility(
@@ -731,9 +769,12 @@ function LocalWorkspacePage({
       const taskCount = safeCount(importedWorkspace.tasks.length)
       const actionWord = restoreMode === 'replace' ? 'replace' : 'merge with'
 
-      const confirmed = window.confirm(
-        `This backup contains ${clientCount} ${clientCount === 1 ? 'client' : 'clients'} and ${taskCount} ${taskCount === 1 ? 'task' : 'tasks'}.\n\nContinue and ${actionWord} your current workspace?`,
-      )
+      const warning =
+        restoreMode === 'replace'
+          ? `WARNING: Replace will permanently remove all current clients and tasks from this account before importing the backup.\n\nThis backup contains ${clientCount} ${clientCount === 1 ? 'client' : 'clients'} and ${taskCount} ${taskCount === 1 ? 'task' : 'tasks'}.\n\nContinue and replace your current workspace?`
+          : `This backup contains ${clientCount} ${clientCount === 1 ? 'client' : 'clients'} and ${taskCount} ${taskCount === 1 ? 'task' : 'tasks'}.\n\nContinue and ${actionWord} your current workspace?`
+
+      const confirmed = window.confirm(warning)
 
       if (!confirmed) {
         setMessage('Restore cancelled. No records were changed.')
@@ -769,6 +810,8 @@ function LocalWorkspacePage({
       if (restoreInputRef.current) {
         restoreInputRef.current.value = ''
       }
+
+      setReplaceConfirmation('')
     }
   }
 
@@ -1121,21 +1164,31 @@ function LocalWorkspacePage({
             alt="WhenIsDue"
           />
         </a>
-        <nav className="va-topbar-actions" aria-label="Workspace navigation">
-          <a
-            href="/typing"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/typing')
-            }}
-          >
-            Typing Practice
-          </a>
-          <a href="/" onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}>Calculators</a>
+        <nav className="va-topbar-actions va-workspace-utility-nav" aria-label="Workspace navigation">
           <span aria-current="page">VA Workspace</span>
+          <details className="va-workspace-tools">
+            <summary>Other tools</summary>
+            <div>
+              <a
+                href="/typing"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/typing')
+                }}
+              >
+                Typing Practice
+              </a>
+              <a
+                href="/"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/')
+                }}
+              >
+                Calculators
+              </a>
+            </div>
+          </details>
         </nav>
       </header>
 
@@ -1503,18 +1556,20 @@ function LocalWorkspacePage({
                             name="followUpDate"
                             min={today}
                             value={taskDraft.followUpDate}
-                            onInput={(event) =>
+                            onInput={(event) => {
+                              const value = event.currentTarget.value
                               setTaskDraft((current) => ({
                                 ...current,
-                                followUpDate: event.currentTarget.value,
+                                followUpDate: value,
                               }))
-                            }
-                            onChange={(event) =>
+                            }}
+                            onChange={(event) => {
+                              const value = event.currentTarget.value
                               setTaskDraft((current) => ({
                                 ...current,
-                                followUpDate: event.currentTarget.value,
+                                followUpDate: value,
                               }))
-                            }
+                            }}
                           />
                           <small>
                             Choose when to check this again.
@@ -1527,18 +1582,20 @@ function LocalWorkspacePage({
                             type="date"
                             name="actionDate"
                             value={taskDraft.actionDate}
-                            onInput={(event) =>
+                            onInput={(event) => {
+                              const value = event.currentTarget.value
                               setTaskDraft((current) => ({
                                 ...current,
-                                actionDate: event.currentTarget.value,
+                                actionDate: value,
                               }))
-                            }
-                            onChange={(event) =>
+                            }}
+                            onChange={(event) => {
+                              const value = event.currentTarget.value
                               setTaskDraft((current) => ({
                                 ...current,
-                                actionDate: event.currentTarget.value,
+                                actionDate: value,
                               }))
-                            }
+                            }}
                           />
                           <small>
                             Choose when you plan to do this.
@@ -1556,18 +1613,20 @@ function LocalWorkspacePage({
                             type="date"
                             name="dueDate"
                             value={taskDraft.dueDate}
-                            onInput={(event) =>
+                            onInput={(event) => {
+                              const value = event.currentTarget.value
                               setTaskDraft((current) => ({
                                 ...current,
-                                dueDate: event.currentTarget.value,
+                                dueDate: value,
                               }))
-                            }
-                            onChange={(event) =>
+                            }}
+                            onChange={(event) => {
+                              const value = event.currentTarget.value
                               setTaskDraft((current) => ({
                                 ...current,
-                                dueDate: event.currentTarget.value,
+                                dueDate: value,
                               }))
-                            }
+                            }}
                           />
                           <small>The final deadline for this task.</small>
                         </label>
@@ -1730,10 +1789,10 @@ function LocalWorkspacePage({
                   <ClientCard
                     key={client.id}
                     client={client}
-                    taskCount={
-                      workspace.tasks.filter((task) => task.clientId === client.id)
-                        .length
-                    }
+                    tasks={workspace.tasks.filter(
+                      (task) => task.clientId === client.id,
+                    )}
+                    today={today}
                     onEdit={editClient}
                     onToggle={toggleClient}
                     onDelete={deleteClient}
@@ -1747,42 +1806,118 @@ function LocalWorkspacePage({
               />
             )
           ) : visibleTasks.length > 0 ? (
-            <div className="va-task-list">
-              {visibleTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  client={workspace.clients.find(
-                    (client) => client.id === task.clientId,
-                  )}
-                  today={today}
-                  currentView={view}
-                  onEdit={editTask}
-                  onStatusChange={updateTaskStatus}
-                  onDelete={deleteTask}
-                />
-              ))}
-            </div>
+            view === 'waiting' ? (
+              <div className="va-waiting-groups">
+                {waitingGroups.map((group) => (
+                  <section
+                    className={`va-waiting-group group-${group.key}`}
+                    key={group.key}
+                    aria-labelledby={`waiting-group-${group.key}`}
+                  >
+                    <div className="va-waiting-group-heading">
+                      <div>
+                        <h3 id={`waiting-group-${group.key}`}>{group.label}</h3>
+                        <p>{group.description}</p>
+                      </div>
+                      <span>{safeCount(group.tasks.length)}</span>
+                    </div>
+
+                    <div className="va-task-list">
+                      {group.tasks.map((task) => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          client={workspace.clients.find(
+                            (client) => client.id === task.clientId,
+                          )}
+                          today={today}
+                          currentView={view}
+                          onEdit={editTask}
+                          onStatusChange={updateTaskStatus}
+                          onDelete={deleteTask}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div className="va-task-list">
+                {visibleTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    client={workspace.clients.find(
+                      (client) => client.id === task.clientId,
+                    )}
+                    today={today}
+                    currentView={view}
+                    onEdit={editTask}
+                    onStatusChange={updateTaskStatus}
+                    onDelete={deleteTask}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <EmptyState
               title={`Nothing in ${getViewTitle(view).toLowerCase()}`}
               message={
                 view === 'today'
-                  ? 'You’re clear for today. Review upcoming work, add a follow-up, or use the free time to practice typing.'
+                  ? 'You’re clear for today. Review upcoming work or add the next task that needs attention.'
                   : 'Tasks will appear here automatically based on their dates and status.'
-              }
-              action={
-                view === 'today'
-                  ? {
-                      label: 'Practice typing',
-                      onClick: () => onNavigate('/typing'),
-                    }
-                  : undefined
               }
             />
           )}
         </section>
       </section>
+
+      {view === 'today' ? (
+        <details className="va-close-day-panel">
+          <summary>
+            <div>
+              <p className="va-eyebrow">End-of-day check</p>
+              <h2>Close the day</h2>
+              <p>Review what is finished and what still needs a clear next step.</p>
+            </div>
+            <span>Review</span>
+          </summary>
+
+          <div className="va-close-day-body">
+            <div className="va-close-day-grid">
+              <article>
+                <span>Completed today</span>
+                <strong>{safeCount(completedTodayCount)}</strong>
+              </article>
+              <article>
+                <span>Still open</span>
+                <strong>{safeCount(stillOpenCount)}</strong>
+              </article>
+              <article>
+                <span>Waiting on others</span>
+                <strong>{safeCount(waitingOnOthersCount)}</strong>
+              </article>
+              <article>
+                <span>Returning tomorrow</span>
+                <strong>{safeCount(returningTomorrowCount)}</strong>
+              </article>
+              <article>
+                <span>Deadlines in 7 days</span>
+                <strong>{safeCount(upcomingDeadlineCount)}</strong>
+              </article>
+              <article className={unclearCount > 0 ? 'needs-attention' : ''}>
+                <span>Needs clarification</span>
+                <strong>{safeCount(unclearCount)}</strong>
+              </article>
+            </div>
+
+            <p className="va-close-day-note">
+              Before signing off, make sure every open item is either planned,
+              waiting on someone, or clearly marked for clarification.
+            </p>
+          </div>
+        </details>
+      ) : null}
 
       <nav className="va-compact-tabs" aria-label="Workspace views">
         <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
@@ -1821,9 +1956,11 @@ function LocalWorkspacePage({
               <span>Restore method</span>
               <select
                 value={restoreMode}
-                onChange={(event) =>
-                  setRestoreMode(event.target.value as 'merge' | 'replace')
-                }
+                onChange={(event) => {
+                  const nextMode = event.target.value as 'merge' | 'replace'
+                  setRestoreMode(nextMode)
+                  setReplaceConfirmation('')
+                }}
                 disabled={restoring}
               >
                 <option value="merge">Merge with current records</option>
@@ -1831,13 +1968,43 @@ function LocalWorkspacePage({
               </select>
             </label>
 
+            {restoreMode === 'replace' ? (
+              <label className="va-replace-confirmation">
+                <span>Type REPLACE to continue</span>
+                <input
+                  value={replaceConfirmation}
+                  onChange={(event) =>
+                    setReplaceConfirmation(event.target.value.toUpperCase())
+                  }
+                  placeholder="REPLACE"
+                  autoComplete="off"
+                  disabled={restoring}
+                />
+                <small>
+                  Replace permanently removes the current workspace before importing the backup.
+                </small>
+              </label>
+            ) : null}
+
             <button
-              className="va-primary-button"
+              className={
+                restoreMode === 'replace'
+                  ? 'va-destructive-restore-button'
+                  : 'va-primary-button'
+              }
               type="button"
               onClick={() => restoreInputRef.current?.click()}
-              disabled={restoring}
+              disabled={
+                restoring ||
+                (restoreMode === 'replace' &&
+                  replaceConfirmation !== 'REPLACE')
+              }
             >
-              {restoring ? 'Restoring...' : 'Restore backup'}
+              {restoring
+                ? 'Restoring...'
+                : restoreMode === 'replace'
+                  ? 'Replace workspace'
+                  : 'Restore backup'}
             </button>
 
             <input
@@ -1918,17 +2085,43 @@ function ViewButton({
 
 function ClientCard({
   client,
-  taskCount,
+  tasks,
+  today,
   onEdit,
   onToggle,
   onDelete,
 }: {
   client: VaClient
-  taskCount: number
+  tasks: VaTask[]
+  today: string
   onEdit: (client: VaClient) => void
   onToggle: (id: string) => void
   onDelete: (client: VaClient) => void
 }) {
+  const openTasks = tasks.filter((task) => task.status !== 'completed')
+  const activeCount = openTasks.filter(
+    (task) => task.status === 'needs-action',
+  ).length
+  const waitingCount = openTasks.filter(
+    (task) => task.status === 'waiting',
+  ).length
+  const overdueCount = openTasks.filter(
+    (task) =>
+      Boolean(
+        (task.dueDate && task.dueDate < today) ||
+          (task.status === 'waiting' &&
+            task.followUpDate &&
+            task.followUpDate < today) ||
+          (task.status !== 'waiting' &&
+            task.actionDate &&
+            task.actionDate < today),
+      ),
+  ).length
+  const nextDeadline = openTasks
+    .map((task) => task.dueDate)
+    .filter(Boolean)
+    .sort()[0]
+
   return (
     <article className={`va-client-card ${client.active ? '' : 'is-inactive'}`}>
       <div className="va-client-card-top">
@@ -1936,15 +2129,49 @@ function ClientCard({
         <div>
           <div className="va-client-title-row">
             <h3>{client.displayName}</h3>
-            <span className={client.active ? 'is-active' : 'is-paused'}>{client.active ? 'Active' : 'Paused'}</span>
+            <span className={client.active ? 'is-active' : 'is-paused'}>
+              {client.active ? 'Active' : 'Paused'}
+            </span>
           </div>
-          <p>{client.serviceType || 'Service type not added'} · {safeCount(taskCount)} {taskCount === 1 ? 'task' : 'tasks'}</p>
+          <p>
+            {client.serviceType || 'Service type not added'} ·{' '}
+            {safeCount(openTasks.length)}{' '}
+            {openTasks.length === 1 ? 'open task' : 'open tasks'}
+          </p>
         </div>
       </div>
+
+      <dl className="va-client-work-summary" aria-label={`${client.displayName} work summary`}>
+        <div className={overdueCount > 0 ? 'has-overdue' : ''}>
+          <dt>Overdue</dt>
+          <dd>{safeCount(overdueCount)}</dd>
+        </div>
+        <div>
+          <dt>Active</dt>
+          <dd>{safeCount(activeCount)}</dd>
+        </div>
+        <div>
+          <dt>Waiting</dt>
+          <dd>{safeCount(waitingCount)}</dd>
+        </div>
+        <div className="va-client-next-deadline">
+          <dt>Next deadline</dt>
+          <dd>{nextDeadline ? formatDateKey(nextDeadline) : 'None'}</dd>
+        </div>
+      </dl>
+
       <div className="va-client-actions">
         <button type="button" onClick={() => onEdit(client)}>Edit</button>
-        <button type="button" onClick={() => onToggle(client.id)}>{client.active ? 'Pause' : 'Activate'}</button>
-        <button className="va-delete-button" type="button" onClick={() => onDelete(client)}>Delete</button>
+        <button type="button" onClick={() => onToggle(client.id)}>
+          {client.active ? 'Pause' : 'Activate'}
+        </button>
+        <button
+          className="va-delete-button"
+          type="button"
+          onClick={() => onDelete(client)}
+        >
+          Delete
+        </button>
       </div>
     </article>
   )
@@ -1984,7 +2211,24 @@ function TaskCard({
             {getResponsibilityLabel(task.responsibility)}
           </p>
         </div>
-        {relevantDate ? <span className="va-task-relevant-date">{relevantDate}</span> : null}
+
+        <div className="va-task-date-stack">
+          {relevantDate ? (
+            <span className="va-task-relevant-date">{relevantDate}</span>
+          ) : null}
+
+          {task.dueDate ? (
+            <span
+              className={`va-task-final-deadline ${
+                task.status !== 'completed' && task.dueDate < today
+                  ? 'is-overdue'
+                  : ''
+              }`}
+            >
+              Final deadline {formatDateKey(task.dueDate)}
+            </span>
+          ) : null}
+        </div>
       </div>
 
       {task.details ? (
@@ -2235,6 +2479,62 @@ function EmptyState({
   )
 }
 
+type WaitingGroup = {
+  key: 'soon' | 'week' | 'later' | 'missing'
+  label: string
+  description: string
+  tasks: VaTask[]
+}
+
+function groupWaitingTasks(
+  tasks: VaTask[],
+  today: string,
+): WaitingGroup[] {
+  const inThreeDays = getRelativeDateKey(today, 3)
+  const inSevenDays = getRelativeDateKey(today, 7)
+
+  const groups: WaitingGroup[] = [
+    {
+      key: 'soon',
+      label: 'Follow up soon',
+      description: 'Returning within the next 3 days.',
+      tasks: [],
+    },
+    {
+      key: 'week',
+      label: 'Later this week',
+      description: 'Returning 4 to 7 days from now.',
+      tasks: [],
+    },
+    {
+      key: 'later',
+      label: 'Later',
+      description: 'Returning more than a week from now.',
+      tasks: [],
+    },
+    {
+      key: 'missing',
+      label: 'No check-back date',
+      description: 'These items need a follow-up date before they can return automatically.',
+      tasks: [],
+    },
+  ]
+
+  for (const task of tasks) {
+    if (!task.followUpDate) {
+      groups[3].tasks.push(task)
+    } else if (task.followUpDate <= inThreeDays) {
+      groups[0].tasks.push(task)
+    } else if (task.followUpDate <= inSevenDays) {
+      groups[1].tasks.push(task)
+    } else {
+      groups[2].tasks.push(task)
+    }
+  }
+
+  return groups.filter((group) => group.tasks.length > 0)
+}
+
 function filterTasksForView(tasks: VaTask[], view: WorkspaceView, today: string): VaTask[] {
   if (view === 'clients') return []
   if (view === 'waiting') return tasks.filter((task) => task.status === 'waiting' && (!task.followUpDate || task.followUpDate > today))
@@ -2389,6 +2689,26 @@ function workspacesMatch(
   })
 
   return clientsMatch && tasksMatch
+}
+
+function getRelativeDateKey(dateKey: string, days: number): string {
+  const date = new Date(`${dateKey}T00:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return date.toISOString().slice(0, 10)
+}
+
+function getLocalDateKeyFromIso(value: string): string {
+  const date = new Date(value)
+
+  if (!Number.isFinite(date.getTime())) {
+    return ''
+  }
+
+  const year = String(date.getFullYear()).padStart(4, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
 }
 
 function getSuggestedCheckDate(today: string): string {

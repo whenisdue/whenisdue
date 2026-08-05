@@ -2454,3 +2454,486 @@
   }
 }
 
+/* Compact client workload summary */
+.va-client-work-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(78px, 0.7fr)) minmax(150px, 1.35fr);
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.va-client-work-summary > div {
+  min-width: 0;
+  border: 1px solid #e5ddd2;
+  border-radius: 11px;
+  background: #f8f5ef;
+  padding: 9px 10px;
+}
+
+.va-client-work-summary dt {
+  color: var(--va-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.va-client-work-summary dd {
+  overflow: hidden;
+  margin: 4px 0 0;
+  color: var(--va-ink);
+  font-size: 0.84rem;
+  font-weight: 820;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.va-client-work-summary .has-overdue {
+  border-color: #efc9c5;
+  background: var(--va-overdue-tint);
+}
+
+.va-client-work-summary .has-overdue dt,
+.va-client-work-summary .has-overdue dd {
+  color: var(--va-overdue);
+}
+
+.va-client-next-deadline {
+  background: #fffdf9 !important;
+}
+
+.va-client-next-deadline dd {
+  font-size: 0.76rem;
+}
+
+@media (max-width: 700px) {
+  .va-client-work-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .va-client-next-deadline {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
+  .va-client-work-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .va-client-next-deadline {
+    grid-column: auto;
+  }
+}
+
+/* End-of-day habit check */
+.va-close-day-panel {
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid var(--va-border);
+  border-radius: 16px;
+  background: rgba(255, 253, 249, 0.9);
+}
+
+.va-close-day-panel > summary {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 17px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.va-close-day-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.va-close-day-panel > summary h2 {
+  margin: 0;
+  color: var(--va-ink);
+  font-size: 1rem;
+}
+
+.va-close-day-panel > summary p:not(.va-eyebrow) {
+  margin: 4px 0 0;
+  color: var(--va-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.va-close-day-panel > summary > span {
+  flex: 0 0 auto;
+  border: 1px solid #d3c2ab;
+  border-radius: 999px;
+  background: white;
+  color: var(--va-primary);
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.va-close-day-panel[open] > summary {
+  border-bottom: 1px solid #e5d9c8;
+}
+
+.va-close-day-panel[open] > summary > span {
+  color: transparent;
+  position: relative;
+}
+
+.va-close-day-panel[open] > summary > span::after {
+  position: absolute;
+  inset: 6px 10px;
+  color: var(--va-muted);
+  content: "Close";
+  white-space: nowrap;
+}
+
+.va-close-day-body {
+  padding: 15px 17px 17px;
+}
+
+.va-close-day-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.va-close-day-grid article {
+  display: grid;
+  min-height: 82px;
+  border: 1px solid #e5ddd2;
+  border-radius: 12px;
+  background: #f8f5ef;
+  padding: 10px 11px;
+}
+
+.va-close-day-grid span {
+  color: var(--va-muted);
+  font-size: 0.66rem;
+  font-weight: 760;
+  line-height: 1.3;
+}
+
+.va-close-day-grid strong {
+  align-self: end;
+  color: var(--va-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.va-close-day-grid .needs-attention {
+  border-color: #efc9c5;
+  background: var(--va-overdue-tint);
+}
+
+.va-close-day-grid .needs-attention span,
+.va-close-day-grid .needs-attention strong {
+  color: var(--va-overdue);
+}
+
+.va-close-day-note {
+  margin: 12px 0 0;
+  color: var(--va-muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .va-close-day-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .va-close-day-panel > summary {
+    align-items: flex-start;
+    padding: 13px 14px;
+  }
+
+  .va-close-day-body {
+    padding: 13px 14px 15px;
+  }
+
+  .va-close-day-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .va-close-day-grid article {
+    min-height: 74px;
+  }
+}
+
+/* Keep the working date and final deadline visible together */
+.va-task-date-stack {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.va-task-final-deadline {
+  color: var(--va-muted);
+  font-size: 0.67rem;
+  font-weight: 720;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.va-task-final-deadline.is-overdue {
+  color: var(--va-overdue);
+  font-weight: 800;
+}
+
+@media (max-width: 620px) {
+  .va-task-date-stack {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .va-task-final-deadline {
+    text-align: left;
+  }
+}
+
+/* Waiting view groups */
+.va-waiting-groups {
+  display: grid;
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.va-waiting-group {
+  display: grid;
+  gap: 10px;
+}
+
+.va-waiting-group + .va-waiting-group {
+  border-top: 1px solid var(--va-border);
+  padding-top: 20px;
+}
+
+.va-waiting-group-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.va-waiting-group-heading h3 {
+  margin: 0;
+  color: var(--va-ink);
+  font-size: 0.92rem;
+}
+
+.va-waiting-group-heading p {
+  margin: 3px 0 0;
+  color: var(--va-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.va-waiting-group-heading > span {
+  display: inline-grid;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--va-waiting-tint);
+  color: var(--va-waiting);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.va-waiting-group .va-task-list {
+  margin-top: 0;
+}
+
+.va-waiting-group.group-missing .va-waiting-group-heading {
+  border: 1px solid #efc9c5;
+  border-radius: 12px;
+  background: var(--va-overdue-tint);
+  padding: 10px 12px;
+}
+
+.va-waiting-group.group-missing .va-waiting-group-heading h3,
+.va-waiting-group.group-missing .va-waiting-group-heading p,
+.va-waiting-group.group-missing .va-waiting-group-heading > span {
+  color: var(--va-overdue);
+}
+
+.va-waiting-group.group-missing .va-waiting-group-heading > span {
+  background: #f5d8d4;
+}
+
+@media (max-width: 620px) {
+  .va-waiting-groups {
+    gap: 18px;
+    margin-top: 14px;
+  }
+
+  .va-waiting-group + .va-waiting-group {
+    padding-top: 16px;
+  }
+
+  .va-waiting-group-heading {
+    align-items: flex-start;
+  }
+}
+
+/* Strong warning for destructive backup replacement */
+.va-replace-confirmation {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 6px;
+  border: 1px solid #efc9c5;
+  border-radius: 11px;
+  background: var(--va-overdue-tint);
+  padding: 10px 11px;
+}
+
+.va-replace-confirmation > span {
+  color: var(--va-overdue);
+  font-size: 0.7rem;
+  font-weight: 820;
+}
+
+.va-replace-confirmation input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #dba9a4;
+  border-radius: 9px;
+  background: white;
+  color: var(--va-ink);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.va-replace-confirmation small {
+  color: var(--va-overdue);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.va-destructive-restore-button {
+  min-height: 38px;
+  border: 1px solid var(--va-destructive);
+  border-radius: 10px;
+  background: var(--va-destructive);
+  color: white;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.va-destructive-restore-button:hover:not(:disabled) {
+  background: #6f2522;
+  border-color: #6f2522;
+}
+
+.va-destructive-restore-button:disabled {
+  border-color: #d8c8c6;
+  background: #e8dfde;
+  color: #817674;
+  cursor: not-allowed;
+}
+
+@media (max-width: 620px) {
+  .va-replace-confirmation {
+    grid-column: auto;
+  }
+
+  .va-destructive-restore-button {
+    width: 100%;
+  }
+}
+
+/* Keep secondary utilities available without competing with daily VA work */
+.va-workspace-utility-nav {
+  gap: 7px;
+}
+
+.va-workspace-tools {
+  position: relative;
+}
+
+.va-workspace-tools > summary {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--va-muted);
+  padding: 7px 10px;
+  font-size: 0.75rem;
+  font-weight: 740;
+  cursor: pointer;
+  list-style: none;
+}
+
+.va-workspace-tools > summary::-webkit-details-marker {
+  display: none;
+}
+
+.va-workspace-tools > summary::after {
+  margin-left: 6px;
+  content: "▾";
+  font-size: 0.65rem;
+}
+
+.va-workspace-tools > summary:hover {
+  background: #f4f1eb;
+  color: var(--va-ink);
+}
+
+.va-workspace-tools > div {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  min-width: 170px;
+  gap: 3px;
+  border: 1px solid var(--va-border);
+  border-radius: 11px;
+  background: white;
+  padding: 6px;
+  box-shadow: 0 12px 30px rgba(24, 50, 75, 0.14);
+}
+
+.va-workspace-tools > div a {
+  display: block;
+  border-radius: 8px;
+  color: var(--va-ink);
+  padding: 9px 10px;
+  font-size: 0.74rem;
+  font-weight: 720;
+  text-align: left;
+}
+
+.va-workspace-tools > div a:hover {
+  background: #f4f1eb;
+  color: var(--va-primary);
+}
+
+@media (max-width: 620px) {
+  .va-workspace-utility-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .va-workspace-tools > div {
+    right: 0;
+  }
+}
+
