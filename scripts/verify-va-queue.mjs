@@ -356,8 +356,8 @@ assert.match(
 
 assert.match(
   workspaceSource,
-  /Snooze this item/,
-  'Waiting tasks must provide Snooze',
+  /Check this item later/,
+  'Waiting tasks must provide Check later',
 )
 
 console.log('✓ Queue integrity checks passed')
@@ -373,5 +373,5 @@ console.log('  Move to Today keeps the final deadline')
 console.log('  Date inputs keep immediate state handlers')
 console.log('  Moving to Waiting records the wait start')
 console.log('  Waiting reason is preserved')
-console.log('  Snooze changes only the check-back date')
+console.log('  Check later changes only the check-back date')
 console.log('  Resume Marker is stored on the task')
