@@ -2943,7 +2943,7 @@ function TaskCard({
               type="button"
               onClick={() => onSnooze(task)}
             >
-              Snooze
+              Check later
             </button>
             <button
               className="va-complete-button va-task-secondary-action"
