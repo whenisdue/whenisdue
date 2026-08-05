@@ -3276,3 +3276,144 @@
     min-height: 44px !important;
   }
 }
+
+
+/* Mobile polish for Today header and time-zone controls */
+@media (max-width: 620px) {
+  .va-daily-header-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 10px 1px 14px;
+  }
+
+  .va-daily-header-compact > div:first-child {
+    width: 100%;
+  }
+
+  .va-daily-header-compact .va-eyebrow {
+    margin-bottom: 5px;
+  }
+
+  .va-daily-header-compact h1 {
+    font-size: 1.8rem;
+  }
+
+  .va-daily-header-compact p:not(.va-eyebrow) {
+    max-width: none;
+    font-size: 0.9rem;
+  }
+
+  .va-daily-header-right {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .va-time-panel {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr;
+    border-radius: 14px;
+  }
+
+  .va-time-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .va-time-card:first-child {
+    display: grid;
+    min-height: 58px;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    align-content: center;
+    column-gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .va-time-card:first-child > span,
+  .va-time-card:first-child > strong,
+  .va-time-card:first-child > small {
+    margin: 0;
+  }
+
+  .va-time-card:first-child > strong {
+    font-size: 1.15rem;
+  }
+
+  .va-time-card:first-child > small {
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .va-client-time-card {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px 12px;
+    padding: 12px;
+  }
+
+  .va-client-time-card > span {
+    grid-column: 1;
+    margin: 0;
+  }
+
+  .va-client-time-card > strong {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .va-client-clock-select {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .va-client-clock-select select {
+    min-height: 42px;
+    border: 1px solid var(--va-border);
+    border-radius: 9px;
+    background: white;
+    color: var(--va-primary);
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .va-inline-timezone-picker {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+    margin: 0;
+  }
+
+  .va-inline-timezone-picker > span {
+    color: var(--va-primary);
+    font-size: 0.67rem;
+  }
+
+  .va-inline-timezone-picker select {
+    min-height: 42px;
+    border-radius: 9px;
+    padding: 8px 10px;
+    font-size: 0.76rem;
+  }
+
+  .va-daily-header-actions {
+    display: grid !important;
+    width: 100% !important;
+  }
+
+  .va-daily-header-actions .va-primary-button,
+  .va-daily-header-actions .va-secondary-button {
+    width: 100%;
+    min-height: 48px;
+  }
+}

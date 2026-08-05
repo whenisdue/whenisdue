@@ -3004,9 +3004,10 @@ function formatTimeZoneLabel(timeZone: string): string {
 }
 
 function formatClockTime(date: Date, timeZone?: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-US', {
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
     timeZone,
   }).format(date)
 }
