@@ -3611,3 +3611,49 @@
     min-height: 44px;
   }
 }
+
+
+/* Make secondary task actions clearly tappable on mobile */
+@media (max-width: 620px) {
+  .va-task-outcomes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .va-task-outcomes .va-task-primary-action,
+  .va-task-outcomes .va-task-secondary-action {
+    grid-column: 1 / -1;
+  }
+
+  .va-task-outcomes .va-task-text-button {
+    grid-column: auto;
+    min-height: 48px !important;
+    border: 1px solid var(--va-border);
+    border-radius: 10px;
+    background: white;
+    color: var(--va-ink);
+    padding: 9px 12px;
+    font-weight: 800;
+  }
+
+  .va-task-outcomes .va-task-text-button:hover,
+  .va-task-outcomes .va-task-text-button:focus-visible {
+    border-color: #b7c3cb;
+    background: #f5f7f7;
+    color: var(--va-ink);
+  }
+
+  .va-task-outcomes .va-delete-button.va-task-text-button {
+    margin-left: 0;
+    border-color: #dfbbb7;
+    background: #fffafa;
+    color: var(--va-destructive);
+  }
+
+  .va-task-outcomes .va-delete-button.va-task-text-button:hover,
+  .va-task-outcomes .va-delete-button.va-task-text-button:focus-visible {
+    border-color: #cf9690;
+    background: var(--va-destructive-tint);
+    color: var(--va-destructive);
+  }
+}
