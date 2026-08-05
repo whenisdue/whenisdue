@@ -581,14 +581,9 @@ function LocalWorkspacePage({
     [workspace.clients],
   )
 
-  const clientsWithTimeZones = useMemo(
-    () => sortedClients.filter((client) => Boolean(client.timeZone)),
-    [sortedClients],
-  )
-
   const selectedClockClient =
-    clientsWithTimeZones.find((client) => client.id === clockClientId) ??
-    clientsWithTimeZones[0]
+    sortedClients.find((client) => client.id === clockClientId) ??
+    sortedClients[0]
 
   const visibleTasks = useMemo(
     () => filterTasksForView(workspace.tasks, view, today).sort((first, second) => compareTasksForView(first, second, view, today)),
@@ -714,6 +709,25 @@ function LocalWorkspacePage({
     }
 
     persist(failedWorkspace, 'Retrying the last saved change.')
+  }
+
+  function saveClientTimeZone(clientId: string, timeZone: string) {
+    const clients = workspace.clients.map((client) =>
+      client.id === clientId
+        ? {
+            ...client,
+            timeZone,
+            updatedAt: new Date().toISOString(),
+          }
+        : client,
+    )
+
+    persist(
+      { ...workspace, clients },
+      timeZone
+        ? 'Client timezone saved.'
+        : 'Client timezone removed.',
+    )
   }
 
   async function importBrowserRecords() {
@@ -1249,30 +1263,60 @@ function LocalWorkspacePage({
 
             <div className="va-time-card va-client-time-card">
               <span>Client time</span>
-              {selectedClockClient?.timeZone ? (
+
+              {sortedClients.length > 0 ? (
                 <>
-                  <strong>{formatClockTime(clockNow, selectedClockClient.timeZone)}</strong>
-                  <label>
+                  <strong>
+                    {selectedClockClient?.timeZone
+                      ? formatClockTime(clockNow, selectedClockClient.timeZone)
+                      : '—'}
+                  </strong>
+
+                  <label className="va-client-clock-select">
                     <span className="sr-only">Choose client clock</span>
                     <select
-                      value={selectedClockClient.id}
+                      value={selectedClockClient?.id ?? ''}
                       onChange={(event) => setClockClientId(event.target.value)}
                     >
-                      {clientsWithTimeZones.map((client) => (
+                      {sortedClients.map((client) => (
                         <option key={client.id} value={client.id}>
                           {client.displayName}
                         </option>
                       ))}
                     </select>
                   </label>
-                  <small>
-                    {getBusinessHourLabel(clockNow, selectedClockClient.timeZone)}
-                  </small>
+
+                  {selectedClockClient?.timeZone ? (
+                    <small>
+                      {getBusinessHourLabel(clockNow, selectedClockClient.timeZone)}
+                    </small>
+                  ) : (
+                    <label className="va-inline-timezone-picker">
+                      <span>Timezone not set</span>
+                      <select
+                        value=""
+                        onChange={(event) => {
+                          const timeZone = event.target.value
+
+                          if (selectedClockClient && timeZone) {
+                            saveClientTimeZone(selectedClockClient.id, timeZone)
+                          }
+                        }}
+                      >
+                        <option value="">Choose timezone</option>
+                        {getSupportedTimeZones().map((timeZone) => (
+                          <option key={timeZone} value={timeZone}>
+                            {formatTimeZoneLabel(timeZone)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                 </>
               ) : (
                 <>
                   <strong>—</strong>
-                  <small>Add a client timezone</small>
+                  <small>Add a client first</small>
                 </>
               )}
             </div>

@@ -3054,3 +3054,55 @@
     max-width: 120px;
   }
 }
+
+/* Frictionless client clock setup */
+.va-client-clock-select {
+  margin-top: 3px;
+}
+
+.va-client-clock-select select {
+  width: 100%;
+  max-width: 170px;
+  border: 0;
+  background: transparent;
+  color: var(--va-primary);
+  padding: 0;
+  font: inherit;
+  font-size: 0.67rem;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.va-inline-timezone-picker {
+  display: grid;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.va-inline-timezone-picker > span {
+  color: var(--va-overdue);
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
+.va-inline-timezone-picker select {
+  width: 100%;
+  max-width: 170px;
+  min-height: 30px;
+  border: 1px solid var(--va-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--va-ink);
+  padding: 5px 7px;
+  font: inherit;
+  font-size: 0.63rem;
+  cursor: pointer;
+}
+
+@media (max-width: 620px) {
+  .va-client-clock-select select,
+  .va-inline-timezone-picker select {
+    max-width: 130px;
+  }
+}
+
