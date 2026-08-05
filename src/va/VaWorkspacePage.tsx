@@ -1197,7 +1197,7 @@ function LocalWorkspacePage({
 
     persist(
       { ...workspace, tasks },
-      `Snoozed until ${formatDateKey(submittedDate)}.`,
+      `This will return on ${formatDateKey(submittedDate)}.`,
     )
     setSnoozeTaskId(null)
     setSnoozeDate('')
@@ -1810,17 +1810,17 @@ function LocalWorkspacePage({
               className="va-form-drawer va-small-dialog"
               role="dialog"
               aria-modal="true"
-              aria-labelledby="snooze-dialog-title"
+              aria-labelledby="check-later-dialog-title"
             >
               <div className="va-form-drawer-head">
                 <div>
-                  <p className="va-eyebrow">Check again later</p>
-                  <h2 id="snooze-dialog-title">Snooze this item</h2>
+                  <p className="va-eyebrow">Check later</p>
+                  <h2 id="check-later-dialog-title">Check this item later</h2>
                 </div>
                 <button
                   className="va-drawer-close"
                   type="button"
-                  aria-label="Close snooze dialog"
+                  aria-label="Close check-later dialog"
                   onClick={() => {
                     setSnoozeTaskId(null)
                     setSnoozeDate('')
@@ -1883,7 +1883,7 @@ function LocalWorkspacePage({
                     type="submit"
                     disabled={!snoozeDate}
                   >
-                    Save snooze
+                    Save check-back date
                   </button>
                 </div>
               </form>
