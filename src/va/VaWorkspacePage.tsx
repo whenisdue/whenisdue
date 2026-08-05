@@ -1342,10 +1342,54 @@ function LocalWorkspacePage({
       ) : null}
 
       <section className="va-daily-header va-daily-header-compact">
-        <div>
+        <div className="va-daily-heading-block">
           <p className="va-eyebrow">{formatWorkspaceDate(today)}</p>
-          <h1>{getViewTitle(view)}</h1>
-          <p>{getDailySummary(view, todayCount, waitingCount, upcomingCount, completedCount)}</p>
+          <div className="va-daily-title-row">
+            <div>
+              <h1>{getViewTitle(view)}</h1>
+              <p>
+                {getDailySummary(
+                  view,
+                  todayCount,
+                  waitingCount,
+                  upcomingCount,
+                  completedCount,
+                )}
+              </p>
+            </div>
+
+            <div className="va-desktop-primary-actions">
+              {view === 'clients' ? (
+                <button
+                  className="va-primary-button"
+                  type="button"
+                  onClick={() => {
+                    setEditingClientId(null)
+                    setClientDraft(emptyClientDraft)
+                    setFormPanel('client')
+                  }}
+                >
+                  + Add client
+                </button>
+              ) : null}
+
+              <button
+                className={
+                  view === 'clients'
+                    ? 'va-secondary-button'
+                    : 'va-primary-button'
+                }
+                type="button"
+                onClick={() => {
+                  setEditingTaskId(null)
+                  setTaskDraft({ ...emptyTaskDraft, actionDate: today })
+                  setFormPanel('task')
+                }}
+              >
+                + Add task
+              </button>
+            </div>
+          </div>
         </div>
         <div className="va-daily-header-right">
           <button

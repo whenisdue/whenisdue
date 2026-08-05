@@ -3934,3 +3934,54 @@
     line-height: 1.35;
   }
 }
+
+
+/* Keep the primary desktop action beside the current view title */
+.va-daily-heading-block {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.va-daily-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+.va-daily-title-row > div:first-child {
+  min-width: 0;
+}
+
+.va-daily-title-row h1 {
+  margin-bottom: 3px;
+}
+
+.va-desktop-primary-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.va-desktop-primary-actions .va-primary-button,
+.va-desktop-primary-actions .va-secondary-button {
+  min-height: 46px;
+}
+
+@media (min-width: 621px) {
+  .va-daily-header-right .va-daily-header-actions {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .va-daily-title-row {
+    display: block;
+  }
+
+  .va-desktop-primary-actions {
+    display: none;
+  }
+}
