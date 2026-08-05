@@ -16,6 +16,7 @@ type ClientRow = {
   email: string
   phone: string
   service_type: string
+  time_zone: string | null
   notes: string
   active: boolean
   created_at: string
@@ -192,6 +193,7 @@ function toClientRow(user: User, client: VaClient): ClientRow {
     email: client.email,
     phone: client.phone,
     service_type: client.serviceType,
+    time_zone: client.timeZone || null,
     notes: client.notes,
     active: client.active,
     created_at: client.createdAt,
@@ -224,6 +226,7 @@ function fromClientRow(row: ClientRow): VaClient {
     email: row.email,
     phone: row.phone,
     serviceType: row.service_type,
+    timeZone: row.time_zone ?? '',
     notes: row.notes,
     active: row.active,
     createdAt: row.created_at,

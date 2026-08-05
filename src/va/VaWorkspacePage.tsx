@@ -34,6 +34,7 @@ const emptyClientDraft: VaClientDraft = {
   email: '',
   phone: '',
   serviceType: '',
+  timeZone: '',
   notes: '',
   active: true,
 }
@@ -507,6 +508,8 @@ function LocalWorkspacePage({
   const [workspace, setWorkspace] = useState<VaWorkspaceData>(emptyWorkspace)
   const [workspaceLoading, setWorkspaceLoading] = useState(true)
   const [view, setView] = useState<WorkspaceView>('today')
+  const [clockNow, setClockNow] = useState(() => new Date())
+  const [clockClientId, setClockClientId] = useState('')
   const [formPanel, setFormPanel] = useState<'task' | 'client' | null>(null)
   const [waitingTaskId, setWaitingTaskId] = useState<string | null>(null)
   const [waitingCheckDate, setWaitingCheckDate] = useState('')
@@ -566,12 +569,26 @@ function LocalWorkspacePage({
     }
   }, [localSnapshot, user])
 
+  useEffect(() => {
+    const interval = window.setInterval(() => setClockNow(new Date()), 60_000)
+    return () => window.clearInterval(interval)
+  }, [])
+
   const today = getTodayKey()
 
   const sortedClients = useMemo(
     () => [...workspace.clients].sort(compareClients),
     [workspace.clients],
   )
+
+  const clientsWithTimeZones = useMemo(
+    () => sortedClients.filter((client) => Boolean(client.timeZone)),
+    [sortedClients],
+  )
+
+  const selectedClockClient =
+    clientsWithTimeZones.find((client) => client.id === clockClientId) ??
+    clientsWithTimeZones[0]
 
   const visibleTasks = useMemo(
     () => filterTasksForView(workspace.tasks, view, today).sort((first, second) => compareTasksForView(first, second, view, today)),
@@ -843,6 +860,7 @@ function LocalWorkspacePage({
       email: client.email,
       phone: client.phone,
       serviceType: client.serviceType,
+      timeZone: client.timeZone,
       notes: client.notes,
       active: client.active,
     })
@@ -1221,7 +1239,46 @@ function LocalWorkspacePage({
           <h1>{getViewTitle(view)}</h1>
           <p>{getDailySummary(view, todayCount, waitingCount, upcomingCount, completedCount)}</p>
         </div>
-        <div className="va-daily-header-actions">
+        <div className="va-daily-header-right">
+          <section className="va-time-panel" aria-label="Local time comparison">
+            <div className="va-time-card">
+              <span>Your time</span>
+              <strong>{formatClockTime(clockNow)}</strong>
+              <small>{getLocalTimeZoneLabel()}</small>
+            </div>
+
+            <div className="va-time-card va-client-time-card">
+              <span>Client time</span>
+              {selectedClockClient?.timeZone ? (
+                <>
+                  <strong>{formatClockTime(clockNow, selectedClockClient.timeZone)}</strong>
+                  <label>
+                    <span className="sr-only">Choose client clock</span>
+                    <select
+                      value={selectedClockClient.id}
+                      onChange={(event) => setClockClientId(event.target.value)}
+                    >
+                      {clientsWithTimeZones.map((client) => (
+                        <option key={client.id} value={client.id}>
+                          {client.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <small>
+                    {getBusinessHourLabel(clockNow, selectedClockClient.timeZone)}
+                  </small>
+                </>
+              ) : (
+                <>
+                  <strong>—</strong>
+                  <small>Add a client timezone</small>
+                </>
+              )}
+            </div>
+          </section>
+
+          <div className="va-daily-header-actions">
           {view === 'clients' ? (
             <button
               className="va-primary-button"
@@ -1246,6 +1303,7 @@ function LocalWorkspacePage({
           >
             + Add task
           </button>
+          </div>
         </div>
       </section>
 
@@ -1731,6 +1789,29 @@ function LocalWorkspacePage({
                     </label>
 
                     <label>
+                      <span>Client timezone</span>
+                      <select
+                        value={clientDraft.timeZone}
+                        onChange={(event) =>
+                          setClientDraft({
+                            ...clientDraft,
+                            timeZone: event.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Not set</option>
+                        {getSupportedTimeZones().map((timeZone) => (
+                          <option key={timeZone} value={timeZone}>
+                            {formatTimeZoneLabel(timeZone)}
+                          </option>
+                        ))}
+                      </select>
+                      <small>
+                        Used to show the client’s current local time.
+                      </small>
+                    </label>
+
+                    <label>
                       <span>Notes</span>
                       <textarea
                         maxLength={notesMaxLength}
@@ -2134,7 +2215,9 @@ function ClientCard({
             </span>
           </div>
           <p>
-            {client.serviceType || 'Service type not added'} ·{' '}
+            {client.serviceType || 'Service type not added'}
+            {client.timeZone ? ` · ${formatTimeZoneLabel(client.timeZone)}` : ''}
+            {' · '}
             {safeCount(openTasks.length)}{' '}
             {openTasks.length === 1 ? 'open task' : 'open tasks'}
           </p>
@@ -2666,6 +2749,7 @@ function workspacesMatch(
         client.email === cloudClient.email &&
         client.phone === cloudClient.phone &&
         client.serviceType === cloudClient.serviceType &&
+        client.timeZone === cloudClient.timeZone &&
         client.notes === cloudClient.notes &&
         client.active === cloudClient.active,
     )
@@ -2765,6 +2849,76 @@ function getTaskPlacement(
   }
 }
 
+let cachedTimeZones: string[] | null = null
+
+function getSupportedTimeZones(): string[] {
+  if (cachedTimeZones) {
+    return cachedTimeZones
+  }
+
+  const fallback = [
+    'America/Los_Angeles',
+    'America/Denver',
+    'America/Chicago',
+    'America/New_York',
+    'America/Toronto',
+    'Europe/London',
+    'Asia/Dubai',
+    'Asia/Manila',
+    'Asia/Singapore',
+    'Asia/Tokyo',
+    'Australia/Perth',
+    'Australia/Brisbane',
+    'Australia/Sydney',
+    'Pacific/Auckland',
+  ]
+
+  const supportedValuesOf = (
+    Intl as typeof Intl & {
+      supportedValuesOf?: (key: 'timeZone') => string[]
+    }
+  ).supportedValuesOf
+
+  cachedTimeZones =
+    typeof supportedValuesOf === 'function'
+      ? supportedValuesOf('timeZone')
+      : fallback
+
+  return cachedTimeZones
+}
+
+function formatTimeZoneLabel(timeZone: string): string {
+  return timeZone.replaceAll('_', ' ')
+}
+
+function formatClockTime(date: Date, timeZone?: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone,
+  }).format(date)
+}
+
+function getLocalTimeZoneLabel(): string {
+  return (
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+      ?.replaceAll('_', ' ') || 'Local time'
+  )
+}
+
+function getBusinessHourLabel(date: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit',
+    hourCycle: 'h23',
+    timeZone,
+  }).formatToParts(date)
+  const hour = Number(parts.find((part) => part.type === 'hour')?.value)
+
+  return Number.isFinite(hour) && hour >= 8 && hour < 18
+    ? 'Good time to call'
+    : 'Outside business hours'
+}
+
 function formatWorkspaceDate(today: string): string {
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
@@ -2796,6 +2950,7 @@ function normalizeClientDraft(draft: VaClientDraft): VaClientDraft {
     email: draft.email.trim(),
     phone: draft.phone.trim(),
     serviceType: draft.serviceType.trim(),
+    timeZone: draft.timeZone.trim(),
     notes: draft.notes.trim(),
     active: draft.active,
   }
@@ -2922,6 +3077,7 @@ function validateBackupClient(value: unknown, index: number): VaClient {
     email: optionalBackupString(value.email, 160),
     phone: optionalBackupString(value.phone, 60),
     serviceType: optionalBackupString(value.serviceType, 100),
+    timeZone: optionalBackupString(value.timeZone, 100),
     notes: optionalBackupString(value.notes, notesMaxLength),
     active: typeof value.active === 'boolean' ? value.active : true,
     createdAt: requireBackupDate(value.createdAt, `Client ${index + 1} created date`),

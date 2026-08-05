@@ -5,6 +5,7 @@ export type VaClient = {
   email: string
   phone: string
   serviceType: string
+  timeZone: string
   notes: string
   active: boolean
   createdAt: string
