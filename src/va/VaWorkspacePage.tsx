@@ -2993,7 +2993,9 @@ const commonTimeZones: TimeZoneOption[] = [
 ]
 
 function getTimeZoneOptions(): TimeZoneOption[] {
-  return commonTimeZones
+  return [...commonTimeZones].sort((a, b) =>
+    a.label.localeCompare(b.label, 'en', { sensitivity: 'base' }),
+  )
 }
 
 function formatTimeZoneLabel(timeZone: string): string {

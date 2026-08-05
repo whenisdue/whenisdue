@@ -3417,3 +3417,68 @@
     min-height: 48px;
   }
 }
+
+
+/* Align Your time and Client time values */
+@media (max-width: 620px) {
+  .va-time-card:first-child {
+    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-areas:
+      "label time"
+      "zone zone";
+    row-gap: 4px;
+  }
+
+  .va-time-card:first-child > span {
+    grid-area: label;
+  }
+
+  .va-time-card:first-child > strong {
+    grid-area: time;
+    justify-self: end;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .va-time-card:first-child > small {
+    grid-area: zone;
+    justify-self: end;
+    text-align: right;
+  }
+
+  .va-client-time-card {
+    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-areas:
+      "label time"
+      "client client"
+      "status status"
+      "timezone timezone";
+  }
+
+  .va-client-time-card > span {
+    grid-area: label;
+  }
+
+  .va-client-time-card > strong {
+    grid-area: time;
+    justify-self: end;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .va-client-clock-select {
+    grid-area: client;
+  }
+
+  .va-inline-timezone-picker {
+    grid-area: status / status / timezone / timezone;
+  }
+
+  .va-inline-timezone-picker > span {
+    grid-row: 1;
+  }
+
+  .va-inline-timezone-picker > select {
+    grid-row: 2;
+  }
+}
