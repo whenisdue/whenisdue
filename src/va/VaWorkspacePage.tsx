@@ -994,6 +994,14 @@ function LocalWorkspacePage({
               status === 'needs-action'
                 ? ('va' as VaTaskResponsibility)
                 : task.responsibility,
+            actionDate:
+              status === 'needs-action'
+                ? today
+                : task.actionDate,
+            followUpDate:
+              status === 'needs-action'
+                ? ''
+                : task.followUpDate,
             updatedAt: new Date().toISOString(),
           }
         : task,
@@ -1002,7 +1010,7 @@ function LocalWorkspacePage({
     const successMessage =
       status === 'completed'
         ? 'Task completed and moved to History.'
-        : 'The next action is yours again. This item returned to Today.'
+        : 'This task is now in Today.'
 
     persist({ ...workspace, tasks }, successMessage)
 
@@ -1495,11 +1503,17 @@ function LocalWorkspacePage({
                             name="followUpDate"
                             min={today}
                             value={taskDraft.followUpDate}
+                            onInput={(event) =>
+                              setTaskDraft((current) => ({
+                                ...current,
+                                followUpDate: event.currentTarget.value,
+                              }))
+                            }
                             onChange={(event) =>
-                              setTaskDraft({
-                                ...taskDraft,
-                                followUpDate: event.target.value,
-                              })
+                              setTaskDraft((current) => ({
+                                ...current,
+                                followUpDate: event.currentTarget.value,
+                              }))
                             }
                           />
                           <small>
@@ -1513,11 +1527,17 @@ function LocalWorkspacePage({
                             type="date"
                             name="actionDate"
                             value={taskDraft.actionDate}
+                            onInput={(event) =>
+                              setTaskDraft((current) => ({
+                                ...current,
+                                actionDate: event.currentTarget.value,
+                              }))
+                            }
                             onChange={(event) =>
-                              setTaskDraft({
-                                ...taskDraft,
-                                actionDate: event.target.value,
-                              })
+                              setTaskDraft((current) => ({
+                                ...current,
+                                actionDate: event.currentTarget.value,
+                              }))
                             }
                           />
                           <small>
@@ -1536,8 +1556,17 @@ function LocalWorkspacePage({
                             type="date"
                             name="dueDate"
                             value={taskDraft.dueDate}
+                            onInput={(event) =>
+                              setTaskDraft((current) => ({
+                                ...current,
+                                dueDate: event.currentTarget.value,
+                              }))
+                            }
                             onChange={(event) =>
-                              setTaskDraft({ ...taskDraft, dueDate: event.target.value })
+                              setTaskDraft((current) => ({
+                                ...current,
+                                dueDate: event.currentTarget.value,
+                              }))
                             }
                           />
                           <small>The final deadline for this task.</small>
