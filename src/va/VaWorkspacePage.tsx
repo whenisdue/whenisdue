@@ -1503,12 +1503,12 @@ function LocalWorkspacePage({
                             }
                           />
                           <small>
-                            Choose the day you want this waiting task to return to Today.
+                            Choose when to check this again.
                           </small>
                         </label>
                       ) : (
                         <label>
-                          <span>Work on this date *</span>
+                          <span>Do this on *</span>
                           <input
                             type="date"
                             name="actionDate"
@@ -1521,7 +1521,7 @@ function LocalWorkspacePage({
                             }
                           />
                           <small>
-                            Choose the day you want this task to appear in your Today list.
+                            Choose when you plan to do this.
                           </small>
                         </label>
                       )}
@@ -1967,35 +1967,58 @@ function TaskCard({
 
       <div className="va-task-actions va-task-outcomes">
         {currentView === 'completed' ? (
-          <button className="va-restore-button" type="button" onClick={() => onStatusChange(task.id, 'needs-action')}>
+          <button
+            className="va-restore-button"
+            type="button"
+            onClick={() => onStatusChange(task.id, 'needs-action')}
+          >
             Restore
           </button>
-        ) : (
+        ) : task.status === 'waiting' ? (
           <>
-            <button className="va-complete-button" type="button" onClick={() => onStatusChange(task.id, 'completed')}>
+            <button
+              className="va-needs-action-button va-task-primary-action"
+              type="button"
+              onClick={() => onStatusChange(task.id, 'needs-action')}
+            >
+              Move to Today
+            </button>
+            <button
+              className="va-complete-button va-task-secondary-action"
+              type="button"
+              onClick={() => onStatusChange(task.id, 'completed')}
+            >
               Done
             </button>
-            {task.status !== 'waiting' ? (
-              <button className="va-waiting-button" type="button" onClick={() => onStatusChange(task.id, 'waiting')}>
-                Waiting on someone
-              </button>
-            ) : (
-              <button className="va-needs-action-button" type="button" onClick={() => onStatusChange(task.id, 'needs-action')}>
-                Return to Today
-              </button>
-            )}
+          </>
+        ) : (
+          <>
+            <button
+              className="va-complete-button va-task-primary-action"
+              type="button"
+              onClick={() => onStatusChange(task.id, 'completed')}
+            >
+              Done
+            </button>
+            <button
+              className="va-waiting-button va-task-secondary-action"
+              type="button"
+              onClick={() => onStatusChange(task.id, 'waiting')}
+            >
+              Wait for reply
+            </button>
           </>
         )}
 
         <button
-          className="va-secondary-button"
+          className="va-task-text-button"
           type="button"
           onClick={() => onEdit(task)}
         >
           Edit
         </button>
         <button
-          className="va-delete-button"
+          className="va-delete-button va-task-text-button"
           type="button"
           onClick={() => onDelete(task)}
         >

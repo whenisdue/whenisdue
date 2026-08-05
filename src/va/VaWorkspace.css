@@ -2372,3 +2372,85 @@
   font-size: 0.7rem;
   line-height: 1.45;
 }
+
+/* Refined task-action hierarchy */
+.va-task-outcomes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.va-task-outcomes > button {
+  min-height: 38px;
+  border-radius: 9px;
+  padding: 7px 11px;
+  font-size: 0.72rem;
+}
+
+.va-task-outcomes .va-task-primary-action {
+  border-color: var(--va-primary);
+  background: var(--va-primary);
+  color: white;
+}
+
+.va-task-outcomes .va-task-primary-action:hover {
+  border-color: var(--va-primary-hover);
+  background: var(--va-primary-hover);
+  color: white;
+}
+
+.va-task-outcomes .va-task-secondary-action {
+  border-color: #d8c79e;
+  background: #fffaf0;
+  color: var(--va-waiting);
+}
+
+.va-task-outcomes .va-task-secondary-action:hover {
+  border-color: #c9ad6e;
+  background: var(--va-waiting-tint);
+  color: var(--va-waiting);
+}
+
+.va-task-outcomes .va-task-text-button {
+  min-height: 36px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--va-muted);
+  padding-inline: 9px;
+}
+
+.va-task-outcomes .va-task-text-button:hover {
+  border-color: transparent;
+  background: #f4f1eb;
+  color: var(--va-ink);
+}
+
+.va-task-outcomes .va-delete-button.va-task-text-button {
+  margin-left: 0;
+  border-color: transparent;
+  color: var(--va-destructive);
+}
+
+.va-task-outcomes .va-delete-button.va-task-text-button:hover {
+  border-color: transparent;
+  background: var(--va-destructive-tint);
+  color: var(--va-destructive);
+}
+
+@media (max-width: 620px) {
+  .va-task-outcomes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .va-task-outcomes > button {
+    width: 100%;
+  }
+
+  .va-task-outcomes .va-task-text-button {
+    min-height: 34px;
+  }
+}
+
