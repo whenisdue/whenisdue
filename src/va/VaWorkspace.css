@@ -3657,3 +3657,280 @@
     color: var(--va-destructive);
   }
 }
+
+
+/* Mobile-first workspace compression */
+.va-mobile-time-summary {
+  display: none;
+}
+
+.va-task-more-actions {
+  display: contents;
+}
+
+.va-task-more-actions > summary {
+  display: none;
+}
+
+.va-task-more-actions > div {
+  display: contents;
+}
+
+@media (max-width: 620px) {
+  .va-page-shell {
+    padding-bottom: 128px;
+  }
+
+  .va-auth-account-bar {
+    display: none;
+  }
+
+  .va-topbar {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .va-brand img {
+    max-height: 42px;
+  }
+
+  .va-daily-header-compact {
+    gap: 10px;
+  }
+
+  .va-daily-header-compact > div:first-child {
+    order: 1;
+  }
+
+  .va-daily-header-right {
+    order: 2;
+  }
+
+  .va-time-panel-desktop {
+    display: none !important;
+  }
+
+  .va-mobile-time-summary {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    border: 1px solid var(--va-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.76);
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .va-mobile-time-summary span {
+    min-width: 0;
+  }
+
+  .va-mobile-time-summary small,
+  .va-mobile-time-summary strong,
+  .va-mobile-time-summary em {
+    display: block;
+  }
+
+  .va-mobile-time-summary small {
+    overflow: hidden;
+    color: var(--va-muted);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.035em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .va-mobile-time-summary strong {
+    margin-top: 2px;
+    color: var(--va-ink);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .va-mobile-time-summary em {
+    grid-column: 1 / -1;
+    color: var(--va-primary);
+    font-size: 0.63rem;
+    font-style: normal;
+    font-weight: 750;
+  }
+
+  .va-daily-header-actions {
+    position: static !important;
+    display: block !important;
+    height: 0;
+  }
+
+  .va-add-client-button {
+    display: none;
+  }
+
+  .va-add-task-button {
+    position: fixed;
+    right: 14px;
+    bottom: 76px;
+    z-index: 42;
+    width: auto !important;
+    min-width: 118px;
+    min-height: 48px !important;
+    border-radius: 999px !important;
+    padding-inline: 18px !important;
+    box-shadow: 0 10px 28px rgba(20, 57, 49, 0.2);
+  }
+
+  .va-daily-work {
+    margin-top: 2px;
+  }
+
+  .va-task-card {
+    padding: 16px 14px;
+  }
+
+  .va-resume-marker {
+    min-height: 0;
+    padding: 8px 10px;
+  }
+
+  .va-resume-marker p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .va-waiting-radar {
+    gap: 7px;
+    padding: 9px 10px;
+  }
+
+  .va-task-outcomes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .va-task-outcomes .va-task-primary-action,
+  .va-task-outcomes .va-task-secondary-action {
+    grid-column: auto;
+    min-height: 46px !important;
+  }
+
+  .va-task-outcomes .va-task-primary-action:last-of-type:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .va-task-more-actions {
+    display: block;
+    grid-column: 1 / -1;
+  }
+
+  .va-task-more-actions > summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--va-border);
+    border-radius: 10px;
+    background: white;
+    color: var(--va-ink);
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .va-task-more-actions > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .va-task-more-actions > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-top: 9px;
+  }
+
+  .va-task-more-actions .va-task-text-button {
+    width: 100%;
+    min-height: 44px !important;
+  }
+
+  .va-compact-tabs {
+    position: fixed;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    z-index: 40;
+    width: auto;
+    margin: 0;
+    border: 1px solid var(--va-border);
+    border-radius: 16px;
+    background: rgba(255, 253, 249, 0.96);
+    box-shadow: 0 8px 28px rgba(20, 57, 49, 0.16);
+    backdrop-filter: blur(12px);
+  }
+
+  .va-close-day-panel,
+  .va-backup-panel,
+  .va-sync-panel {
+    position: relative;
+    z-index: 1;
+  }
+
+  .va-mobile-clock-overlay {
+    align-items: flex-end;
+  }
+
+  .va-mobile-clock-drawer {
+    width: 100%;
+    max-width: none;
+    max-height: min(82vh, 720px);
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    overflow-y: auto;
+  }
+
+  .va-mobile-clock-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .va-mobile-clock-comparison article {
+    padding: 12px;
+    border: 1px solid var(--va-border);
+    border-radius: 12px;
+    background: rgba(239, 247, 244, 0.6);
+  }
+
+  .va-mobile-clock-comparison span,
+  .va-mobile-clock-comparison strong,
+  .va-mobile-clock-comparison small {
+    display: block;
+  }
+
+  .va-mobile-clock-comparison span {
+    color: var(--va-muted);
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .va-mobile-clock-comparison strong {
+    margin-top: 4px;
+    color: var(--va-ink);
+    font-size: 1.1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .va-mobile-clock-comparison small {
+    margin-top: 4px;
+    color: var(--va-primary);
+    font-size: 0.64rem;
+    line-height: 1.35;
+  }
+}

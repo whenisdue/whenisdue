@@ -513,6 +513,7 @@ function LocalWorkspacePage({
   const [view, setView] = useState<WorkspaceView>('today')
   const [clockNow, setClockNow] = useState(() => new Date())
   const [clockClientId, setClockClientId] = useState('')
+  const [clockDrawerOpen, setClockDrawerOpen] = useState(false)
   const [formPanel, setFormPanel] = useState<'task' | 'client' | null>(null)
   const [waitingTaskId, setWaitingTaskId] = useState<string | null>(null)
   const [waitingCheckDate, setWaitingCheckDate] = useState('')
@@ -1347,7 +1348,35 @@ function LocalWorkspacePage({
           <p>{getDailySummary(view, todayCount, waitingCount, upcomingCount, completedCount)}</p>
         </div>
         <div className="va-daily-header-right">
-          <section className="va-time-panel" aria-label="Local time comparison">
+          <button
+            className="va-mobile-time-summary"
+            type="button"
+            onClick={() => setClockDrawerOpen(true)}
+            aria-label="Open time and timezone controls"
+          >
+            <span>
+              <small>Your time</small>
+              <strong>{formatClockTime(clockNow)}</strong>
+            </span>
+            <span>
+              <small>{selectedClockClient?.displayName || 'Client time'}</small>
+              <strong>
+                {selectedClockClient?.timeZone
+                  ? formatClockTime(clockNow, selectedClockClient.timeZone)
+                  : 'Set timezone'}
+              </strong>
+            </span>
+            <em>
+              {selectedClockClient?.timeZone
+                ? getContactWindowLabel(clockNow, selectedClockClient.timeZone)
+                : 'Tap to choose a client timezone'}
+            </em>
+          </button>
+
+          <section
+            className="va-time-panel va-time-panel-desktop"
+            aria-label="Local time comparison"
+          >
             <div className="va-time-card">
               <span>Your time</span>
               <strong>{formatClockTime(clockNow)}</strong>
@@ -1421,7 +1450,7 @@ function LocalWorkspacePage({
           <div className="va-daily-header-actions">
           {view === 'clients' ? (
             <button
-              className="va-primary-button"
+              className="va-primary-button va-add-client-button"
               type="button"
               onClick={() => {
                 setEditingClientId(null)
@@ -1433,7 +1462,9 @@ function LocalWorkspacePage({
             </button>
           ) : null}
           <button
-            className={view === 'clients' ? 'va-secondary-button' : 'va-primary-button'}
+            className={`${
+              view === 'clients' ? 'va-secondary-button' : 'va-primary-button'
+            } va-add-task-button`}
             type="button"
             onClick={() => {
               setEditingTaskId(null)
@@ -1616,6 +1647,106 @@ function LocalWorkspacePage({
                   </button>
                 </div>
               </form>
+            </section>
+          </div>
+        ) : null}
+
+        {clockDrawerOpen ? (
+          <div
+            className="va-form-overlay va-mobile-clock-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setClockDrawerOpen(false)
+              }
+            }}
+          >
+            <section
+              className="va-form-drawer va-mobile-clock-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="mobile-clock-title"
+            >
+              <div className="va-form-drawer-head">
+                <div>
+                  <p className="va-eyebrow">Time check</p>
+                  <h2 id="mobile-clock-title">Your time and client time</h2>
+                </div>
+                <button
+                  className="va-drawer-close"
+                  type="button"
+                  aria-label="Close time controls"
+                  onClick={() => setClockDrawerOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="va-mobile-clock-comparison">
+                <article>
+                  <span>Your time</span>
+                  <strong>{formatClockTime(clockNow)}</strong>
+                  <small>{getLocalTimeZoneLabel()}</small>
+                </article>
+                <article>
+                  <span>Client time</span>
+                  <strong>
+                    {selectedClockClient?.timeZone
+                      ? formatClockTime(clockNow, selectedClockClient.timeZone)
+                      : '—'}
+                  </strong>
+                  <small>
+                    {selectedClockClient?.timeZone
+                      ? getContactWindowLabel(
+                          clockNow,
+                          selectedClockClient.timeZone,
+                        )
+                      : 'Timezone not set'}
+                  </small>
+                </article>
+              </div>
+
+              {sortedClients.length > 0 ? (
+                <div className="va-form-fields">
+                  <label>
+                    <span>Choose a client</span>
+                    <select
+                      value={selectedClockClient?.id ?? ''}
+                      onChange={(event) => setClockClientId(event.target.value)}
+                    >
+                      {sortedClients.map((client) => (
+                        <option key={client.id} value={client.id}>
+                          {client.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    <span>Client timezone</span>
+                    <select
+                      value={selectedClockClient?.timeZone ?? ''}
+                      onChange={(event) => {
+                        if (selectedClockClient) {
+                          saveClientTimeZone(
+                            selectedClockClient.id,
+                            event.target.value,
+                          )
+                        }
+                      }}
+                    >
+                      <option value="">Choose timezone</option>
+                      {getTimeZoneOptions().map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              ) : (
+                <p className="va-empty-copy">Add a client before setting client time.</p>
+              )}
             </section>
           </div>
         ) : null}
@@ -2797,20 +2928,25 @@ function TaskCard({
           </>
         )}
 
-        <button
-          className="va-task-text-button"
-          type="button"
-          onClick={() => onEdit(task)}
-        >
-          Edit
-        </button>
-        <button
-          className="va-delete-button va-task-text-button"
-          type="button"
-          onClick={() => onDelete(task)}
-        >
-          {currentView === 'completed' ? 'Delete permanently' : 'Delete'}
-        </button>
+        <details className="va-task-more-actions">
+          <summary>More</summary>
+          <div>
+            <button
+              className="va-task-text-button"
+              type="button"
+              onClick={() => onEdit(task)}
+            >
+              Edit
+            </button>
+            <button
+              className="va-delete-button va-task-text-button"
+              type="button"
+              onClick={() => onDelete(task)}
+            >
+              {currentView === 'completed' ? 'Delete permanently' : 'Delete'}
+            </button>
+          </div>
+        </details>
       </div>
     </article>
   )
