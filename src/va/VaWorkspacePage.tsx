@@ -1197,7 +1197,7 @@ function LocalWorkspacePage({
 
     persist(
       { ...workspace, tasks },
-      `This will return on ${formatDateKey(submittedDate)}.`,
+      `This task will return to Today on ${formatDateKey(submittedDate)}.`,
     )
     setSnoozeTaskId(null)
     setSnoozeDate('')
@@ -2507,6 +2507,24 @@ function LocalWorkspacePage({
       ) : null}
 
       <nav className="va-compact-tabs" aria-label="Workspace views">
+        <button
+          className="va-mobile-dock-add"
+          type="button"
+          onClick={() => {
+            if (view === 'clients') {
+              setEditingClientId(null)
+              setClientDraft(emptyClientDraft)
+              setFormPanel('client')
+              return
+            }
+
+            setEditingTaskId(null)
+            setTaskDraft({ ...emptyTaskDraft, actionDate: today })
+            setFormPanel('task')
+          }}
+        >
+          {view === 'clients' ? '+ Add client' : '+ Add task'}
+        </button>
         <ViewButton label="Today" viewName="today" currentView={view} setView={setView} count={todayCount} />
         <ViewButton label="Waiting" viewName="waiting" currentView={view} setView={setView} count={waitingCount} />
         <ViewButton label="Clients" viewName="clients" currentView={view} setView={setView} count={activeClients} />
@@ -2844,6 +2862,7 @@ function TaskCard({
   onEditNextStep: (task: VaTask) => void
   onDelete: (task: VaTask) => void
 }) {
+  const [moreOpen, setMoreOpen] = useState(false)
   const reason = getTaskPriorityReason(task, today)
   const relevantDate = getRelevantTaskDate(task, today)
 
@@ -2883,12 +2902,12 @@ function TaskCard({
 
       {task.status === 'waiting' ? (
         <section className="va-waiting-radar" aria-label="Waiting status">
-          <div>
+          <div className="va-waiting-main">
             <span>Waiting for</span>
             <strong>{task.waitingFor || getWaitingPersonLabel(task.responsibility)}</strong>
           </div>
           <div>
-            <span>Waiting time</span>
+            <span>Waiting since</span>
             <strong>{getWaitingAgeLabel(task, today)}</strong>
           </div>
           <div>
@@ -2950,7 +2969,7 @@ function TaskCard({
               type="button"
               onClick={() => onStatusChange(task.id, 'completed')}
             >
-              Done waiting
+              Mark task done
             </button>
           </>
         ) : (
@@ -2972,25 +2991,40 @@ function TaskCard({
           </>
         )}
 
-        <details className="va-task-more-actions">
-          <summary>More</summary>
-          <div>
-            <button
-              className="va-task-text-button"
-              type="button"
-              onClick={() => onEdit(task)}
-            >
-              Edit
-            </button>
-            <button
-              className="va-delete-button va-task-text-button"
-              type="button"
-              onClick={() => onDelete(task)}
-            >
-              {currentView === 'completed' ? 'Delete permanently' : 'Delete'}
-            </button>
-          </div>
-        </details>
+        <div className={`va-task-more-actions ${moreOpen ? 'is-open' : ''}`}>
+          <button
+            className="va-task-more-toggle"
+            type="button"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((current) => !current)}
+          >
+            More
+          </button>
+          {moreOpen ? (
+            <div className="va-task-more-menu">
+              <button
+                className="va-task-text-button"
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  onEdit(task)
+                }}
+              >
+                Edit
+              </button>
+              <button
+                className="va-delete-button va-task-text-button"
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  onDelete(task)
+                }}
+              >
+                {currentView === 'completed' ? 'Delete permanently' : 'Delete'}
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
     </article>
   )
@@ -3010,10 +3044,10 @@ function getWaitingAgeLabel(task: VaTask, today: string): string {
   const days = Math.max(0, daysBetweenKeys(task.waitingSince, today))
 
   if (days === 0) {
-    return 'Waiting today'
+    return 'Today'
   }
 
-  return `Waiting ${days} ${days === 1 ? 'day' : 'days'}`
+  return `${days} ${days === 1 ? 'day' : 'days'} ago`
 }
 
 function getCheckBackLabel(date: string, today: string): string {
@@ -3039,8 +3073,8 @@ function getCheckBackLabel(date: string, today: string): string {
 
 function getContactWindowLabel(date: Date, timeZone: string): string {
   return getBusinessHourLabel(date, timeZone) === 'Good time to call'
-    ? 'Good time to contact'
-    : 'Client is outside work hours'
+    ? 'Client is within work hours'
+    : 'Client is outside their work hours'
 }
 
 function getNextMondayKey(today: string): string {
