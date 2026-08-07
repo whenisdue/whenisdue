@@ -1184,6 +1184,9 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             <p className="business-today-date">
               <strong>Today:</strong> {formatWeekday(today)}, {formatPlainDate(today)}
             </p>
+            <p className="business-today-timezone">
+              <strong>Using your device time zone:</strong> {getLocalTimeZoneName()}
+            </p>
             <p>
               Today is the starting date. Saturdays and Sundays are skipped.
             </p>
@@ -1397,6 +1400,12 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           margin: 8px 0 3px !important;
           font-size: 1rem;
           color: #10213f;
+        }
+
+        .business-today-timezone {
+          margin: 0 0 8px !important;
+          font-size: 0.92rem;
+          color: #60738d;
         }
 
         .business-today-grid {
@@ -2696,6 +2705,14 @@ function formatMonthShort(date: PlainDate): string {
     timeZone: 'UTC',
     month: 'short',
   }).format(new Date(Date.UTC(date.year, date.month - 1, date.day))).toUpperCase()
+}
+
+function getLocalTimeZoneName(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local device time'
+  } catch {
+    return 'Local device time'
+  }
 }
 
 function getDefaultTitle(mode: CalculatorMode): string {
