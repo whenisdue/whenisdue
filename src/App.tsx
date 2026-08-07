@@ -58,6 +58,12 @@ type RouteName =
   | 'free-trial'
   | 'return-window'
   | 'invoice-due-date'
+  | 'net-7'
+  | 'net-15'
+  | 'net-30'
+  | 'net-45'
+  | 'net-60'
+  | 'net-90'
   | 'workspace'
   | 'typing'
   | 'about'
@@ -145,6 +151,30 @@ function App() {
 
   if (route === 'invoice-due-date') {
     return <InvoiceDueDatePage onNavigate={navigate} />
+  }
+
+  if (route === 'net-7') {
+    return <InvoiceTermPage dayCount={7} term="net7" onNavigate={navigate} />
+  }
+
+  if (route === 'net-15') {
+    return <InvoiceTermPage dayCount={15} term="net15" onNavigate={navigate} />
+  }
+
+  if (route === 'net-30') {
+    return <InvoiceTermPage dayCount={30} term="net30" onNavigate={navigate} />
+  }
+
+  if (route === 'net-45') {
+    return <InvoiceTermPage dayCount={45} term="net45" onNavigate={navigate} />
+  }
+
+  if (route === 'net-60') {
+    return <InvoiceTermPage dayCount={60} term="net60" onNavigate={navigate} />
+  }
+
+  if (route === 'net-90') {
+    return <InvoiceTermPage dayCount={90} term="net90" onNavigate={navigate} />
   }
 
   if (route === 'workspace') {
@@ -2944,25 +2974,10 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell invoice-due-date-page">
-      <section className="intro" aria-labelledby="invoice-due-date-title">
+      <section className="intro invoice-bam-intro" aria-labelledby="invoice-due-date-title">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <a
-          className="back-link"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          Home
-        </a>
-        <h1 id="invoice-due-date-title">Invoice Due Date Calculator</h1>
-        <p className="subtitle">
-          Calculate invoice due dates from common payment terms.
-        </p>
-        <p className="intro-note">
-          Date-only planning for Net 7, 15, 30, 45, 60, 90, and end-of-month invoices.
-        </p>
+        <h1 id="invoice-due-date-title">Invoice due date</h1>
+        <p className="subtitle">Enter the invoice date and payment terms. Your due date appears immediately.</p>
       </section>
 
       <section className="business-workspace" aria-label="Invoice due date calculator">
@@ -3018,7 +3033,8 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                 Calendar-day terms are used for Net invoices. EOM means the last calendar day of the invoice month.
                 Check the invoice or contract if weekends, holidays, or a different EOM rule apply.
               </p>
-              <div className="business-save">
+              <details className="business-save">
+                <summary>Save this date</summary>
                 <label className="field title-field">
                   <span>Title</span>
                   <input
@@ -3032,7 +3048,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                   Save to My due dates
                 </button>
                 {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-              </div>
+              </details>
             </>
           ) : (
             <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
@@ -3051,12 +3067,19 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         <article>
           <h2>Common invoice terms</h2>
           <ul>
-            <li>Net 7</li>
-            <li>Net 15</li>
-            <li>Net 30</li>
-            <li>Net 45</li>
-            <li>Net 60</li>
-            <li>Net 90</li>
+            {[7, 15, 30, 45, 60, 90].map((days) => (
+              <li key={days}>
+                <a
+                  href={`/net-${days}-due-date`}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    onNavigate(`/net-${days}-due-date`)
+                  }}
+                >
+                  Net {days} due date
+                </a>
+              </li>
+            ))}
             <li>EOM — last calendar day of the invoice month</li>
           </ul>
         </article>
@@ -3108,6 +3131,357 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
+    </main>
+  )
+}
+
+
+type InvoiceTermPageProps = NavigationProps & {
+  dayCount: 7 | 15 | 30 | 45 | 60 | 90
+  term: Extract<InvoiceTerm, 'net7' | 'net15' | 'net30' | 'net45' | 'net60' | 'net90'>
+}
+
+function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
+  const [invoiceDate, setInvoiceDate] = useState(todayInputValue)
+  const parsedInvoiceDate = parsePlainDate(invoiceDate)
+  const dueDate = parsedInvoiceDate
+    ? getDueDateForMode('invoice', parsedInvoiceDate, 0, term)
+    : null
+  const relatedTerms = [7, 15, 30, 45, 60, 90]
+    .filter((days) => days !== dayCount)
+    .slice(0, 4)
+
+  return (
+    <main className="page-shell net-term-page">
+      <section className="net-term-hero" aria-labelledby={`net-${dayCount}-title`}>
+        <header className="net-term-header">
+          <a
+            className="net-term-brand"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            WhenIsDue
+          </a>
+          <a
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            Invoice calculator
+          </a>
+        </header>
+
+        <div className="net-term-answer">
+          <p className="net-term-kicker">Net {dayCount} due date</p>
+
+          <label className="net-term-date-input">
+            <span>Invoice date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={invoiceDate}
+              onChange={(event) => setInvoiceDate(event.target.value)}
+            />
+          </label>
+
+          {dueDate ? (
+            <>
+              <h1 id={`net-${dayCount}-title`} className="net-term-date">
+                {formatPlainDate(dueDate)}
+              </h1>
+              <p className="net-term-weekday">{formatWeekday(dueDate)}</p>
+              <p className="net-term-rule">
+                Net {dayCount} · {dayCount} calendar days after the invoice date
+              </p>
+              <p className="net-term-note">
+                Weekends and public holidays do not change this date unless your invoice or contract says otherwise.
+              </p>
+            </>
+          ) : (
+            <h1 id={`net-${dayCount}-title`} className="net-term-date net-term-date-error">
+              Enter a valid invoice date
+            </h1>
+          )}
+        </div>
+      </section>
+
+      <section className="net-term-related" aria-labelledby={`net-${dayCount}-related`}>
+        <div className="net-term-related-heading">
+          <h2 id={`net-${dayCount}-related`}>Other common invoice terms</h2>
+          <a
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            Custom terms
+          </a>
+        </div>
+
+        <div className="net-term-grid">
+          {relatedTerms.map((days) => {
+            const relatedDate = parsedInvoiceDate
+              ? getDueDateForMode('invoice', parsedInvoiceDate, 0, `net${days}` as InvoiceTerm)
+              : null
+
+            return (
+              <a
+                key={days}
+                href={`/net-${days}-due-date`}
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate(`/net-${days}-due-date`)
+                }}
+              >
+                <span>Net {days}</span>
+                <strong>{relatedDate ? formatPlainDate(relatedDate) : 'Choose a date'}</strong>
+              </a>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="net-term-explanation">
+        <h2>What does Net {dayCount} mean?</h2>
+        <p>
+          Net {dayCount} commonly means an invoice is due {dayCount} calendar days after the invoice date.
+          This page treats the invoice date as day zero. Your written invoice or contract controls if it
+          specifies business days, a different starting rule, or a weekend or holiday adjustment.
+        </p>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .net-term-hero {
+          width: min(100% - 32px, 1240px);
+          min-height: 78vh;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .net-term-header {
+          min-height: 62px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .net-term-header a {
+          color: #647990;
+          font-size: 0.78rem;
+          font-weight: 800;
+          text-decoration: none;
+        }
+
+        .net-term-brand {
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .net-term-answer {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 28px 12px 44px;
+        }
+
+        .net-term-kicker {
+          margin: 0 0 13px;
+          color: #526b87;
+          font-size: clamp(1.25rem, 2.5vw, 1.95rem);
+          font-weight: 900;
+        }
+
+        .net-term-date-input {
+          margin-bottom: 24px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #75879b;
+          font-size: 0.78rem;
+          font-weight: 800;
+        }
+
+        .net-term-date-input input {
+          min-height: 42px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.16);
+          border-radius: 8px;
+          background: #fff;
+          color: #1a314c;
+          font: inherit;
+          font-size: 0.88rem;
+        }
+
+        .net-term-date {
+          margin: 0;
+          max-width: 100%;
+          color: #0b1830;
+          font-size: clamp(4.4rem, 10vw, 8.8rem);
+          font-weight: 900;
+          line-height: 0.95;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .net-term-date-error {
+          font-size: clamp(2.2rem, 5vw, 4rem);
+        }
+
+        .net-term-weekday {
+          margin: 16px 0 0;
+          color: #546a83;
+          font-size: clamp(1.5rem, 3vw, 2.4rem);
+        }
+
+        .net-term-rule {
+          margin: 14px 0 0;
+          color: #60758e;
+          font-size: 0.82rem;
+          font-weight: 800;
+        }
+
+        .net-term-note {
+          max-width: 650px;
+          margin: 7px 0 0;
+          color: #8894a3;
+          font-size: 0.75rem;
+          line-height: 1.45;
+        }
+
+        .net-term-related,
+        .net-term-explanation {
+          width: min(100% - 32px, 1080px);
+          margin: 0 auto;
+        }
+
+        .net-term-related {
+          padding: 36px 0 46px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .net-term-related-heading {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 14px;
+        }
+
+        .net-term-related-heading h2,
+        .net-term-explanation h2 {
+          margin: 0;
+          color: #18304c;
+          font-size: 1.25rem;
+        }
+
+        .net-term-related-heading a {
+          color: #687d95;
+          font-size: 0.78rem;
+          font-weight: 800;
+          text-decoration: none;
+        }
+
+        .net-term-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 9px;
+        }
+
+        .net-term-grid a {
+          min-height: 94px;
+          padding: 13px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 9px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-decoration: none;
+          background: #fff;
+        }
+
+        .net-term-grid span {
+          color: #71849a;
+          font-size: 0.74rem;
+          font-weight: 900;
+        }
+
+        .net-term-grid strong {
+          margin-top: 5px;
+          color: #142945;
+          font-size: 1rem;
+          line-height: 1.15;
+        }
+
+        .net-term-explanation {
+          padding: 8px 0 56px;
+        }
+
+        .net-term-explanation p {
+          max-width: 760px;
+          color: #60748a;
+          line-height: 1.65;
+        }
+
+        @media (max-width: 760px) {
+          .net-term-hero {
+            width: min(100% - 24px, 1240px);
+            min-height: 72vh;
+          }
+
+          .net-term-header {
+            min-height: 52px;
+          }
+
+          .net-term-answer {
+            padding: 24px 0 34px;
+          }
+
+          .net-term-date-input {
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 18px;
+          }
+
+          .net-term-date {
+            font-size: clamp(3.5rem, 17vw, 5.5rem);
+            line-height: 0.98;
+          }
+
+          .net-term-weekday {
+            margin-top: 11px;
+            font-size: 1.6rem;
+          }
+
+          .net-term-related,
+          .net-term-explanation {
+            width: min(100% - 24px, 1080px);
+          }
+
+          .net-term-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+          }
+
+          .net-term-grid a {
+            min-height: 80px;
+          }
+        }
+      `}</style>
     </main>
   )
 }
@@ -3836,6 +4210,30 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'invoice-due-date'
   }
 
+  if (pathname === '/net-7-due-date') {
+    return 'net-7'
+  }
+
+  if (pathname === '/net-15-due-date') {
+    return 'net-15'
+  }
+
+  if (pathname === '/net-30-due-date') {
+    return 'net-30'
+  }
+
+  if (pathname === '/net-45-due-date') {
+    return 'net-45'
+  }
+
+  if (pathname === '/net-60-due-date') {
+    return 'net-60'
+  }
+
+  if (pathname === '/net-90-due-date') {
+    return 'net-90'
+  }
+
   if (pathname === '/workspace') {
     return 'workspace'
   }
@@ -3981,6 +4379,33 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       title: 'Invoice Due Date Calculator - WhenIsDue',
       description: 'Calculate invoice due dates from common payment terms like Net 7, Net 15, Net 30, Net 45, and Net 60.',
       path: '/invoice-due-date-calculator',
+    }
+  }
+
+  if (
+    route === 'net-7' ||
+    route === 'net-15' ||
+    route === 'net-30' ||
+    route === 'net-45' ||
+    route === 'net-60' ||
+    route === 'net-90'
+  ) {
+    const dayCountByRoute = {
+      'net-7': 7,
+      'net-15': 15,
+      'net-30': 30,
+      'net-45': 45,
+      'net-60': 60,
+      'net-90': 90,
+    } as const
+    const dayCount = dayCountByRoute[route]
+
+    return {
+      title: `Net ${dayCount} Due Date Calculator | WhenIsDue`,
+      description: `Enter an invoice date and instantly see the Net ${dayCount} payment due date. Uses ${dayCount} calendar days after the invoice date.`,
+      openGraphDescription: `Calculate a Net ${dayCount} invoice due date instantly from any invoice date.`,
+      twitterDescription: `Find the Net ${dayCount} due date instantly.`,
+      path: `/net-${dayCount}-due-date`,
     }
   }
 
@@ -4175,7 +4600,13 @@ function getRouteStructuredData(
     route === 'calculators' ||
     route === 'free-trial' ||
     route === 'return-window' ||
-    route === 'invoice-due-date'
+    route === 'invoice-due-date' ||
+    route === 'net-7' ||
+    route === 'net-15' ||
+    route === 'net-30' ||
+    route === 'net-45' ||
+    route === 'net-60' ||
+    route === 'net-90'
   ) {
     return {
       '@context': 'https://schema.org',
