@@ -49,6 +49,9 @@ type RouteName =
   | 'calculators'
   | 'business-days'
   | 'three-business-days'
+  | 'five-business-days'
+  | 'seven-business-days'
+  | 'ten-business-days'
   | 'free-trial'
   | 'return-window'
   | 'invoice-due-date'
@@ -141,7 +144,19 @@ function App() {
   }
 
   if (route === 'three-business-days') {
-    return <ThreeBusinessDaysPage onNavigate={navigate} />
+    return <BusinessDaysFromTodayPage dayCount={3} onNavigate={navigate} />
+  }
+
+  if (route === 'five-business-days') {
+    return <BusinessDaysFromTodayPage dayCount={5} onNavigate={navigate} />
+  }
+
+  if (route === 'seven-business-days') {
+    return <BusinessDaysFromTodayPage dayCount={7} onNavigate={navigate} />
+  }
+
+  if (route === 'ten-business-days') {
+    return <BusinessDaysFromTodayPage dayCount={10} onNavigate={navigate} />
   }
 
   if (route === 'free-trial') {
@@ -1571,21 +1586,32 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 }
 
 
-function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
+type BusinessDaysFromTodayPageProps = NavigationProps & {
+  dayCount: 3 | 5 | 7 | 10
+}
+
+function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTodayPageProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
-  const answerDate = useMemo(() => addBusinessDays(today, 3), [today])
+  const answerDate = useMemo(() => addBusinessDays(today, dayCount), [today, dayCount])
+
+  const relatedDayCounts = useMemo(
+    () => [3, 5, 7, 10].filter((value) => value !== dayCount),
+    [dayCount],
+  )
+
   const relatedAnswers = useMemo(
-    () => [5, 7, 10].map((dayCount) => ({
-      dayCount,
-      date: addBusinessDays(today, dayCount),
-    })),
-    [today],
+    () =>
+      relatedDayCounts.map((relatedDayCount) => ({
+        dayCount: relatedDayCount,
+        date: addBusinessDays(today, relatedDayCount),
+      })),
+    [relatedDayCounts, today],
   )
 
   return (
     <main className="page-shell three-business-days-page">
-      <section className="three-business-hero" aria-labelledby="three-business-title">
+      <section className="three-business-hero" aria-labelledby="business-days-from-today-title">
         <div className="three-business-topbar">
           <button
             type="button"
@@ -1605,8 +1631,8 @@ function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
         </div>
 
         <div className="three-business-answer">
-          <p id="three-business-title" className="three-business-question">
-            3 business days from today
+          <p id="business-days-from-today-title" className="three-business-question">
+            {dayCount} business days from today
           </p>
 
           <p className="three-business-date" aria-label={`Answer: ${formatPlainDate(answerDate)}`}>
@@ -1631,12 +1657,17 @@ function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
         <h2 id="three-business-more-title">Other common answers</h2>
 
         <div className="three-business-related-grid">
-          {relatedAnswers.map(({ dayCount, date }) => (
-            <article key={dayCount}>
-              <span>{dayCount} business days</span>
+          {relatedAnswers.map(({ dayCount: relatedDayCount, date }) => (
+            <button
+              type="button"
+              className="three-business-related-card"
+              key={relatedDayCount}
+              onClick={() => onNavigate(`/${relatedDayCount}-business-days-from-today`)}
+            >
+              <span>{relatedDayCount} business days</span>
               <strong>{formatPlainDate(date)}</strong>
               <small>{formatWeekday(date)}</small>
-            </article>
+            </button>
           ))}
         </div>
 
@@ -1687,14 +1718,19 @@ function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .three-business-brand,
-        .three-business-calculator-link {
+        .three-business-calculator-link,
+        .three-business-related-card {
           appearance: none;
           border: 0;
           background: transparent;
-          padding: 0;
           cursor: pointer;
-          color: #667991;
           font: inherit;
+        }
+
+        .three-business-brand,
+        .three-business-calculator-link {
+          padding: 0;
+          color: #667991;
         }
 
         .three-business-brand {
@@ -1777,7 +1813,7 @@ function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
           gap: 10px;
         }
 
-        .three-business-related-grid article {
+        .three-business-related-card {
           min-height: 98px;
           padding: 14px;
           border: 1px solid rgba(19, 38, 70, 0.1);
@@ -1786,21 +1822,26 @@ function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          text-align: left;
         }
 
-        .three-business-related-grid span {
+        .three-business-related-card:hover {
+          border-color: rgba(19, 38, 70, 0.22);
+        }
+
+        .three-business-related-card span {
           font-size: 0.78rem;
           font-weight: 800;
           color: #647991;
         }
 
-        .three-business-related-grid strong {
+        .three-business-related-card strong {
           margin-top: 4px;
           font-size: 1.25rem;
           color: #10213f;
         }
 
-        .three-business-related-grid small {
+        .three-business-related-card small {
           margin-top: 2px;
           color: #718197;
         }
@@ -1875,7 +1916,7 @@ function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
             gap: 6px;
           }
 
-          .three-business-related-grid article {
+          .three-business-related-card {
             min-height: 62px;
             display: grid;
             grid-template-columns: 1fr auto;
@@ -1886,18 +1927,18 @@ function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
             padding: 9px 12px;
           }
 
-          .three-business-related-grid span {
+          .three-business-related-card span {
             grid-area: label;
           }
 
-          .three-business-related-grid strong {
+          .three-business-related-card strong {
             grid-area: date;
             margin: 0;
             text-align: right;
             font-size: 1.1rem;
           }
 
-          .three-business-related-grid small {
+          .three-business-related-card small {
             grid-area: weekday;
             margin: 0;
             text-align: right;
@@ -3472,6 +3513,18 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'three-business-days'
   }
 
+  if (pathname === '/5-business-days-from-today') {
+    return 'five-business-days'
+  }
+
+  if (pathname === '/7-business-days-from-today') {
+    return 'seven-business-days'
+  }
+
+  if (pathname === '/10-business-days-from-today') {
+    return 'ten-business-days'
+  }
+
   if (pathname === '/free-trial-calculator') {
     return 'free-trial'
   }
@@ -3573,13 +3626,27 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
     }
   }
 
-  if (route === 'three-business-days') {
+  if (
+    route === 'three-business-days' ||
+    route === 'five-business-days' ||
+    route === 'seven-business-days' ||
+    route === 'ten-business-days'
+  ) {
+    const dayCount =
+      route === 'three-business-days'
+        ? 3
+        : route === 'five-business-days'
+          ? 5
+          : route === 'seven-business-days'
+            ? 7
+            : 10
+
     return {
-      title: '3 Business Days From Today: Exact Date | WhenIsDue',
-      description: 'See the exact date 3 business days from today instantly. Weekends are skipped and your device time zone is shown.',
-      openGraphDescription: 'Get the exact date 3 business days from today instantly, with weekends skipped.',
-      twitterDescription: 'See the exact date 3 business days from today instantly.',
-      path: '/3-business-days-from-today',
+      title: `${dayCount} Business Days From Today: Exact Date | WhenIsDue`,
+      description: `See the exact date ${dayCount} business days from today instantly. Weekends are skipped and your device time zone is shown.`,
+      openGraphDescription: `Get the exact date ${dayCount} business days from today instantly, with weekends skipped.`,
+      twitterDescription: `See the exact date ${dayCount} business days from today instantly.`,
+      path: `/${dayCount}-business-days-from-today`,
     }
   }
 
@@ -3804,12 +3871,26 @@ function getRouteStructuredData(
     ]
   }
 
-  if (route === 'three-business-days') {
+  if (
+    route === 'three-business-days' ||
+    route === 'five-business-days' ||
+    route === 'seven-business-days' ||
+    route === 'ten-business-days'
+  ) {
+    const dayCount =
+      route === 'three-business-days'
+        ? 3
+        : route === 'five-business-days'
+          ? 5
+          : route === 'seven-business-days'
+            ? 7
+            : 10
+
     return [
       {
         '@context': 'https://schema.org',
         '@type': 'WebPage',
-        name: '3 Business Days From Today',
+        name: `${dayCount} Business Days From Today`,
         url: canonicalUrl,
         description: metadata.description,
         isPartOf: {
@@ -3824,10 +3905,10 @@ function getRouteStructuredData(
         mainEntity: [
           {
             '@type': 'Question',
-            name: 'What date is 3 business days from today?',
+            name: `What date is ${dayCount} business days from today?`,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'The page calculates the exact date 3 business days from the visitor’s local date, skipping Saturdays and Sundays.',
+              text: `The page calculates the exact date ${dayCount} business days from the visitor’s local date, skipping Saturdays and Sundays.`,
             },
           },
           {
