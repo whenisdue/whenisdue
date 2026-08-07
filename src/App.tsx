@@ -49,9 +49,13 @@ type RouteName =
   | 'calculators'
   | 'business-days'
   | 'three-business-days'
+  | 'four-business-days'
   | 'five-business-days'
   | 'seven-business-days'
+  | 'eight-business-days'
   | 'ten-business-days'
+  | 'twenty-business-days'
+  | 'thirty-business-days'
   | 'free-trial'
   | 'return-window'
   | 'invoice-due-date'
@@ -147,6 +151,10 @@ function App() {
     return <BusinessDaysFromTodayPage dayCount={3} onNavigate={navigate} />
   }
 
+  if (route === 'four-business-days') {
+    return <BusinessDaysFromTodayPage dayCount={4} onNavigate={navigate} />
+  }
+
   if (route === 'five-business-days') {
     return <BusinessDaysFromTodayPage dayCount={5} onNavigate={navigate} />
   }
@@ -155,8 +163,20 @@ function App() {
     return <BusinessDaysFromTodayPage dayCount={7} onNavigate={navigate} />
   }
 
+  if (route === 'eight-business-days') {
+    return <BusinessDaysFromTodayPage dayCount={8} onNavigate={navigate} />
+  }
+
   if (route === 'ten-business-days') {
     return <BusinessDaysFromTodayPage dayCount={10} onNavigate={navigate} />
+  }
+
+  if (route === 'twenty-business-days') {
+    return <BusinessDaysFromTodayPage dayCount={20} onNavigate={navigate} />
+  }
+
+  if (route === 'thirty-business-days') {
+    return <BusinessDaysFromTodayPage dayCount={30} onNavigate={navigate} />
   }
 
   if (route === 'free-trial') {
@@ -1587,7 +1607,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
 
 type BusinessDaysFromTodayPageProps = NavigationProps & {
-  dayCount: 3 | 5 | 7 | 10
+  dayCount: 3 | 4 | 5 | 7 | 8 | 10 | 20 | 30
 }
 
 function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTodayPageProps) {
@@ -1595,10 +1615,17 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
   const answerDate = useMemo(() => addBusinessDays(today, dayCount), [today, dayCount])
 
-  const relatedDayCounts = useMemo(
-    () => [3, 5, 7, 10].filter((value) => value !== dayCount),
-    [dayCount],
-  )
+  const relatedDayCounts = useMemo(() => {
+    const primaryCounts = [3, 5, 7, 10]
+    const extendedCounts = [4, 8, 20, 30]
+    const orderedCounts = primaryCounts.includes(dayCount)
+      ? [...primaryCounts, ...extendedCounts]
+      : [dayCount, ...primaryCounts, ...extendedCounts]
+
+    return orderedCounts.filter(
+      (value, index, values) => value !== dayCount && values.indexOf(value) === index,
+    ).slice(0, 4)
+  }, [dayCount])
 
   const relatedAnswers = useMemo(
     () =>
@@ -3513,6 +3540,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'three-business-days'
   }
 
+  if (pathname === '/4-business-days-from-today') {
+    return 'four-business-days'
+  }
+
   if (pathname === '/5-business-days-from-today') {
     return 'five-business-days'
   }
@@ -3521,8 +3552,20 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'seven-business-days'
   }
 
+  if (pathname === '/8-business-days-from-today') {
+    return 'eight-business-days'
+  }
+
   if (pathname === '/10-business-days-from-today') {
     return 'ten-business-days'
+  }
+
+  if (pathname === '/20-business-days-from-today') {
+    return 'twenty-business-days'
+  }
+
+  if (pathname === '/30-business-days-from-today') {
+    return 'thirty-business-days'
   }
 
   if (pathname === '/free-trial-calculator') {
@@ -3628,18 +3671,25 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (
     route === 'three-business-days' ||
+    route === 'four-business-days' ||
     route === 'five-business-days' ||
     route === 'seven-business-days' ||
-    route === 'ten-business-days'
+    route === 'eight-business-days' ||
+    route === 'ten-business-days' ||
+    route === 'twenty-business-days' ||
+    route === 'thirty-business-days'
   ) {
-    const dayCount =
-      route === 'three-business-days'
-        ? 3
-        : route === 'five-business-days'
-          ? 5
-          : route === 'seven-business-days'
-            ? 7
-            : 10
+    const dayCountByRoute = {
+      'three-business-days': 3,
+      'four-business-days': 4,
+      'five-business-days': 5,
+      'seven-business-days': 7,
+      'eight-business-days': 8,
+      'ten-business-days': 10,
+      'twenty-business-days': 20,
+      'thirty-business-days': 30,
+    } as const
+    const dayCount = dayCountByRoute[route]
 
     return {
       title: `${dayCount} Business Days From Today: Exact Date | WhenIsDue`,
@@ -3873,18 +3923,25 @@ function getRouteStructuredData(
 
   if (
     route === 'three-business-days' ||
+    route === 'four-business-days' ||
     route === 'five-business-days' ||
     route === 'seven-business-days' ||
-    route === 'ten-business-days'
+    route === 'eight-business-days' ||
+    route === 'ten-business-days' ||
+    route === 'twenty-business-days' ||
+    route === 'thirty-business-days'
   ) {
-    const dayCount =
-      route === 'three-business-days'
-        ? 3
-        : route === 'five-business-days'
-          ? 5
-          : route === 'seven-business-days'
-            ? 7
-            : 10
+    const dayCountByRoute = {
+      'three-business-days': 3,
+      'four-business-days': 4,
+      'five-business-days': 5,
+      'seven-business-days': 7,
+      'eight-business-days': 8,
+      'ten-business-days': 10,
+      'twenty-business-days': 20,
+      'thirty-business-days': 30,
+    } as const
+    const dayCount = dayCountByRoute[route]
 
     return [
       {
