@@ -47,6 +47,7 @@ type RouteName =
   | 'home'
   | 'calculators'
   | 'business-days'
+  | 'business-days-between'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -107,6 +108,10 @@ function App() {
 
   if (route === 'business-days') {
     return <BusinessDaysPage onNavigate={navigate} />
+  }
+
+  if (route === 'business-days-between') {
+    return <BusinessDaysBetweenPage onNavigate={navigate} />
   }
 
   if (route === 'three-business-days') {
@@ -2262,6 +2267,400 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
   )
 }
 
+
+function countBusinessDaysBetween(start: PlainDate, end: PlainDate) {
+  const startKey = toDateKey(start)
+  const endKey = toDateKey(end)
+
+  if (startKey === endKey) {
+    return 0
+  }
+
+  const earlier = startKey < endKey ? start : end
+  const later = startKey < endKey ? end : start
+
+  let count = 0
+  let cursor = addCalendarDays(earlier, 1)
+
+  while (toDateKey(cursor) <= toDateKey(later)) {
+    const weekday = new Date(`${toDateKey(cursor)}T12:00:00`).getDay()
+
+    if (weekday !== 0 && weekday !== 6) {
+      count += 1
+    }
+
+    cursor = addCalendarDays(cursor, 1)
+  }
+
+  return count
+}
+
+type ResultActionsProps = {
+  title: string
+  date: PlainDate
+  details?: string
+}
+
+function ResultActions({ title, date, details }: ResultActionsProps) {
+  const [message, setMessage] = useState<string | null>(null)
+  const dateText = formatPlainDate(date)
+  const shareText = `${title}: ${dateText}${details ? ` — ${details}` : ''}`
+
+  async function copyAnswer() {
+    try {
+      await navigator.clipboard.writeText(shareText)
+      setMessage('Copied.')
+    } catch {
+      setMessage('Copy is not available in this browser.')
+    }
+  }
+
+  async function shareAnswer() {
+    if (!navigator.share) {
+      await copyAnswer()
+      return
+    }
+
+    try {
+      await navigator.share({
+        title,
+        text: shareText,
+        url: window.location.href,
+      })
+    } catch {
+      // User cancelled the share sheet.
+    }
+  }
+
+  function addToCalendar() {
+    const dateKey = toDateKey(date).replaceAll('-', '')
+    const nextDateKey = toDateKey(addCalendarDays(date, 1)).replaceAll('-', '')
+    const escapeIcs = (value: string) =>
+      value
+        .replaceAll('\\', '\\\\')
+        .replaceAll(',', '\\,')
+        .replaceAll(';', '\\;')
+        .replaceAll('\n', '\\n')
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//WhenIsDue//Date Reminder//EN',
+      'BEGIN:VEVENT',
+      `UID:${crypto.randomUUID()}@whenisdue.com`,
+      `DTSTART;VALUE=DATE:${dateKey}`,
+      `DTEND;VALUE=DATE:${nextDateKey}`,
+      `SUMMARY:${escapeIcs(title)}`,
+      details ? `DESCRIPTION:${escapeIcs(details)}` : '',
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ]
+      .filter(Boolean)
+      .join('\r\n')
+
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'whenisdue-date.ics'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+    setMessage('Calendar file created.')
+  }
+
+  return (
+    <div className="result-actions" aria-label="Result actions">
+      <button type="button" onClick={copyAnswer}>Copy</button>
+      <button type="button" onClick={shareAnswer}>Share</button>
+      <button type="button" onClick={addToCalendar}>Add to calendar</button>
+      {message ? <span aria-live="polite">{message}</span> : null}
+    </div>
+  )
+}
+
+function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
+  const [startDate, setStartDate] = useState(todayInputValue)
+  const [endDate, setEndDate] = useState(() =>
+    toDateKey(addCalendarDays(getTodayPlainDate(new Date()), 14)),
+  )
+
+  const parsedStartDate = parsePlainDate(startDate)
+  const parsedEndDate = parsePlainDate(endDate)
+  const businessDays =
+    parsedStartDate && parsedEndDate
+      ? countBusinessDaysBetween(parsedStartDate, parsedEndDate)
+      : null
+
+  return (
+    <main className="page-shell business-between-page">
+      <section className="business-between-hero" aria-labelledby="business-between-title">
+        <header className="business-between-header">
+          <a
+            className="business-between-brand"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            WhenIsDue
+          </a>
+          <a
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            Business days calculator
+          </a>
+        </header>
+
+        <div className="business-between-answer">
+          <p className="business-between-kicker">Business days between dates</p>
+
+          <div className="business-between-inputs">
+            <label>
+              <span>Start date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+              />
+            </label>
+
+            <label>
+              <span>End date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+              />
+            </label>
+          </div>
+
+          {businessDays !== null ? (
+            <>
+              <h1 id="business-between-title" className="business-between-number">{businessDays}</h1>
+              <p className="business-between-label">
+                {businessDays === 1 ? 'business day' : 'business days'}
+              </p>
+              <p className="business-between-rule">
+                Start date excluded · End date included · Weekends skipped
+              </p>
+              <p className="business-between-note">
+                Public holidays still count as weekdays.
+              </p>
+            </>
+          ) : (
+            <h1 id="business-between-title" className="business-between-number business-between-error">
+              Choose two valid dates
+            </h1>
+          )}
+        </div>
+      </section>
+
+      <section className="business-between-explanation">
+        <h2>How this count works</h2>
+        <p>
+          WhenIsDue counts weekdays after the earlier date through the later date. Saturdays and Sundays are skipped.
+          Public holidays are not excluded yet.
+        </p>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .business-between-hero {
+          width: min(100% - 32px, 1240px);
+          min-height: 76vh;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .business-between-header {
+          min-height: 62px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .business-between-header a {
+          color: #647990;
+          font-size: 0.78rem;
+          font-weight: 800;
+          text-decoration: none;
+        }
+
+        .business-between-brand {
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .business-between-answer {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 28px 12px 42px;
+        }
+
+        .business-between-kicker {
+          margin: 0 0 18px;
+          color: #526b87;
+          font-size: clamp(1.25rem, 2.5vw, 2rem);
+          font-weight: 900;
+        }
+
+        .business-between-inputs {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 26px;
+        }
+
+        .business-between-inputs label {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          color: #75879b;
+          font-size: 0.75rem;
+          font-weight: 800;
+          text-align: left;
+        }
+
+        .business-between-inputs input {
+          min-height: 42px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.16);
+          border-radius: 8px;
+          background: #fff;
+          color: #1a314c;
+          font: inherit;
+          font-size: 0.88rem;
+        }
+
+        .business-between-number {
+          margin: 0;
+          color: #0b1830;
+          font-size: clamp(7rem, 18vw, 14rem);
+          font-weight: 900;
+          line-height: 0.78;
+          letter-spacing: -0.06em;
+        }
+
+        .business-between-error {
+          font-size: clamp(2.2rem, 6vw, 4.5rem);
+          line-height: 1;
+        }
+
+        .business-between-label {
+          margin: 24px 0 0;
+          color: #536981;
+          font-size: clamp(1.6rem, 3vw, 2.5rem);
+        }
+
+        .business-between-rule {
+          margin: 16px 0 0;
+          color: #60758e;
+          font-size: 0.82rem;
+          font-weight: 800;
+        }
+
+        .business-between-note {
+          margin: 7px 0 0;
+          color: #8894a3;
+          font-size: 0.75rem;
+        }
+
+        .business-between-explanation {
+          width: min(100% - 32px, 860px);
+          margin: 0 auto;
+          padding: 36px 0 58px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .business-between-explanation h2 {
+          margin: 0;
+          color: #18304c;
+          font-size: 1.25rem;
+        }
+
+        .business-between-explanation p {
+          color: #60748a;
+          line-height: 1.65;
+        }
+
+        .result-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          align-items: center;
+          justify-content: center;
+          margin-top: 16px;
+        }
+
+        .result-actions button {
+          min-height: 38px;
+          padding: 7px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 8px;
+          background: #fff;
+          color: #526a85;
+          font: inherit;
+          font-size: 0.75rem;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .result-actions span {
+          color: #75879b;
+          font-size: 0.72rem;
+        }
+
+        @media (max-width: 760px) {
+          .business-between-hero {
+            width: min(100% - 24px, 1240px);
+            min-height: 72vh;
+          }
+
+          .business-between-header {
+            min-height: 52px;
+          }
+
+          .business-between-inputs {
+            width: 100%;
+            flex-direction: column;
+            margin-bottom: 20px;
+          }
+
+          .business-between-inputs label {
+            width: 100%;
+          }
+
+          .business-between-number {
+            font-size: clamp(6rem, 32vw, 9rem);
+          }
+
+          .business-between-explanation {
+            width: min(100% - 24px, 860px);
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
 function FreeTrialPage({ onNavigate }: NavigationProps) {
   const [startDate, setStartDate] = useState(todayInputValue)
   const [trialLength, setTrialLength] = useState('7')
@@ -2314,25 +2713,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell free-trial-page">
-      <section className="intro" aria-labelledby="free-trial-title">
+      <section className="intro free-trial-bam-intro" aria-labelledby="free-trial-title">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <a
-          className="back-link"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          Home
-        </a>
-        <h1 id="free-trial-title">Free Trial Calculator</h1>
-        <p className="subtitle">
-          Find when a free trial ends and the last safe day to cancel before renewal.
-        </p>
-        <p className="intro-note">
-          Date-only planning for trial periods that count calendar days.
-        </p>
+        <h1 id="free-trial-title">When does my free trial end?</h1>
+        <p className="subtitle">Enter the start date and trial length. The answer updates immediately.</p>
       </section>
 
       <section className="business-workspace" aria-label="Free trial calculator">
@@ -2393,21 +2777,29 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
                 </span>
               </div>
               <p className="result-note">Always check the service terms for exact renewal timing.</p>
-              <div className="business-save">
-                <label className="field title-field">
-                  <span>Title</span>
-                  <input
-                    maxLength={titleMaxLength}
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                  />
-                  {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-                </label>
-                <button className="primary-button" type="button" disabled={!canSave} onClick={saveTrialDeadline}>
-                  Save to My due dates
-                </button>
-                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-              </div>
+              <ResultActions
+                title="Free trial ends"
+                date={trialEndDate}
+                details={`Last day to cancel: ${formatPlainDate(cancelByDate)}`}
+              />
+              <details className="result-save-details">
+                <summary>Save this date</summary>
+                <div className="business-save">
+                  <label className="field title-field">
+                    <span>Title</span>
+                    <input
+                      maxLength={titleMaxLength}
+                      value={title}
+                      onChange={(event) => setTitle(event.target.value)}
+                    />
+                    {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+                  </label>
+                  <button className="primary-button" type="button" disabled={!canSave} onClick={saveTrialDeadline}>
+                    Save to My due dates
+                  </button>
+                  {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+                </div>
+              </details>
             </>
           ) : (
             <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
@@ -2610,6 +3002,11 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
               <p className="result-note">
                 Use the purchase or delivery date named in the store's policy.
               </p>
+              <ResultActions
+                title="Return deadline"
+                date={returnDeadline}
+                details={`${parsedReturnWindow}-day return window`}
+              />
               <details className="result-save-details">
                 <summary>Save this date</summary>
                 <div className="business-save">
@@ -3033,6 +3430,11 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                 Calendar-day terms are used for Net invoices. EOM means the last calendar day of the invoice month.
                 Check the invoice or contract if weekends, holidays, or a different EOM rule apply.
               </p>
+              <ResultActions
+                title="Invoice due date"
+                date={invoiceDueDate}
+                details={invoiceTermLabels[invoiceTerm]}
+              />
               <details className="business-save">
                 <summary>Save this date</summary>
                 <label className="field title-field">
@@ -3202,6 +3604,11 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
               <p className="net-term-note">
                 Weekends and public holidays do not change this date unless your invoice or contract says otherwise.
               </p>
+              <ResultActions
+                title={`Net ${dayCount} invoice due date`}
+                date={dueDate}
+                details={`${dayCount} calendar days after the invoice date`}
+              />
             </>
           ) : (
             <h1 id={`net-${dayCount}-title`} className="net-term-date net-term-date-error">
@@ -4166,6 +4573,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'business-days'
   }
 
+  if (pathname === '/business-days-between-dates') {
+    return 'business-days-between'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -4322,6 +4733,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Calculate business days from today or any start date. Quick answers for 3, 5, 7 and 10 business days, with weekends skipped.',
       twitterDescription: 'Find 3, 5, 7, 10 or any number of business days from today or another date.',
       path: '/business-days-calculator',
+    }
+  }
+
+  if (route === 'business-days-between') {
+    return {
+      title: 'Business Days Between Dates Calculator | WhenIsDue',
+      description: 'Count business days between two dates instantly. Weekends are skipped and the counting rule is shown clearly.',
+      openGraphDescription: 'Count weekdays between two dates instantly with a clear start-date and end-date counting rule.',
+      twitterDescription: 'Count business days between two dates instantly.',
+      path: '/business-days-between-dates',
     }
   }
 
@@ -4598,6 +5019,7 @@ function getRouteStructuredData(
 
   if (
     route === 'calculators' ||
+    route === 'business-days-between' ||
     route === 'free-trial' ||
     route === 'return-window' ||
     route === 'invoice-due-date' ||
