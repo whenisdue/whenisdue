@@ -1106,7 +1106,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
   const [startDate, setStartDate] = useState(todayInputValue)
-  const [businessDays, setBusinessDays] = useState('10')
+  const [businessDays, setBusinessDays] = useState('3')
   const [title, setTitle] = useState(getDefaultTitle('business'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
@@ -1169,14 +1169,49 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         </a>
         <h1 id="business-days-title">Business Days Calculator</h1>
         <p className="subtitle">
-          Find 3, 5, 7, 10, or any number of business days from today or another start date.
+          See the most common business-day answers from today instantly, or use the calculator for any other starting date.
         </p>
         <p className="intro-note">
           Monday through Friday count as business days. Weekends are skipped automatically; public holidays are not removed.
         </p>
       </section>
 
-      <section className="business-workspace" aria-label="Business days calculator">
+      <section className="business-today-answers" aria-labelledby="business-today-title">
+        <div className="business-today-heading">
+          <div>
+            <p className="friendly-eyebrow muted-eyebrow">Quick answers</p>
+            <h2 id="business-today-title">Business days from today</h2>
+            <p>
+              Today is the starting date. Saturdays and Sundays are skipped.
+            </p>
+          </div>
+        </div>
+
+        <div className="business-today-grid">
+          {[3, 5, 7, 10].map((dayCount) => {
+            const answerDate = addBusinessDays(today, dayCount)
+
+            return (
+              <article className="business-today-card" key={dayCount}>
+                <span>{dayCount} business days</span>
+                <strong>{formatPlainDate(answerDate)}</strong>
+                <small>{formatWeekday(answerDate)}</small>
+              </article>
+            )
+          })}
+        </div>
+
+        <p className="business-today-note">
+          Need another number or a different starting date? Use the calculator below.
+        </p>
+      </section>
+
+      <section className="business-workspace" aria-label="Custom business days calculator">
+        <div className="business-custom-heading">
+          <p className="friendly-eyebrow muted-eyebrow">Custom date</p>
+          <h2>Calculate another business-day deadline</h2>
+          <p>Change the starting date or enter any number of business days.</p>
+        </div>
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
             <h2>Add business days</h2>
@@ -1257,28 +1292,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
       <section className="business-content" aria-label="Business days help">
         <article>
-          <h2>Business days from today</h2>
-          <p>
-            These quick answers use today as the starting date and skip Saturdays and Sundays.
-          </p>
-          <ul>
-            {[3, 5, 7, 10].map((dayCount) => {
-              const exampleDate = addBusinessDays(today, dayCount)
-
-              return (
-                <li key={dayCount}>
-                  <strong>{dayCount} business days from today:</strong>{' '}
-                  {formatWeekday(exampleDate)}, {formatPlainDate(exampleDate)}
-                </li>
-              )
-            })}
-          </ul>
-          <p>
-            Need a different number or starting date? Use the calculator above for the exact result.
-          </p>
-        </article>
-
-        <article>
           <h2>How long is 3 business days?</h2>
           <p>
             Three business days means three Monday-through-Friday working days. Weekends do not count, so 3 business days can span more than 3 calendar days when a weekend falls in between.
@@ -1355,6 +1368,89 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         onNavigate={onNavigate}
         planningNote="For planning only. Always check the original terms or official calendar when a deadline matters."
       />
+
+      <style>{`
+        .business-today-answers {
+          width: min(100% - 32px, 1130px);
+          margin: 0 auto 20px;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.12);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .business-today-heading h2,
+        .business-custom-heading h2 {
+          margin: 4px 0 6px;
+        }
+
+        .business-today-heading p,
+        .business-custom-heading p,
+        .business-today-note {
+          margin: 0;
+        }
+
+        .business-today-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .business-today-card {
+          min-height: 124px;
+          padding: 16px;
+          border: 1px solid rgba(19, 38, 70, 0.12);
+          border-radius: 12px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .business-today-card span {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #55708f;
+        }
+
+        .business-today-card strong {
+          margin-top: 8px;
+          font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+          line-height: 1.2;
+          color: #10213f;
+        }
+
+        .business-today-card small {
+          margin-top: 4px;
+          color: #60738d;
+        }
+
+        .business-today-note {
+          margin-top: 14px;
+          color: #516783;
+        }
+
+        .business-custom-heading {
+          grid-column: 1 / -1;
+          margin-bottom: 4px;
+        }
+
+        @media (max-width: 760px) {
+          .business-today-answers {
+            width: min(100% - 24px, 1130px);
+            padding: 16px;
+          }
+
+          .business-today-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .business-today-card {
+            min-height: 112px;
+          }
+        }
+      `}</style>
     </main>
   )
 }
