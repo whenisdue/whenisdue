@@ -1162,12 +1162,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
           <span aria-hidden="true"> · </span>
           {getLocalTimeZoneName()}
-          <span aria-hidden="true"> · </span>
-          Today is day 0
-          <span aria-hidden="true"> · </span>
-          Weekends skipped
-          <span aria-hidden="true"> · </span>
-          Holidays counted
         </p>
       </section>
 
@@ -1185,12 +1179,12 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             )
           })}
         </div>
+        <p className="business-bam-rule">Weekends skipped. Public holidays included.</p>
       </section>
 
       <section className="business-workspace" aria-label="Custom business days calculator">
         <div className="business-custom-heading">
-          <h2>Another date or number?</h2>
-          <p>Change the start date or enter any number of business days.</p>
+          <h2>Different date or number?</h2>
         </div>
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
@@ -1362,15 +1356,15 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .business-answer-intro h1 {
-          margin-bottom: 6px;
-          font-size: clamp(2rem, 4vw, 3.2rem);
+          margin-bottom: 4px;
+          font-size: clamp(1.85rem, 3.4vw, 2.8rem);
         }
 
         .business-answer-context {
           margin: 0;
           color: #5a6f89;
-          font-size: 0.95rem;
-          line-height: 1.5;
+          font-size: 0.9rem;
+          line-height: 1.35;
         }
 
         .business-today-answers {
@@ -1388,10 +1382,10 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .business-bam-row {
-          min-height: 132px;
-          padding: 16px 18px;
-          border: 1px solid rgba(19, 38, 70, 0.12);
-          border-radius: 12px;
+          min-height: 138px;
+          padding: 14px 18px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 10px;
           background: #fff;
           display: flex;
           flex-direction: column;
@@ -1399,22 +1393,28 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .business-bam-row span {
-          font-size: 0.86rem;
+          font-size: 0.82rem;
           font-weight: 800;
           color: #55708f;
         }
 
         .business-bam-row strong {
-          margin-top: 8px;
-          font-size: clamp(1.45rem, 2.3vw, 2.2rem);
-          line-height: 1.08;
+          margin-top: 6px;
+          font-size: clamp(1.7rem, 2.8vw, 2.65rem);
+          line-height: 1.02;
           color: #10213f;
         }
 
         .business-bam-row small {
           margin-top: 4px;
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           color: #60738d;
+        }
+
+        .business-bam-rule {
+          margin: 8px 2px 0;
+          font-size: 0.78rem;
+          color: #718197;
         }
 
         .result-save-details {
@@ -1509,11 +1509,11 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-answer-intro h1 {
-            font-size: 2rem;
+            font-size: 1.85rem;
           }
 
           .business-answer-context {
-            font-size: 0.86rem;
+            font-size: 0.82rem;
           }
 
           .business-today-answers {
@@ -1522,12 +1522,12 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
           .business-bam-list {
             grid-template-columns: 1fr;
-            gap: 6px;
+            gap: 4px;
           }
 
           .business-bam-row {
-            min-height: 56px;
-            padding: 8px 12px;
+            min-height: 52px;
+            padding: 7px 10px;
             display: grid;
             grid-template-columns: 1fr auto;
             grid-template-areas:
@@ -1538,21 +1538,26 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
           .business-bam-row span {
             grid-area: label;
-            font-size: 0.9rem;
+            font-size: 0.84rem;
           }
 
           .business-bam-row strong {
             grid-area: date;
             margin: 0;
             text-align: right;
-            font-size: 1.2rem;
+            font-size: 1.18rem;
           }
 
           .business-bam-row small {
             grid-area: weekday;
-            margin: 1px 0 0;
+            margin: 0;
             text-align: right;
-            font-size: 0.8rem;
+            font-size: 0.76rem;
+          }
+
+          .business-bam-rule {
+            margin-top: 6px;
+            font-size: 0.72rem;
           }
         }
       `}</style>
