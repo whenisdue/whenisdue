@@ -2730,8 +2730,11 @@ function applyRouteMetadata(route: RouteName) {
   const twitterDescription = getOrCreateMetaName('twitter:description')
   twitterDescription.setAttribute('content', metadata.twitterDescription ?? metadata.description)
 
+  const canonicalUrl = `https://www.whenisdue.com${metadata.path}`
   const canonical = getOrCreateCanonicalLink()
-  canonical.setAttribute('href', `https://www.whenisdue.com${metadata.path}`)
+  canonical.setAttribute('href', canonicalUrl)
+
+  applyRouteStructuredData(route, metadata, canonicalUrl)
 }
 
 function getRouteMetadata(route: RouteName): RouteMetadata {
@@ -2834,11 +2837,120 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
   }
 
   return {
-    title: 'WhenIsDue - Daily Client Action Workspace for Virtual Assistants',
-    description: 'One ordered daily queue for virtual assistants to manage client actions, deadlines, waiting items, and follow-ups.',
+    title: 'WhenIsDue - Daily Workspace for Virtual Assistants',
+    description: 'A simple daily workspace for virtual assistants to manage client actions, deadlines, waiting items, follow-ups, and time zones.',
     openGraphDescription: 'Open one workspace and know the next client action, deadline, or follow-up that needs your attention.',
     twitterDescription: 'A daily client action queue for virtual assistants.',
     path: '/',
+  }
+}
+
+
+type StructuredData = Record<string, unknown>
+
+function applyRouteStructuredData(
+  route: RouteName,
+  metadata: RouteMetadata,
+  canonicalUrl: string,
+) {
+  const scriptId = 'whenisdue-route-structured-data'
+  let script = document.getElementById(scriptId) as HTMLScriptElement | null
+
+  if (route === 'workspace' || route === 'not-found') {
+    script?.remove()
+    return
+  }
+
+  const structuredData = getRouteStructuredData(route, metadata, canonicalUrl)
+
+  if (!script) {
+    script = document.createElement('script')
+    script.id = scriptId
+    script.type = 'application/ld+json'
+    document.head.append(script)
+  }
+
+  script.textContent = JSON.stringify(structuredData)
+}
+
+function getRouteStructuredData(
+  route: RouteName,
+  metadata: RouteMetadata,
+  canonicalUrl: string,
+): StructuredData | StructuredData[] {
+  const website: StructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'WhenIsDue',
+    url: 'https://www.whenisdue.com/',
+    description: 'A simple daily workspace for virtual assistants to manage client actions, deadlines, waiting items, follow-ups, and time zones.',
+    inLanguage: 'en',
+  }
+
+  if (route === 'home') {
+    return [
+      website,
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'WhenIsDue',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        url: canonicalUrl,
+        description: metadata.description,
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        audience: {
+          '@type': 'Audience',
+          audienceType: 'Virtual assistants',
+        },
+      },
+    ]
+  }
+
+  if (
+    route === 'calculators' ||
+    route === 'business-days' ||
+    route === 'free-trial' ||
+    route === 'return-window' ||
+    route === 'invoice-due-date' ||
+    route === 'typing'
+  ) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: metadata.title.replace(' - WhenIsDue', '').replace(' | WhenIsDue', ''),
+      url: canonicalUrl,
+      description: metadata.description,
+      applicationCategory: route === 'typing' ? 'EducationalApplication' : 'UtilitiesApplication',
+      operatingSystem: 'Web',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'WhenIsDue',
+        url: 'https://www.whenisdue.com/',
+      },
+    }
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: metadata.title,
+    url: canonicalUrl,
+    description: metadata.description,
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'WhenIsDue',
+      url: 'https://www.whenisdue.com/',
+    },
   }
 }
 
