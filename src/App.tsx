@@ -1181,6 +1181,9 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           <div>
             <p className="friendly-eyebrow muted-eyebrow">Quick answers</p>
             <h2 id="business-today-title">Business days from today</h2>
+            <p className="business-today-date">
+              <strong>Today:</strong> {formatWeekday(today)}, {formatPlainDate(today)}
+            </p>
             <p>
               Today is the starting date. Saturdays and Sundays are skipped.
             </p>
@@ -1193,7 +1196,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
             return (
               <article className="business-today-card" key={dayCount}>
-                <span>{dayCount} business days</span>
+                <span>{dayCount} business days from today</span>
                 <strong>{formatPlainDate(answerDate)}</strong>
                 <small>{formatWeekday(answerDate)}</small>
               </article>
@@ -1388,6 +1391,12 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         .business-custom-heading p,
         .business-today-note {
           margin: 0;
+        }
+
+        .business-today-date {
+          margin: 8px 0 3px !important;
+          font-size: 1rem;
+          color: #10213f;
         }
 
         .business-today-grid {
