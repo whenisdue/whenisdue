@@ -347,6 +347,30 @@ function HomePage({ onNavigate }: NavigationProps) {
             <strong>When does my trial end?</strong>
             <small>Find the end date before renewal.</small>
           </a>
+
+          <a
+            href="/business-days-between-dates"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-between-dates')
+            }}
+          >
+            <span>Date difference</span>
+            <strong>Business days between dates</strong>
+            <small>Count weekdays between two dates instantly.</small>
+          </a>
+
+          <a
+            href="/net-30-due-date"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/net-30-due-date')
+            }}
+          >
+            <span>Invoices</span>
+            <strong>Net 30 due date</strong>
+            <small>Enter an invoice date and get the due date immediately.</small>
+          </a>
         </div>
       </section>
 
@@ -2371,12 +2395,130 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
   }
 
   return (
-    <div className="result-actions" aria-label="Result actions">
-      <button type="button" onClick={copyAnswer}>Copy</button>
-      <button type="button" onClick={shareAnswer}>Share</button>
-      <button type="button" onClick={addToCalendar}>Add to calendar</button>
-      {message ? <span aria-live="polite">{message}</span> : null}
-    </div>
+    <>
+      <div className="result-actions" aria-label="Result actions">
+        <button type="button" onClick={copyAnswer}>Copy</button>
+        <button type="button" onClick={shareAnswer}>Share</button>
+        <button type="button" onClick={addToCalendar}>Add to calendar</button>
+        {message ? <span aria-live="polite">{message}</span> : null}
+      </div>
+      <style>{`
+        .result-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          align-items: center;
+          justify-content: center;
+          margin-top: 16px;
+        }
+
+        .result-actions button {
+          min-height: 38px;
+          padding: 7px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 8px;
+          background: #fff;
+          color: #526a85;
+          font: inherit;
+          font-size: 0.75rem;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .result-actions button:hover {
+          border-color: rgba(19, 38, 70, 0.28);
+        }
+
+        .result-actions span {
+          color: #75879b;
+          font-size: 0.72rem;
+        }
+      `}</style>
+    </>
+  )
+}
+
+type CalculationReceiptRow = {
+  label: string
+  value: string
+}
+
+type CalculationReceiptProps = {
+  title?: string
+  rows: CalculationReceiptRow[]
+}
+
+function CalculationReceipt({ title = 'How this date was calculated', rows }: CalculationReceiptProps) {
+  return (
+    <>
+      <details className="calculation-receipt">
+        <summary>{title}</summary>
+        <dl>
+          {rows.map((row) => (
+            <div key={`${row.label}-${row.value}`}>
+              <dt>{row.label}</dt>
+              <dd>{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
+      <style>{`
+        .calculation-receipt {
+          width: min(100%, 620px);
+          margin: 14px auto 0;
+          text-align: left;
+          border-top: 1px solid rgba(19, 38, 70, 0.09);
+          padding-top: 10px;
+        }
+
+        .calculation-receipt summary {
+          cursor: pointer;
+          color: #60758d;
+          font-size: 0.78rem;
+          font-weight: 850;
+          text-align: center;
+        }
+
+        .calculation-receipt dl {
+          margin: 12px 0 0;
+          display: grid;
+          gap: 7px;
+        }
+
+        .calculation-receipt dl > div {
+          display: flex;
+          justify-content: space-between;
+          gap: 18px;
+          padding: 7px 0;
+          border-bottom: 1px solid rgba(19, 38, 70, 0.07);
+        }
+
+        .calculation-receipt dt {
+          color: #7b8999;
+          font-size: 0.74rem;
+        }
+
+        .calculation-receipt dd {
+          margin: 0;
+          color: #314963;
+          font-size: 0.76rem;
+          font-weight: 800;
+          text-align: right;
+        }
+
+        @media (max-width: 560px) {
+          .calculation-receipt dl > div {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 2px;
+          }
+
+          .calculation-receipt dd {
+            text-align: left;
+          }
+        }
+      `}</style>
+    </>
   )
 }
 
@@ -2457,6 +2599,18 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
               <p className="business-between-note">
                 Public holidays still count as weekdays.
               </p>
+              {parsedStartDate && parsedEndDate ? (
+                <CalculationReceipt
+                  rows={[
+                    { label: 'Start date', value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}` },
+                    { label: 'End date', value: `${formatWeekday(parsedEndDate)}, ${formatPlainDate(parsedEndDate)}` },
+                    { label: 'Counting rule', value: 'Start excluded · End included' },
+                    { label: 'Weekend rule', value: 'Saturday and Sunday skipped' },
+                    { label: 'Public holidays', value: 'Still counted as weekdays' },
+                    { label: 'Result', value: `${businessDays} ${businessDays === 1 ? 'business day' : 'business days'}` },
+                  ]}
+                />
+              ) : null}
             </>
           ) : (
             <h1 id="business-between-title" className="business-between-number business-between-error">
@@ -2601,33 +2755,6 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           line-height: 1.65;
         }
 
-        .result-actions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 7px;
-          align-items: center;
-          justify-content: center;
-          margin-top: 16px;
-        }
-
-        .result-actions button {
-          min-height: 38px;
-          padding: 7px 11px;
-          border: 1px solid rgba(19, 38, 70, 0.14);
-          border-radius: 8px;
-          background: #fff;
-          color: #526a85;
-          font: inherit;
-          font-size: 0.75rem;
-          font-weight: 800;
-          cursor: pointer;
-        }
-
-        .result-actions span {
-          color: #75879b;
-          font-size: 0.72rem;
-        }
-
         @media (max-width: 760px) {
           .business-between-hero {
             width: min(100% - 24px, 1240px);
@@ -2721,11 +2848,6 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 
       <section className="business-workspace" aria-label="Free trial calculator">
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
-          <div className="card-heading">
-            <h2>Calculate trial dates</h2>
-            <p>Enter the trial start date and trial length.</p>
-          </div>
-
           <label className="field start-field">
             <span>Trial start date</span>
             <input
@@ -2777,6 +2899,15 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
                 </span>
               </div>
               <p className="result-note">Always check the service terms for exact renewal timing.</p>
+              <CalculationReceipt
+                rows={[
+                  { label: 'Trial starts', value: `${formatWeekday(parsedStartDate!)}, ${formatPlainDate(parsedStartDate!)}` },
+                  { label: 'Trial length', value: `${parsedTrialLength} ${parsedTrialLength === 1 ? 'day' : 'days'}` },
+                  { label: 'Counting rule', value: 'Full trial length added to the start date' },
+                  { label: 'Trial ends', value: `${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}` },
+                  { label: 'Suggested cancel-by', value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}` },
+                ]}
+              />
               <ResultActions
                 title="Free trial ends"
                 date={trialEndDate}
@@ -2806,6 +2937,47 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           )}
         </section>
       </section>
+
+      <style>{`
+        .free-trial-bam-intro {
+          padding-bottom: 8px;
+        }
+
+        .free-trial-page .business-workspace {
+          align-items: stretch;
+        }
+
+        .free-trial-page .business-calculator {
+          padding-top: 16px;
+        }
+
+        .free-trial-page .free-trial-result .due-date {
+          font-size: clamp(3.6rem, 8vw, 7rem);
+          line-height: 0.96;
+          letter-spacing: -0.045em;
+        }
+
+        .free-trial-page .free-trial-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        @media (max-width: 760px) {
+          .free-trial-page .business-workspace {
+            gap: 10px;
+          }
+
+          .free-trial-page .business-calculator {
+            padding-top: 12px;
+            padding-bottom: 12px;
+          }
+
+          .free-trial-page .free-trial-result .due-date {
+            font-size: clamp(3.2rem, 15vw, 5rem);
+          }
+        }
+      `}</style>
 
       <section className="business-content" aria-label="Free trial help">
         <article>
@@ -2940,16 +3112,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       </section>
 
       <section className="business-workspace return-primary-workspace" aria-label="Return deadline calculator">
-        <div className="return-custom-heading">
-          <h2>When did the return window start?</h2>
-          <p>Use the purchase or delivery date named in the store's policy.</p>
-        </div>
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
-          <div className="card-heading">
-            <h2>Calculate return deadline</h2>
-            <p>Use the purchase date or delivery date stated in the store's policy.</p>
-          </div>
-
           <label className="field start-field">
             <span>Return window start date</span>
             <input
@@ -3002,6 +3165,14 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
               <p className="result-note">
                 Use the purchase or delivery date named in the store's policy.
               </p>
+              <CalculationReceipt
+                rows={[
+                  { label: 'Window starts', value: `${formatWeekday(parsedPurchaseDate!)}, ${formatPlainDate(parsedPurchaseDate!)}` },
+                  { label: 'Window length', value: `${parsedReturnWindow} ${parsedReturnWindow === 1 ? 'day' : 'days'}` },
+                  { label: 'Counting rule', value: 'Start date counts as day 1' },
+                  { label: 'Last day to return', value: `${formatWeekday(returnDeadline)}, ${formatPlainDate(returnDeadline)}` },
+                ]}
+              />
               <ResultActions
                 title="Return deadline"
                 date={returnDeadline}
@@ -3031,6 +3202,47 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           )}
         </section>
       </section>
+
+      <style>{`
+        .return-window-page .return-answer-intro {
+          padding-bottom: 8px;
+        }
+
+        .return-window-page .return-primary-workspace {
+          align-items: stretch;
+        }
+
+        .return-window-page .business-calculator {
+          padding-top: 16px;
+        }
+
+        .return-window-page .return-window-result .due-date {
+          font-size: clamp(3.8rem, 8.5vw, 7.4rem);
+          line-height: 0.96;
+          letter-spacing: -0.05em;
+        }
+
+        .return-window-page .return-window-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        @media (max-width: 760px) {
+          .return-window-page .return-primary-workspace {
+            gap: 10px;
+          }
+
+          .return-window-page .business-calculator {
+            padding-top: 12px;
+            padding-bottom: 12px;
+          }
+
+          .return-window-page .return-window-result .due-date {
+            font-size: clamp(3.25rem, 15.5vw, 5.2rem);
+          }
+        }
+      `}</style>
 
       <section className="return-today-answers return-secondary-answers" aria-labelledby="return-today-title">
         <div className="return-today-heading">
@@ -3430,6 +3642,19 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                 Calendar-day terms are used for Net invoices. EOM means the last calendar day of the invoice month.
                 Check the invoice or contract if weekends, holidays, or a different EOM rule apply.
               </p>
+              <CalculationReceipt
+                rows={[
+                  { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate!)}, ${formatPlainDate(parsedInvoiceDate!)}` },
+                  { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
+                  {
+                    label: 'Counting rule',
+                    value: invoiceTerm === 'eom'
+                      ? 'Last calendar day of the invoice month'
+                      : `${calendarDaysFromInvoice} calendar ${calendarDaysFromInvoice === 1 ? 'day' : 'days'} after invoice date`,
+                  },
+                  { label: 'Due date', value: `${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}` },
+                ]}
+              />
               <ResultActions
                 title="Invoice due date"
                 date={invoiceDueDate}
@@ -3604,6 +3829,16 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
               <p className="net-term-note">
                 Weekends and public holidays do not change this date unless your invoice or contract says otherwise.
               </p>
+              <CalculationReceipt
+                rows={[
+                  { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate!)}, ${formatPlainDate(parsedInvoiceDate!)}` },
+                  { label: 'Payment terms', value: `Net ${dayCount}` },
+                  { label: 'Counting rule', value: `${dayCount} calendar days after invoice date` },
+                  { label: 'Weekend handling', value: 'No automatic adjustment' },
+                  { label: 'Public holidays', value: 'No automatic adjustment' },
+                  { label: 'Due date', value: `${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}` },
+                ]}
+              />
               <ResultActions
                 title={`Net ${dayCount} invoice due date`}
                 date={dueDate}
