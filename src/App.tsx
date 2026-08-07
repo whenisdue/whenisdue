@@ -1699,6 +1699,8 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 }
 
 function ReturnWindowPage({ onNavigate }: NavigationProps) {
+  const currentTime = useCurrentMinute()
+  const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
   const [purchaseDate, setPurchaseDate] = useState(todayInputValue)
   const [returnWindow, setReturnWindow] = useState('30')
   const [title, setTitle] = useState(getDefaultTitle('return'))
@@ -1765,22 +1767,72 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         </a>
         <h1 id="return-window-title">Return Window Calculator</h1>
         <p className="subtitle">
-          Find the last calendar day to return an item.
+          See common return deadlines instantly, or calculate the last return day from any purchase or delivery date.
         </p>
         <p className="intro-note">
-          Date-only planning for common purchase return windows.
+          Many stores use 7, 14, 30, or 60-day return windows. Always check whether the policy starts from purchase or delivery.
         </p>
       </section>
 
-      <section className="business-workspace" aria-label="Return window calculator">
+      <section className="return-today-answers" aria-labelledby="return-today-title">
+        <div className="return-today-heading">
+          <p className="friendly-eyebrow muted-eyebrow">Quick answers</p>
+          <h2 id="return-today-title">If your return window starts today</h2>
+          <p className="return-today-date">
+            <strong>Today:</strong> {formatWeekday(today)}, {formatPlainDate(today)}
+          </p>
+          <p className="return-today-timezone">
+            <strong>Using your device time zone:</strong> {getLocalTimeZoneName()}
+          </p>
+        </div>
+
+        <div className="return-today-grid">
+          {[7, 14, 30, 60].map((dayCount) => {
+            const answerDate = addCalendarDays(today, Math.max(dayCount - 1, 0))
+            const isCommon = dayCount === 30
+
+            return (
+              <article
+                className={`return-today-card ${isCommon ? 'is-common' : ''}`}
+                key={dayCount}
+              >
+                <div className="return-today-card-top">
+                  <span>{dayCount}-day return window</span>
+                  {isCommon ? <b>Common</b> : null}
+                </div>
+                <strong>{formatPlainDate(answerDate)}</strong>
+                <small>{formatWeekday(answerDate)}</small>
+              </article>
+            )
+          })}
+        </div>
+
+        <div className="return-policy-warning">
+          <strong>Check the policy start date.</strong>
+          <span>
+            Some stores count from the delivery date instead of the purchase date.
+          </span>
+        </div>
+
+        <p className="return-today-note">
+          Bought it on another day? Use the custom calculator below.
+        </p>
+      </section>
+
+      <section className="business-workspace" aria-label="Custom return window calculator">
+        <div className="return-custom-heading">
+          <p className="friendly-eyebrow muted-eyebrow">Custom date</p>
+          <h2>Calculate another return deadline</h2>
+          <p>Enter the date your store says the return window begins, then choose the number of days.</p>
+        </div>
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
             <h2>Calculate return deadline</h2>
-            <p>Enter the purchase date and return window.</p>
+            <p>Use the purchase date or delivery date stated in the store's policy.</p>
           </div>
 
           <label className="field start-field">
-            <span>Purchase date</span>
+            <span>Return window start date</span>
             <input
               type="date"
               min="1900-01-01"
@@ -1829,7 +1881,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 </span>
               </div>
               <p className="result-note">
-                Check the store's official return policy because some return windows start on delivery date, not purchase date.
+                Check the store's official policy. Some return windows start on the delivery date, not the purchase date.
               </p>
               <div className="business-save">
                 <label className="field title-field">
@@ -1923,6 +1975,135 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .return-today-answers {
+          width: min(100% - 32px, 1130px);
+          margin: 0 auto 20px;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.12);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .return-today-heading h2,
+        .return-custom-heading h2 {
+          margin: 4px 0 6px;
+        }
+
+        .return-today-heading p,
+        .return-custom-heading p,
+        .return-today-note {
+          margin: 0;
+        }
+
+        .return-today-date {
+          margin-top: 8px !important;
+          font-size: 1rem;
+          color: #10213f;
+        }
+
+        .return-today-timezone {
+          margin-top: 3px !important;
+          font-size: 0.92rem;
+          color: #60738d;
+        }
+
+        .return-today-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .return-today-card {
+          min-height: 124px;
+          padding: 16px;
+          border: 1px solid rgba(19, 38, 70, 0.12);
+          border-radius: 12px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .return-today-card.is-common {
+          border-width: 2px;
+        }
+
+        .return-today-card-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+
+        .return-today-card-top span {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #55708f;
+        }
+
+        .return-today-card-top b {
+          font-size: 0.72rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: #55708f;
+        }
+
+        .return-today-card > strong {
+          margin-top: 8px;
+          font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+          line-height: 1.2;
+          color: #10213f;
+        }
+
+        .return-today-card small {
+          margin-top: 4px;
+          color: #60738d;
+        }
+
+        .return-policy-warning {
+          display: flex;
+          gap: 8px 12px;
+          flex-wrap: wrap;
+          margin-top: 14px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          background: rgba(255, 247, 224, 0.8);
+          color: #4f4a3c;
+        }
+
+        .return-policy-warning strong {
+          color: #2f3c50;
+        }
+
+        .return-today-note {
+          margin-top: 14px;
+          color: #516783;
+        }
+
+        .return-custom-heading {
+          grid-column: 1 / -1;
+          margin-bottom: 4px;
+        }
+
+        @media (max-width: 760px) {
+          .return-today-answers {
+            width: min(100% - 24px, 1130px);
+            padding: 16px;
+          }
+
+          .return-today-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .return-today-card {
+            min-height: 112px;
+          }
+        }
+      `}</style>
     </main>
   )
 }
@@ -2938,8 +3119,10 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'return-window') {
     return {
-      title: 'Return Window Calculator - WhenIsDue',
-      description: 'Calculate the last day to return an item based on a purchase date and return window.',
+      title: 'Return Window Calculator: Find Your Last Return Day | WhenIsDue',
+      description: 'Find the last day to return an item for common 7, 14, 30, or 60-day return windows, or calculate from any purchase or delivery date.',
+      openGraphDescription: 'See common return deadlines instantly or calculate the last return day from any purchase or delivery date.',
+      twitterDescription: 'Find the last day to return an item for 7, 14, 30, 60-day or custom return windows.',
       path: '/return-window-calculator',
     }
   }
