@@ -38,7 +38,7 @@ type SavedDeadline = {
 const storageKey = 'whenisdue.savedDeadlines.v1'
 const modes: CalculatorMode[] = ['calendar', 'business', 'invoice', 'trial', 'return']
 const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60', 'net90', 'eom']
-const businessDayQuickPicks = [1, 5, 10, 15, 30]
+const businessDayQuickPicks = [1, 3, 5, 7, 10]
 const trialLengthQuickPicks = [7, 14, 30]
 const returnWindowQuickPicks = [7, 14, 30, 60, 90]
 const titleMaxLength = 80
@@ -1169,10 +1169,10 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         </a>
         <h1 id="business-days-title">Business Days Calculator</h1>
         <p className="subtitle">
-          Add business days to a start date. Weekends are skipped automatically.
+          Find 3, 5, 7, 10, or any number of business days from today or another start date.
         </p>
         <p className="intro-note">
-          This calculator counts Monday to Friday only. Public holidays are not removed.
+          Monday through Friday count as business days. Weekends are skipped automatically; public holidays are not removed.
         </p>
       </section>
 
@@ -1257,46 +1257,96 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
       <section className="business-content" aria-label="Business days help">
         <article>
-          <h2>How business days are counted</h2>
+          <h2>Business days from today</h2>
           <p>
-            Business days are counted Monday through Friday. Saturdays and Sundays are skipped. This version does not remove public holidays, bank holidays, or company closures.
+            These quick answers use today as the starting date and skip Saturdays and Sundays.
+          </p>
+          <ul>
+            {[3, 5, 7, 10].map((dayCount) => {
+              const exampleDate = addBusinessDays(today, dayCount)
+
+              return (
+                <li key={dayCount}>
+                  <strong>{dayCount} business days from today:</strong>{' '}
+                  {formatWeekday(exampleDate)}, {formatPlainDate(exampleDate)}
+                </li>
+              )
+            })}
+          </ul>
+          <p>
+            Need a different number or starting date? Use the calculator above for the exact result.
           </p>
         </article>
 
         <article>
-          <h2>Examples</h2>
+          <h2>How long is 3 business days?</h2>
+          <p>
+            Three business days means three Monday-through-Friday working days. Weekends do not count, so 3 business days can span more than 3 calendar days when a weekend falls in between.
+          </p>
+        </article>
+
+        <article>
+          <h2>How long is 5 business days?</h2>
+          <p>
+            Five business days means five Monday-through-Friday working days. If you start on a Monday, 5 business days later is the following Monday because the starting date is treated as day zero and the weekend is skipped.
+          </p>
+        </article>
+
+        <article>
+          <h2>How business days are counted</h2>
+          <p>
+            This calculator counts Monday through Friday. Saturdays and Sundays are skipped. The starting date is treated as day zero, so adding 1 business day moves to the next weekday.
+          </p>
+          <p>
+            Public holidays, bank holidays, and company closures are not removed. If an official deadline depends on holidays or local rules, check the original terms or calendar.
+          </p>
+        </article>
+
+        <article>
+          <h2>Business day examples</h2>
           <ul>
             <li>Start Friday + 1 business day = Monday</li>
-            <li>Start Monday + 5 business days = next Monday</li>
             <li>Start Thursday + 2 business days = Monday</li>
+            <li>Start Monday + 3 business days = Thursday</li>
+            <li>Start Monday + 5 business days = next Monday</li>
+            <li>Start Monday + 10 business days = Monday two weeks later</li>
           </ul>
         </article>
 
         <article>
-          <h2>FAQ</h2>
+          <h2>Business days FAQ</h2>
           <dl>
+            <dt>What is 3 business days?</dt>
+            <dd>It means three weekdays, usually Monday through Friday. Saturdays and Sundays are not counted by this calculator.</dd>
+
             <dt>What counts as a business day?</dt>
             <dd>In this calculator, Monday through Friday count as business days. Saturdays and Sundays are skipped.</dd>
+
+            <dt>Does today count as business day one?</dt>
+            <dd>No. When you add business days here, the start date is day zero. One business day from today means the next weekday.</dd>
+
             <dt>Are public holidays removed?</dt>
-            <dd>No. This calculator skips weekends only. Check your local holiday calendar if holidays matter.</dd>
+            <dd>No. This calculator skips weekends only. Check the relevant holiday calendar if holidays affect your deadline.</dd>
+
             <dt>Why does one business day after Friday land on Monday?</dt>
-            <dd>Saturday and Sunday are not counted, so Monday is the next business day.</dd>
+            <dd>Saturday and Sunday are skipped, so Monday is the next business day.</dd>
+
             <dt>What is the difference between business days and calendar days?</dt>
-            <dd>Calendar days count every day. Business days skip weekends.</dd>
+            <dd>Calendar days count every day. Business days in this calculator count Monday through Friday and skip weekends.</dd>
           </dl>
         </article>
 
         <article>
           <h2>When to use this calculator</h2>
           <p>
-            Use this calculator when a deadline is measured in business days instead of calendar days. It can help with work tasks, invoice follow-ups, school forms, shipping estimates, application timelines, and simple planning. This version skips weekends only, so always check official terms if holidays or local rules matter.
+            Use it when a deadline is measured in business days instead of calendar days. Common examples include work tasks, invoice follow-ups, shipping estimates, application timelines, school forms, and administrative deadlines.
           </p>
         </article>
 
         <article>
           <h2>Business days vs calendar days</h2>
           <p>
-            Calendar days count every day on the calendar. Business days usually count Monday through Friday and skip weekends. That is why 10 business days can be more than 10 calendar days away.
+            Calendar days include every day of the week. Business days usually mean Monday through Friday, so a deadline that is 7 or 10 business days away will often be farther away on the calendar because weekends are skipped.
           </p>
         </article>
       </section>
@@ -2748,8 +2798,10 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'business-days') {
     return {
-      title: 'Business Days Calculator - WhenIsDue',
-      description: 'Add business days to a start date and find the exact due date while skipping weekends.',
+      title: 'Business Days Calculator: Days From Today | WhenIsDue',
+      description: 'Find 3, 5, 7, 10 or any number of business days from today or another date. Get the exact date instantly while skipping weekends.',
+      openGraphDescription: 'Calculate business days from today or any start date. Quick answers for 3, 5, 7 and 10 business days, with weekends skipped.',
+      twitterDescription: 'Find 3, 5, 7, 10 or any number of business days from today or another date.',
       path: '/business-days-calculator',
     }
   }
@@ -2911,9 +2963,70 @@ function getRouteStructuredData(
     ]
   }
 
+  if (route === 'business-days') {
+    return [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'Business Days Calculator',
+        url: canonicalUrl,
+        description: metadata.description,
+        applicationCategory: 'UtilitiesApplication',
+        operatingSystem: 'Web',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'WhenIsDue',
+          url: 'https://www.whenisdue.com/',
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'What is 3 business days?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Three business days means three weekdays, usually Monday through Friday. Saturdays and Sundays are not counted by this calculator.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What counts as a business day?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'In this calculator, Monday through Friday count as business days. Saturdays and Sundays are skipped.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Does today count as business day one?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. The start date is treated as day zero. One business day from today means the next weekday.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Are public holidays removed?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. This calculator skips weekends only. Check the relevant holiday calendar if holidays affect your deadline.',
+            },
+          },
+        ],
+      },
+    ]
+  }
+
   if (
     route === 'calculators' ||
-    route === 'business-days' ||
     route === 'free-trial' ||
     route === 'return-window' ||
     route === 'invoice-due-date' ||
