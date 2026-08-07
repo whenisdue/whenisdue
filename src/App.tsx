@@ -48,6 +48,7 @@ type RouteName =
   | 'home'
   | 'calculators'
   | 'business-days'
+  | 'three-business-days'
   | 'free-trial'
   | 'return-window'
   | 'invoice-due-date'
@@ -137,6 +138,10 @@ function App() {
 
   if (route === 'business-days') {
     return <BusinessDaysPage onNavigate={navigate} />
+  }
+
+  if (route === 'three-business-days') {
+    return <ThreeBusinessDaysPage onNavigate={navigate} />
   }
 
   if (route === 'free-trial') {
@@ -1558,6 +1563,344 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           .business-bam-rule {
             margin-top: 6px;
             font-size: 0.72rem;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
+function ThreeBusinessDaysPage({ onNavigate }: NavigationProps) {
+  const currentTime = useCurrentMinute()
+  const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
+  const answerDate = useMemo(() => addBusinessDays(today, 3), [today])
+  const relatedAnswers = useMemo(
+    () => [5, 7, 10].map((dayCount) => ({
+      dayCount,
+      date: addBusinessDays(today, dayCount),
+    })),
+    [today],
+  )
+
+  return (
+    <main className="page-shell three-business-days-page">
+      <section className="three-business-hero" aria-labelledby="three-business-title">
+        <div className="three-business-topbar">
+          <button
+            type="button"
+            className="three-business-brand"
+            onClick={() => onNavigate('/')}
+            aria-label="WhenIsDue home"
+          >
+            WhenIsDue
+          </button>
+          <button
+            type="button"
+            className="three-business-calculator-link"
+            onClick={() => onNavigate('/business-days-calculator')}
+          >
+            Business days calculator
+          </button>
+        </div>
+
+        <div className="three-business-answer">
+          <p id="three-business-title" className="three-business-question">
+            3 business days from today
+          </p>
+
+          <p className="three-business-date" aria-label={`Answer: ${formatPlainDate(answerDate)}`}>
+            {formatPlainDate(answerDate)}
+          </p>
+
+          <p className="three-business-weekday">{formatWeekday(answerDate)}</p>
+
+          <p className="three-business-context">
+            Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
+            <span aria-hidden="true"> · </span>
+            {getLocalTimeZoneName()}
+          </p>
+
+          <p className="three-business-rule">
+            Weekends skipped. Public holidays included.
+          </p>
+        </div>
+      </section>
+
+      <section className="three-business-more" aria-labelledby="three-business-more-title">
+        <h2 id="three-business-more-title">Other common answers</h2>
+
+        <div className="three-business-related-grid">
+          {relatedAnswers.map(({ dayCount, date }) => (
+            <article key={dayCount}>
+              <span>{dayCount} business days</span>
+              <strong>{formatPlainDate(date)}</strong>
+              <small>{formatWeekday(date)}</small>
+            </article>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          className="secondary-button three-business-custom-button"
+          onClick={() => onNavigate('/business-days-calculator')}
+        >
+          Different date or number
+        </button>
+      </section>
+
+      <section className="three-business-explainer" aria-label="About the calculation">
+        <article>
+          <h2>How this date is calculated</h2>
+          <p>
+            Monday through Friday count as business days. Saturdays and Sundays are skipped.
+            Public holidays are not removed, so check the official calendar if a holiday affects your deadline.
+          </p>
+        </article>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Check the original terms or official calendar when a deadline matters."
+      />
+
+      <style>{`
+        .three-business-days-page {
+          min-height: 100vh;
+        }
+
+        .three-business-hero {
+          width: min(100% - 32px, 1240px);
+          min-height: 82vh;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .three-business-topbar {
+          min-height: 62px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .three-business-brand,
+        .three-business-calculator-link {
+          appearance: none;
+          border: 0;
+          background: transparent;
+          padding: 0;
+          cursor: pointer;
+          color: #667991;
+          font: inherit;
+        }
+
+        .three-business-brand {
+          font-size: 0.88rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+        }
+
+        .three-business-calculator-link {
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+
+        .three-business-answer {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          padding: 38px 16px 54px;
+        }
+
+        .three-business-question {
+          margin: 0 0 12px;
+          font-size: clamp(1.25rem, 2.2vw, 2rem);
+          font-weight: 800;
+          color: #425b79;
+        }
+
+        .three-business-date {
+          margin: 0;
+          max-width: 100%;
+          font-size: clamp(4.4rem, 10.4vw, 9.8rem);
+          font-weight: 900;
+          line-height: 0.94;
+          letter-spacing: -0.055em;
+          color: #0c1931;
+          text-wrap: balance;
+        }
+
+        .three-business-weekday {
+          margin: 18px 0 0;
+          font-size: clamp(1.45rem, 3vw, 2.6rem);
+          color: #566a83;
+        }
+
+        .three-business-context {
+          margin: 30px 0 0;
+          font-size: 0.9rem;
+          color: #64778e;
+        }
+
+        .three-business-rule {
+          margin: 7px 0 0;
+          font-size: 0.76rem;
+          color: #8190a2;
+        }
+
+        .three-business-more,
+        .three-business-explainer {
+          width: min(100% - 32px, 1040px);
+          margin: 0 auto;
+        }
+
+        .three-business-more {
+          padding: 46px 0 56px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .three-business-more h2,
+        .three-business-explainer h2 {
+          margin: 0 0 16px;
+          font-size: 1.3rem;
+        }
+
+        .three-business-related-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .three-business-related-grid article {
+          min-height: 98px;
+          padding: 14px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 10px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .three-business-related-grid span {
+          font-size: 0.78rem;
+          font-weight: 800;
+          color: #647991;
+        }
+
+        .three-business-related-grid strong {
+          margin-top: 4px;
+          font-size: 1.25rem;
+          color: #10213f;
+        }
+
+        .three-business-related-grid small {
+          margin-top: 2px;
+          color: #718197;
+        }
+
+        .three-business-custom-button {
+          margin-top: 18px;
+        }
+
+        .three-business-explainer {
+          padding: 26px 0 52px;
+        }
+
+        .three-business-explainer article {
+          max-width: 760px;
+        }
+
+        .three-business-explainer p {
+          margin: 0;
+          line-height: 1.65;
+          color: #5e7087;
+        }
+
+        @media (max-width: 760px) {
+          .three-business-hero {
+            width: min(100% - 24px, 1240px);
+            min-height: 78vh;
+          }
+
+          .three-business-topbar {
+            min-height: 52px;
+          }
+
+          .three-business-calculator-link {
+            font-size: 0.72rem;
+          }
+
+          .three-business-answer {
+            padding: 28px 0 38px;
+          }
+
+          .three-business-question {
+            margin-bottom: 10px;
+            font-size: 1.08rem;
+          }
+
+          .three-business-date {
+            font-size: clamp(3.55rem, 17vw, 5.6rem);
+            line-height: 0.98;
+          }
+
+          .three-business-weekday {
+            margin-top: 12px;
+            font-size: 1.55rem;
+          }
+
+          .three-business-context {
+            margin-top: 24px;
+            font-size: 0.8rem;
+          }
+
+          .three-business-rule {
+            font-size: 0.7rem;
+          }
+
+          .three-business-more,
+          .three-business-explainer {
+            width: min(100% - 24px, 1040px);
+          }
+
+          .three-business-related-grid {
+            grid-template-columns: 1fr;
+            gap: 6px;
+          }
+
+          .three-business-related-grid article {
+            min-height: 62px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-areas:
+              "label date"
+              "label weekday";
+            align-items: center;
+            padding: 9px 12px;
+          }
+
+          .three-business-related-grid span {
+            grid-area: label;
+          }
+
+          .three-business-related-grid strong {
+            grid-area: date;
+            margin: 0;
+            text-align: right;
+            font-size: 1.1rem;
+          }
+
+          .three-business-related-grid small {
+            grid-area: weekday;
+            margin: 0;
+            text-align: right;
           }
         }
       `}</style>
@@ -3125,6 +3468,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'business-days'
   }
 
+  if (pathname === '/3-business-days-from-today') {
+    return 'three-business-days'
+  }
+
   if (pathname === '/free-trial-calculator') {
     return 'free-trial'
   }
@@ -3223,6 +3570,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Calculate business days from today or any start date. Quick answers for 3, 5, 7 and 10 business days, with weekends skipped.',
       twitterDescription: 'Find 3, 5, 7, 10 or any number of business days from today or another date.',
       path: '/business-days-calculator',
+    }
+  }
+
+  if (route === 'three-business-days') {
+    return {
+      title: '3 Business Days From Today: Exact Date | WhenIsDue',
+      description: 'See the exact date 3 business days from today instantly. Weekends are skipped and your device time zone is shown.',
+      openGraphDescription: 'Get the exact date 3 business days from today instantly, with weekends skipped.',
+      twitterDescription: 'See the exact date 3 business days from today instantly.',
+      path: '/3-business-days-from-today',
     }
   }
 
@@ -3440,6 +3797,53 @@ function getRouteStructuredData(
             acceptedAnswer: {
               '@type': 'Answer',
               text: 'No. This calculator skips weekends only. Check the relevant holiday calendar if holidays affect your deadline.',
+            },
+          },
+        ],
+      },
+    ]
+  }
+
+  if (route === 'three-business-days') {
+    return [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: '3 Business Days From Today',
+        url: canonicalUrl,
+        description: metadata.description,
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'WhenIsDue',
+          url: 'https://www.whenisdue.com/',
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'What date is 3 business days from today?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'The page calculates the exact date 3 business days from the visitor’s local date, skipping Saturdays and Sundays.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Do weekends count as business days?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. This calculation skips Saturdays and Sundays.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Are public holidays removed?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. Public holidays are included unless they fall on a weekend.',
             },
           },
         ],
