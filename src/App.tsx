@@ -258,7 +258,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           ))}
         </div>
 
-        <p className="date-home-rule">Weekends skipped. Public holidays included.</p>
+        <p className="date-home-rule">Weekends skipped. Public holidays still count as weekdays.</p>
       </section>
 
       <section className="date-home-tools" aria-labelledby="date-home-tools-title">
@@ -1475,7 +1475,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             )
           })}
         </div>
-        <p className="business-bam-rule">Weekends skipped. Public holidays included.</p>
+        <p className="business-bam-rule">Weekends skipped. Public holidays still count as weekdays.</p>
       </section>
 
       <section className="business-workspace" aria-label="Custom business days calculator">
@@ -1931,7 +1931,7 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
           </p>
 
           <p className="three-business-rule">
-            Weekends skipped. Public holidays included.
+            Weekends skipped. Public holidays still count as weekdays.
           </p>
         </div>
       </section>
@@ -3878,7 +3878,9 @@ function applyRouteMetadata(route: RouteName) {
   const robots = getOrCreateMetaName('robots')
   robots.setAttribute(
     'content',
-    route === 'not-found' || route === 'workspace' ? 'noindex, follow' : 'index, follow',
+    route === 'not-found' || route === 'workspace' || route === 'typing'
+      ? 'noindex, follow'
+      : 'index, follow',
   )
 
   const description = getOrCreateMetaDescription()
@@ -4060,7 +4062,7 @@ function applyRouteStructuredData(
   const scriptId = 'whenisdue-route-structured-data'
   let script = document.getElementById(scriptId) as HTMLScriptElement | null
 
-  if (route === 'workspace' || route === 'not-found') {
+  if (route === 'workspace' || route === 'typing' || route === 'not-found') {
     script?.remove()
     return
   }
@@ -4112,65 +4114,25 @@ function getRouteStructuredData(
   }
 
   if (route === 'business-days') {
-    return [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'WebApplication',
-        name: 'Business Days Calculator',
-        url: canonicalUrl,
-        description: metadata.description,
-        applicationCategory: 'UtilitiesApplication',
-        operatingSystem: 'Web',
-        offers: {
-          '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'USD',
-        },
-        isPartOf: {
-          '@type': 'WebSite',
-          name: 'WhenIsDue',
-          url: 'https://www.whenisdue.com/',
-        },
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'Business Days Calculator',
+      url: canonicalUrl,
+      description: metadata.description,
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Web',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
       },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: [
-          {
-            '@type': 'Question',
-            name: 'What is 3 business days?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Three business days means three weekdays, usually Monday through Friday. Saturdays and Sundays are not counted by this calculator.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'What counts as a business day?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'In this calculator, Monday through Friday count as business days. Saturdays and Sundays are skipped.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Does today count as business day one?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'No. The start date is treated as day zero. One business day from today means the next weekday.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Are public holidays removed?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'No. This calculator skips weekends only. Check the relevant holiday calendar if holidays affect your deadline.',
-            },
-          },
-        ],
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'WhenIsDue',
+        url: 'https://www.whenisdue.com/',
       },
-    ]
+    }
   }
 
   if (
@@ -4195,58 +4157,25 @@ function getRouteStructuredData(
     } as const
     const dayCount = dayCountByRoute[route]
 
-    return [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'WebPage',
-        name: `${dayCount} Business Days From Today`,
-        url: canonicalUrl,
-        description: metadata.description,
-        isPartOf: {
-          '@type': 'WebSite',
-          name: 'WhenIsDue',
-          url: 'https://www.whenisdue.com/',
-        },
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: `${dayCount} Business Days From Today`,
+      url: canonicalUrl,
+      description: metadata.description,
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'WhenIsDue',
+        url: 'https://www.whenisdue.com/',
       },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: [
-          {
-            '@type': 'Question',
-            name: `What date is ${dayCount} business days from today?`,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: `The page calculates the exact date ${dayCount} business days from the visitor’s local date, skipping Saturdays and Sundays.`,
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Do weekends count as business days?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'No. This calculation skips Saturdays and Sundays.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Are public holidays removed?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'No. Public holidays are included unless they fall on a weekend.',
-            },
-          },
-        ],
-      },
-    ]
+    }
   }
 
   if (
     route === 'calculators' ||
     route === 'free-trial' ||
     route === 'return-window' ||
-    route === 'invoice-due-date' ||
-    route === 'typing'
+    route === 'invoice-due-date'
   ) {
     return {
       '@context': 'https://schema.org',
@@ -4254,7 +4183,7 @@ function getRouteStructuredData(
       name: metadata.title.replace(' - WhenIsDue', '').replace(' | WhenIsDue', ''),
       url: canonicalUrl,
       description: metadata.description,
-      applicationCategory: route === 'typing' ? 'EducationalApplication' : 'UtilitiesApplication',
+      applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'Web',
       offers: {
         '@type': 'Offer',
