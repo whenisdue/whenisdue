@@ -1155,68 +1155,42 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell business-page">
-      <section className="intro business-intro" aria-labelledby="business-days-title">
+      <section className="intro business-intro business-answer-intro" aria-labelledby="business-days-title">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <a
-          className="back-link"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          Home
-        </a>
-        <h1 id="business-days-title">Business Days Calculator</h1>
-        <p className="subtitle">
-          See the most common business-day answers from today instantly, or use the calculator for any other starting date.
-        </p>
-        <p className="intro-note">
-          Monday through Friday count as business days. Weekends are skipped automatically; public holidays are not removed.
+        <h1 id="business-days-title">Business days from today</h1>
+        <p className="business-answer-context">
+          Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
+          <span aria-hidden="true"> · </span>
+          {getLocalTimeZoneName()}
+          <span aria-hidden="true"> · </span>
+          Today is day 0
+          <span aria-hidden="true"> · </span>
+          Weekends skipped
+          <span aria-hidden="true"> · </span>
+          Holidays counted
         </p>
       </section>
 
-      <section className="business-today-answers" aria-labelledby="business-today-title">
-        <div className="business-today-heading">
-          <div>
-            <p className="friendly-eyebrow muted-eyebrow">Quick answers</p>
-            <h2 id="business-today-title">Business days from today</h2>
-            <p className="business-today-date">
-              <strong>Today:</strong> {formatWeekday(today)}, {formatPlainDate(today)}
-            </p>
-            <p className="business-today-timezone">
-              <strong>Using your device time zone:</strong> {getLocalTimeZoneName()}
-            </p>
-            <p>
-              Today is the starting date. Saturdays and Sundays are skipped.
-            </p>
-          </div>
-        </div>
-
-        <div className="business-today-grid">
+      <section className="business-today-answers business-bam-answers" aria-label="Business day answers from today">
+        <div className="business-bam-list">
           {[3, 5, 7, 10].map((dayCount) => {
             const answerDate = addBusinessDays(today, dayCount)
 
             return (
-              <article className="business-today-card" key={dayCount}>
-                <span>{dayCount} business days from today</span>
+              <article className="business-bam-row" key={dayCount}>
+                <span>{dayCount} business days</span>
                 <strong>{formatPlainDate(answerDate)}</strong>
                 <small>{formatWeekday(answerDate)}</small>
               </article>
             )
           })}
         </div>
-
-        <p className="business-today-note">
-          Need another number or a different starting date? Use the calculator below.
-        </p>
       </section>
 
       <section className="business-workspace" aria-label="Custom business days calculator">
         <div className="business-custom-heading">
-          <p className="friendly-eyebrow muted-eyebrow">Custom date</p>
-          <h2>Calculate another business-day deadline</h2>
-          <p>Change the starting date or enter any number of business days.</p>
+          <h2>Another date or number?</h2>
+          <p>Change the start date or enter any number of business days.</p>
         </div>
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
@@ -1275,20 +1249,23 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                 </span>
               </div>
               <p className="result-note">Weekends skipped. Public holidays are not removed.</p>
-              <div className="business-save">
-                <label className="field title-field">
-                  <span>Title</span>
-                  <input
-                    maxLength={titleMaxLength}
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                  />
-                </label>
-                <button className="primary-button" type="button" disabled={!canSave} onClick={saveBusinessDeadline}>
-                  Save to My due dates
-                </button>
-                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-              </div>
+              <details className="result-save-details">
+                <summary>Save this date</summary>
+                <div className="business-save">
+                  <label className="field title-field">
+                    <span>Title</span>
+                    <input
+                      maxLength={titleMaxLength}
+                      value={title}
+                      onChange={(event) => setTitle(event.target.value)}
+                    />
+                  </label>
+                  <button className="primary-button" type="button" disabled={!canSave} onClick={saveBusinessDeadline}>
+                    Save to My due dates
+                  </button>
+                  {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+                </div>
+              </details>
             </>
           ) : (
             <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
@@ -1376,13 +1353,81 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
+        .business-answer-intro {
+          padding-bottom: 10px;
+        }
+
+        .business-answer-intro .friendly-site-header {
+          margin-bottom: 8px;
+        }
+
+        .business-answer-intro h1 {
+          margin-bottom: 6px;
+          font-size: clamp(2rem, 4vw, 3.2rem);
+        }
+
+        .business-answer-context {
+          margin: 0;
+          color: #5a6f89;
+          font-size: 0.95rem;
+          line-height: 1.5;
+        }
+
         .business-today-answers {
           width: min(100% - 32px, 1130px);
-          margin: 0 auto 20px;
-          padding: 20px;
+          margin: 0 auto 18px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+        }
+
+        .business-bam-list {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .business-bam-row {
+          min-height: 132px;
+          padding: 16px 18px;
           border: 1px solid rgba(19, 38, 70, 0.12);
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.72);
+          border-radius: 12px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .business-bam-row span {
+          font-size: 0.86rem;
+          font-weight: 800;
+          color: #55708f;
+        }
+
+        .business-bam-row strong {
+          margin-top: 8px;
+          font-size: clamp(1.45rem, 2.3vw, 2.2rem);
+          line-height: 1.08;
+          color: #10213f;
+        }
+
+        .business-bam-row small {
+          margin-top: 4px;
+          font-size: 0.95rem;
+          color: #60738d;
+        }
+
+        .result-save-details {
+          margin-top: 16px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+          padding-top: 12px;
+        }
+
+        .result-save-details summary {
+          width: fit-content;
+          cursor: pointer;
+          font-weight: 700;
+          color: #4f6682;
         }
 
         .business-today-heading h2,
@@ -1455,17 +1500,59 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 760px) {
+          .business-answer-intro {
+            padding-top: 10px;
+          }
+
+          .business-answer-intro .friendly-top-nav {
+            gap: 10px;
+          }
+
+          .business-answer-intro h1 {
+            font-size: 2rem;
+          }
+
+          .business-answer-context {
+            font-size: 0.86rem;
+          }
+
           .business-today-answers {
             width: min(100% - 24px, 1130px);
-            padding: 16px;
           }
 
-          .business-today-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+          .business-bam-list {
+            grid-template-columns: 1fr;
+            gap: 6px;
           }
 
-          .business-today-card {
-            min-height: 112px;
+          .business-bam-row {
+            min-height: 56px;
+            padding: 8px 12px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-areas:
+              "label date"
+              "label weekday";
+            align-items: center;
+          }
+
+          .business-bam-row span {
+            grid-area: label;
+            font-size: 0.9rem;
+          }
+
+          .business-bam-row strong {
+            grid-area: date;
+            margin: 0;
+            text-align: right;
+            font-size: 1.2rem;
+          }
+
+          .business-bam-row small {
+            grid-area: weekday;
+            margin: 1px 0 0;
+            text-align: right;
+            font-size: 0.8rem;
           }
         }
       `}</style>
@@ -1753,77 +1840,18 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell return-window-page">
-      <section className="intro" aria-labelledby="return-window-title">
+      <section className="intro return-answer-intro" aria-labelledby="return-window-title">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <a
-          className="back-link"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          Home
-        </a>
-        <h1 id="return-window-title">Return Window Calculator</h1>
-        <p className="subtitle">
-          See common return deadlines instantly, or calculate the last return day from any purchase or delivery date.
-        </p>
-        <p className="intro-note">
-          Many stores use 7, 14, 30, or 60-day return windows. Always check whether the policy starts from purchase or delivery.
+        <h1 id="return-window-title">Return deadline</h1>
+        <p className="return-answer-context">
+          Enter the date your store says the return window begins. The start date counts as day 1.
         </p>
       </section>
 
-      <section className="return-today-answers" aria-labelledby="return-today-title">
-        <div className="return-today-heading">
-          <p className="friendly-eyebrow muted-eyebrow">Quick answers</p>
-          <h2 id="return-today-title">If your return window starts today</h2>
-          <p className="return-today-date">
-            <strong>Today:</strong> {formatWeekday(today)}, {formatPlainDate(today)}
-          </p>
-          <p className="return-today-timezone">
-            <strong>Using your device time zone:</strong> {getLocalTimeZoneName()}
-          </p>
-        </div>
-
-        <div className="return-today-grid">
-          {[7, 14, 30, 60].map((dayCount) => {
-            const answerDate = addCalendarDays(today, Math.max(dayCount - 1, 0))
-            const isCommon = dayCount === 30
-
-            return (
-              <article
-                className={`return-today-card ${isCommon ? 'is-common' : ''}`}
-                key={dayCount}
-              >
-                <div className="return-today-card-top">
-                  <span>{dayCount}-day return window</span>
-                  {isCommon ? <b>Common</b> : null}
-                </div>
-                <strong>{formatPlainDate(answerDate)}</strong>
-                <small>{formatWeekday(answerDate)}</small>
-              </article>
-            )
-          })}
-        </div>
-
-        <div className="return-policy-warning">
-          <strong>Check the policy start date.</strong>
-          <span>
-            Some stores count from the delivery date instead of the purchase date.
-          </span>
-        </div>
-
-        <p className="return-today-note">
-          Bought it on another day? Use the custom calculator below.
-        </p>
-      </section>
-
-      <section className="business-workspace" aria-label="Custom return window calculator">
+      <section className="business-workspace return-primary-workspace" aria-label="Return deadline calculator">
         <div className="return-custom-heading">
-          <p className="friendly-eyebrow muted-eyebrow">Custom date</p>
-          <h2>Calculate another return deadline</h2>
-          <p>Enter the date your store says the return window begins, then choose the number of days.</p>
+          <h2>When did the return window start?</h2>
+          <p>Use the purchase or delivery date named in the store's policy.</p>
         </div>
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
           <div className="card-heading">
@@ -1875,34 +1903,64 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             <>
               <p className="due-date">{formatPlainDate(returnDeadline)}</p>
               <div className="result-meta result-meta-stack">
-                <span>Last day to return: {formatPlainDate(returnDeadline)}</span>
+                <span className="return-result-label">Last day to return</span>
                 <span className="status-badge status-comfortable">
-                  {calendarDaysFromPurchase} {calendarDaysFromPurchase === 1 ? 'calendar day' : 'calendar days'} from purchase date
+                  {parsedReturnWindow}-day return window · Start date counts as day 1
                 </span>
               </div>
               <p className="result-note">
-                Check the store's official policy. Some return windows start on the delivery date, not the purchase date.
+                Use the purchase or delivery date named in the store's policy.
               </p>
-              <div className="business-save">
-                <label className="field title-field">
-                  <span>Title</span>
-                  <input
-                    maxLength={titleMaxLength}
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                  />
-                  {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-                </label>
-                <button className="primary-button" type="button" disabled={!canSave} onClick={saveReturnDeadline}>
-                  Save to My due dates
-                </button>
-                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-              </div>
+              <details className="result-save-details">
+                <summary>Save this date</summary>
+                <div className="business-save">
+                  <label className="field title-field">
+                    <span>Title</span>
+                    <input
+                      maxLength={titleMaxLength}
+                      value={title}
+                      onChange={(event) => setTitle(event.target.value)}
+                    />
+                    {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+                  </label>
+                  <button className="primary-button" type="button" disabled={!canSave} onClick={saveReturnDeadline}>
+                    Save to My due dates
+                  </button>
+                  {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+                </div>
+              </details>
             </>
           ) : (
             <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
           )}
         </section>
+      </section>
+
+      <section className="return-today-answers return-secondary-answers" aria-labelledby="return-today-title">
+        <div className="return-today-heading">
+          <h2 id="return-today-title">If your return window starts today</h2>
+          <p className="return-today-date">
+            Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
+            <span aria-hidden="true"> · </span>
+            {getLocalTimeZoneName()}
+          </p>
+        </div>
+
+        <div className="return-today-grid">
+          {[7, 14, 30, 60].map((dayCount) => {
+            const answerDate = addCalendarDays(today, Math.max(dayCount - 1, 0))
+
+            return (
+              <article className="return-today-card" key={dayCount}>
+                <div className="return-today-card-top">
+                  <span>{dayCount}-day window</span>
+                </div>
+                <strong>{formatPlainDate(answerDate)}</strong>
+                <small>{formatWeekday(answerDate)}</small>
+              </article>
+            )
+          })}
+        </div>
       </section>
 
       <section className="business-content" aria-label="Return window help">
@@ -1977,13 +2035,50 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       <SiteFooter onNavigate={onNavigate} />
 
       <style>{`
+        .return-answer-intro {
+          padding-bottom: 10px;
+        }
+
+        .return-answer-intro .friendly-site-header {
+          margin-bottom: 8px;
+        }
+
+        .return-answer-intro h1 {
+          margin-bottom: 6px;
+          font-size: clamp(2rem, 4vw, 3.2rem);
+        }
+
+        .return-answer-context {
+          margin: 0;
+          color: #5a6f89;
+          font-size: 0.95rem;
+        }
+
+        .return-primary-workspace {
+          margin-top: 0;
+        }
+
+        .return-primary-workspace .return-window-result .due-date {
+          font-size: clamp(2.4rem, 6vw, 5rem);
+          line-height: 1;
+        }
+
+        .return-result-label {
+          font-weight: 800;
+          color: #10213f;
+        }
+
         .return-today-answers {
           width: min(100% - 32px, 1130px);
-          margin: 0 auto 20px;
-          padding: 20px;
+          margin: 20px auto;
+          padding: 18px;
           border: 1px solid rgba(19, 38, 70, 0.12);
           border-radius: 14px;
           background: rgba(255, 255, 255, 0.72);
+        }
+
+        .return-secondary-answers {
+          margin-top: 24px;
         }
 
         .return-today-heading h2,
@@ -2090,9 +2185,29 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 760px) {
+          .return-answer-intro {
+            padding-top: 10px;
+          }
+
+          .return-answer-intro h1 {
+            font-size: 2rem;
+          }
+
+          .return-answer-context {
+            font-size: 0.88rem;
+          }
+
+          .return-primary-workspace {
+            margin-top: 0;
+          }
+
+          .return-primary-workspace .return-window-result .due-date {
+            font-size: 2.65rem;
+          }
+
           .return-today-answers {
             width: min(100% - 24px, 1130px);
-            padding: 16px;
+            padding: 14px;
           }
 
           .return-today-grid {
@@ -2100,7 +2215,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           }
 
           .return-today-card {
-            min-height: 112px;
+            min-height: 96px;
           }
         }
       `}</style>
