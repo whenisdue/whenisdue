@@ -3,7 +3,6 @@ import './App.css'
 import './VaHomeCompact.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
 import VaTypingTrainerPage from './typing/VaTypingTrainerPage'
-import { isSupabaseConfigured, supabase } from './va/supabaseClient'
 import {
   type CalculatorMode,
   type InvoiceTerm,
@@ -73,9 +72,6 @@ type NavigationProps = {
 
 function App() {
   const [route, setRoute] = useState<RouteName>(() => getRouteFromPath(window.location.pathname))
-  const [homeAuthState, setHomeAuthState] = useState<'checking' | 'signed-in' | 'signed-out'>(
-    isSupabaseConfigured ? 'checking' : 'signed-out',
-  )
 
   useEffect(() => {
     function handlePopState() {
@@ -88,46 +84,6 @@ function App() {
       window.removeEventListener('popstate', handlePopState)
     }
   }, [])
-
-  useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setHomeAuthState('signed-out')
-      return
-    }
-
-    let active = true
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) {
-        return
-      }
-
-      setHomeAuthState(data.session ? 'signed-in' : 'signed-out')
-    })
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (!active) {
-        return
-      }
-
-      setHomeAuthState(nextSession ? 'signed-in' : 'signed-out')
-    })
-
-    return () => {
-      active = false
-      listener.subscription.unsubscribe()
-    }
-  }, [])
-
-  useEffect(() => {
-    if (route !== 'home' || homeAuthState !== 'signed-in') {
-      return
-    }
-
-    window.history.replaceState(null, '', '/workspace')
-    setRoute('workspace')
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-  }, [homeAuthState, route])
 
   useEffect(() => {
     applyRouteMetadata(route)
@@ -207,144 +163,47 @@ function App() {
     return <NotFoundPage onNavigate={navigate} />
   }
 
-  if (homeAuthState === 'checking') {
-    return (
-      <main className="va-home-session-check">
-        <span aria-hidden="true" />
-        <p>Opening WhenIsDue...</p>
-      </main>
-    )
-  }
-
   return <HomePage onNavigate={navigate} />
 }
 
-const vaHomepageQuestions = [
-  'Who am I still waiting on?',
-  'What did I promise to send?',
-  'Which follow-up is overdue?',
-  'What needs my attention first?',
-  'Can I finish the day without forgetting something?',
-]
-
-function RotatingVaQuestion() {
-  const [questionIndex, setQuestionIndex] = useState(0)
-  const [visibleText, setVisibleText] = useState('')
-  const [deleting, setDeleting] = useState(false)
-
-  useEffect(() => {
-    const question = vaHomepageQuestions[questionIndex]
-    const isComplete = visibleText === question
-    const isEmpty = visibleText.length === 0
-
-    const delay = deleting ? 38 : 72
-    const pause = isComplete && !deleting ? 3500 : isEmpty && deleting ? 500 : delay
-
-    const timer = window.setTimeout(() => {
-      if (isComplete && !deleting) {
-        setDeleting(true)
-        return
-      }
-
-      if (deleting && isEmpty) {
-        setDeleting(false)
-        setQuestionIndex((current) => (current + 1) % vaHomepageQuestions.length)
-        return
-      }
-
-      setVisibleText(
-        deleting
-          ? question.slice(0, Math.max(0, visibleText.length - 1))
-          : question.slice(0, visibleText.length + 1),
-      )
-    }, pause)
-
-    return () => window.clearTimeout(timer)
-  }, [deleting, questionIndex, visibleText])
-
-  return (
-    <div className="va-question-demo" aria-hidden="true">
-      <span>VAs ask themselves every day</span>
-      <p>
-        “{visibleText}
-        <b className="va-question-cursor">|</b>”
-      </p>
-    </div>
-  )
-}
 
 function HomePage({ onNavigate }: NavigationProps) {
-  return (
-    <main className="page-shell va-home-page va-public-home-compact">
-      <header className="va-home-header">
-        <a
-          className="va-home-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img
-            className="whenisdue-brand-logo"
-            src="/whenisdue-logo.png"
-            alt="WhenIsDue"
-          />
-        </a>
+  const currentTime = useCurrentMinute()
+  const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
+  const commonBusinessDays = useMemo(
+    () =>
+      [3, 5, 7, 10].map((dayCount) => ({
+        dayCount,
+        date: addBusinessDays(today, dayCount),
+      })),
+    [today],
+  )
 
-        <nav className="va-home-nav" aria-label="Main navigation">
+  return (
+    <main className="page-shell date-home-page">
+      <section className="date-home-hero" aria-labelledby="date-home-title">
+        <header className="date-home-header">
           <a
-            href="/calculators"
+            className="date-home-brand"
+            href="/"
             onClick={(event) => {
               event.preventDefault()
-              onNavigate('/calculators')
+              onNavigate('/')
             }}
           >
-            Calculators
+            WhenIsDue
           </a>
-        </nav>
-      </header>
 
-      <section className="va-compact-public-hero" aria-labelledby="homepage-title">
-        <div className="va-compact-public-copy">
-          <p className="va-home-audience">For virtual assistants</p>
-
-          <RotatingVaQuestion />
-
-          <h1 id="homepage-title">Know what needs attention today.</h1>
-          <p className="va-home-subheadline">
-            See what is due, waiting, and ready for follow-up across every client.
-          </p>
-
-          <p className="sr-only">
-            WhenIsDue is a daily client-action workspace for virtual assistants.
-          </p>
-
-          <div className="va-home-actions">
+          <nav className="date-home-nav" aria-label="Main navigation">
             <a
-              className="va-home-primary"
-              href="/workspace?mode=sign-up"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/workspace?mode=sign-up')
-              }}
-            >
-              Create a free account
-            </a>
-            <a
-              className="va-home-secondary"
               href="/calculators"
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/calculators')
               }}
             >
-              Use a free calculator
+              Calculators
             </a>
-          </div>
-
-          <p className="va-home-returning">
-            Already have an account?{' '}
             <a
               href="/workspace"
               onClick={(event) => {
@@ -352,69 +211,466 @@ function HomePage({ onNavigate }: NavigationProps) {
                 onNavigate('/workspace')
               }}
             >
-              Sign in
+              VA Workspace
             </a>
-          </p>
+          </nav>
+        </header>
 
-          <p className="va-home-trust">Private account · Cloud synced · Export anytime</p>
-
-          <aside
-            className="va-typing-promo"
-            aria-labelledby="va-typing-promo-title"
-          >
-            <div>
-              <p className="va-typing-promo-kicker">Free VA tool</p>
-
-              <h2 id="va-typing-promo-title">
-                Type faster. Work with less friction.
-              </h2>
-
-              <p>
-                Build speed and accuracy for emails, chat replies, and client work.
-              </p>
-            </div>
-
-            <a
-              href="/typing"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/typing')
-              }}
-            >
-              Start practicing
-            </a>
-          </aside>
-        </div>
-
-        <div className="va-compact-product-proof" aria-label="Example of the Today action queue">
-          <div className="va-compact-proof-heading">
-            <div>
-              <span>Today</span>
-              <strong>3 actions need you</strong>
-            </div>
-          </div>
-
-          <article className="va-compact-proof-task is-first">
-            <p>Follow-up overdue by 2 days</p>
-            <h2>Confirm Friday’s appointment</h2>
-            <span>Richard</span>
-          </article>
-
-          <article className="va-compact-proof-task">
-            <p>Deadline today</p>
-            <h3>Send updated appointment summary</h3>
-            <span>Jan</span>
-          </article>
-
-          <article className="va-compact-proof-task">
-            <p>Scheduled for today</p>
-            <h3>Review revised content calendar</h3>
-            <span>Acme Studio</span>
-          </article>
+        <div className="date-home-answer">
+          <p className="date-home-kicker">Today is</p>
+          <h1 id="date-home-title" className="date-home-date">
+            {formatPlainDate(today)}
+          </h1>
+          <p className="date-home-weekday">{formatWeekday(today)}</p>
+          <p className="date-home-timezone">{getLocalTimeZoneName()}</p>
         </div>
       </section>
 
+      <section className="date-home-business" aria-labelledby="date-home-business-title">
+        <div className="date-home-section-heading">
+          <h2 id="date-home-business-title">Business days from today</h2>
+          <a
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            Different date or number
+          </a>
+        </div>
+
+        <div className="date-home-business-grid">
+          {commonBusinessDays.map(({ dayCount, date }) => (
+            <a
+              key={dayCount}
+              className="date-home-business-answer"
+              href={`/${dayCount}-business-days-from-today`}
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate(`/${dayCount}-business-days-from-today`)
+              }}
+            >
+              <span>{dayCount} business days</span>
+              <strong>{formatPlainDate(date)}</strong>
+              <small>{formatWeekday(date)}</small>
+            </a>
+          ))}
+        </div>
+
+        <p className="date-home-rule">Weekends skipped. Public holidays included.</p>
+      </section>
+
+      <section className="date-home-tools" aria-labelledby="date-home-tools-title">
+        <h2 id="date-home-tools-title">What do you need to know?</h2>
+
+        <div className="date-home-tool-grid">
+          <a
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            <span>Business days</span>
+            <strong>When is it due?</strong>
+            <small>Skip weekends and find the exact date.</small>
+          </a>
+
+          <a
+            href="/return-window-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/return-window-calculator')
+            }}
+          >
+            <span>Returns</span>
+            <strong>Last day to return</strong>
+            <small>Calculate from the purchase or delivery date.</small>
+          </a>
+
+          <a
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            <span>Invoices</span>
+            <strong>Invoice due date</strong>
+            <small>Net 7, Net 15, Net 30, Net 45, and more.</small>
+          </a>
+
+          <a
+            href="/free-trial-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/free-trial-calculator')
+            }}
+          >
+            <span>Subscriptions</span>
+            <strong>When does my trial end?</strong>
+            <small>Find the end date before renewal.</small>
+          </a>
+        </div>
+      </section>
+
+      <section className="date-home-secondary" aria-label="WhenIsDue workspace">
+        <div>
+          <span>Need to keep track of deadlines?</span>
+          <strong>VA Workspace is still here.</strong>
+        </div>
+        <a
+          href="/workspace"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/workspace')
+          }}
+        >
+          Open workspace
+        </a>
+      </section>
+
       <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .date-home-page {
+          min-height: 100vh;
+        }
+
+        .date-home-hero {
+          width: min(100% - 32px, 1240px);
+          min-height: 72vh;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .date-home-header {
+          min-height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .date-home-brand {
+          color: #536c89;
+          font-size: 0.9rem;
+          font-weight: 900;
+          letter-spacing: 0.09em;
+          text-decoration: none;
+        }
+
+        .date-home-nav {
+          display: flex;
+          gap: 18px;
+          align-items: center;
+        }
+
+        .date-home-nav a {
+          color: #687c94;
+          font-size: 0.82rem;
+          font-weight: 700;
+          text-decoration: none;
+        }
+
+        .date-home-answer {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          padding: 34px 12px 54px;
+        }
+
+        .date-home-kicker {
+          margin: 0 0 10px;
+          color: #607793;
+          font-size: clamp(1.1rem, 2vw, 1.65rem);
+          font-weight: 800;
+        }
+
+        .date-home-date {
+          margin: 0;
+          max-width: 100%;
+          color: #0b1830;
+          font-size: clamp(4.7rem, 10.5vw, 9.5rem);
+          font-weight: 900;
+          line-height: 0.95;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .date-home-weekday {
+          margin: 18px 0 0;
+          color: #536981;
+          font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+        }
+
+        .date-home-timezone {
+          margin: 12px 0 0;
+          color: #8290a1;
+          font-size: 0.82rem;
+        }
+
+        .date-home-business,
+        .date-home-tools,
+        .date-home-secondary {
+          width: min(100% - 32px, 1080px);
+          margin: 0 auto;
+        }
+
+        .date-home-business {
+          padding: 42px 0 54px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .date-home-section-heading {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          align-items: baseline;
+          margin-bottom: 16px;
+        }
+
+        .date-home-section-heading h2,
+        .date-home-tools h2 {
+          margin: 0;
+          color: #18304c;
+          font-size: 1.35rem;
+        }
+
+        .date-home-section-heading a {
+          color: #657b95;
+          font-size: 0.78rem;
+          font-weight: 700;
+          text-decoration: none;
+        }
+
+        .date-home-business-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .date-home-business-answer {
+          min-height: 112px;
+          padding: 14px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 10px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-decoration: none;
+        }
+
+        .date-home-business-answer span {
+          color: #637a94;
+          font-size: 0.78rem;
+          font-weight: 800;
+        }
+
+        .date-home-business-answer strong {
+          margin-top: 5px;
+          color: #10213f;
+          font-size: 1.35rem;
+          line-height: 1.08;
+        }
+
+        .date-home-business-answer small {
+          margin-top: 3px;
+          color: #7a899b;
+        }
+
+        .date-home-rule {
+          margin: 8px 2px 0;
+          color: #8491a1;
+          font-size: 0.72rem;
+        }
+
+        .date-home-tools {
+          padding: 28px 0 56px;
+        }
+
+        .date-home-tools h2 {
+          margin-bottom: 16px;
+        }
+
+        .date-home-tool-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .date-home-tool-grid a {
+          min-height: 132px;
+          padding: 18px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.72);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-decoration: none;
+        }
+
+        .date-home-tool-grid span {
+          color: #74869a;
+          font-size: 0.72rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .date-home-tool-grid strong {
+          margin-top: 5px;
+          color: #17304c;
+          font-size: 1.18rem;
+        }
+
+        .date-home-tool-grid small {
+          margin-top: 5px;
+          color: #6d7f93;
+          line-height: 1.4;
+        }
+
+        .date-home-secondary {
+          margin-bottom: 34px;
+          padding: 18px 20px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+        }
+
+        .date-home-secondary div {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .date-home-secondary span {
+          color: #7b899a;
+          font-size: 0.76rem;
+        }
+
+        .date-home-secondary strong {
+          color: #2e4662;
+          font-size: 0.95rem;
+        }
+
+        .date-home-secondary a {
+          color: #536b87;
+          font-size: 0.8rem;
+          font-weight: 800;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        @media (max-width: 760px) {
+          .date-home-hero {
+            width: min(100% - 24px, 1240px);
+            min-height: 68vh;
+          }
+
+          .date-home-header {
+            min-height: 52px;
+          }
+
+          .date-home-nav {
+            gap: 12px;
+          }
+
+          .date-home-nav a {
+            font-size: 0.72rem;
+          }
+
+          .date-home-answer {
+            padding: 28px 0 38px;
+          }
+
+          .date-home-kicker {
+            font-size: 1rem;
+          }
+
+          .date-home-date {
+            font-size: clamp(3.7rem, 17vw, 5.8rem);
+            line-height: 0.98;
+          }
+
+          .date-home-weekday {
+            margin-top: 12px;
+            font-size: 1.7rem;
+          }
+
+          .date-home-business,
+          .date-home-tools,
+          .date-home-secondary {
+            width: min(100% - 24px, 1080px);
+          }
+
+          .date-home-business {
+            padding: 30px 0 40px;
+          }
+
+          .date-home-section-heading {
+            align-items: flex-start;
+          }
+
+          .date-home-business-grid {
+            grid-template-columns: 1fr;
+            gap: 5px;
+          }
+
+          .date-home-business-answer {
+            min-height: 58px;
+            padding: 8px 11px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-areas:
+              "label date"
+              "label weekday";
+            align-items: center;
+          }
+
+          .date-home-business-answer span {
+            grid-area: label;
+          }
+
+          .date-home-business-answer strong {
+            grid-area: date;
+            margin: 0;
+            text-align: right;
+            font-size: 1.12rem;
+          }
+
+          .date-home-business-answer small {
+            grid-area: weekday;
+            margin: 0;
+            text-align: right;
+          }
+
+          .date-home-tool-grid {
+            grid-template-columns: 1fr;
+            gap: 7px;
+          }
+
+          .date-home-tool-grid a {
+            min-height: 104px;
+          }
+
+          .date-home-secondary {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+        }
+      `}</style>
     </main>
   )
 }
@@ -3785,10 +4041,10 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
   }
 
   return {
-    title: 'WhenIsDue - Daily Workspace for Virtual Assistants',
-    description: 'A simple daily workspace for virtual assistants to manage client actions, deadlines, waiting items, follow-ups, and time zones.',
-    openGraphDescription: 'Open one workspace and know the next client action, deadline, or follow-up that needs your attention.',
-    twitterDescription: 'A daily client action queue for virtual assistants.',
+    title: 'WhenIsDue - Instant Date and Deadline Answers',
+    description: 'Get instant answers for business days, return deadlines, invoice due dates, free trials, and other common date questions.',
+    openGraphDescription: 'WhenIsDue gives you the date first: business days, return deadlines, invoice due dates, trials, and more.',
+    twitterDescription: 'Instant date and deadline answers without unnecessary steps.',
     path: '/',
   }
 }
@@ -3831,7 +4087,7 @@ function getRouteStructuredData(
     '@type': 'WebSite',
     name: 'WhenIsDue',
     url: 'https://www.whenisdue.com/',
-    description: 'A simple daily workspace for virtual assistants to manage client actions, deadlines, waiting items, follow-ups, and time zones.',
+    description: 'Instant date and deadline answers for business days, returns, invoices, trials, and other common date questions.',
     inLanguage: 'en',
   }
 
@@ -3840,9 +4096,9 @@ function getRouteStructuredData(
       website,
       {
         '@context': 'https://schema.org',
-        '@type': 'SoftwareApplication',
+        '@type': 'WebApplication',
         name: 'WhenIsDue',
-        applicationCategory: 'BusinessApplication',
+        applicationCategory: 'UtilitiesApplication',
         operatingSystem: 'Web',
         url: canonicalUrl,
         description: metadata.description,
@@ -3850,10 +4106,6 @@ function getRouteStructuredData(
           '@type': 'Offer',
           price: '0',
           priceCurrency: 'USD',
-        },
-        audience: {
-          '@type': 'Audience',
-          audienceType: 'Virtual assistants',
         },
       },
     ]
