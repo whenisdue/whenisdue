@@ -1801,9 +1801,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   const returnDeadline = parsedPurchaseDate && parsedReturnWindow !== null && !validationMessage
     ? addCalendarDays(parsedPurchaseDate, Math.max(parsedReturnWindow - 1, 0))
     : null
-  const calendarDaysFromPurchase = parsedPurchaseDate && returnDeadline
-    ? daysBetween(parsedPurchaseDate, returnDeadline)
-    : 0
   const canSave = Boolean(returnDeadline && parsedPurchaseDate && !validationMessage && !titleValidationMessage)
 
   function saveReturnDeadline() {
