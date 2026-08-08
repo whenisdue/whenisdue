@@ -645,6 +645,14 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
   )
   const [message, setMessage] = useState<string | null>(null)
 
+  const recentOnly = useMemo(
+    () => {
+      const favoriteIds = new Set(favorites.map((item) => item.id))
+      return recents.filter((item) => !favoriteIds.has(item.id))
+    },
+    [favorites, recents],
+  )
+
   useEffect(() => {
     const refresh = () => {
       setFavorites(readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY))
@@ -673,7 +681,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
     setMessage(copied ? 'Exact calculation link copied.' : 'Link copy is not available in this browser.')
   }
 
-  const hasItems = favorites.length > 0 || recents.length > 0
+  const hasItems = favorites.length > 0 || recentOnly.length > 0
 
   return (
     <main className="page-shell saved-calculations-page">
@@ -754,7 +762,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
             </div>
           ) : null}
 
-          {recents.length > 0 ? (
+          {recentOnly.length > 0 ? (
             <div className="saved-calculations-group">
               <div className="saved-calculations-group-heading">
                 <div>
@@ -773,7 +781,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
               </div>
 
               <div className="saved-calculations-list">
-                {recents.map((item) => (
+                {recentOnly.map((item) => (
                   <article className="saved-calculation-row" key={item.id}>
                     <button
                       type="button"
@@ -1517,6 +1525,14 @@ function HomePage({ onNavigate }: NavigationProps) {
     readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
   )
 
+  const recentOnlyCalculations = useMemo(
+    () => {
+      const favoriteIds = new Set(favoriteCalculations.map((item) => item.id))
+      return recentCalculations.filter((item) => !favoriteIds.has(item.id))
+    },
+    [favoriteCalculations, recentCalculations],
+  )
+
   useEffect(() => {
     saveHolidayCalendar(holidayCalendar)
   }, [holidayCalendar])
@@ -1688,7 +1704,7 @@ function HomePage({ onNavigate }: NavigationProps) {
 
       <AskWhenBox onNavigate={onNavigate} holidayCalendar={holidayCalendar} />
 
-      {(favoriteCalculations.length > 0 || recentCalculations.length > 0) ? (
+      {(favoriteCalculations.length > 0 || recentOnlyCalculations.length > 0) ? (
         <section className="date-home-saved" aria-labelledby="date-home-saved-title">
           <div className="date-home-section-heading">
             <div>
@@ -1744,7 +1760,7 @@ function HomePage({ onNavigate }: NavigationProps) {
             </div>
           ) : null}
 
-          {recentCalculations.length > 0 ? (
+          {recentOnlyCalculations.length > 0 ? (
             <div className="date-home-saved-group">
               <div className="date-home-saved-group-heading">
                 <h3>Recent</h3>
@@ -1759,7 +1775,7 @@ function HomePage({ onNavigate }: NavigationProps) {
                 </button>
               </div>
               <div className="date-home-saved-grid">
-                {recentCalculations.slice(0, 6).map((item) => (
+                {recentOnlyCalculations.slice(0, 6).map((item) => (
                   <article className="date-home-saved-card" key={item.id}>
                     <a
                       href={item.url}
