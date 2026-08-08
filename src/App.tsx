@@ -23,6 +23,14 @@ import {
   todayInputValue,
   toDateKey,
 } from './dateHelpers'
+import {
+  type HolidayCalendarId,
+  calculateBusinessDaysWithCalendar,
+  countBusinessDaysBetweenWithCalendar,
+  getHolidayCalendarOption,
+  holidayCalendarOptions,
+  isHolidayCalendarId,
+} from './holidayCalendars'
 
 type SavedDeadline = {
   id: string
@@ -1463,6 +1471,9 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const [businessDays, setBusinessDays] = useState(() =>
     getInitialPositiveIntegerQueryParam('days', '3', getAmountLimit('business')),
   )
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
   const [title, setTitle] = useState(getDefaultTitle('business'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
@@ -1470,16 +1481,22 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const parsedStartDate = parsePlainDate(startDate)
   const parsedBusinessDays = parseInteger(businessDays)
   const validationMessage = getBusinessDaysValidationMessage(parsedStartDate, parsedBusinessDays, title)
-  const dueDate = parsedStartDate && parsedBusinessDays !== null && !validationMessage
-    ? addBusinessDays(parsedStartDate, parsedBusinessDays)
-    : null
+  const businessCalculation =
+    parsedStartDate && parsedBusinessDays !== null && !validationMessage
+      ? calculateBusinessDaysWithCalendar(parsedStartDate, parsedBusinessDays, holidayCalendar)
+      : null
+  const dueDate = businessCalculation?.date ?? null
   const calendarDaysAway = parsedStartDate && dueDate ? daysBetween(parsedStartDate, dueDate) : 0
   const daysRemaining = dueDate ? daysBetween(today, dueDate) : 0
   const canSave = Boolean(dueDate && title.trim() && !validationMessage)
 
   useEffect(() => {
-    syncShareableQueryParams({ start: startDate, days: businessDays })
-  }, [startDate, businessDays])
+    syncShareableQueryParams({
+      start: startDate,
+      days: businessDays,
+      calendar: holidayCalendarQueryValue(holidayCalendar),
+    })
+  }, [startDate, businessDays, holidayCalendar])
 
   function saveBusinessDeadline() {
     if (!dueDate || !parsedStartDate || !title.trim()) {
@@ -1528,7 +1545,11 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
       <section className="business-today-answers business-bam-answers" aria-label="Business day answers from today">
         <div className="business-bam-list">
           {[3, 5, 7, 10].map((dayCount) => {
-            const answerDate = addBusinessDays(today, dayCount)
+            const answerDate = calculateBusinessDaysWithCalendar(
+              today,
+              dayCount,
+              holidayCalendar,
+            ).date
 
             return (
               <article className="business-bam-row" key={dayCount}>
@@ -1539,7 +1560,23 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             )
           })}
         </div>
-        <p className="business-bam-rule">Weekends skipped. Public holidays still count as weekdays.</p>
+        <p className="business-bam-rule">
+          {holidayCalendar === 'none'
+            ? 'Weekends skipped. Public holidays still count as weekdays.'
+            : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
+        </p>
+
+        <HolidayCalendarSelect
+          value={holidayCalendar}
+          onChange={(nextCalendar) => {
+            setHolidayCalendar(nextCalendar)
+            trackWhenIsDueEvent('holiday_calendar_changed', {
+              context: 'business_days',
+              value: nextCalendar,
+            })
+          }}
+          compact
+        />
       </section>
 
       <section className="business-workspace" aria-label="Custom business days calculator">
@@ -1611,7 +1648,40 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                   {formatCalendarDistance(calendarDaysAway)}
                 </span>
               </div>
-              <p className="result-note">Weekends skipped. Public holidays are not removed.</p>
+              <p className="result-note">
+                {holidayCalendar === 'none'
+                  ? 'Weekends skipped. Public holidays are not removed.'
+                  : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
+              </p>
+
+              {parsedStartDate && businessCalculation ? (
+                <CalculationReceipt
+                  analyticsContext="business_days"
+                  rows={[
+                    {
+                      label: 'Start date',
+                      value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}`,
+                    },
+                    {
+                      label: 'Business days added',
+                      value: String(parsedBusinessDays),
+                    },
+                    {
+                      label: 'Holiday calendar',
+                      value: getHolidayCalendarOption(holidayCalendar).label,
+                    },
+                    {
+                      label: 'Skipped holidays',
+                      value: formatSkippedHolidaySummary(businessCalculation.skippedHolidays),
+                    },
+                    {
+                      label: 'Result',
+                      value: `${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}`,
+                    },
+                  ]}
+                />
+              ) : null}
+
               <details className="result-save-details">
                 <summary>Save this date</summary>
                 <div className="business-save">
@@ -1657,7 +1727,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             This calculator counts Monday through Friday. Saturdays and Sundays are skipped. The starting date is treated as day zero, so adding 1 business day moves to the next weekday.
           </p>
           <p>
-            Public holidays, bank holidays, and company closures are not removed. If an official deadline depends on holidays or local rules, check the original terms or calendar.
+            By default, public holidays still count as weekdays. You can optionally choose a supported holiday calendar above. Local, provincial, state, proclamation-based, and company-specific closures can still differ, so check the original terms when a deadline matters.
           </p>
         </article>
 
@@ -1685,7 +1755,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             <dd>No. When you add business days here, the start date is day zero. One business day from today means the next weekday.</dd>
 
             <dt>Are public holidays removed?</dt>
-            <dd>No. This calculator skips weekends only. Check the relevant holiday calendar if holidays affect your deadline.</dd>
+            <dd>Not by default. Choose a supported public-holiday calendar to skip known holidays as well as weekends.</dd>
 
             <dt>Why does one business day after Friday land on Monday?</dt>
             <dd>Saturday and Sunday are skipped, so Monday is the next business day.</dd>
@@ -1947,7 +2017,20 @@ type BusinessDaysFromTodayPageProps = NavigationProps & {
 function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTodayPageProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
-  const answerDate = useMemo(() => addBusinessDays(today, dayCount), [today, dayCount])
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+  const answerCalculation = useMemo(
+    () => calculateBusinessDaysWithCalendar(today, dayCount, holidayCalendar),
+    [today, dayCount, holidayCalendar],
+  )
+  const answerDate = answerCalculation.date
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      calendar: holidayCalendarQueryValue(holidayCalendar),
+    })
+  }, [holidayCalendar])
 
   const relatedDayCounts = useMemo(() => {
     const primaryCounts = [3, 5, 7, 10]
@@ -1965,9 +2048,13 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
     () =>
       relatedDayCounts.map((relatedDayCount) => ({
         dayCount: relatedDayCount,
-        date: addBusinessDays(today, relatedDayCount),
+        date: calculateBusinessDaysWithCalendar(
+          today,
+          relatedDayCount,
+          holidayCalendar,
+        ).date,
       })),
-    [relatedDayCounts, today],
+    [relatedDayCounts, today, holidayCalendar],
   )
 
   return (
@@ -2009,8 +2096,49 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
           </p>
 
           <p className="three-business-rule">
-            Weekends skipped. Public holidays still count as weekdays.
+            {holidayCalendar === 'none'
+              ? 'Weekends skipped. Public holidays still count as weekdays.'
+              : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
           </p>
+
+          <HolidayCalendarSelect
+            value={holidayCalendar}
+            onChange={(nextCalendar) => {
+              setHolidayCalendar(nextCalendar)
+              trackWhenIsDueEvent('holiday_calendar_changed', {
+                context: 'business_days_from_today',
+                days: dayCount,
+                value: nextCalendar,
+              })
+            }}
+            compact
+          />
+
+          <CalculationReceipt
+            analyticsContext="business_days_from_today"
+            rows={[
+              {
+                label: 'Today',
+                value: `${formatWeekday(today)}, ${formatPlainDate(today)}`,
+              },
+              {
+                label: 'Business days added',
+                value: String(dayCount),
+              },
+              {
+                label: 'Holiday calendar',
+                value: getHolidayCalendarOption(holidayCalendar).label,
+              },
+              {
+                label: 'Skipped holidays',
+                value: formatSkippedHolidaySummary(answerCalculation.skippedHolidays),
+              },
+              {
+                label: 'Result',
+                value: `${formatWeekday(answerDate)}, ${formatPlainDate(answerDate)}`,
+              },
+            ]}
+          />
         </div>
       </section>
 
@@ -2023,7 +2151,13 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
               type="button"
               className="three-business-related-card"
               key={relatedDayCount}
-              onClick={() => onNavigate(`/${relatedDayCount}-business-days-from-today`)}
+              onClick={() =>
+                onNavigate(
+                  `/${relatedDayCount}-business-days-from-today${
+                    holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                  }`,
+                )
+              }
             >
               <span>{relatedDayCount} business days</span>
               <strong>{formatPlainDate(date)}</strong>
@@ -2035,7 +2169,13 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
         <button
           type="button"
           className="secondary-button three-business-custom-button"
-          onClick={() => onNavigate('/business-days-calculator')}
+          onClick={() =>
+            onNavigate(
+              `/business-days-calculator${
+                holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+              }`,
+            )
+          }
         >
           Different date or number
         </button>
@@ -2046,7 +2186,7 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
           <h2>How this date is calculated</h2>
           <p>
             Monday through Friday count as business days. Saturdays and Sundays are skipped.
-            Public holidays are not removed, so check the official calendar if a holiday affects your deadline.
+            By default, public holidays still count as weekdays. Choose a supported holiday calendar above to skip known holidays too. Calendar coverage varies by country, so verify local rules when a deadline matters.
           </p>
         </article>
       </section>
@@ -2313,33 +2453,6 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
 }
 
 
-function countBusinessDaysBetween(start: PlainDate, end: PlainDate) {
-  const startKey = toDateKey(start)
-  const endKey = toDateKey(end)
-
-  if (startKey === endKey) {
-    return 0
-  }
-
-  const earlier = startKey < endKey ? start : end
-  const later = startKey < endKey ? end : start
-
-  let count = 0
-  let cursor = addCalendarDays(earlier, 1)
-
-  while (toDateKey(cursor) <= toDateKey(later)) {
-    const weekday = new Date(`${toDateKey(cursor)}T12:00:00`).getDay()
-
-    if (weekday !== 0 && weekday !== 6) {
-      count += 1
-    }
-
-    cursor = addCalendarDays(cursor, 1)
-  }
-
-  return count
-}
-
 type ResultActionsProps = {
   title: string
   date: PlainDate
@@ -2569,17 +2682,29 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
       toDateKey(addCalendarDays(getTodayPlainDate(new Date()), 14)),
     ),
   )
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
 
   const parsedStartDate = parsePlainDate(startDate)
   const parsedEndDate = parsePlainDate(endDate)
-  const businessDays =
+  const businessDayCalculation =
     parsedStartDate && parsedEndDate
-      ? countBusinessDaysBetween(parsedStartDate, parsedEndDate)
+      ? countBusinessDaysBetweenWithCalendar(
+          parsedStartDate,
+          parsedEndDate,
+          holidayCalendar,
+        )
       : null
+  const businessDays = businessDayCalculation?.count ?? null
 
   useEffect(() => {
-    syncShareableQueryParams({ start: startDate, end: endDate })
-  }, [startDate, endDate])
+    syncShareableQueryParams({
+      start: startDate,
+      end: endDate,
+      calendar: holidayCalendarQueryValue(holidayCalendar),
+    })
+  }, [startDate, endDate, holidayCalendar])
 
   return (
     <main className="page-shell business-between-page">
@@ -2639,6 +2764,18 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
             </label>
           </div>
 
+          <HolidayCalendarSelect
+            value={holidayCalendar}
+            onChange={(nextCalendar) => {
+              setHolidayCalendar(nextCalendar)
+              trackWhenIsDueEvent('holiday_calendar_changed', {
+                context: 'business_days_between',
+                value: nextCalendar,
+              })
+            }}
+            compact
+          />
+
           {businessDays !== null ? (
             <>
               <h1 id="business-between-title" className="business-between-number">{businessDays}</h1>
@@ -2649,7 +2786,9 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
                 Start date excluded · End date included · Weekends skipped
               </p>
               <p className="business-between-note">
-                Public holidays still count as weekdays.
+                {holidayCalendar === 'none'
+                  ? 'Public holidays still count as weekdays.'
+                  : `${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays are excluded.`}
               </p>
               {parsedStartDate && parsedEndDate ? (
                 <CalculationReceipt
@@ -2659,7 +2798,16 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
                     { label: 'End date', value: `${formatWeekday(parsedEndDate)}, ${formatPlainDate(parsedEndDate)}` },
                     { label: 'Counting rule', value: 'Start excluded · End included' },
                     { label: 'Weekend rule', value: 'Saturday and Sunday skipped' },
-                    { label: 'Public holidays', value: 'Still counted as weekdays' },
+                    {
+                      label: 'Holiday calendar',
+                      value: getHolidayCalendarOption(holidayCalendar).label,
+                    },
+                    {
+                      label: 'Skipped holidays',
+                      value: formatSkippedHolidaySummary(
+                        businessDayCalculation?.skippedHolidays ?? [],
+                      ),
+                    },
                     { label: 'Result', value: `${businessDays} ${businessDays === 1 ? 'business day' : 'business days'}` },
                   ]}
                 />
@@ -2677,7 +2825,7 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
         <h2>How this count works</h2>
         <p>
           WhenIsDue counts weekdays after the earlier date through the later date. Saturdays and Sundays are skipped.
-          Public holidays are not excluded yet.
+          Public holidays still count by default, or you can choose a supported holiday calendar above to exclude known holidays.
         </p>
       </section>
 
@@ -3632,6 +3780,123 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   )
 }
 
+
+
+function getInitialHolidayCalendarQueryParam(): HolidayCalendarId {
+  const value = new URLSearchParams(window.location.search).get('calendar')
+  return isHolidayCalendarId(value) ? value : 'none'
+}
+
+function holidayCalendarQueryValue(calendar: HolidayCalendarId) {
+  return calendar === 'none' ? null : calendar
+}
+
+function formatSkippedHolidaySummary(
+  skippedHolidays: Array<{ date: string; name: string }>,
+) {
+  if (skippedHolidays.length === 0) {
+    return 'None encountered'
+  }
+
+  const visible = skippedHolidays.slice(0, 6).map((holiday) => {
+    const parsed = parsePlainDate(holiday.date)
+    return parsed ? `${holiday.name} — ${formatPlainDate(parsed)}` : `${holiday.name} — ${holiday.date}`
+  })
+
+  const remaining = skippedHolidays.length - visible.length
+
+  return remaining > 0
+    ? `${visible.join('; ')}; +${remaining} more`
+    : visible.join('; ')
+}
+
+type HolidayCalendarSelectProps = {
+  value: HolidayCalendarId
+  onChange: (value: HolidayCalendarId) => void
+  compact?: boolean
+}
+
+function HolidayCalendarSelect({
+  value,
+  onChange,
+  compact = false,
+}: HolidayCalendarSelectProps) {
+  const selected = getHolidayCalendarOption(value)
+
+  return (
+    <>
+      <label className={`holiday-calendar-control ${compact ? 'is-compact' : ''}`}>
+        <span>Public holidays</span>
+        <select
+          value={value}
+          onChange={(event) => {
+            const next = event.target.value
+            if (!isHolidayCalendarId(next)) return
+            onChange(next)
+          }}
+        >
+          {holidayCalendarOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <small>{selected.note}</small>
+      </label>
+
+      <style>{`
+        .holiday-calendar-control {
+          display: grid;
+          gap: 5px;
+          min-width: 0;
+        }
+
+        .holiday-calendar-control > span {
+          color: #526a85;
+          font-size: 0.78rem;
+          font-weight: 800;
+        }
+
+        .holiday-calendar-control select {
+          width: 100%;
+          min-height: 44px;
+          padding: 8px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 9px;
+          background: #fff;
+          color: #223b59;
+          font: inherit;
+          font-size: 0.86rem;
+        }
+
+        .holiday-calendar-control small {
+          max-width: 620px;
+          color: #7a8999;
+          font-size: 0.7rem;
+          line-height: 1.4;
+        }
+
+        .holiday-calendar-control.is-compact {
+          width: min(100%, 520px);
+          margin: 12px auto 0;
+          text-align: left;
+        }
+
+        .holiday-calendar-control.is-compact > span,
+        .holiday-calendar-control.is-compact small {
+          text-align: center;
+        }
+
+        @media (max-width: 560px) {
+          .holiday-calendar-control.is-compact > span,
+          .holiday-calendar-control.is-compact small {
+            text-align: left;
+          }
+        }
+      `}</style>
+    </>
+  )
+}
 
 function getInitialInvoiceTermQueryParam(name: string, fallback: InvoiceTerm): InvoiceTerm {
   const value = new URLSearchParams(window.location.search).get(name) as InvoiceTerm | null
