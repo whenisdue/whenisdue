@@ -849,7 +849,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
     calendar: { title: 'Add days', helper: 'Find a future date' },
     business: { title: 'Business days', helper: 'Skip weekends' },
     invoice: { title: 'Invoice', helper: 'Calculate payment terms' },
-    trial: { title: 'Free trial', helper: 'Know when to cancel' },
+    trial: { title: 'Free trial', helper: 'Estimate trial end' },
     return: { title: 'Return', helper: 'Find the last return day' },
   }
 
@@ -980,15 +980,15 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
       <section className="dual-intent-hero" aria-labelledby="homepage-title">
         <IdentityRow onNavigate={onNavigate} />
 
-        <div className="dual-intent-grid">
+        <div className="dual-intent-grid utility-hub-hero">
           <div className="dual-intent-copy">
             <p className="friendly-eyebrow">
-              <span aria-hidden="true">✓</span>
-              Free deadline calculators
+              <span aria-hidden="true">◷</span>
+              Date and deadline tools
             </p>
-            <h1 id="homepage-title" tabIndex={-1}>Calculate a date quickly and accurately.</h1>
+            <h1 id="homepage-title" tabIndex={-1}>Choose what you need to know.</h1>
             <p className="friendly-subtitle">
-              Choose a calculator, enter the details, and get a clear date without creating an account.
+              Business days, invoice due dates, returns, free trials, and date differences — with the answer shown as quickly as possible.
             </p>
 
             <div className="dual-intent-actions">
@@ -1000,43 +1000,42 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
                   focusHomeSection('calculator', 'calculator-heading')
                 }}
               >
-                Calculate a due date
-              </a>
-              <a
-                className="workspace-secondary-choice"
-                href="/workspace"
-                onClick={(event) => {
-                  event.preventDefault()
-                  onNavigate('/workspace')
-                }}
-              >
-                Open VA Workspace
+                Open quick calculator
               </a>
             </div>
-
-            <p className="workspace-trust-line">
-              Free calculators <span aria-hidden="true">·</span> Private VA account
-              <span aria-hidden="true">·</span> Export your workspace anytime
-            </p>
           </div>
 
-          <div className="dual-intent-proof" aria-label="WhenIsDue product choices">
-            <article className="intent-proof-card proof-calculator">
+          <div className="dual-intent-proof utility-directory-cards" aria-label="Popular WhenIsDue tools">
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/business-days-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/business-days-calculator')
+              }}
+            >
               <span className="intent-proof-icon" aria-hidden="true">◷</span>
               <div>
-                <p>Quick utility</p>
-                <h2>Find the exact date</h2>
-                <span>Calendar days, business days, invoices, trials, and returns.</span>
+                <p>Business days</p>
+                <h2>Add or count working days</h2>
+                <span>Skip weekends and see the exact date.</span>
               </div>
-            </article>
-            <article className="intent-proof-card proof-workspace">
-              <span className="intent-proof-icon" aria-hidden="true">✓</span>
+            </a>
+            <a
+              className="intent-proof-card proof-workspace"
+              href="/invoice-due-date-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/invoice-due-date-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">#</span>
               <div>
-                <p>Daily workspace</p>
-                <h2>Know what needs attention</h2>
-                <span>Keep every client’s next action, due date, and follow-up together.</span>
+                <p>Invoices</p>
+                <h2>Calculate payment due dates</h2>
+                <span>Net 7, 15, 30, 45, 60, 90, and EOM.</span>
               </div>
-            </article>
+            </a>
           </div>
         </div>
       </section>
@@ -1167,7 +1166,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
 
                 {cancelByDate ? (
                   <p className="friendly-extra-result">
-                    Suggested safe cancel-by date:
+                    Suggested cancellation reminder:
                     <strong>{formatPlainDate(cancelByDate)}</strong>
                   </p>
                 ) : null}
@@ -1408,7 +1407,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <span className="tool-card-icon" aria-hidden="true">★</span>
             <span>
               <strong>Free trial</strong>
-              <small>Find a safe cancel-by date</small>
+              <small>Set a one-day-before reminder</small>
             </span>
             <b aria-hidden="true">→</b>
           </a>
@@ -1448,7 +1447,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
       <section className="trust-strip" aria-label="Privacy and ease of use">
         <span><b aria-hidden="true">✓</b> Free to use</span>
         <span><b aria-hidden="true">⌁</b> Calculator dates stay on this device</span>
-        <span><b aria-hidden="true">○</b> VA Workspace uses a private account</span>
+        <span><b aria-hidden="true">○</b> No account is required for calculations</span>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
@@ -1854,6 +1853,11 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           margin-bottom: 4px;
         }
 
+        .business-page .quick-picks button {
+          min-width: 44px;
+          min-height: 44px;
+        }
+
         @media (max-width: 760px) {
           .business-answer-intro {
             padding-top: 10px;
@@ -1973,9 +1977,9 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
         </div>
 
         <div className="three-business-answer">
-          <p id="business-days-from-today-title" className="three-business-question">
+          <h1 id="business-days-from-today-title" className="three-business-question">
             {dayCount} business days from today
-          </p>
+          </h1>
 
           <p className="three-business-date" aria-label={`Answer: ${formatPlainDate(answerDate)}`}>
             {formatPlainDate(answerDate)}
@@ -2106,12 +2110,12 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
         .three-business-date {
           margin: 0;
           max-width: 100%;
-          font-size: clamp(4.4rem, 10.4vw, 9.8rem);
+          font-size: clamp(4rem, 8.2vw, 7.6rem);
           font-weight: 900;
           line-height: 0.94;
           letter-spacing: -0.055em;
           color: #0c1931;
-          text-wrap: balance;
+          white-space: nowrap;
         }
 
         .three-business-weekday {
@@ -2230,8 +2234,10 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
           }
 
           .three-business-date {
-            font-size: clamp(3.55rem, 17vw, 5.6rem);
+            font-size: clamp(3.2rem, 15vw, 5rem);
             line-height: 0.98;
+            white-space: normal;
+            text-wrap: balance;
           }
 
           .three-business-weekday {
@@ -2413,7 +2419,7 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
         }
 
         .result-actions button {
-          min-height: 38px;
+          min-height: 44px;
           padding: 7px 11px;
           border: 1px solid rgba(19, 38, 70, 0.14);
           border-radius: 8px;
@@ -2893,7 +2899,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               <p className="due-date">{formatPlainDate(trialEndDate)}</p>
               <div className="result-meta result-meta-stack">
                 <span>Trial ends on {formatPlainDate(trialEndDate)}</span>
-                <span>Last day to cancel: {formatPlainDate(cancelByDate)}</span>
+                <span>Suggested reminder: {formatPlainDate(cancelByDate)}</span>
                 <span className="status-badge status-comfortable">
                   {calendarDaysFromStart} {calendarDaysFromStart === 1 ? 'calendar day' : 'calendar days'} from the start date
                 </span>
@@ -2905,13 +2911,13 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
                   { label: 'Trial length', value: `${parsedTrialLength} ${parsedTrialLength === 1 ? 'day' : 'days'}` },
                   { label: 'Counting rule', value: 'Full trial length added to the start date' },
                   { label: 'Trial ends', value: `${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}` },
-                  { label: 'Suggested cancel-by', value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}` },
+                  { label: 'Suggested reminder', value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}` },
                 ]}
               />
               <ResultActions
                 title="Free trial ends"
                 date={trialEndDate}
-                details={`Last day to cancel: ${formatPlainDate(cancelByDate)}`}
+                details={`Suggested reminder: ${formatPlainDate(cancelByDate)}`}
               />
               <details className="result-save-details">
                 <summary>Save this date</summary>
@@ -2963,6 +2969,11 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           justify-content: center;
         }
 
+        .free-trial-page .quick-picks button {
+          min-width: 44px;
+          min-height: 44px;
+        }
+
         @media (max-width: 760px) {
           .free-trial-page .business-workspace {
             gap: 10px;
@@ -2983,7 +2994,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
         <article>
           <h2>How this calculator works</h2>
           <p>
-            Enter the day your trial starts and the number of days in the trial. The calculator shows the trial end date and the last day to cancel before the renewal date. Always check the company's official cancellation terms because some services renew earlier or use a specific billing time.
+            Enter the day your trial starts and the number of days in the trial. The calculator shows the trial end date and the suggested one-day-before reminder. Always check the company's official cancellation terms because some services renew earlier or use a specific billing time.
           </p>
         </article>
 
@@ -2999,7 +3010,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
         <article>
           <h2>Free trial calculation example</h2>
           <p>
-            Suppose a 14-day trial starts on May 1. Using this calculator's date-addition method, the trial end date is May 15 and the suggested cancel-by date is May 14. This treats the start date as day zero. A service may instead count the signup date as day one, so its displayed renewal date should take priority.
+            Suppose a 14-day trial starts on May 1. Using this calculator's date-addition method, the trial end date is May 15 and the suggested reminder date is May 14. This treats the start date as day zero. A service may instead count the signup date as day one, so its displayed renewal date should take priority.
           </p>
         </article>
 
@@ -3019,7 +3030,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           <dl>
             <dt>Does the signup day count as the first day?</dt>
             <dd>This calculator adds the full trial length to the start date. Services may use a different counting convention, so check the renewal date displayed by the provider.</dd>
-            <dt>Why is the suggested cancel-by date one day earlier?</dt>
+            <dt>Why is the suggested reminder one day earlier?</dt>
             <dd>It provides a simple planning buffer before the calculated end date. It is not a guarantee that every provider will accept cancellation until that date.</dd>
             <dt>Does uninstalling an app cancel a free trial?</dt>
             <dd>Usually, uninstalling an app and cancelling its subscription are separate actions. Use the provider, App Store, or Google Play subscription controls and confirm the cancellation.</dd>
@@ -3226,6 +3237,17 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           display: flex;
           flex-direction: column;
           justify-content: center;
+        }
+
+        .return-window-page .quick-picks button {
+          min-width: 44px;
+          min-height: 44px;
+        }
+
+        .return-window-page input,
+        .return-window-page select,
+        .return-window-page .quick-picks {
+          max-width: 100%;
         }
 
         @media (max-width: 760px) {
@@ -3630,7 +3652,6 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             <>
               <p className="due-date">{formatPlainDate(invoiceDueDate)}</p>
               <div className="result-meta result-meta-stack">
-                <span>Invoice due date: {formatPlainDate(invoiceDueDate)}</span>
                 <span className="status-badge status-comfortable">
                   {invoiceTermLabels[invoiceTerm]}
                   {invoiceTerm === 'eom'
@@ -3758,6 +3779,51 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .invoice-bam-intro {
+          padding-bottom: 8px;
+        }
+
+        .invoice-due-date-page .business-workspace {
+          align-items: stretch;
+        }
+
+        .invoice-due-date-page .invoice-due-date-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .invoice-due-date-page .invoice-due-date-result .due-date {
+          margin-top: 6px;
+          font-size: clamp(3.8rem, 7.6vw, 6.8rem);
+          line-height: 0.96;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .invoice-due-date-page .invoice-due-date-result .result-meta-stack {
+          align-items: center;
+        }
+
+        .invoice-due-date-page .invoice-due-date-result .result-note {
+          max-width: 680px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        @media (max-width: 760px) {
+          .invoice-due-date-page .business-workspace {
+            gap: 10px;
+          }
+
+          .invoice-due-date-page .invoice-due-date-result .due-date {
+            font-size: clamp(3.2rem, 14.5vw, 5rem);
+          }
+        }
+      `}</style>
     </main>
   )
 }
@@ -4220,7 +4286,7 @@ function NotFoundPage({ onNavigate }: NavigationProps) {
             }}
           >
             <strong>Free Trial Calculator</strong>
-            <span>Find the last safe day to cancel before renewal.</span>
+            <span>Estimate the trial end and set a one-day-before reminder.</span>
           </a>
           <a
             className="calculator-link-card"
@@ -4667,7 +4733,7 @@ function getFriendlyResultLabel(mode: CalculatorMode): string {
 
 function getCopyAnswer(mode: CalculatorMode, dueDate: PlainDate, cancelByDate: PlainDate | null): string {
   if (mode === 'trial' && cancelByDate) {
-    return `The trial ends ${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}. Suggested cancel-by date: ${formatPlainDate(cancelByDate)}.`
+    return `The trial ends ${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}. Suggested reminder date: ${formatPlainDate(cancelByDate)}.`
   }
 
   const prefix: Record<CalculatorMode, string> = {
@@ -5015,7 +5081,7 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
   if (route === 'free-trial') {
     return {
       title: 'Free Trial Calculator - WhenIsDue',
-      description: 'Find when a free trial ends and the last safe day to cancel before renewal.',
+      description: 'Estimate when a free trial ends and see a suggested one-day-before reminder.',
       path: '/free-trial-calculator',
     }
   }
@@ -5023,9 +5089,9 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
   if (route === 'return-window') {
     return {
       title: 'Return Window Calculator: Find Your Last Return Day | WhenIsDue',
-      description: 'Find the last day to return an item for common 7, 14, 30, or 60-day return windows, or calculate from any purchase or delivery date.',
+      description: 'Find the last day to return an item for common 7, 14, 30, 60, or 90-day return windows, or calculate from any purchase or delivery date.',
       openGraphDescription: 'See common return deadlines instantly or calculate the last return day from any purchase or delivery date.',
-      twitterDescription: 'Find the last day to return an item for 7, 14, 30, 60-day or custom return windows.',
+      twitterDescription: 'Find the last day to return an item for 7, 14, 30, 60, 90-day or custom return windows.',
       path: '/return-window-calculator',
     }
   }
