@@ -6047,6 +6047,30 @@ function formatBusinessDayExplanation(
   return `${dayCount} business ${dayWord} after ${formatPlainDate(startDate)} is ${formatPlainDate(resultDate)}. ${rule}`
 }
 
+function formatNetTermExplanation(
+  invoiceDate: PlainDate,
+  dayCount: number,
+  dueDate: PlainDate,
+) {
+  return `A Net ${dayCount} invoice dated ${formatPlainDate(invoiceDate)} is due ${dayCount} calendar days later, on ${formatPlainDate(dueDate)}. Weekends and public holidays do not automatically move the due date unless the invoice or contract says otherwise.`
+}
+
+function formatInvoiceTermExplanation(
+  invoiceDate: PlainDate,
+  term: InvoiceTerm,
+  dueDate: PlainDate,
+) {
+  if (term === 'eom') {
+    return `For an end-of-month term, an invoice dated ${formatPlainDate(invoiceDate)} is due on ${formatPlainDate(dueDate)}, the last calendar day of that invoice month. Weekend or holiday adjustments depend on the invoice or contract.`
+  }
+
+  const match = /^net(\d+)$/.exec(term)
+  const dayCount = match ? Number(match[1]) : 0
+
+  return formatNetTermExplanation(invoiceDate, dayCount, dueDate)
+}
+
+
 
 type HolidayCalendarSelectProps = {
   value: HolidayCalendarId
@@ -6265,6 +6289,14 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                 Calendar-day terms are used for Net invoices. EOM means the last calendar day of the invoice month.
                 Check the invoice or contract if weekends, holidays, or a different EOM rule apply.
               </p>
+              <p className="invoice-citation-explanation">
+                {formatInvoiceTermExplanation(
+                  parsedInvoiceDate!,
+                  invoiceTerm,
+                  invoiceDueDate,
+                )}
+              </p>
+
               <CalculationReceipt
                 analyticsContext="invoice_due_date"
                 rows={[
@@ -6411,6 +6443,15 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
       <SiteFooter onNavigate={onNavigate} />
 
       <style>{`
+        .invoice-citation-explanation {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
+        }
+
         .invoice-related-answers {
           width: min(100% - 24px, 920px);
           margin: 24px auto 0;
@@ -6576,6 +6617,14 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
               <p className="net-term-note">
                 Weekends and public holidays do not change this date unless your invoice or contract says otherwise.
               </p>
+              <p className="net-citation-explanation">
+                {formatNetTermExplanation(
+                  parsedInvoiceDate!,
+                  dayCount,
+                  dueDate,
+                )}
+              </p>
+
               <CalculationReceipt
                 analyticsContext="net_term"
                 rows={[
@@ -6736,6 +6785,15 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
           margin: 16px 0 0;
           color: #546a83;
           font-size: clamp(1.5rem, 3vw, 2.4rem);
+        }
+
+        .net-citation-explanation {
+          max-width: 660px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
         }
 
         .net-term-rule {
