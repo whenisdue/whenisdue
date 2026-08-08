@@ -5399,6 +5399,50 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       </section>
 
       <style>{`
+        .return-related-tools {
+          width: min(100% - 24px, 920px);
+          margin: 24px auto 0;
+          padding: 18px 0;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .return-related-tools > div > span {
+          color: #7b8da0;
+          font-size: 0.76rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .return-related-tools h2 {
+          margin: 4px 0 0;
+          color: #28435f;
+          font-size: 1.05rem;
+        }
+
+        .return-related-tools nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: 12px;
+        }
+
+        .return-related-tools a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 7px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.82rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
         .return-window-page .return-answer-intro {
           padding-bottom: 8px;
         }
@@ -5544,6 +5588,33 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             .
           </p>
         </article>
+      </section>
+
+      <section className="return-related-tools" aria-label="Related deadline calculators">
+        <div>
+          <span>Related deadlines</span>
+          <h2>Other common date questions</h2>
+        </div>
+
+        <nav>
+          {[
+            ['/free-trial-calculator', 'Free trial end date'],
+            ['/invoice-due-date-calculator', 'Invoice due date'],
+            ['/business-days-calculator', 'Business days'],
+          ].map(([path, label]) => (
+            <a
+              href={path}
+              key={path}
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('related_return_tool_click', { path })
+                onNavigate(path)
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
       </section>
 
       <SiteFooter onNavigate={onNavigate} />
@@ -6239,9 +6310,80 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         </article>
       </section>
 
+      <section className="invoice-related-answers" aria-label="Common invoice due date answers">
+        <div>
+          <span>Common payment terms</span>
+          <h2>Exact Net due date pages</h2>
+        </div>
+
+        <nav>
+          {[7, 15, 30, 45, 60, 90].map((term) => {
+            const path = `/net-${term}-due-date`
+
+            return (
+              <a
+                href={path}
+                key={term}
+                onClick={(event) => {
+                  event.preventDefault()
+                  trackWhenIsDueEvent('related_invoice_term_click', { term, path })
+                  onNavigate(path)
+                }}
+              >
+                Net {term}
+              </a>
+            )
+          })}
+        </nav>
+      </section>
+
       <SiteFooter onNavigate={onNavigate} />
 
       <style>{`
+        .invoice-related-answers {
+          width: min(100% - 24px, 920px);
+          margin: 24px auto 0;
+          padding: 18px 0;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .invoice-related-answers > div > span {
+          color: #7b8da0;
+          font-size: 0.76rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .invoice-related-answers h2 {
+          margin: 4px 0 0;
+          color: #28435f;
+          font-size: 1.05rem;
+        }
+
+        .invoice-related-answers nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: 12px;
+        }
+
+        .invoice-related-answers a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 7px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.82rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
         .invoice-bam-intro {
           padding-bottom: 8px;
         }
