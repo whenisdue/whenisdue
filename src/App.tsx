@@ -5126,6 +5126,14 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
                 </span>
               </div>
               <p className="result-note">Always check the service terms for exact renewal timing.</p>
+              <p className="trial-citation-explanation">
+                {formatFreeTrialExplanation(
+                  parsedStartDate!,
+                  parsedTrialLength!,
+                  trialEndDate,
+                )}
+              </p>
+
               <CalculationReceipt
                 analyticsContext="free_trial"
                 rows={[
@@ -5167,6 +5175,15 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
       </section>
 
       <style>{`
+        .trial-citation-explanation {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
+        }
+
         .free-trial-bam-intro {
           padding-bottom: 8px;
         }
@@ -5413,6 +5430,14 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
               <p className="result-note">
                 Use the purchase or delivery date named in the store's policy.
               </p>
+              <p className="return-citation-explanation">
+                {formatReturnWindowExplanation(
+                  parsedPurchaseDate!,
+                  parsedReturnWindow!,
+                  returnDeadline,
+                )}
+              </p>
+
               <CalculationReceipt
                 analyticsContext="return_window"
                 rows={[
@@ -5453,6 +5478,15 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       </section>
 
       <style>{`
+        .return-citation-explanation {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
+        }
+
         .return-related-tools {
           width: min(100% - 24px, 920px);
           margin: 24px auto 0;
@@ -6069,6 +6103,27 @@ function formatInvoiceTermExplanation(
 
   return formatNetTermExplanation(invoiceDate, dayCount, dueDate)
 }
+
+function formatReturnWindowExplanation(
+  startDate: PlainDate,
+  windowDays: number,
+  deadline: PlainDate,
+) {
+  const dayWord = windowDays === 1 ? 'day' : 'days'
+
+  return `A ${windowDays}-${dayWord} return window starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(deadline)}. This calculator counts calendar days and does not automatically extend the deadline for weekends or public holidays unless the retailer's policy says otherwise.`
+}
+
+function formatFreeTrialExplanation(
+  startDate: PlainDate,
+  trialDays: number,
+  endDate: PlainDate,
+) {
+  const dayWord = trialDays === 1 ? 'day' : 'days'
+
+  return `A ${trialDays}-${dayWord} trial starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(endDate)} using calendar-day counting. The actual cancellation cutoff can depend on the service's billing terms, time zone, and whether the start date counts as day one.`
+}
+
 
 
 
