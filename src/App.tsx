@@ -1459,8 +1459,10 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
 function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
-  const [startDate, setStartDate] = useState(todayInputValue)
-  const [businessDays, setBusinessDays] = useState('3')
+  const [startDate, setStartDate] = useState(() => getInitialDateQueryParam('start', todayInputValue()))
+  const [businessDays, setBusinessDays] = useState(() =>
+    getInitialPositiveIntegerQueryParam('days', '3', getAmountLimit('business')),
+  )
   const [title, setTitle] = useState(getDefaultTitle('business'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
@@ -1474,6 +1476,10 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const calendarDaysAway = parsedStartDate && dueDate ? daysBetween(parsedStartDate, dueDate) : 0
   const daysRemaining = dueDate ? daysBetween(today, dueDate) : 0
   const canSave = Boolean(dueDate && title.trim() && !validationMessage)
+
+  useEffect(() => {
+    syncShareableQueryParams({ start: startDate, days: businessDays })
+  }, [startDate, businessDays])
 
   function saveBusinessDeadline() {
     if (!dueDate || !parsedStartDate || !title.trim()) {
@@ -1553,7 +1559,10 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
               min="1900-01-01"
               max="2100-12-31"
               value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
+              onChange={(event) => {
+                setStartDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', { context: 'business_days', value: event.target.value })
+              }}
             />
           </label>
 
@@ -1565,7 +1574,10 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
               min="1"
               max="2600"
               value={businessDays}
-              onChange={(event) => setBusinessDays(event.target.value)}
+              onChange={(event) => {
+                setBusinessDays(event.target.value)
+                trackWhenIsDueEvent('number_changed', { context: 'business_days', value: event.target.value })
+              }}
             />
             <span className="quick-picks" aria-label="Quick business day values">
               {businessDayQuickPicks.map((quickPick) => (
@@ -1573,7 +1585,10 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                   className={businessDays === String(quickPick) ? 'is-selected' : ''}
                   key={quickPick}
                   type="button"
-                  onClick={() => setBusinessDays(String(quickPick))}
+                  onClick={() => {
+                    setBusinessDays(String(quickPick))
+                    trackWhenIsDueEvent('quick_pick', { context: 'business_days', value: quickPick })
+                  }}
                 >
                   {quickPick}
                 </button>
@@ -2340,8 +2355,10 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
     try {
       await navigator.clipboard.writeText(shareText)
       setMessage('Copied.')
+      trackWhenIsDueEvent('copy_result', { title, result_date: toDateKey(date), status: 'success' })
     } catch {
       setMessage('Copy is not available in this browser.')
+      trackWhenIsDueEvent('copy_result', { title, result_date: toDateKey(date), status: 'failed' })
     }
   }
 
@@ -2357,8 +2374,11 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
         text: shareText,
         url: window.location.href,
       })
+      setMessage('Shared.')
+      trackWhenIsDueEvent('share_result', { title, result_date: toDateKey(date), status: 'success' })
     } catch {
-      // User cancelled the share sheet.
+      setMessage('Share cancelled or unavailable.')
+      trackWhenIsDueEvent('share_result', { title, result_date: toDateKey(date), status: 'cancelled_or_failed' })
     }
   }
 
@@ -2398,6 +2418,7 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
     link.remove()
     URL.revokeObjectURL(url)
     setMessage('Calendar file created.')
+    trackWhenIsDueEvent('calendar_export', { title, result_date: toDateKey(date), status: 'created' })
   }
 
   return (
@@ -2452,12 +2473,24 @@ type CalculationReceiptRow = {
 type CalculationReceiptProps = {
   title?: string
   rows: CalculationReceiptRow[]
+  analyticsContext?: string
 }
 
-function CalculationReceipt({ title = 'How this date was calculated', rows }: CalculationReceiptProps) {
+function CalculationReceipt({
+  title = 'How this date was calculated',
+  rows,
+  analyticsContext = 'calculation',
+}: CalculationReceiptProps) {
   return (
     <>
-      <details className="calculation-receipt">
+      <details
+        className="calculation-receipt"
+        onToggle={(event) => {
+          if (event.currentTarget.open) {
+            trackWhenIsDueEvent('receipt_opened', { context: analyticsContext })
+          }
+        }}
+      >
         <summary>{title}</summary>
         <dl>
           {rows.map((row) => (
@@ -2529,9 +2562,12 @@ function CalculationReceipt({ title = 'How this date was calculated', rows }: Ca
 }
 
 function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
-  const [startDate, setStartDate] = useState(todayInputValue)
+  const [startDate, setStartDate] = useState(() => getInitialDateQueryParam('start', todayInputValue()))
   const [endDate, setEndDate] = useState(() =>
-    toDateKey(addCalendarDays(getTodayPlainDate(new Date()), 14)),
+    getInitialDateQueryParam(
+      'end',
+      toDateKey(addCalendarDays(getTodayPlainDate(new Date()), 14)),
+    ),
   )
 
   const parsedStartDate = parsePlainDate(startDate)
@@ -2540,6 +2576,10 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
     parsedStartDate && parsedEndDate
       ? countBusinessDaysBetween(parsedStartDate, parsedEndDate)
       : null
+
+  useEffect(() => {
+    syncShareableQueryParams({ start: startDate, end: endDate })
+  }, [startDate, endDate])
 
   return (
     <main className="page-shell business-between-page">
@@ -2577,7 +2617,10 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
                 min="1900-01-01"
                 max="2100-12-31"
                 value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
+                onChange={(event) => {
+                  setStartDate(event.target.value)
+                  trackWhenIsDueEvent('date_changed', { context: 'business_days_between_start', value: event.target.value })
+                }}
               />
             </label>
 
@@ -2588,7 +2631,10 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
                 min="1900-01-01"
                 max="2100-12-31"
                 value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
+                onChange={(event) => {
+                  setEndDate(event.target.value)
+                  trackWhenIsDueEvent('date_changed', { context: 'business_days_between_end', value: event.target.value })
+                }}
               />
             </label>
           </div>
@@ -2607,6 +2653,7 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
               </p>
               {parsedStartDate && parsedEndDate ? (
                 <CalculationReceipt
+                  analyticsContext="business_days_between"
                   rows={[
                     { label: 'Start date', value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}` },
                     { label: 'End date', value: `${formatWeekday(parsedEndDate)}, ${formatPlainDate(parsedEndDate)}` },
@@ -2795,8 +2842,10 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
 }
 
 function FreeTrialPage({ onNavigate }: NavigationProps) {
-  const [startDate, setStartDate] = useState(todayInputValue)
-  const [trialLength, setTrialLength] = useState('7')
+  const [startDate, setStartDate] = useState(() => getInitialDateQueryParam('start', todayInputValue()))
+  const [trialLength, setTrialLength] = useState(() =>
+    getInitialPositiveIntegerQueryParam('days', '7', getAmountLimit('trial')),
+  )
   const [title, setTitle] = useState(getDefaultTitle('trial'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
@@ -2811,6 +2860,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
   const cancelByDate = trialEndDate ? addCalendarDays(trialEndDate, -1) : null
   const calendarDaysFromStart = parsedStartDate && trialEndDate ? daysBetween(parsedStartDate, trialEndDate) : 0
   const canSave = Boolean(trialEndDate && parsedStartDate && !validationMessage && !titleValidationMessage)
+
+  useEffect(() => {
+    syncShareableQueryParams({ start: startDate, days: trialLength })
+  }, [startDate, trialLength])
 
   function saveTrialDeadline() {
     if (!trialEndDate || !parsedStartDate || titleValidationMessage) {
@@ -2861,7 +2914,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               min="1900-01-01"
               max="2100-12-31"
               value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
+              onChange={(event) => {
+                setStartDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', { context: 'free_trial', value: event.target.value })
+              }}
             />
           </label>
 
@@ -2873,7 +2929,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               min="1"
               max={getAmountLimit('trial')}
               value={trialLength}
-              onChange={(event) => setTrialLength(event.target.value)}
+              onChange={(event) => {
+                setTrialLength(event.target.value)
+                trackWhenIsDueEvent('number_changed', { context: 'free_trial', value: event.target.value })
+              }}
             />
             <span className="quick-picks" aria-label="Quick trial length values">
               {trialLengthQuickPicks.map((quickPick) => (
@@ -2881,7 +2940,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
                   className={trialLength === String(quickPick) ? 'is-selected' : ''}
                   key={quickPick}
                   type="button"
-                  onClick={() => setTrialLength(String(quickPick))}
+                  onClick={() => {
+                    setTrialLength(String(quickPick))
+                    trackWhenIsDueEvent('quick_pick', { context: 'free_trial', value: quickPick })
+                  }}
                 >
                   {quickPick}
                 </button>
@@ -2906,6 +2968,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               </div>
               <p className="result-note">Always check the service terms for exact renewal timing.</p>
               <CalculationReceipt
+                analyticsContext="free_trial"
                 rows={[
                   { label: 'Trial starts', value: `${formatWeekday(parsedStartDate!)}, ${formatPlainDate(parsedStartDate!)}` },
                   { label: 'Trial length', value: `${parsedTrialLength} ${parsedTrialLength === 1 ? 'day' : 'days'}` },
@@ -3065,8 +3128,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 function ReturnWindowPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
-  const [purchaseDate, setPurchaseDate] = useState(todayInputValue)
-  const [returnWindow, setReturnWindow] = useState('30')
+  const [purchaseDate, setPurchaseDate] = useState(() => getInitialDateQueryParam('start', todayInputValue()))
+  const [returnWindow, setReturnWindow] = useState(() =>
+    getInitialPositiveIntegerQueryParam('days', '30', getAmountLimit('return')),
+  )
   const [title, setTitle] = useState(getDefaultTitle('return'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
@@ -3079,6 +3144,10 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
     ? addCalendarDays(parsedPurchaseDate, Math.max(parsedReturnWindow - 1, 0))
     : null
   const canSave = Boolean(returnDeadline && parsedPurchaseDate && !validationMessage && !titleValidationMessage)
+
+  useEffect(() => {
+    syncShareableQueryParams({ start: purchaseDate, days: returnWindow })
+  }, [purchaseDate, returnWindow])
 
   function saveReturnDeadline() {
     if (!returnDeadline || !parsedPurchaseDate || titleValidationMessage) {
@@ -3131,7 +3200,10 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
               min="1900-01-01"
               max="2100-12-31"
               value={purchaseDate}
-              onChange={(event) => setPurchaseDate(event.target.value)}
+              onChange={(event) => {
+                setPurchaseDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', { context: 'return_window', value: event.target.value })
+              }}
             />
           </label>
 
@@ -3143,7 +3215,10 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
               min="1"
               max={getAmountLimit('return')}
               value={returnWindow}
-              onChange={(event) => setReturnWindow(event.target.value)}
+              onChange={(event) => {
+                setReturnWindow(event.target.value)
+                trackWhenIsDueEvent('number_changed', { context: 'return_window', value: event.target.value })
+              }}
             />
             <span className="quick-picks" aria-label="Quick return window values">
               {returnWindowQuickPicks.map((quickPick) => (
@@ -3151,7 +3226,10 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                   className={returnWindow === String(quickPick) ? 'is-selected' : ''}
                   key={quickPick}
                   type="button"
-                  onClick={() => setReturnWindow(String(quickPick))}
+                  onClick={() => {
+                    setReturnWindow(String(quickPick))
+                    trackWhenIsDueEvent('quick_pick', { context: 'return_window', value: quickPick })
+                  }}
                 >
                   {quickPick}
                 </button>
@@ -3177,6 +3255,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 Use the purchase or delivery date named in the store's policy.
               </p>
               <CalculationReceipt
+                analyticsContext="return_window"
                 rows={[
                   { label: 'Window starts', value: `${formatWeekday(parsedPurchaseDate!)}, ${formatPlainDate(parsedPurchaseDate!)}` },
                   { label: 'Window length', value: `${parsedReturnWindow} ${parsedReturnWindow === 1 ? 'day' : 'days'}` },
@@ -3553,9 +3632,17 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   )
 }
 
+
+function getInitialInvoiceTermQueryParam(name: string, fallback: InvoiceTerm): InvoiceTerm {
+  const value = new URLSearchParams(window.location.search).get(name) as InvoiceTerm | null
+  return value && invoiceTerms.includes(value) ? value : fallback
+}
+
 function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
-  const [invoiceDate, setInvoiceDate] = useState(todayInputValue)
-  const [invoiceTerm, setInvoiceTerm] = useState<InvoiceTerm>('net30')
+  const [invoiceDate, setInvoiceDate] = useState(() => getInitialDateQueryParam('date', todayInputValue()))
+  const [invoiceTerm, setInvoiceTerm] = useState<InvoiceTerm>(() =>
+    getInitialInvoiceTermQueryParam('term', 'net30'),
+  )
   const [title, setTitle] = useState(getDefaultTitle('invoice'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
@@ -3570,6 +3657,10 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
     ? daysBetween(parsedInvoiceDate, invoiceDueDate)
     : 0
   const canSave = Boolean(invoiceDueDate && parsedInvoiceDate && !validationMessage && !titleValidationMessage)
+
+  useEffect(() => {
+    syncShareableQueryParams({ date: invoiceDate, term: invoiceTerm })
+  }, [invoiceDate, invoiceTerm])
 
   function saveInvoiceDeadline() {
     if (!invoiceDueDate || !parsedInvoiceDate || titleValidationMessage) {
@@ -3625,7 +3716,10 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
               min="1900-01-01"
               max="2100-12-31"
               value={invoiceDate}
-              onChange={(event) => setInvoiceDate(event.target.value)}
+              onChange={(event) => {
+                setInvoiceDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', { context: 'invoice_due_date', value: event.target.value })
+              }}
             />
           </label>
 
@@ -3633,7 +3727,11 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             <span>Payment terms</span>
             <select
               value={invoiceTerm}
-              onChange={(event) => setInvoiceTerm(event.target.value as InvoiceTerm)}
+              onChange={(event) => {
+                const nextTerm = event.target.value as InvoiceTerm
+                setInvoiceTerm(nextTerm)
+                trackWhenIsDueEvent('term_changed', { context: 'invoice_due_date', value: nextTerm })
+              }}
             >
               {invoiceTerms.map((term) => (
                 <option value={term} key={term}>
@@ -3664,6 +3762,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                 Check the invoice or contract if weekends, holidays, or a different EOM rule apply.
               </p>
               <CalculationReceipt
+                analyticsContext="invoice_due_date"
                 rows={[
                   { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate!)}, ${formatPlainDate(parsedInvoiceDate!)}` },
                   { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
@@ -3835,7 +3934,7 @@ type InvoiceTermPageProps = NavigationProps & {
 }
 
 function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
-  const [invoiceDate, setInvoiceDate] = useState(todayInputValue)
+  const [invoiceDate, setInvoiceDate] = useState(() => getInitialDateQueryParam('date', todayInputValue()))
   const parsedInvoiceDate = parsePlainDate(invoiceDate)
   const dueDate = parsedInvoiceDate
     ? getDueDateForMode('invoice', parsedInvoiceDate, 0, term)
@@ -3843,6 +3942,10 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
   const relatedTerms = [7, 15, 30, 45, 60, 90]
     .filter((days) => days !== dayCount)
     .slice(0, 4)
+
+  useEffect(() => {
+    syncShareableQueryParams({ date: invoiceDate })
+  }, [invoiceDate])
 
   return (
     <main className="page-shell net-term-page">
@@ -3879,7 +3982,10 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
               min="1900-01-01"
               max="2100-12-31"
               value={invoiceDate}
-              onChange={(event) => setInvoiceDate(event.target.value)}
+              onChange={(event) => {
+                setInvoiceDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', { context: `net_${dayCount}`, value: event.target.value })
+              }}
             />
           </label>
 
@@ -3896,6 +4002,7 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
                 Weekends and public holidays do not change this date unless your invoice or contract says otherwise.
               </p>
               <CalculationReceipt
+                analyticsContext="net_term"
                 rows={[
                   { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate!)}, ${formatPlainDate(parsedInvoiceDate!)}` },
                   { label: 'Payment terms', value: `Net ${dayCount}` },
@@ -3942,10 +4049,10 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
             return (
               <a
                 key={days}
-                href={`/net-${days}-due-date`}
+                href={`/net-${days}-due-date?date=${invoiceDate}`}
                 onClick={(event) => {
                   event.preventDefault()
-                  onNavigate(`/net-${days}-due-date`)
+                  onNavigate(`/net-${days}-due-date?date=${invoiceDate}`)
                 }}
               >
                 <span>Net {days}</span>
@@ -4752,6 +4859,70 @@ function formatMonthShort(date: PlainDate): string {
     timeZone: 'UTC',
     month: 'short',
   }).format(new Date(Date.UTC(date.year, date.month - 1, date.day))).toUpperCase()
+}
+
+
+type WhenIsDueAnalyticsValue = string | number | boolean | null | undefined
+
+function trackWhenIsDueEvent(
+  name: string,
+  values: Record<string, WhenIsDueAnalyticsValue> = {},
+) {
+  const payload = {
+    event: `wid_${name}`,
+    page_path: window.location.pathname,
+    ...values,
+  }
+
+  const analyticsWindow = window as Window & {
+    dataLayer?: Array<Record<string, unknown>>
+    gtag?: (...args: unknown[]) => void
+  }
+
+  if (typeof analyticsWindow.gtag === 'function') {
+    analyticsWindow.gtag('event', `wid_${name}`, {
+      page_path: window.location.pathname,
+      ...values,
+    })
+  } else {
+    analyticsWindow.dataLayer ??= []
+    analyticsWindow.dataLayer.push(payload)
+  }
+
+  window.dispatchEvent(
+    new CustomEvent('whenisdue:analytics', {
+      detail: payload,
+    }),
+  )
+}
+
+function getInitialDateQueryParam(name: string, fallback: string) {
+  const value = new URLSearchParams(window.location.search).get(name)
+  return value && parsePlainDate(value) ? value : fallback
+}
+
+function getInitialPositiveIntegerQueryParam(
+  name: string,
+  fallback: string,
+  max: number,
+) {
+  const value = new URLSearchParams(window.location.search).get(name)
+  const parsed = value ? parseInteger(value) : null
+  return parsed !== null && parsed > 0 && parsed <= max ? String(parsed) : fallback
+}
+
+function syncShareableQueryParams(values: Record<string, string | null | undefined>) {
+  const url = new URL(window.location.href)
+
+  Object.entries(values).forEach(([key, value]) => {
+    if (value) {
+      url.searchParams.set(key, value)
+    } else {
+      url.searchParams.delete(key)
+    }
+  })
+
+  window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
 }
 
 function getLocalTimeZoneName(): string {
