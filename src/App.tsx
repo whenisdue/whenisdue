@@ -27,10 +27,19 @@ import {
   calculateBusinessDaysWithCalendar,
   countBusinessDaysBetweenWithCalendar,
   getHolidayCalendarOption,
-  getHolidayOnDate,
   holidayCalendarOptions,
   isHolidayCalendarId,
 } from './holidayCalendars'
+import {
+  calculateBusinessHoursDeadline,
+  formatTime12Hour,
+  timeToMinutes,
+} from './businessHours'
+import {
+  type PaySchedule,
+  calculateNextPayday,
+  payScheduleLabel,
+} from './payday'
 
 type SavedDeadline = {
   id: string
@@ -227,13 +236,6 @@ function App() {
 
 
 
-type PaySchedule =
-  | 'weekly'
-  | 'biweekly'
-  | 'semimonthly-1-15'
-  | 'semimonthly-15-last'
-  | 'monthly'
-
 function getInitialPaySchedule(): PaySchedule {
   const value = new URLSearchParams(window.location.search).get('schedule')
   const allowed: PaySchedule[] = [
@@ -246,99 +248,6 @@ function getInitialPaySchedule(): PaySchedule {
   return allowed.includes(value as PaySchedule)
     ? (value as PaySchedule)
     : 'biweekly'
-}
-
-function daysInMonth(year: number, month: number) {
-  return new Date(Date.UTC(year, month, 0, 12)).getUTCDate()
-}
-
-function compareDateKeys(a: PlainDate, b: PlainDate) {
-  return toDateKey(a).localeCompare(toDateKey(b))
-}
-
-function dateParts(date: PlainDate) {
-  const key = toDateKey(date)
-  return {
-    year: Number(key.slice(0, 4)),
-    month: Number(key.slice(5, 7)),
-    day: Number(key.slice(8, 10)),
-  }
-}
-
-function makePlainDate(year: number, month: number, day: number) {
-  return parsePlainDate(
-    `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
-  )
-}
-
-function nextSemimonthlyDate(
-  afterDate: PlainDate,
-  firstDay: number | 'last',
-  secondDay: number | 'last',
-) {
-  const { year, month } = dateParts(afterDate)
-
-  for (let monthOffset = 0; monthOffset < 18; monthOffset += 1) {
-    const monthIndex = month - 1 + monthOffset
-    const candidateYear = year + Math.floor(monthIndex / 12)
-    const candidateMonth = (monthIndex % 12) + 1
-    const lastDay = daysInMonth(candidateYear, candidateMonth)
-
-    const resolveDay = (day: number | 'last') =>
-      day === 'last' ? lastDay : Math.min(day, lastDay)
-
-    const days = [
-      resolveDay(firstDay),
-      resolveDay(secondDay),
-    ]
-      .sort((a, b) => a - b)
-      .filter((day, index, list) => index === 0 || day !== list[index - 1])
-
-    for (const day of days) {
-      const candidate = makePlainDate(candidateYear, candidateMonth, day)
-      if (candidate && compareDateKeys(candidate, afterDate) > 0) {
-        return candidate
-      }
-    }
-  }
-
-  return null
-}
-
-function calculateNextPayday(
-  knownPayday: PlainDate,
-  schedule: PaySchedule,
-) {
-  if (schedule === 'weekly') {
-    return addCalendarDays(knownPayday, 7)
-  }
-
-  if (schedule === 'biweekly') {
-    return addCalendarDays(knownPayday, 14)
-  }
-
-  if (schedule === 'semimonthly-1-15') {
-    return nextSemimonthlyDate(knownPayday, 1, 15)
-  }
-
-  if (schedule === 'semimonthly-15-last') {
-    return nextSemimonthlyDate(knownPayday, 15, 'last')
-  }
-
-  const { year, month, day } = dateParts(knownPayday)
-  const nextMonthIndex = month
-  const nextYear = year + Math.floor(nextMonthIndex / 12)
-  const nextMonth = (nextMonthIndex % 12) + 1
-  const nextDay = Math.min(day, daysInMonth(nextYear, nextMonth))
-  return makePlainDate(nextYear, nextMonth, nextDay)
-}
-
-function payScheduleLabel(schedule: PaySchedule) {
-  if (schedule === 'weekly') return 'Weekly · every 7 days'
-  if (schedule === 'biweekly') return 'Biweekly · every 14 days'
-  if (schedule === 'semimonthly-1-15') return 'Semimonthly · 1st and 15th'
-  if (schedule === 'semimonthly-15-last') return 'Semimonthly · 15th and last day'
-  return 'Monthly · same calendar day when possible'
 }
 
 function NextPaydayPage({ onNavigate }: NavigationProps) {
@@ -6583,125 +6492,6 @@ function saveWorkdayPreferences(preferences: WorkdayPreferences) {
   }
 }
 
-
-function timeToMinutes(value: string) {
-  const match = /^(\d{2}):(\d{2})$/.exec(value)
-  if (!match) return null
-
-  const hours = Number(match[1])
-  const minutes = Number(match[2])
-
-  if (
-    !Number.isInteger(hours) ||
-    !Number.isInteger(minutes) ||
-    hours < 0 ||
-    hours > 23 ||
-    minutes < 0 ||
-    minutes > 59
-  ) {
-    return null
-  }
-
-  return hours * 60 + minutes
-}
-
-function minutesToTime(value: number) {
-  const safe = Math.max(0, Math.min(1439, value))
-  const hours = Math.floor(safe / 60)
-  const minutes = safe % 60
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
-}
-
-function formatTime12Hour(value: string) {
-  const total = timeToMinutes(value)
-  if (total === null) return value
-
-  const hour24 = Math.floor(total / 60)
-  const minute = total % 60
-  const suffix = hour24 >= 12 ? 'PM' : 'AM'
-  const hour12 = hour24 % 12 || 12
-
-  return `${hour12}:${String(minute).padStart(2, '0')} ${suffix}`
-}
-
-function isBusinessDateForCalendar(
-  date: PlainDate,
-  holidayCalendar: HolidayCalendarId,
-) {
-  const weekday = new Date(`${toDateKey(date)}T12:00:00Z`).getUTCDay()
-  if (weekday === 0 || weekday === 6) return false
-
-  return getHolidayOnDate(date, holidayCalendar) === null
-}
-
-function nextBusinessDate(
-  date: PlainDate,
-  holidayCalendar: HolidayCalendarId,
-) {
-  let cursor = addCalendarDays(date, 1)
-
-  while (!isBusinessDateForCalendar(cursor, holidayCalendar)) {
-    cursor = addCalendarDays(cursor, 1)
-  }
-
-  return cursor
-}
-
-function calculateBusinessHoursDeadline(
-  startDate: PlainDate,
-  startTime: string,
-  hoursToAdd: number,
-  workdayStartTime: string,
-  workdayEndTime: string,
-  holidayCalendar: HolidayCalendarId,
-) {
-  const startMinutes = timeToMinutes(startTime)
-  const workdayStart = timeToMinutes(workdayStartTime)
-  const workdayEnd = timeToMinutes(workdayEndTime)
-
-  if (
-    startMinutes === null ||
-    workdayStart === null ||
-    workdayEnd === null ||
-    workdayEnd <= workdayStart ||
-    hoursToAdd <= 0
-  ) {
-    return null
-  }
-
-  let cursorDate = startDate
-  let cursorMinutes = startMinutes
-
-  if (!isBusinessDateForCalendar(cursorDate, holidayCalendar)) {
-    cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
-    cursorMinutes = workdayStart
-  } else if (cursorMinutes < workdayStart) {
-    cursorMinutes = workdayStart
-  } else if (cursorMinutes >= workdayEnd) {
-    cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
-    cursorMinutes = workdayStart
-  }
-
-  let remainingMinutes = Math.round(hoursToAdd * 60)
-
-  while (remainingMinutes > 0) {
-    const availableToday = workdayEnd - cursorMinutes
-
-    if (remainingMinutes <= availableToday) {
-      cursorMinutes += remainingMinutes
-      remainingMinutes = 0
-    } else {
-      remainingMinutes -= availableToday
-      cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
-      cursorMinutes = workdayStart
-    }
-  }
-
-  return {
-    date: cursorDate,
-    time: minutesToTime(cursorMinutes),
-  }
-}
 
 function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
   const [startDate, setStartDate] = useState(() =>
