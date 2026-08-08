@@ -346,6 +346,48 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     endDayAdjustment,
   ])
 
+  const startRuleComparison = useMemo(() => {
+    if (!parsedTriggerDate || parsedDuration === null || parsedDuration < 0) {
+      return null
+    }
+
+    const excluded = calculateDeadlineByRule({
+      triggerDate: parsedTriggerDate,
+      duration: parsedDuration,
+      direction,
+      unit,
+      startDayConvention: 'exclude-trigger',
+      holidayCalendar,
+      endDayAdjustment,
+    })
+
+    const included = calculateDeadlineByRule({
+      triggerDate: parsedTriggerDate,
+      duration: parsedDuration,
+      direction,
+      unit,
+      startDayConvention: 'include-if-qualifying',
+      holidayCalendar,
+      endDayAdjustment,
+    })
+
+    if (!excluded || !included) return null
+
+    return {
+      excluded: excluded.answerDate,
+      included: included.answerDate,
+      sameResult:
+        toDateKey(excluded.answerDate) === toDateKey(included.answerDate),
+    }
+  }, [
+    parsedTriggerDate,
+    parsedDuration,
+    direction,
+    unit,
+    holidayCalendar,
+    endDayAdjustment,
+  ])
+
   const holidayOption = getHolidayCalendarOption(holidayCalendar)
   const cameFromWithinPhrase =
     getDeadlineCalculatorQueryParam('source') === 'within'
@@ -532,6 +574,63 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             Enter a valid start date and a whole number of days.
           </p>
         )}
+
+        {cameFromWithinPhrase && startRuleComparison ? (
+          <section className="deadline-rule-compare" aria-labelledby="deadline-rule-compare-title">
+            <div className="deadline-rule-compare-heading">
+              <span>Compare the start-day rule</span>
+              <h2 id="deadline-rule-compare-title">
+                Which interpretation matches what you were told?
+              </h2>
+            </div>
+
+            <div className="deadline-rule-compare-grid">
+              <button
+                type="button"
+                className={
+                  startDayConvention === 'exclude-trigger'
+                    ? 'is-selected'
+                    : undefined
+                }
+                onClick={() => setStartDayConvention('exclude-trigger')}
+              >
+                <span>Start date does not count</span>
+                <strong>{formatPlainDate(startRuleComparison.excluded)}</strong>
+                <small>Start counting on the next qualifying day.</small>
+              </button>
+
+              <button
+                type="button"
+                className={
+                  startDayConvention === 'include-if-qualifying'
+                    ? 'is-selected'
+                    : undefined
+                }
+                onClick={() =>
+                  setStartDayConvention('include-if-qualifying')
+                }
+              >
+                <span>Start date counts if it qualifies</span>
+                <strong>{formatPlainDate(startRuleComparison.included)}</strong>
+                <small>
+                  Treat the start date as day one when it is a qualifying day.
+                </small>
+              </button>
+            </div>
+
+            {startRuleComparison.sameResult ? (
+              <p>
+                Both rules happen to produce the same date for this example.
+              </p>
+            ) : (
+              <p>
+                Different wording can produce different answers. Use the rule
+                from the message, contract, policy, or law that created the
+                deadline.
+              </p>
+            )}
+          </section>
+        ) : null}
 
         <details className="deadline-rule-advanced">
           <summary>Adjust the counting rules</summary>
@@ -732,6 +831,84 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           line-height: 1.6;
         }
 
+        .deadline-rule-compare {
+          margin-top: 16px;
+          padding: 18px;
+          border: 1px solid rgba(183, 121, 31, 0.16);
+          border-radius: 16px;
+          background: #fffdf8;
+        }
+
+        .deadline-rule-compare-heading {
+          text-align: center;
+        }
+
+        .deadline-rule-compare-heading > span {
+          color: #8a6a2c;
+          font-size: 0.8rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .deadline-rule-compare-heading h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.12rem;
+        }
+
+        .deadline-rule-compare-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .deadline-rule-compare-grid button {
+          display: grid;
+          gap: 5px;
+          min-height: 122px;
+          padding: 14px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 13px;
+          background: #fff;
+          color: inherit;
+          font: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .deadline-rule-compare-grid button.is-selected {
+          border-color: rgba(29, 79, 130, 0.32);
+          box-shadow: 0 0 0 2px rgba(29, 79, 130, 0.08);
+        }
+
+        .deadline-rule-compare-grid button > span {
+          color: #526a82;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .deadline-rule-compare-grid button > strong {
+          color: #17304d;
+          font-size: 1.2rem;
+        }
+
+        .deadline-rule-compare-grid button > small {
+          color: #6d8196;
+          font-size: 0.9rem;
+          line-height: 1.45;
+        }
+
+        .deadline-rule-compare > p {
+          max-width: 680px;
+          margin: 12px auto 0;
+          color: #6f5220;
+          font-size: 0.94rem;
+          line-height: 1.5;
+          text-align: center;
+        }
+
         .deadline-rule-advanced {
           margin-top: 16px;
           border: 1px solid rgba(22, 49, 78, 0.1);
@@ -778,6 +955,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           }
 
           .deadline-rule-essential {
+            grid-template-columns: 1fr;
+          }
+
+          .deadline-rule-compare-grid {
             grid-template-columns: 1fr;
           }
 
