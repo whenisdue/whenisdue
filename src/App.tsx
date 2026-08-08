@@ -2433,25 +2433,6 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
   const [copyMessage, setCopyMessage] = useState<string | null>(null)
-  const [favoriteCalculations, setFavoriteCalculations] = useState<SavedCalculation[]>(() =>
-    readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
-  )
-  const [recentCalculations, setRecentCalculations] = useState<SavedCalculation[]>(() =>
-    readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY),
-  )
-
-  const continueCalculations = useMemo(() => {
-    const seen = new Set<string>()
-
-    return [...favoriteCalculations, ...recentCalculations]
-      .sort((a, b) => b.savedAt - a.savedAt)
-      .filter((item) => {
-        if (seen.has(item.id)) return false
-        seen.add(item.id)
-        return true
-      })
-      .slice(0, 4)
-  }, [favoriteCalculations, recentCalculations])
 
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
   const parsedStartDate = parsePlainDate(startDate)
@@ -2532,25 +2513,6 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
       setTitle(getDefaultTitle(mode))
     }
   }, [isCustomTitle, mode])
-
-  useEffect(() => {
-    const refreshSavedCalculations = () => {
-      setFavoriteCalculations(
-        readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
-      )
-      setRecentCalculations(
-        readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY),
-      )
-    }
-
-    window.addEventListener(SAVED_CALCULATIONS_EVENT, refreshSavedCalculations)
-    window.addEventListener('storage', refreshSavedCalculations)
-
-    return () => {
-      window.removeEventListener(SAVED_CALCULATIONS_EVENT, refreshSavedCalculations)
-      window.removeEventListener('storage', refreshSavedCalculations)
-    }
-  }, [])
 
   useEffect(() => {
     setStorageMessage(null)
@@ -2858,154 +2820,6 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           </div>
         </div>
       </section>
-
-      {continueCalculations.length > 0 ? (
-        <section className="calculator-continue-section" aria-labelledby="calculator-continue-title">
-          <div className="calculator-continue-heading">
-            <div>
-              <span>Continue</span>
-              <h2 id="calculator-continue-title">Pick up where you left off</h2>
-            </div>
-
-            <a
-              href="/saved-calculations"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/saved-calculations')
-              }}
-            >
-              View all
-            </a>
-          </div>
-
-          <div className="calculator-continue-grid">
-            {continueCalculations.map((item) => (
-              <a
-                href={item.url}
-                key={item.id}
-                onClick={(event) => {
-                  event.preventDefault()
-                  trackWhenIsDueEvent('calculator_continue_click', {
-                    title: item.title,
-                    path: item.url,
-                  })
-                  onNavigate(item.url)
-                }}
-              >
-                <span>{item.title}</span>
-                <strong>{item.dateText}</strong>
-                {item.details ? <small>{item.details}</small> : null}
-              </a>
-            ))}
-          </div>
-
-          <style>{`
-            .calculator-continue-section {
-              width: min(100% - 24px, 1080px);
-              margin: 24px auto 0;
-              padding: 18px 0;
-              border-top: 1px solid rgba(19, 38, 70, 0.1);
-              border-bottom: 1px solid rgba(19, 38, 70, 0.1);
-            }
-
-            .calculator-continue-heading {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              gap: 12px;
-            }
-
-            .calculator-continue-heading span {
-              color: #7b8da0;
-              font-size: 0.78rem;
-              font-weight: 900;
-              letter-spacing: 0.06em;
-              text-transform: uppercase;
-            }
-
-            .calculator-continue-heading h2 {
-              margin: 3px 0 0;
-              color: #28435f;
-              font-size: 1.08rem;
-            }
-
-            .calculator-continue-heading > a {
-              min-height: 44px;
-              display: inline-flex;
-              align-items: center;
-              padding: 7px 10px;
-              border: 1px solid rgba(19, 38, 70, 0.1);
-              border-radius: 9px;
-              color: #58728c;
-              font-size: 0.82rem;
-              font-weight: 850;
-              text-decoration: none;
-            }
-
-            .calculator-continue-grid {
-              display: grid;
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-              gap: 8px;
-              margin-top: 12px;
-            }
-
-            .calculator-continue-grid > a {
-              min-width: 0;
-              display: grid;
-              gap: 3px;
-              padding: 13px;
-              border: 1px solid rgba(19, 38, 70, 0.08);
-              border-radius: 12px;
-              background: #fff;
-              color: inherit;
-              text-decoration: none;
-            }
-
-            .calculator-continue-grid > a > span {
-              overflow: hidden;
-              color: #6d8196;
-              font-size: 0.82rem;
-              font-weight: 850;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-
-            .calculator-continue-grid > a > strong {
-              color: #152d48;
-              font-size: 1.02rem;
-            }
-
-            .calculator-continue-grid > a > small {
-              overflow: hidden;
-              color: #75879a;
-              font-size: 0.84rem;
-              line-height: 1.4;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-
-            @media (max-width: 760px) {
-              .calculator-continue-section {
-                margin-top: 18px;
-                padding: 14px 0;
-              }
-
-              .calculator-continue-heading {
-                align-items: flex-start;
-              }
-
-              .calculator-continue-grid {
-                grid-template-columns: 1fr;
-                gap: 7px;
-              }
-
-              .calculator-continue-grid > a {
-                padding: 12px;
-              }
-            }
-          `}</style>
-        </section>
-      ) : null}
 
       <details id="calculator" className="calculator-secondary-section">
         <summary className="friendly-section-heading">
@@ -3676,7 +3490,17 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
               </p>
 
               {parsedStartDate && businessCalculation ? (
-                <CalculationReceipt
+                <>
+                  <p className="business-citation-explanation">
+                    {formatBusinessDayExplanation(
+                      parsedStartDate,
+                      parsedBusinessDays,
+                      dueDate,
+                      holidayCalendar,
+                    )}
+                  </p>
+
+                  <CalculationReceipt
                   analyticsContext="business_days"
                   rows={[
                     {
@@ -3701,6 +3525,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                     },
                   ]}
                 />
+                </>
               ) : null}
 
               <details className="result-save-details">
@@ -3999,6 +3824,15 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           text-decoration: none;
         }
 
+        .business-citation-explanation {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
+        }
+
         .business-custom-heading {
           grid-column: 1 / -1;
           margin-bottom: 4px;
@@ -4185,6 +4019,15 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
             compact
           />
 
+          <p className="three-business-explanation">
+            {formatBusinessDayExplanation(
+              today,
+              dayCount,
+              answerDate,
+              holidayCalendar,
+            )}
+          </p>
+
           <CalculationReceipt
             analyticsContext="business_days_from_today"
             rows={[
@@ -4354,6 +4197,15 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
           margin: 30px 0 0;
           font-size: 0.9rem;
           color: #64778e;
+        }
+
+        .three-business-explanation {
+          max-width: 660px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
         }
 
         .three-business-rule {
@@ -6178,6 +6030,23 @@ function formatSkippedHolidaySummary(
     ? `${visible.join('; ')}; +${remaining} more`
     : visible.join('; ')
 }
+
+function formatBusinessDayExplanation(
+  startDate: PlainDate,
+  dayCount: number,
+  resultDate: PlainDate,
+  holidayCalendar: HolidayCalendarId,
+) {
+  const calendar = getHolidayCalendarOption(holidayCalendar)
+  const dayWord = dayCount === 1 ? 'day' : 'days'
+  const rule =
+    holidayCalendar === 'none'
+      ? 'Weekends are skipped. Public holidays still count as weekdays.'
+      : `Weekends and ${calendar.shortLabel.toLowerCase()} holidays are skipped.`
+
+  return `${dayCount} business ${dayWord} after ${formatPlainDate(startDate)} is ${formatPlainDate(resultDate)}. ${rule}`
+}
+
 
 type HolidayCalendarSelectProps = {
   value: HolidayCalendarId
