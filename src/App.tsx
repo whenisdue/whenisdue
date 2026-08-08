@@ -5561,6 +5561,52 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
 }
 
 
+
+const WORKDAY_PREFERENCES_STORAGE_KEY = 'whenisdue:workday-preferences'
+
+type WorkdayPreferences = {
+  start: string
+  end: string
+}
+
+function getSavedWorkdayPreferences(): WorkdayPreferences {
+  try {
+    const raw = window.localStorage.getItem(WORKDAY_PREFERENCES_STORAGE_KEY)
+    if (!raw) return { start: '09:00', end: '17:00' }
+
+    const parsed = JSON.parse(raw) as Partial<WorkdayPreferences>
+
+    if (
+      typeof parsed.start === 'string' &&
+      typeof parsed.end === 'string' &&
+      timeToMinutes(parsed.start) !== null &&
+      timeToMinutes(parsed.end) !== null &&
+      (timeToMinutes(parsed.end) ?? 0) > (timeToMinutes(parsed.start) ?? 0)
+    ) {
+      return {
+        start: parsed.start,
+        end: parsed.end,
+      }
+    }
+  } catch {
+    // Fall back to the default workday.
+  }
+
+  return { start: '09:00', end: '17:00' }
+}
+
+function saveWorkdayPreferences(preferences: WorkdayPreferences) {
+  try {
+    window.localStorage.setItem(
+      WORKDAY_PREFERENCES_STORAGE_KEY,
+      JSON.stringify(preferences),
+    )
+  } catch {
+    // Local storage can be unavailable in strict privacy modes.
+  }
+}
+
+
 function timeToMinutes(value: string) {
   const match = /^(\d{2}):(\d{2})$/.exec(value)
   if (!match) return null
@@ -5690,12 +5736,18 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
   const [hours, setHours] = useState(() =>
     getInitialPositiveIntegerQueryParam('hours', '8', 1000),
   )
+  const savedWorkdayPreferences = useMemo(getSavedWorkdayPreferences, [])
   const [workdayStart, setWorkdayStart] = useState(
-    () => new URLSearchParams(window.location.search).get('workstart') ?? '09:00',
+    () =>
+      new URLSearchParams(window.location.search).get('workstart') ??
+      savedWorkdayPreferences.start,
   )
   const [workdayEnd, setWorkdayEnd] = useState(
-    () => new URLSearchParams(window.location.search).get('workend') ?? '17:00',
+    () =>
+      new URLSearchParams(window.location.search).get('workend') ??
+      savedWorkdayPreferences.end,
   )
+  const [workdayPreferenceMessage, setWorkdayPreferenceMessage] = useState<string | null>(null)
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
     getInitialHolidayCalendarQueryParam,
   )
@@ -5706,6 +5758,56 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
     { label: '16 hours', hours: '16' },
     { label: '24 hours', hours: '24' },
   ]
+
+  const workdayPresets = [
+    { label: '8 AM–4 PM', start: '08:00', end: '16:00' },
+    { label: '9 AM–5 PM', start: '09:00', end: '17:00' },
+    { label: '10 AM–6 PM', start: '10:00', end: '18:00' },
+  ]
+
+  function applyWorkdayPreset(start: string, end: string) {
+    setWorkdayStart(start)
+    setWorkdayEnd(end)
+    setWorkdayPreferenceMessage(null)
+    trackWhenIsDueEvent('workday_preset_applied', { start, end })
+  }
+
+  function saveCurrentWorkday() {
+    const startMinutes = timeToMinutes(workdayStart)
+    const endMinutes = timeToMinutes(workdayEnd)
+
+    if (
+      startMinutes === null ||
+      endMinutes === null ||
+      endMinutes <= startMinutes
+    ) {
+      setWorkdayPreferenceMessage('Choose a valid workday before saving.')
+      return
+    }
+
+    saveWorkdayPreferences({
+      start: workdayStart,
+      end: workdayEnd,
+    })
+    setWorkdayPreferenceMessage('Workday saved on this device.')
+    trackWhenIsDueEvent('workday_preference_saved', {
+      start: workdayStart,
+      end: workdayEnd,
+    })
+  }
+
+  function resetSavedWorkday() {
+    try {
+      window.localStorage.removeItem(WORKDAY_PREFERENCES_STORAGE_KEY)
+    } catch {
+      // Ignore storage failures.
+    }
+
+    setWorkdayStart('09:00')
+    setWorkdayEnd('17:00')
+    setWorkdayPreferenceMessage('Reset to 9 AM–5 PM.')
+    trackWhenIsDueEvent('workday_preference_reset')
+  }
 
   const parsedStartDate = parsePlainDate(startDate)
   const parsedHours = parseInteger(hours)
@@ -5831,7 +5933,10 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
                 <input
                   type="time"
                   value={workdayStart}
-                  onChange={(event) => setWorkdayStart(event.target.value)}
+                  onChange={(event) => {
+                    setWorkdayStart(event.target.value)
+                    setWorkdayPreferenceMessage(null)
+                  }}
                 />
               </label>
 
@@ -5840,10 +5945,42 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
                 <input
                   type="time"
                   value={workdayEnd}
-                  onChange={(event) => setWorkdayEnd(event.target.value)}
+                  onChange={(event) => {
+                    setWorkdayEnd(event.target.value)
+                    setWorkdayPreferenceMessage(null)
+                  }}
                 />
               </label>
             </div>
+          </div>
+
+          <div className="business-hours-workday-presets" aria-label="Common workday presets">
+            {workdayPresets.map((preset) => (
+              <button
+                type="button"
+                key={`${preset.start}-${preset.end}`}
+                className={
+                  workdayStart === preset.start && workdayEnd === preset.end
+                    ? 'is-active'
+                    : ''
+                }
+                onClick={() => applyWorkdayPreset(preset.start, preset.end)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="business-hours-preference-actions">
+            <button type="button" onClick={saveCurrentWorkday}>
+              Remember this workday
+            </button>
+            <button type="button" className="is-secondary" onClick={resetSavedWorkday}>
+              Reset
+            </button>
+            {workdayPreferenceMessage ? (
+              <span aria-live="polite">{workdayPreferenceMessage}</span>
+            ) : null}
           </div>
 
           <HolidayCalendarSelect
@@ -6042,6 +6179,63 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           color: #173a63;
         }
 
+        .business-hours-workday-presets {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: -3px;
+        }
+
+        .business-hours-workday-presets button {
+          min-height: 40px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.11);
+          border-radius: 999px;
+          background: #fff;
+          color: #667a91;
+          font: inherit;
+          font-size: 0.72rem;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .business-hours-workday-presets button.is-active {
+          border-color: rgba(23, 58, 99, 0.28);
+          background: #eef3f7;
+          color: #173a63;
+        }
+
+        .business-hours-preference-actions {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 7px;
+          margin-top: -4px;
+        }
+
+        .business-hours-preference-actions button {
+          min-height: 40px;
+          padding: 7px 10px;
+          border: 1px solid rgba(23, 58, 99, 0.18);
+          border-radius: 9px;
+          background: #f4f7fa;
+          color: #294766;
+          font: inherit;
+          font-size: 0.72rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .business-hours-preference-actions button.is-secondary {
+          background: #fff;
+          color: #718398;
+        }
+
+        .business-hours-preference-actions span {
+          color: #718398;
+          font-size: 0.7rem;
+        }
+
         .business-hours-error {
           margin: 0;
           color: #9a3f3f;
@@ -6120,7 +6314,9 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             padding: 15px;
           }
 
-          .business-hours-presets button {
+          .business-hours-presets button,
+          .business-hours-workday-presets button,
+          .business-hours-preference-actions button {
             min-height: 44px;
           }
 
