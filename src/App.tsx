@@ -264,16 +264,48 @@ function getInitialPaySchedule(): PaySchedule {
 }
 
 
+
+function getDeadlineCalculatorQueryParam(name: string) {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get(name)
+}
+
+function getInitialDeadlineUnit() {
+  const value = getDeadlineCalculatorQueryParam('unit')
+  return value === 'calendar-days' ? 'calendar-days' : 'business-days'
+}
+
+function getInitialStartDayConvention(): StartDayConvention {
+  return getDeadlineCalculatorQueryParam('startday') === 'include-if-qualifying'
+    ? 'include-if-qualifying'
+    : 'exclude-trigger'
+}
+
+function getInitialEndDayAdjustment(): EndDayAdjustment {
+  const value = getDeadlineCalculatorQueryParam('endrule')
+
+  if (value === 'next-business-day' || value === 'previous-business-day') {
+    return value
+  }
+
+  return 'none'
+}
+
+
 function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
-  const [triggerDate, setTriggerDate] = useState(todayInputValue)
-  const [duration, setDuration] = useState('5')
+  const [triggerDate, setTriggerDate] = useState(
+    () => getDeadlineCalculatorQueryParam('date') ?? todayInputValue(),
+  )
+  const [duration, setDuration] = useState(
+    () => getDeadlineCalculatorQueryParam('days') ?? '5',
+  )
   const [unit, setUnit] = useState<'business-days' | 'calendar-days'>(
-    'business-days',
+    getInitialDeadlineUnit,
   )
   const [startDayConvention, setStartDayConvention] =
-    useState<StartDayConvention>('exclude-trigger')
+    useState<StartDayConvention>(getInitialStartDayConvention)
   const [endDayAdjustment, setEndDayAdjustment] =
-    useState<EndDayAdjustment>('none')
+    useState<EndDayAdjustment>(getInitialEndDayAdjustment)
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
     getInitialHolidayCalendarQueryParam,
   )
@@ -305,6 +337,8 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
   ])
 
   const holidayOption = getHolidayCalendarOption(holidayCalendar)
+  const cameFromWithinPhrase =
+    getDeadlineCalculatorQueryParam('source') === 'within'
 
   useEffect(() => {
     syncShareableQueryParams({
@@ -314,6 +348,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
       startday: startDayConvention,
       endrule: endDayAdjustment,
       calendar: holidayCalendarQueryValue(holidayCalendar),
+      source: cameFromWithinPhrase ? 'within' : null,
     })
   }, [
     triggerDate,
@@ -337,6 +372,17 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             wording you were given needs them.
           </p>
         </header>
+
+        {cameFromWithinPhrase ? (
+          <div className="deadline-rule-source-note">
+            <strong>“Within” needs a counting rule.</strong>
+            <span>
+              I brought over the date and number for you. Check whether the
+              start date counts, then use the rule from the message, policy,
+              contract, or law that created the deadline.
+            </span>
+          </div>
+        ) : null}
 
         <div className="deadline-rule-essential">
           <label>
@@ -556,6 +602,27 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           color: #61788f;
           font-size: 1.05rem;
           line-height: 1.6;
+        }
+
+        .deadline-rule-source-note {
+          display: grid;
+          gap: 4px;
+          margin: 20px auto 0;
+          padding: 13px 14px;
+          border: 1px solid rgba(183, 121, 31, 0.2);
+          border-radius: 12px;
+          background: #fffaf0;
+          color: #6f5220;
+          text-align: left;
+        }
+
+        .deadline-rule-source-note strong {
+          font-size: 1rem;
+        }
+
+        .deadline-rule-source-note span {
+          font-size: 0.96rem;
+          line-height: 1.5;
         }
 
         .deadline-rule-essential {
@@ -1527,12 +1594,27 @@ function resolveAskWhenQuery(
     const usesWithin = deadlineInterpretation.ambiguities.includes('within-wording')
 
     if (usesWithin) {
+      const query = new URLSearchParams({
+        date: toDateKey(deadlineInterpretation.triggerDate),
+        days: String(deadlineInterpretation.duration),
+        unit: deadlineInterpretation.unit,
+        startday: deadlineInterpretation.startDayConvention,
+        endrule: deadlineInterpretation.endDayAdjustment,
+        source: 'within',
+      })
+
+      const calendarValue = holidayCalendarQueryValue(holidayCalendar)
+
+      if (calendarValue) {
+        query.set('calendar', calendarValue)
+      }
+
       return {
         kind: 'clarification',
         label: 'This wording needs one more rule',
         description:
-          '“Within” can use different counting conventions. WhenIsDue will not guess. Try wording it as “5 business days after 2026-08-10” or use the deadline calculator when rule choices are available.',
-        path: null,
+          '“Within” can use different counting conventions. Open the deadline calculator with your date and duration already filled in, then choose the rule that applies.',
+        path: `/deadline-calculator?${query.toString()}`,
       }
     }
 
