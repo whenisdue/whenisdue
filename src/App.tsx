@@ -410,34 +410,6 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
             </select>
           </label>
 
-          <div className="next-payday-quick-picks" aria-label="Common pay schedules">
-            {[
-              ['Weekly', 'weekly'],
-              ['Every 2 weeks', 'biweekly'],
-              ['1st & 15th', 'semimonthly-1-15'],
-              ['15th & last', 'semimonthly-15-last'],
-            ].map(([label, value]) => (
-              <button
-                type="button"
-                key={value}
-                className={schedule === value ? 'is-active' : ''}
-                onClick={() => {
-                  setSchedule(value as PaySchedule)
-                  trackWhenIsDueEvent('quick_pick', {
-                    context: 'next_payday',
-                    value,
-                  })
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          <p className="next-payday-caveat">
-            This calculates the schedule only. Employers and banks may move payments
-            for weekends, holidays, payroll processing, or local rules.
-          </p>
         </div>
 
         <div className="next-payday-result" aria-live="polite">
@@ -479,6 +451,37 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           ) : (
             <p className="next-payday-empty">Choose a valid known payday.</p>
           )}
+        </div>
+
+        <div className="next-payday-secondary">
+          <div className="next-payday-quick-picks" aria-label="Common pay schedules">
+            {[
+              ['Weekly', 'weekly'],
+              ['Every 2 weeks', 'biweekly'],
+              ['1st & 15th', 'semimonthly-1-15'],
+              ['15th & last', 'semimonthly-15-last'],
+            ].map(([label, value]) => (
+              <button
+                type="button"
+                key={value}
+                className={schedule === value ? 'is-active' : ''}
+                onClick={() => {
+                  setSchedule(value as PaySchedule)
+                  trackWhenIsDueEvent('quick_pick', {
+                    context: 'next_payday',
+                    value,
+                  })
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <p className="next-payday-caveat">
+            This calculates the schedule only. Employers and banks may move payments
+            for weekends, holidays, payroll processing, or local rules.
+          </p>
         </div>
       </section>
 
@@ -577,6 +580,13 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           background: #fff;
           color: #243f5e;
           font: inherit;
+        }
+
+        .next-payday-secondary {
+          grid-column: 1 / -1;
+          display: grid;
+          gap: 8px;
+          padding: 2px 4px 0;
         }
 
         .next-payday-quick-picks {
@@ -1133,6 +1143,7 @@ function resolveAskWhenQuery(
     /^(\d{1,3})\s+(?:business|working)\s+days?(?:\s+from\s+today)?$/,
     /^in\s+(\d{1,3})\s+(?:business|working)\s+days?$/,
     /^(\d{1,3})\s+(?:business|working)\s+days?\s+after\s+today$/,
+    /^what\s+day\s+is\s+(\d{1,3})\s+(?:business|working)\s+days?\s+from\s+today$/,
   ]
 
   let businessDays: number | null = null
@@ -1166,6 +1177,7 @@ function resolveAskWhenQuery(
     /^net\s*(7|15|30|45|60|90)(?:\s+(?:due\s+date|invoice|terms?))?$/,
     /^(?:invoice\s+)?net\s*(7|15|30|45|60|90)$/,
     /^(?:invoice\s+)?due\s+(?:in\s+)?(7|15|30|45|60|90)\s+days?$/,
+    /^when\s+is\s+net\s*(7|15|30|45|60|90)\s+due$/,
   ]
 
   for (const pattern of netPatterns) {
@@ -1184,6 +1196,7 @@ function resolveAskWhenQuery(
     /^(\d{1,3})[\s-]*(?:day|days)\s+(?:return|return\s+window|return\s+deadline)$/,
     /^(?:return|return\s+window|return\s+deadline)\s+(\d{1,3})[\s-]*(?:day|days)$/,
     /^(\d{1,3})[\s-]*(?:day|days)\s+return\s+policy$/,
+    /^return\s+deadline\s+in\s+(\d{1,3})\s+days?$/,
   ]
 
   for (const pattern of returnPatterns) {
@@ -1204,6 +1217,7 @@ function resolveAskWhenQuery(
     /^(\d{1,3})[\s-]*(?:day|days)\s+(?:free\s+)?trial$/,
     /^(?:free\s+)?trial\s+(\d{1,3})[\s-]*(?:day|days)$/,
     /^when\s+does\s+(?:a\s+)?(\d{1,3})[\s-]*(?:day|days)\s+(?:free\s+)?trial\s+end$/,
+    /^(?:free\s+)?trial\s+ends\s+in\s+(\d{1,3})\s+days?$/,
   ]
 
   for (const pattern of trialPatterns) {
@@ -1223,6 +1237,8 @@ function resolveAskWhenQuery(
   if (
     query === 'next payday' ||
     query === 'next pay day' ||
+    query === 'my next payday' ||
+    query === 'my next pay day' ||
     query === 'payday calculator' ||
     query === 'pay day calculator' ||
     query === 'when is my next payday' ||
@@ -6886,74 +6902,83 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             ))}
           </div>
 
-          <div className="business-hours-day">
-            <span>Workday</span>
-            <div>
-              <label>
-                <span>Starts</span>
-                <input
-                  type="time"
-                  value={workdayStart}
-                  onChange={(event) => {
-                    setWorkdayStart(event.target.value)
-                    setWorkdayPreferenceMessage(null)
-                  }}
-                />
-              </label>
+          <p className="business-hours-default-note">
+            Using your remembered workday and holiday settings.
+          </p>
 
-              <label>
-                <span>Ends</span>
-                <input
-                  type="time"
-                  value={workdayEnd}
-                  onChange={(event) => {
-                    setWorkdayEnd(event.target.value)
-                    setWorkdayPreferenceMessage(null)
-                  }}
-                />
-              </label>
+          <details className="business-hours-advanced">
+            <summary>Workday and holiday settings</summary>
+            <div className="business-hours-advanced-body">
+              <div className="business-hours-day">
+                <span>Workday</span>
+                <div>
+                  <label>
+                    <span>Starts</span>
+                    <input
+                      type="time"
+                      value={workdayStart}
+                      onChange={(event) => {
+                            setWorkdayStart(event.target.value)
+                            setWorkdayPreferenceMessage(null)
+                      }}
+                    />
+                  </label>
+
+                  <label>
+                    <span>Ends</span>
+                    <input
+                      type="time"
+                      value={workdayEnd}
+                      onChange={(event) => {
+                            setWorkdayEnd(event.target.value)
+                            setWorkdayPreferenceMessage(null)
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="business-hours-workday-presets" aria-label="Common workday presets">
+                {workdayPresets.map((preset) => (
+                  <button
+                    type="button"
+                    key={`${preset.start}-${preset.end}`}
+                    className={
+                      workdayStart === preset.start && workdayEnd === preset.end
+                            ? 'is-active'
+                            : ''
+                    }
+                    onClick={() => applyWorkdayPreset(preset.start, preset.end)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="business-hours-preference-actions">
+                <button type="button" onClick={saveCurrentWorkday}>
+                  Remember this workday
+                </button>
+                <button type="button" className="is-secondary" onClick={resetSavedWorkday}>
+                  Reset
+                </button>
+                {workdayPreferenceMessage ? (
+                  <span aria-live="polite">{workdayPreferenceMessage}</span>
+                ) : null}
+              </div>
+
+              <HolidayCalendarSelect
+                value={holidayCalendar}
+                onChange={(nextCalendar) => {
+                  setHolidayCalendar(nextCalendar)
+                  trackWhenIsDueEvent('holiday_calendar_changed', {
+                    context: 'business_hours_deadline',
+                    value: nextCalendar,
+                  })
+                }}
+              />
             </div>
-          </div>
-
-          <div className="business-hours-workday-presets" aria-label="Common workday presets">
-            {workdayPresets.map((preset) => (
-              <button
-                type="button"
-                key={`${preset.start}-${preset.end}`}
-                className={
-                  workdayStart === preset.start && workdayEnd === preset.end
-                    ? 'is-active'
-                    : ''
-                }
-                onClick={() => applyWorkdayPreset(preset.start, preset.end)}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="business-hours-preference-actions">
-            <button type="button" onClick={saveCurrentWorkday}>
-              Remember this workday
-            </button>
-            <button type="button" className="is-secondary" onClick={resetSavedWorkday}>
-              Reset
-            </button>
-            {workdayPreferenceMessage ? (
-              <span aria-live="polite">{workdayPreferenceMessage}</span>
-            ) : null}
-          </div>
-
-          <HolidayCalendarSelect
-            value={holidayCalendar}
-            onChange={(nextCalendar) => {
-              setHolidayCalendar(nextCalendar)
-              trackWhenIsDueEvent('holiday_calendar_changed', {
-                context: 'business_hours_deadline',
-                value: nextCalendar,
-              })
-            }}
-          />
+          </details>
 
           {validationMessage ? (
             <p className="business-hours-error" role="alert">{validationMessage}</p>
@@ -7195,6 +7220,34 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
         .business-hours-preference-actions span {
           color: #718398;
           font-size: 0.7rem;
+        }
+
+        .business-hours-default-note {
+          margin: -3px 0 0;
+          color: #7a8999;
+          font-size: 0.7rem;
+          line-height: 1.4;
+        }
+
+        .business-hours-advanced {
+          border-top: 1px solid rgba(19, 38, 70, 0.08);
+          padding-top: 10px;
+        }
+
+        .business-hours-advanced summary {
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          color: #526a85;
+          font-size: 0.76rem;
+          font-weight: 850;
+        }
+
+        .business-hours-advanced-body {
+          display: grid;
+          gap: 12px;
+          padding-top: 8px;
         }
 
         .business-hours-error {

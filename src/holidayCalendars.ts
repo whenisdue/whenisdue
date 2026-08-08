@@ -340,7 +340,15 @@ export function getHolidayOnDate(
   const key = toDateKey(date)
   const year = Number(key.slice(0, 4))
 
-  return holidaysForYear(calendar, year).get(key) ?? null
+  // Observed holidays can spill across calendar-year boundaries.
+  // Example: Jan 1, 2022 was a Saturday, so the U.S. federal
+  // observance occurred on Friday, Dec 31, 2021.
+  for (const candidateYear of [year - 1, year, year + 1]) {
+    const holiday = holidaysForYear(calendar, candidateYear).get(key)
+    if (holiday) return holiday
+  }
+
+  return null
 }
 
 function isWeekend(date: PlainDate) {
