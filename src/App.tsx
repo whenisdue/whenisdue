@@ -273,15 +273,8 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
       <IdentityRow onNavigate={onNavigate} showHomeLink />
 
       <section className="next-payday-hero">
-        <p className="friendly-eyebrow">
-          <span aria-hidden="true">$</span>
-          Pay schedule
-        </p>
         <h1>When is my next payday?</h1>
-        <p>
-          Enter one payday you already know, then choose how often you are paid.
-          Your next payday appears immediately.
-        </p>
+        <p>Enter a known payday and choose your pay schedule.</p>
       </section>
 
       <section className="next-payday-workspace" aria-label="Next payday calculator">
@@ -599,14 +592,12 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
             grid-template-columns: 1fr;
           }
 
-          .next-payday-result {
+          .next-payday-form {
             order: 1;
-            padding: 16px;
           }
 
-          .next-payday-form {
+          .next-payday-result {
             order: 2;
-            padding: 15px;
           }
 
           .next-payday-secondary {
@@ -6655,15 +6646,8 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
       <IdentityRow onNavigate={onNavigate} showHomeLink />
 
       <section className="business-hours-hero" aria-labelledby="business-hours-title">
-        <p className="friendly-eyebrow">
-          <span aria-hidden="true">◷</span>
-          SLA / response deadline
-        </p>
         <h1 id="business-hours-title">When is this due in business hours?</h1>
-        <p>
-          Add working hours inside a business-day schedule. Time outside the workday,
-          weekends, and selected public holidays does not count.
-        </p>
+        <p>Add working hours inside your business-day schedule.</p>
       </section>
 
       <section className="business-hours-workspace" aria-label="Business hours deadline calculator">
@@ -7183,14 +7167,12 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             grid-template-columns: 1fr;
           }
 
-          .business-hours-result {
+          .business-hours-form {
             order: 1;
-            padding: 16px;
           }
 
-          .business-hours-form {
+          .business-hours-result {
             order: 2;
-            padding: 15px;
           }
 
           .business-hours-presets button,
@@ -7459,7 +7441,230 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
             line-height: 1.4 !important;
           }
         }
-      `}</style>
+      
+
+        @media (max-width: 760px) {
+          /* Net-term pages are the reference: question → compact inputs → obvious answer. */
+          .next-payday-hero,
+          .business-hours-hero,
+          .invoice-bam-intro,
+          .free-trial-bam-intro,
+          .return-window-page .intro {
+            width: calc(100% - 24px) !important;
+            margin: 14px auto 0 !important;
+            padding: 0 0 10px !important;
+            text-align: left !important;
+          }
+
+          .next-payday-hero h1,
+          .business-hours-hero h1,
+          .invoice-bam-intro h1,
+          .free-trial-bam-intro h1,
+          .return-window-page .intro h1 {
+            margin: 0 !important;
+            color: #10213b !important;
+            font-size: clamp(2rem, 9vw, 2.75rem) !important;
+            line-height: 1.02 !important;
+            letter-spacing: -0.035em !important;
+            text-align: left !important;
+          }
+
+          .next-payday-hero > p:last-child,
+          .business-hours-hero > p:last-child,
+          .invoice-bam-intro .subtitle,
+          .free-trial-bam-intro .subtitle,
+          .return-window-page .intro .subtitle {
+            max-width: none !important;
+            margin: 7px 0 0 !important;
+            color: #5f748b !important;
+            font-size: 0.96rem !important;
+            line-height: 1.42 !important;
+            text-align: left !important;
+          }
+
+          .next-payday-workspace,
+          .business-hours-workspace,
+          .invoice-due-date-page .business-workspace,
+          .free-trial-page .business-workspace,
+          .return-window-page .business-workspace {
+            width: calc(100% - 24px) !important;
+            margin: 6px auto 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+
+          /* Inputs first, like Net 30. Keep the input area visually light. */
+          .next-payday-form,
+          .business-hours-form,
+          .invoice-due-date-page .business-calculator,
+          .free-trial-page .business-calculator,
+          .return-window-page .business-calculator {
+            order: 1 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            gap: 10px !important;
+          }
+
+          .next-payday-form label,
+          .business-hours-form > label,
+          .invoice-due-date-page .field,
+          .free-trial-page .field,
+          .return-window-page .field {
+            gap: 5px !important;
+          }
+
+          .next-payday-form label > span,
+          .business-hours-form label > span,
+          .invoice-due-date-page .field > span:first-child,
+          .free-trial-page .field > span:first-child,
+          .return-window-page .field > span:first-child {
+            color: #506985 !important;
+            font-size: 0.84rem !important;
+            font-weight: 850 !important;
+          }
+
+          .next-payday-form input,
+          .next-payday-form select,
+          .business-hours-form input,
+          .invoice-due-date-page .field input,
+          .invoice-due-date-page .field select,
+          .free-trial-page .field input,
+          .return-window-page .field input {
+            min-height: 44px !important;
+            border-radius: 9px !important;
+            background: #fff !important;
+            font-size: 1rem !important;
+          }
+
+          /* The answer follows the compact input block and owns the visual hierarchy. */
+          .next-payday-result,
+          .business-hours-result,
+          .invoice-due-date-page .invoice-due-date-result,
+          .free-trial-page .free-trial-result,
+          .return-window-page .return-window-result {
+            order: 2 !important;
+            min-height: 0 !important;
+            padding: 18px 8px 12px !important;
+            border: 0 !important;
+            border-top: 1px solid rgba(19, 38, 70, 0.1) !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            text-align: center !important;
+          }
+
+          .next-payday-result > p:first-child,
+          .business-hours-result > p:first-child,
+          .invoice-due-date-page .result-label,
+          .free-trial-page .result-label,
+          .return-window-page .result-label {
+            margin: 0 0 8px !important;
+            color: #61778d !important;
+            font-size: 0.82rem !important;
+            font-weight: 900 !important;
+            letter-spacing: 0.07em !important;
+            text-transform: uppercase !important;
+          }
+
+          .next-payday-date,
+          .business-hours-date,
+          .invoice-due-date-page .due-date,
+          .free-trial-page .due-date,
+          .return-window-page .due-date {
+            width: 100% !important;
+            margin: 0 !important;
+            color: #08172f !important;
+            font-family: inherit !important;
+            font-size: clamp(3rem, 15vw, 4.8rem) !important;
+            font-weight: 950 !important;
+            line-height: 0.98 !important;
+            letter-spacing: -0.05em !important;
+            text-align: center !important;
+            text-wrap: balance !important;
+            overflow-wrap: anywhere !important;
+          }
+
+          .next-payday-weekday,
+          .business-hours-weekday {
+            margin-top: 10px !important;
+            color: #536b85 !important;
+            font-size: 1.08rem !important;
+            font-weight: 800 !important;
+          }
+
+          .next-payday-rule,
+          .business-hours-rule,
+          .invoice-due-date-page .result-note,
+          .free-trial-page .result-note,
+          .return-window-page .result-note,
+          .invoice-due-date-page .result-meta,
+          .free-trial-page .result-meta,
+          .return-window-page .result-meta {
+            color: #667c92 !important;
+            font-size: 0.9rem !important;
+            line-height: 1.45 !important;
+          }
+
+          /* SLA: keep quick hour choices secondary so they do not push the answer away. */
+          .business-hours-presets {
+            order: 3 !important;
+            gap: 6px !important;
+          }
+
+          .business-hours-default-note,
+          .business-hours-advanced {
+            order: 4 !important;
+          }
+
+          .business-hours-presets button {
+            min-height: 40px !important;
+            padding: 6px 10px !important;
+            font-size: 0.8rem !important;
+          }
+
+          .business-hours-time-block {
+            margin-top: 12px !important;
+            padding: 9px 14px 10px !important;
+            border-radius: 12px !important;
+          }
+
+          /* Payday quick choices and policy copy come after the answer. */
+          .next-payday-secondary {
+            order: 3 !important;
+            padding: 6px 0 0 !important;
+          }
+
+          /* Remove old green visual language from the legacy result panels. */
+          .invoice-due-date-page .status-badge,
+          .free-trial-page .status-badge,
+          .return-window-page .status-badge {
+            border-color: rgba(19, 38, 70, 0.12) !important;
+            background: #f5f7f9 !important;
+            color: #536b85 !important;
+          }
+
+          .invoice-due-date-page .invoice-due-date-result,
+          .free-trial-page .free-trial-result,
+          .return-window-page .return-window-result {
+            border-left: 0 !important;
+          }
+
+          .invoice-due-date-page .result-meta-stack,
+          .free-trial-page .result-meta-stack,
+          .return-window-page .result-meta-stack {
+            align-items: center !important;
+          }
+
+          /* Keep actions below the answer; they should never compete with it. */
+          .result-actions {
+            margin-top: 14px !important;
+          }
+        }
+`}</style>
 
       <header className="site-header friendly-site-header">
       <div className="identity-row">
