@@ -3323,12 +3323,31 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
               holidayCalendar,
             ).date
 
+            const exactPath = `/${dayCount}-business-days-from-today`
+            const calendarQuery = holidayCalendarQueryValue(holidayCalendar)
+            const exactHref = calendarQuery
+              ? `${exactPath}?calendar=${calendarQuery}`
+              : exactPath
+
             return (
-              <article className="business-bam-row" key={dayCount}>
+              <a
+                className="business-bam-row"
+                key={dayCount}
+                href={exactHref}
+                onClick={(event) => {
+                  event.preventDefault()
+                  trackWhenIsDueEvent('related_bam_click', {
+                    context: 'business_days_calculator',
+                    day_count: dayCount,
+                  })
+                  onNavigate(exactHref)
+                }}
+                aria-label={`${dayCount} business days from today is ${formatPlainDate(answerDate)}`}
+              >
                 <span>{dayCount} business days</span>
                 <strong>{formatPlainDate(answerDate)}</strong>
                 <small>{formatWeekday(answerDate)}</small>
-              </article>
+              </a>
             )
           })}
         </div>
@@ -3349,6 +3368,34 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }}
           compact
         />
+
+        <nav className="business-exact-links" aria-label="More business days from today answers">
+          <span>More exact answers</span>
+          <div>
+            {[4, 8, 20, 30].map((dayCount) => {
+              const path = `/${dayCount}-business-days-from-today`
+              const calendarQuery = holidayCalendarQueryValue(holidayCalendar)
+              const href = calendarQuery ? `${path}?calendar=${calendarQuery}` : path
+
+              return (
+                <a
+                  href={href}
+                  key={dayCount}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    trackWhenIsDueEvent('related_bam_click', {
+                      context: 'business_days_calculator_more',
+                      day_count: dayCount,
+                    })
+                    onNavigate(href)
+                  }}
+                >
+                  {dayCount} business days
+                </a>
+              )
+            })}
+          </div>
+        </nav>
       </section>
 
       <section className="business-workspace" aria-label="Custom business days calculator">
@@ -3593,6 +3640,9 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .business-bam-row {
+          color: inherit;
+          text-decoration: none;
+          transition: border-color 120ms ease, transform 120ms ease;
           min-height: 138px;
           padding: 14px 18px;
           border: 1px solid rgba(19, 38, 70, 0.1);
@@ -3703,6 +3753,48 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         .business-today-note {
           margin-top: 14px;
           color: #516783;
+        }
+
+        .business-bam-row:hover,
+        .business-bam-row:focus-visible {
+          border-color: rgba(23, 58, 99, 0.22);
+          transform: translateY(-1px);
+          outline: none;
+        }
+
+        .business-exact-links {
+          width: 100%;
+          margin-top: 14px;
+          padding-top: 12px;
+          border-top: 1px solid rgba(19, 38, 70, 0.08);
+        }
+
+        .business-exact-links > span {
+          display: block;
+          margin-bottom: 7px;
+          color: #6d8196;
+          font-size: 0.82rem;
+          font-weight: 850;
+        }
+
+        .business-exact-links > div {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .business-exact-links a {
+          min-height: 40px;
+          display: inline-flex;
+          align-items: center;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4e6985;
+          font-size: 0.82rem;
+          font-weight: 800;
+          text-decoration: none;
         }
 
         .business-custom-heading {
