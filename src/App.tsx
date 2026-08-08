@@ -9292,26 +9292,53 @@ function getRouteStructuredData(
   metadata: RouteMetadata,
   canonicalUrl: string,
 ): StructuredData | StructuredData[] {
+  const organizationId = 'https://www.whenisdue.com/#organization'
+  const websiteId = 'https://www.whenisdue.com/#website'
+
+  const organization: StructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': organizationId,
+    name: 'WhenIsDue',
+    url: 'https://www.whenisdue.com/',
+  }
+
   const website: StructuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': websiteId,
     name: 'WhenIsDue',
     url: 'https://www.whenisdue.com/',
     description: 'Instant date and deadline answers for business days, returns, invoices, trials, and other common date questions.',
     inLanguage: 'en',
+    publisher: {
+      '@id': organizationId,
+    },
+  }
+
+  const websiteReference: StructuredData = {
+    '@id': websiteId,
+  }
+
+  const organizationReference: StructuredData = {
+    '@id': organizationId,
   }
 
   if (route === 'home') {
     return [
+      organization,
       website,
       {
         '@context': 'https://schema.org',
         '@type': 'WebApplication',
+        '@id': 'https://www.whenisdue.com/#webapp',
         name: 'WhenIsDue',
         applicationCategory: 'UtilitiesApplication',
         operatingSystem: 'Web',
         url: canonicalUrl,
         description: metadata.description,
+        provider: organizationReference,
+        isPartOf: websiteReference,
         offers: {
           '@type': 'Offer',
           price: '0',
@@ -9325,20 +9352,18 @@ function getRouteStructuredData(
     return {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
+      '@id': `${canonicalUrl}#calculator`,
       name: 'Business Days Calculator',
       url: canonicalUrl,
       description: metadata.description,
       applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'Web',
+      provider: organizationReference,
+      isPartOf: websiteReference,
       offers: {
         '@type': 'Offer',
         price: '0',
         priceCurrency: 'USD',
-      },
-      isPartOf: {
-        '@type': 'WebSite',
-        name: 'WhenIsDue',
-        url: 'https://www.whenisdue.com/',
       },
     }
   }
@@ -9368,14 +9393,12 @@ function getRouteStructuredData(
     return {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
       name: `${dayCount} Business Days From Today`,
       url: canonicalUrl,
       description: metadata.description,
-      isPartOf: {
-        '@type': 'WebSite',
-        name: 'WhenIsDue',
-        url: 'https://www.whenisdue.com/',
-      },
+      isPartOf: websiteReference,
+      publisher: organizationReference,
     }
   }
 
@@ -9397,20 +9420,18 @@ function getRouteStructuredData(
     return {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
+      '@id': `${canonicalUrl}#calculator`,
       name: metadata.title.replace(' - WhenIsDue', '').replace(' | WhenIsDue', ''),
       url: canonicalUrl,
       description: metadata.description,
       applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'Web',
+      provider: organizationReference,
+      isPartOf: websiteReference,
       offers: {
         '@type': 'Offer',
         price: '0',
         priceCurrency: 'USD',
-      },
-      isPartOf: {
-        '@type': 'WebSite',
-        name: 'WhenIsDue',
-        url: 'https://www.whenisdue.com/',
       },
     }
   }
@@ -9418,14 +9439,12 @@ function getRouteStructuredData(
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
+    '@id': `${canonicalUrl}#webpage`,
     name: metadata.title,
     url: canonicalUrl,
     description: metadata.description,
-    isPartOf: {
-      '@type': 'WebSite',
-      name: 'WhenIsDue',
-      url: 'https://www.whenisdue.com/',
-    },
+    isPartOf: websiteReference,
+    publisher: organizationReference,
   }
 }
 
