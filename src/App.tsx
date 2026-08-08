@@ -582,16 +582,35 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           }
 
           .next-payday-hero {
-            margin-top: 28px;
+            margin-top: 18px;
+          }
+
+          .next-payday-hero h1 {
+            font-size: clamp(2.1rem, 10vw, 2.9rem);
+          }
+
+          .next-payday-hero > p:last-child {
+            margin-top: 9px;
+            font-size: 0.96rem;
+            line-height: 1.45;
           }
 
           .next-payday-workspace {
             grid-template-columns: 1fr;
           }
 
-          .next-payday-form,
           .next-payday-result {
+            order: 1;
+            padding: 16px;
+          }
+
+          .next-payday-form {
+            order: 2;
             padding: 15px;
+          }
+
+          .next-payday-secondary {
+            order: 3;
           }
 
           .next-payday-quick-picks button {
@@ -4464,72 +4483,54 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
   return (
     <main className="page-shell business-between-page">
       <section className="business-between-hero" aria-labelledby="business-between-title">
-        <header className="business-between-header">
-          <a
-            className="business-between-brand"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            WhenIsDue
-          </a>
-          <a
-            href="/business-days-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/business-days-calculator')
-            }}
-          >
-            Business days calculator
-          </a>
-        </header>
+        <IdentityRow onNavigate={onNavigate} showHomeLink />
 
         <div className="business-between-answer">
           <p className="business-between-kicker">Business days between dates</p>
 
-          <div className="business-between-inputs">
-            <label>
-              <span>Start date</span>
-              <input
-                type="date"
-                min="1900-01-01"
-                max="2100-12-31"
-                value={startDate}
-                onChange={(event) => {
-                  setStartDate(event.target.value)
-                  trackWhenIsDueEvent('date_changed', { context: 'business_days_between_start', value: event.target.value })
-                }}
-              />
-            </label>
+          <div className="business-between-controls-card">
+            <div className="business-between-inputs">
+              <label>
+                <span>Start date</span>
+                <input
+                  type="date"
+                  min="1900-01-01"
+                  max="2100-12-31"
+                  value={startDate}
+                  onChange={(event) => {
+                    setStartDate(event.target.value)
+                    trackWhenIsDueEvent('date_changed', { context: 'business_days_between_start', value: event.target.value })
+                  }}
+                />
+              </label>
 
-            <label>
-              <span>End date</span>
-              <input
-                type="date"
-                min="1900-01-01"
-                max="2100-12-31"
-                value={endDate}
-                onChange={(event) => {
-                  setEndDate(event.target.value)
-                  trackWhenIsDueEvent('date_changed', { context: 'business_days_between_end', value: event.target.value })
-                }}
-              />
-            </label>
+              <label>
+                <span>End date</span>
+                <input
+                  type="date"
+                  min="1900-01-01"
+                  max="2100-12-31"
+                  value={endDate}
+                  onChange={(event) => {
+                    setEndDate(event.target.value)
+                    trackWhenIsDueEvent('date_changed', { context: 'business_days_between_end', value: event.target.value })
+                  }}
+                />
+              </label>
+            </div>
+
+            <HolidayCalendarSelect
+              value={holidayCalendar}
+              onChange={(nextCalendar) => {
+                setHolidayCalendar(nextCalendar)
+                trackWhenIsDueEvent('holiday_calendar_changed', {
+                  context: 'business_days_between',
+                  value: nextCalendar,
+                })
+              }}
+              compact
+            />
           </div>
-
-          <HolidayCalendarSelect
-            value={holidayCalendar}
-            onChange={(nextCalendar) => {
-              setHolidayCalendar(nextCalendar)
-              trackWhenIsDueEvent('holiday_calendar_changed', {
-                context: 'business_days_between',
-                value: nextCalendar,
-              })
-            }}
-            compact
-          />
 
           {businessDays !== null ? (
             <>
@@ -4595,27 +4596,6 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           flex-direction: column;
         }
 
-        .business-between-header {
-          min-height: 62px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
-        }
-
-        .business-between-header a {
-          color: #647990;
-          font-size: 0.78rem;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        .business-between-brand {
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-
         .business-between-answer {
           flex: 1;
           display: flex;
@@ -4623,7 +4603,16 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           align-items: center;
           justify-content: center;
           text-align: center;
-          padding: 28px 12px 42px;
+          padding: 32px 12px 42px;
+        }
+
+        .business-between-controls-card {
+          width: min(100%, 620px);
+          margin: 0 auto 22px;
+          padding: 16px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 16px;
+          background: #fff;
         }
 
         .business-between-kicker {
@@ -4717,8 +4706,19 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
             min-height: 72vh;
           }
 
-          .business-between-header {
-            min-height: 52px;
+          .business-between-answer {
+            justify-content: flex-start;
+            padding: 22px 0 30px;
+          }
+
+          .business-between-kicker {
+            margin-bottom: 14px;
+            font-size: 1.35rem;
+          }
+
+          .business-between-controls-card {
+            margin-bottom: 16px;
+            padding: 13px;
           }
 
           .business-between-inputs {
@@ -4732,7 +4732,23 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           }
 
           .business-between-number {
-            font-size: clamp(6rem, 32vw, 9rem);
+            font-size: clamp(5.4rem, 29vw, 7.8rem);
+          }
+
+          .business-between-label {
+            margin-top: 14px;
+            font-size: 1.6rem;
+          }
+
+          .business-between-rule {
+            margin-top: 11px;
+            font-size: 0.94rem;
+            line-height: 1.45;
+          }
+
+          .business-between-note {
+            font-size: 0.9rem;
+            line-height: 1.45;
           }
 
           .business-between-explanation {
@@ -7150,15 +7166,30 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           }
 
           .business-hours-hero {
-            margin-top: 28px;
+            margin-top: 18px;
+          }
+
+          .business-hours-hero h1 {
+            font-size: clamp(2.1rem, 10vw, 2.9rem);
+          }
+
+          .business-hours-hero > p:last-child {
+            margin-top: 9px;
+            font-size: 0.96rem;
+            line-height: 1.45;
           }
 
           .business-hours-workspace {
             grid-template-columns: 1fr;
           }
 
-          .business-hours-form,
           .business-hours-result {
+            order: 1;
+            padding: 16px;
+          }
+
+          .business-hours-form {
+            order: 2;
             padding: 15px;
           }
 
@@ -7355,7 +7386,82 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
   )
 
   return (
-    <header className="site-header friendly-site-header">
+    <>
+      <style>{`
+        @media (max-width: 760px) {
+          .invoice-bam-intro,
+          .free-trial-bam-intro,
+          .return-window-page .intro {
+            padding-bottom: 10px !important;
+          }
+
+          .invoice-bam-intro h1,
+          .free-trial-bam-intro h1,
+          .return-window-page .intro h1 {
+            font-size: clamp(2.1rem, 10vw, 2.9rem) !important;
+            line-height: 1.02 !important;
+            letter-spacing: -0.035em !important;
+          }
+
+          .invoice-bam-intro .subtitle,
+          .free-trial-bam-intro .subtitle,
+          .return-window-page .intro .subtitle {
+            font-size: 0.96rem !important;
+            line-height: 1.45 !important;
+          }
+
+          .invoice-due-date-page .business-workspace,
+          .free-trial-page .business-workspace,
+          .return-window-page .business-workspace {
+            gap: 10px !important;
+          }
+
+          .invoice-due-date-page .invoice-due-date-result,
+          .free-trial-page .free-trial-result,
+          .return-window-page .return-window-result {
+            border: 1px solid rgba(19, 38, 70, 0.09) !important;
+            border-radius: 16px !important;
+            background: #fff !important;
+            box-shadow: none !important;
+          }
+
+          .invoice-due-date-page .result-label,
+          .free-trial-page .result-label,
+          .return-window-page .result-label {
+            color: #667c92 !important;
+            font-size: 0.88rem !important;
+            font-weight: 900 !important;
+            letter-spacing: 0.06em !important;
+            text-transform: uppercase !important;
+          }
+
+          .invoice-due-date-page .due-date,
+          .free-trial-page .due-date,
+          .return-window-page .due-date {
+            color: #0b1830 !important;
+            font-weight: 950 !important;
+            letter-spacing: -0.045em !important;
+            line-height: 0.98 !important;
+          }
+
+          .invoice-due-date-page .result-note,
+          .free-trial-page .result-note,
+          .return-window-page .result-note {
+            color: #667c92 !important;
+            font-size: 0.92rem !important;
+            line-height: 1.5 !important;
+          }
+
+          .invoice-due-date-page .status-badge,
+          .free-trial-page .status-badge,
+          .return-window-page .status-badge {
+            font-size: 0.86rem !important;
+            line-height: 1.4 !important;
+          }
+        }
+      `}</style>
+
+      <header className="site-header friendly-site-header">
       <div className="identity-row">
         {siteMark}
         {onNavigate ? (
@@ -7391,7 +7497,8 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
           </nav>
         ) : null}
       </div>
-    </header>
+      </header>
+    </>
   )
 }
 
