@@ -5700,6 +5700,13 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
     getInitialHolidayCalendarQueryParam,
   )
 
+  const slaPresets = [
+    { label: '4 hours', hours: '4' },
+    { label: '8 hours', hours: '8' },
+    { label: '16 hours', hours: '16' },
+    { label: '24 hours', hours: '24' },
+  ]
+
   const parsedStartDate = parsePlainDate(startDate)
   const parsedHours = parseInteger(hours)
   const workdayStartMinutes = timeToMinutes(workdayStart)
@@ -5797,6 +5804,25 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             />
           </label>
 
+          <div className="business-hours-presets" aria-label="Common SLA hour presets">
+            {slaPresets.map((preset) => (
+              <button
+                type="button"
+                key={preset.hours}
+                className={hours === preset.hours ? 'is-active' : ''}
+                onClick={() => {
+                  setHours(preset.hours)
+                  trackWhenIsDueEvent('quick_pick', {
+                    context: 'business_hours_deadline',
+                    value: preset.hours,
+                  })
+                }}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
           <div className="business-hours-day">
             <span>Workday</span>
             <div>
@@ -5873,6 +5899,12 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
                     value: `${formatPlainDate(result.date)} · ${formatTime12Hour(result.time)}`,
                   },
                 ]}
+              />
+
+              <ResultActions
+                title={`${parsedHours}-business-hour deadline`}
+                date={result.date}
+                details={`${formatTime12Hour(result.time)} · ${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)} workday · ${getHolidayCalendarOption(holidayCalendar).shortLabel}`}
               />
             </>
           ) : (
@@ -5985,6 +6017,31 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           gap: 8px;
         }
 
+        .business-hours-presets {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .business-hours-presets button {
+          min-height: 40px;
+          padding: 7px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.12);
+          border-radius: 999px;
+          background: #f7f9fb;
+          color: #60758c;
+          font: inherit;
+          font-size: 0.74rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .business-hours-presets button.is-active {
+          border-color: rgba(23, 58, 99, 0.28);
+          background: #eef3f7;
+          color: #173a63;
+        }
+
         .business-hours-error {
           margin: 0;
           color: #9a3f3f;
@@ -6061,6 +6118,10 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           .business-hours-form,
           .business-hours-result {
             padding: 15px;
+          }
+
+          .business-hours-presets button {
+            min-height: 44px;
           }
 
           .business-hours-date {
