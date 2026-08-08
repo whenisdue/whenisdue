@@ -40,6 +40,9 @@ import {
   calculateNextPayday,
   payScheduleLabel,
 } from './payday'
+import {
+  interpretDeadlinePhrase,
+} from './deadlinePhrase'
 
 type SavedDeadline = {
   id: string
@@ -1056,7 +1059,8 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
 type AskWhenMatch = {
   label: string
   description: string
-  path: string
+  path: string | null
+  kind?: 'navigation' | 'deadline-answer' | 'clarification'
 }
 
 function normalizeAskWhenQuery(rawQuery: string) {
@@ -1075,10 +1079,54 @@ function normalizeAskWhenQuery(rawQuery: string) {
 function resolveAskWhenQuery(
   rawQuery: string,
   holidayCalendar: HolidayCalendarId,
+  today: PlainDate,
 ): AskWhenMatch | null {
   const query = normalizeAskWhenQuery(rawQuery)
 
   if (!query) return null
+
+  const deadlineInterpretation = interpretDeadlinePhrase(query, {
+    today,
+    holidayCalendar,
+  })
+
+  if (deadlineInterpretation) {
+    const usesWithin = deadlineInterpretation.ambiguities.includes('within-wording')
+
+    if (usesWithin) {
+      return {
+        kind: 'clarification',
+        label: 'This wording needs one more rule',
+        description:
+          '“Within” can use different counting conventions. WhenIsDue will not guess. Try wording it as “5 business days after 2026-08-10” or use the deadline calculator when rule choices are available.',
+        path: null,
+      }
+    }
+
+    const answerDate = deadlineInterpretation.answer.answerDate
+    const directionLabel =
+      deadlineInterpretation.direction === 'before' ? 'before' : 'after'
+    const unitLabel =
+      deadlineInterpretation.unit === 'business-days'
+        ? `business ${deadlineInterpretation.duration === 1 ? 'day' : 'days'}`
+        : `calendar ${deadlineInterpretation.duration === 1 ? 'day' : 'days'}`
+
+    let ruleText = 'Calendar days counted, including weekends.'
+
+    if (deadlineInterpretation.unit === 'business-days') {
+      ruleText =
+        holidayCalendar === 'none'
+          ? 'Trigger day not counted. Weekends skipped; public holidays still count as weekdays.'
+          : `Trigger day not counted. Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`
+    }
+
+    return {
+      kind: 'deadline-answer',
+      label: formatPlainDate(answerDate),
+      description: `${deadlineInterpretation.duration} ${unitLabel} ${directionLabel} ${formatPlainDate(deadlineInterpretation.triggerDate)}. ${ruleText}`,
+      path: null,
+    }
+  }
 
   const calendarSuffix =
     holidayCalendar === 'none' ? '' : `&calendar=${holidayCalendar}`
@@ -1281,21 +1329,22 @@ function resolveAskWhenQuery(
 
 type AskWhenBoxProps = NavigationProps & {
   holidayCalendar: HolidayCalendarId
+  today: PlainDate
 }
 
-function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
+function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
   const [query, setQuery] = useState(
     () => new URLSearchParams(window.location.search).get('q') ?? '',
   )
   const [submittedWithoutMatch, setSubmittedWithoutMatch] = useState(false)
   const match = useMemo(
-    () => resolveAskWhenQuery(query, holidayCalendar),
-    [query, holidayCalendar],
+    () => resolveAskWhenQuery(query, holidayCalendar, today),
+    [query, holidayCalendar, today],
   )
 
   const examples = [
     'what is 3 business days from today',
-    'how long is 5 business days',
+    '5 business days after 2026-08-10',
     'Net 30 due date',
     '30 day return',
   ]
@@ -1312,6 +1361,21 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
     }
 
     setSubmittedWithoutMatch(false)
+
+    if (!match.path) {
+      trackWhenIsDueEvent(
+        match.kind === 'clarification'
+          ? 'ask_when_rule_clarification'
+          : 'ask_when_direct_answer',
+        {
+          query: query.trim(),
+          normalized_query: normalizeAskWhenQuery(query),
+          answer: match.label,
+        },
+      )
+      return
+    }
+
     trackWhenIsDueEvent('ask_when_submitted', {
       query: query.trim(),
       normalized_query: normalizeAskWhenQuery(query),
@@ -1325,7 +1389,7 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
       <div className="ask-when-heading">
         <span>Quick answer finder</span>
         <h2 id="ask-when-title">Ask WhenIsDue</h2>
-        <p>Type a common date question. WhenIsDue recognizes practical patterns and sends you to the exact answer or calculator.</p>
+        <p>Type a common date question. Your answer appears as soon as WhenIsDue recognizes the pattern.</p>
       </div>
 
       <form
@@ -1346,25 +1410,52 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
           aria-label="Ask a date or deadline question"
           autoComplete="off"
         />
-        <button type="submit" disabled={!query.trim()}>
-          Show answer
-        </button>
       </form>
 
       {query.trim() && (match || submittedWithoutMatch) ? (
-        <div className={`ask-when-preview ${match ? 'has-match' : 'no-match'}`} aria-live="polite">
-          {match ? (
-            <>
-              <strong>{match.label}</strong>
-              <span>{match.description}</span>
-            </>
-          ) : (
-            <>
-              <strong>I don't recognize that one yet.</strong>
-              <span>Try one of the examples below or choose a calculator.</span>
-            </>
-          )}
-        </div>
+        match?.path ? (
+          <a
+            className="ask-when-preview has-match is-link"
+            href={match.path}
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('ask_when_realtime_open', {
+                query: query.trim(),
+                normalized_query: normalizeAskWhenQuery(query),
+                destination: match.path,
+              })
+              onNavigate(match.path!)
+            }}
+            aria-live="polite"
+          >
+            <strong>{match.label}</strong>
+            <span>{match.description}</span>
+            <em>Open this answer →</em>
+          </a>
+        ) : (
+          <div
+            className={`ask-when-preview ${
+              match?.kind === 'clarification'
+                ? 'needs-clarification'
+                : match
+                  ? 'has-match'
+                  : 'no-match'
+            }`}
+            aria-live="polite"
+          >
+            {match ? (
+              <>
+                <strong>{match.label}</strong>
+                <span>{match.description}</span>
+              </>
+            ) : (
+              <>
+                <strong>I don't recognize that one yet.</strong>
+                <span>Try one of the examples below or choose a calculator.</span>
+              </>
+            )}
+          </div>
+        )
       ) : null}
 
       <div className="ask-when-examples" aria-label="Ask WhenIsDue examples">
@@ -1398,7 +1489,8 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
           display: block;
           margin-bottom: 4px;
           color: #78899b;
-          font-size: 0.72rem;
+          font-size: 1rem;
+          line-height: 1.35;
           font-weight: 900;
           letter-spacing: 0.07em;
           text-transform: uppercase;
@@ -1414,53 +1506,33 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
           margin: 7px auto 0;
           max-width: 620px;
           color: #6d8094;
-          font-size: 0.84rem;
-          line-height: 1.5;
+          font-size: 1rem;
+          line-height: 1.55;
         }
 
         .ask-when-form {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 8px;
+          display: block;
           margin: 18px auto 0;
           max-width: 720px;
         }
 
         .ask-when-form input {
           min-width: 0;
-          min-height: 50px;
-          padding: 10px 14px;
+          min-height: 56px;
+          padding: 12px 16px;
           border: 1px solid rgba(19, 38, 70, 0.16);
           border-radius: 11px;
           color: #18314e;
           font: inherit;
-          font-size: 0.95rem;
-        }
-
-        .ask-when-form button {
-          min-height: 50px;
-          padding: 10px 18px;
-          border: 0;
-          border-radius: 11px;
-          background: #173a63;
-          color: #fff;
-          font: inherit;
-          font-size: 0.84rem;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .ask-when-form button:disabled {
-          opacity: 0.42;
-          cursor: default;
+          font-size: 1.08rem;
         }
 
         .ask-when-preview {
           display: grid;
-          gap: 2px;
+          gap: 4px;
           max-width: 720px;
-          margin: 9px auto 0;
-          padding: 9px 11px;
+          margin: 10px auto 0;
+          padding: 12px 14px;
           border-radius: 10px;
           text-align: left;
         }
@@ -1469,8 +1541,35 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
           background: #f2f7f4;
         }
 
+        .ask-when-preview.needs-clarification {
+          border-color: rgba(183, 121, 31, 0.2);
+          background: #fffaf0;
+        }
+
+        .ask-when-preview.needs-clarification strong {
+          color: #7a5314;
+        }
+
         .ask-when-preview.no-match {
           background: #f7f5f2;
+        }
+
+        .ask-when-preview.is-link {
+          color: inherit;
+          text-decoration: none;
+          cursor: pointer;
+        }
+
+        .ask-when-preview.is-link:hover {
+          background: #eaf3ee;
+        }
+
+        .ask-when-preview.is-link em {
+          margin-top: 2px;
+          color: #1d4f82;
+          font-size: 0.9rem;
+          font-style: normal;
+          font-weight: 850;
         }
 
         .ask-when-preview strong {
@@ -1480,7 +1579,8 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
 
         .ask-when-preview span {
           color: #738599;
-          font-size: 0.72rem;
+          font-size: 0.92rem;
+          line-height: 1.5;
         }
 
         .ask-when-examples {
@@ -1499,7 +1599,7 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
           background: #f7f9fb;
           color: #60758c;
           font: inherit;
-          font-size: 0.72rem;
+          font-size: 0.86rem;
           font-weight: 800;
           cursor: pointer;
         }
@@ -1514,7 +1614,6 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
             grid-template-columns: 1fr;
           }
 
-          .ask-when-form button,
           .ask-when-examples button {
             min-height: 44px;
           }
@@ -1719,7 +1818,11 @@ function HomePage({ onNavigate }: NavigationProps) {
         `}</style>
       </section>
 
-      <AskWhenBox onNavigate={onNavigate} holidayCalendar={holidayCalendar} />
+      <AskWhenBox
+        onNavigate={onNavigate}
+        holidayCalendar={holidayCalendar}
+        today={today}
+      />
 
       {(favoriteCalculations.length > 0 || recentOnlyCalculations.length > 0) ? (
         <section className="date-home-saved" aria-labelledby="date-home-saved-title">
