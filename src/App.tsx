@@ -4119,9 +4119,10 @@ type ResultActionsProps = {
   title: string
   date: PlainDate
   details?: string
+  time?: string
 }
 
-function ResultActions({ title, date, details }: ResultActionsProps) {
+function ResultActions({ title, date, details, time }: ResultActionsProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(() =>
     isFavoriteCalculation(
@@ -4204,6 +4205,10 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
   function addToCalendar() {
     const dateKey = toDateKey(date).replaceAll('-', '')
     const nextDateKey = toDateKey(addCalendarDays(date, 1)).replaceAll('-', '')
+    const validTime = time && timeToMinutes(time) !== null ? time : null
+    const timedStart = validTime
+      ? `${dateKey}T${validTime.replace(':', '')}00`
+      : null
     const escapeIcs = (value: string) =>
       value
         .replaceAll('\\', '\\\\')
@@ -4217,8 +4222,10 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
       'PRODID:-//WhenIsDue//Date Reminder//EN',
       'BEGIN:VEVENT',
       `UID:${crypto.randomUUID()}@whenisdue.com`,
-      `DTSTART;VALUE=DATE:${dateKey}`,
-      `DTEND;VALUE=DATE:${nextDateKey}`,
+      timedStart
+        ? `DTSTART:${timedStart}`
+        : `DTSTART;VALUE=DATE:${dateKey}`,
+      timedStart ? '' : `DTEND;VALUE=DATE:${nextDateKey}`,
       `SUMMARY:${escapeIcs(title)}`,
       details ? `DESCRIPTION:${escapeIcs(details)}` : '',
       'END:VEVENT',
@@ -4231,14 +4238,20 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = 'whenisdue-date.ics'
+    link.download = time ? 'whenisdue-deadline.ics' : 'whenisdue-date.ics'
     document.body.appendChild(link)
     link.click()
     link.remove()
     URL.revokeObjectURL(url)
     setMessage('Calendar file created.')
     recordRecentCalculation(title, date, details)
-    trackWhenIsDueEvent('calendar_export', { title, result_date: toDateKey(date), status: 'created' })
+    trackWhenIsDueEvent('calendar_export', {
+      title,
+      result_date: toDateKey(date),
+      result_time: time ?? null,
+      event_type: time ? 'timed' : 'all_day',
+      status: 'created',
+    })
   }
 
   function toggleFavorite() {
@@ -6817,6 +6830,7 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
               <ResultActions
                 title={`${parsedHours}-business-hour deadline`}
                 date={result.date}
+                time={result.time}
                 details={`${formatTime12Hour(result.time)} · ${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)} workday · ${getHolidayCalendarOption(holidayCalendar).shortLabel}`}
               />
             </>
