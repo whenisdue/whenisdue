@@ -57,6 +57,7 @@ type RouteName =
   | 'business-days'
   | 'business-days-between'
   | 'business-hours-deadline'
+  | 'saved-calculations'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -125,6 +126,10 @@ function App() {
 
   if (route === 'business-hours-deadline') {
     return <BusinessHoursDeadlinePage onNavigate={navigate} />
+  }
+
+  if (route === 'saved-calculations') {
+    return <SavedCalculationsPage onNavigate={navigate} />
   }
 
   if (route === 'three-business-days') {
@@ -214,6 +219,417 @@ function App() {
   return <HomePage onNavigate={navigate} />
 }
 
+
+
+async function copySavedCalculationLink(item: SavedCalculation) {
+  const absoluteUrl = new URL(item.url, window.location.origin).toString()
+
+  try {
+    await navigator.clipboard.writeText(absoluteUrl)
+    trackWhenIsDueEvent('saved_calculation_link_copied', {
+      title: item.title,
+      status: 'success',
+    })
+    return true
+  } catch {
+    trackWhenIsDueEvent('saved_calculation_link_copied', {
+      title: item.title,
+      status: 'failed',
+    })
+    return false
+  }
+}
+
+function SavedCalculationsPage({ onNavigate }: NavigationProps) {
+  const [favorites, setFavorites] = useState<SavedCalculation[]>(() =>
+    readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
+  )
+  const [recents, setRecents] = useState<SavedCalculation[]>(() =>
+    readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY),
+  )
+  const [message, setMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    const refresh = () => {
+      setFavorites(readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY))
+      setRecents(readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY))
+    }
+
+    window.addEventListener(SAVED_CALCULATIONS_EVENT, refresh)
+    window.addEventListener('storage', refresh)
+
+    return () => {
+      window.removeEventListener(SAVED_CALCULATIONS_EVENT, refresh)
+      window.removeEventListener('storage', refresh)
+    }
+  }, [])
+
+  function openItem(item: SavedCalculation, type: 'favorite' | 'recent') {
+    trackWhenIsDueEvent('saved_calculation_opened', {
+      type,
+      title: item.title,
+    })
+    onNavigate(item.url)
+  }
+
+  async function copyItemLink(item: SavedCalculation) {
+    const copied = await copySavedCalculationLink(item)
+    setMessage(copied ? 'Exact calculation link copied.' : 'Link copy is not available in this browser.')
+  }
+
+  const hasItems = favorites.length > 0 || recents.length > 0
+
+  return (
+    <main className="page-shell saved-calculations-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="saved-calculations-hero">
+        <p className="friendly-eyebrow">
+          <span aria-hidden="true">★</span>
+          Local history
+        </p>
+        <h1>Saved calculations</h1>
+        <p>
+          Reopen the exact calculator state you used before. Favorites and recent
+          calculations are stored only on this device.
+        </p>
+        {message ? <div className="saved-calculations-message" aria-live="polite">{message}</div> : null}
+      </section>
+
+      {!hasItems ? (
+        <section className="saved-calculations-empty">
+          <h2>Nothing saved yet</h2>
+          <p>
+            Favorite a result or use Copy, Share, or Add to calendar on a calculator.
+            It will appear here automatically.
+          </p>
+          <a
+            href="/calculators"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/calculators')
+            }}
+          >
+            Browse calculators
+          </a>
+        </section>
+      ) : (
+        <section className="saved-calculations-groups">
+          {favorites.length > 0 ? (
+            <div className="saved-calculations-group">
+              <div className="saved-calculations-group-heading">
+                <div>
+                  <span>Favorites</span>
+                  <h2>Your pinned calculations</h2>
+                </div>
+              </div>
+
+              <div className="saved-calculations-list">
+                {favorites.map((item) => (
+                  <article className="saved-calculation-row" key={item.id}>
+                    <button
+                      type="button"
+                      className="saved-calculation-main"
+                      onClick={() => openItem(item, 'favorite')}
+                    >
+                      <span>Favorite</span>
+                      <strong>{item.title}</strong>
+                      <b>{item.dateText}</b>
+                      {item.details ? <small>{item.details}</small> : null}
+                    </button>
+
+                    <div className="saved-calculation-actions">
+                      <button type="button" onClick={() => copyItemLink(item)}>
+                        Copy link
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeSavedCalculation(FAVORITE_CALCULATIONS_STORAGE_KEY, item.id)
+                          trackWhenIsDueEvent('favorite_removed', { title: item.title })
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {recents.length > 0 ? (
+            <div className="saved-calculations-group">
+              <div className="saved-calculations-group-heading">
+                <div>
+                  <span>Recent</span>
+                  <h2>Calculations you used recently</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    writeSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY, [])
+                    trackWhenIsDueEvent('recent_calculations_cleared')
+                  }}
+                >
+                  Clear recent
+                </button>
+              </div>
+
+              <div className="saved-calculations-list">
+                {recents.map((item) => (
+                  <article className="saved-calculation-row" key={item.id}>
+                    <button
+                      type="button"
+                      className="saved-calculation-main"
+                      onClick={() => openItem(item, 'recent')}
+                    >
+                      <span>Recent</span>
+                      <strong>{item.title}</strong>
+                      <b>{item.dateText}</b>
+                      {item.details ? <small>{item.details}</small> : null}
+                    </button>
+
+                    <div className="saved-calculation-actions">
+                      <button type="button" onClick={() => copyItemLink(item)}>
+                        Copy link
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      )}
+
+      <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .saved-calculations-page {
+          min-height: 100vh;
+        }
+
+        .saved-calculations-hero {
+          width: min(900px, calc(100% - 36px));
+          margin: 42px auto 0;
+          text-align: center;
+        }
+
+        .saved-calculations-hero h1 {
+          margin: 6px 0 0;
+          color: #10213b;
+          font-size: clamp(2.3rem, 5vw, 4.6rem);
+          line-height: 1;
+          letter-spacing: -0.045em;
+        }
+
+        .saved-calculations-hero > p:last-of-type {
+          max-width: 650px;
+          margin: 12px auto 0;
+          color: #6d8094;
+          line-height: 1.55;
+        }
+
+        .saved-calculations-message {
+          margin: 10px auto 0;
+          color: #536f8b;
+          font-size: 0.76rem;
+          font-weight: 800;
+        }
+
+        .saved-calculations-empty,
+        .saved-calculations-groups {
+          width: min(980px, calc(100% - 36px));
+          margin: 24px auto 48px;
+        }
+
+        .saved-calculations-empty {
+          padding: 28px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 18px;
+          background: #fff;
+          text-align: center;
+        }
+
+        .saved-calculations-empty h2 {
+          margin: 0;
+          color: #263f5d;
+        }
+
+        .saved-calculations-empty p {
+          max-width: 560px;
+          margin: 8px auto 16px;
+          color: #728398;
+          line-height: 1.5;
+        }
+
+        .saved-calculations-empty a {
+          display: inline-flex;
+          min-height: 44px;
+          align-items: center;
+          padding: 8px 14px;
+          border-radius: 10px;
+          background: #173a63;
+          color: #fff;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        .saved-calculations-groups {
+          display: grid;
+          gap: 20px;
+        }
+
+        .saved-calculations-group {
+          padding: 18px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.75);
+        }
+
+        .saved-calculations-group-heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 10px;
+        }
+
+        .saved-calculations-group-heading span {
+          color: #7d8fa2;
+          font-size: 0.68rem;
+          font-weight: 900;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+        }
+
+        .saved-calculations-group-heading h2 {
+          margin: 2px 0 0;
+          color: #2b435f;
+          font-size: 1.05rem;
+        }
+
+        .saved-calculations-group-heading > button {
+          min-height: 44px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 9px;
+          background: #fff;
+          color: #6b7f94;
+          font: inherit;
+          font-size: 0.72rem;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .saved-calculations-list {
+          display: grid;
+          gap: 8px;
+        }
+
+        .saved-calculation-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 8px;
+          align-items: stretch;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 13px;
+          background: #fff;
+          overflow: hidden;
+        }
+
+        .saved-calculation-main {
+          display: grid;
+          gap: 3px;
+          min-width: 0;
+          padding: 13px;
+          border: 0;
+          background: transparent;
+          color: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .saved-calculation-main > span {
+          color: #8292a3;
+          font-size: 0.65rem;
+          font-weight: 850;
+          text-transform: uppercase;
+        }
+
+        .saved-calculation-main > strong {
+          overflow: hidden;
+          color: #304a66;
+          font-size: 0.84rem;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .saved-calculation-main > b {
+          color: #0c1931;
+          font-size: 1.02rem;
+        }
+
+        .saved-calculation-main > small {
+          overflow: hidden;
+          color: #788a9d;
+          font-size: 0.7rem;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .saved-calculation-actions {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 8px;
+        }
+
+        .saved-calculation-actions button {
+          min-height: 44px;
+          padding: 7px 9px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 8px;
+          background: #f7f9fb;
+          color: #60758c;
+          font: inherit;
+          font-size: 0.7rem;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        @media (max-width: 640px) {
+          .saved-calculations-hero,
+          .saved-calculations-empty,
+          .saved-calculations-groups {
+            width: calc(100% - 20px);
+          }
+
+          .saved-calculations-hero {
+            margin-top: 28px;
+          }
+
+          .saved-calculations-group {
+            padding: 12px;
+          }
+
+          .saved-calculation-row {
+            grid-template-columns: 1fr;
+          }
+
+          .saved-calculation-actions {
+            border-top: 1px solid rgba(19, 38, 70, 0.06);
+          }
+
+          .saved-calculation-actions button {
+            flex: 1;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
 
 type AskWhenMatch = {
   label: string
@@ -857,8 +1273,19 @@ function HomePage({ onNavigate }: NavigationProps) {
       {(favoriteCalculations.length > 0 || recentCalculations.length > 0) ? (
         <section className="date-home-saved" aria-labelledby="date-home-saved-title">
           <div className="date-home-section-heading">
-            <h2 id="date-home-saved-title">Your saved calculations</h2>
-            <span>Stored only on this device</span>
+            <div>
+              <h2 id="date-home-saved-title">Your saved calculations</h2>
+              <span>Stored only on this device</span>
+            </div>
+            <a
+              href="/saved-calculations"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/saved-calculations')
+              }}
+            >
+              View all
+            </a>
           </div>
 
           {favoriteCalculations.length > 0 ? (
@@ -948,9 +1375,29 @@ function HomePage({ onNavigate }: NavigationProps) {
               background: rgba(255, 255, 255, 0.72);
             }
 
-            .date-home-saved .date-home-section-heading > span {
+            .date-home-saved .date-home-section-heading > div > span {
               color: #7a8999;
               font-size: 0.74rem;
+            }
+
+            .date-home-saved .date-home-section-heading {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+            }
+
+            .date-home-saved .date-home-section-heading a {
+              min-height: 40px;
+              display: inline-flex;
+              align-items: center;
+              padding: 6px 10px;
+              border: 1px solid rgba(19, 38, 70, 0.1);
+              border-radius: 9px;
+              color: #536f8b;
+              font-size: 0.74rem;
+              font-weight: 850;
+              text-decoration: none;
             }
 
             .date-home-saved-group + .date-home-saved-group {
@@ -3283,6 +3730,26 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
     }
   }, [title])
 
+  async function copyExactLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setMessage('Link copied.')
+      recordRecentCalculation(title, date, details)
+      trackWhenIsDueEvent('copy_exact_link', {
+        title,
+        result_date: toDateKey(date),
+        status: 'success',
+      })
+    } catch {
+      setMessage('Link copy is not available in this browser.')
+      trackWhenIsDueEvent('copy_exact_link', {
+        title,
+        result_date: toDateKey(date),
+        status: 'failed',
+      })
+    }
+  }
+
   async function copyAnswer() {
     try {
       await navigator.clipboard.writeText(shareText)
@@ -3381,7 +3848,8 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
         >
           {isFavorite ? 'Favorited' : 'Favorite'}
         </button>
-        <button type="button" onClick={copyAnswer}>Copy</button>
+        <button type="button" onClick={copyAnswer}>Copy result</button>
+        <button type="button" onClick={copyExactLink}>Copy link</button>
         <button type="button" onClick={shareAnswer}>Share</button>
         <button type="button" onClick={addToCalendar}>Add to calendar</button>
         {message ? <span aria-live="polite">{message}</span> : null}
@@ -7085,6 +7553,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'business-hours-deadline'
   }
 
+  if (pathname === '/saved-calculations') {
+    return 'saved-calculations'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -7195,7 +7667,10 @@ function applyRouteMetadata(route: RouteName) {
   const robots = getOrCreateMetaName('robots')
   robots.setAttribute(
     'content',
-    route === 'not-found' || route === 'workspace' || route === 'typing'
+    route === 'not-found' ||
+    route === 'workspace' ||
+    route === 'typing' ||
+    route === 'saved-calculations'
       ? 'noindex, follow'
       : 'index, follow',
   )
@@ -7261,6 +7736,14 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Calculate an SLA or response deadline using business hours, workday times, weekends, and optional holiday calendars.',
       twitterDescription: 'Add business hours to a date and time and calculate the exact deadline.',
       path: '/business-hours-deadline-calculator',
+    }
+  }
+
+  if (route === 'saved-calculations') {
+    return {
+      title: 'Saved Calculations - WhenIsDue',
+      description: 'Reopen recent and favorite WhenIsDue calculations saved on this device.',
+      path: '/saved-calculations',
     }
   }
 
