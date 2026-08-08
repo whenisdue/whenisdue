@@ -275,6 +275,12 @@ function getInitialDeadlineUnit() {
   return value === 'calendar-days' ? 'calendar-days' : 'business-days'
 }
 
+function getInitialDeadlineDirection(): 'after' | 'before' {
+  return getDeadlineCalculatorQueryParam('direction') === 'before'
+    ? 'before'
+    : 'after'
+}
+
 function getInitialStartDayConvention(): StartDayConvention {
   return getDeadlineCalculatorQueryParam('startday') === 'include-if-qualifying'
     ? 'include-if-qualifying'
@@ -302,6 +308,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
   const [unit, setUnit] = useState<'business-days' | 'calendar-days'>(
     getInitialDeadlineUnit,
   )
+  const [direction, setDirection] = useState<'after' | 'before'>(
+    getInitialDeadlineDirection,
+  )
   const [startDayConvention, setStartDayConvention] =
     useState<StartDayConvention>(getInitialStartDayConvention)
   const [endDayAdjustment, setEndDayAdjustment] =
@@ -321,7 +330,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     return calculateDeadlineByRule({
       triggerDate: parsedTriggerDate,
       duration: parsedDuration,
-      direction: 'after',
+      direction,
       unit,
       startDayConvention,
       holidayCalendar,
@@ -330,6 +339,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
   }, [
     parsedTriggerDate,
     parsedDuration,
+    direction,
     unit,
     startDayConvention,
     holidayCalendar,
@@ -345,6 +355,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
       date: triggerDate,
       days: duration,
       unit,
+      direction,
       startday: startDayConvention,
       endrule: endDayAdjustment,
       calendar: holidayCalendarQueryValue(holidayCalendar),
@@ -354,6 +365,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     triggerDate,
     duration,
     unit,
+    direction,
     startDayConvention,
     endDayAdjustment,
     holidayCalendar,
@@ -407,6 +419,19 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           </label>
 
           <label>
+            <span>Direction</span>
+            <select
+              value={direction}
+              onChange={(event) =>
+                setDirection(event.target.value as 'after' | 'before')
+              }
+            >
+              <option value="after">After the start date</option>
+              <option value="before">Before the start date</option>
+            </select>
+          </label>
+
+          <label>
             <span>Count as</span>
             <select
               value={unit}
@@ -428,7 +453,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
             <p>
               {parsedDuration} {unit === 'business-days' ? 'business' : 'calendar'}{' '}
-              {parsedDuration === 1 ? 'day' : 'days'} after{' '}
+              {parsedDuration === 1 ? 'day' : 'days'} {direction}{' '}
               {formatPlainDate(parsedTriggerDate)}.{' '}
               {startDayConvention === 'exclude-trigger'
                 ? 'The start date does not count. '
@@ -446,6 +471,13 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                 {
                   label: 'Start date',
                   value: formatPlainDate(parsedTriggerDate),
+                },
+                {
+                  label: 'Direction',
+                  value:
+                    direction === 'after'
+                      ? 'Count forward from the start date'
+                      : 'Count backward from the start date',
                 },
                 {
                   label: 'Duration',
@@ -627,7 +659,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         .deadline-rule-essential {
           display: grid;
-          grid-template-columns: 1.35fr 0.8fr 1fr;
+          grid-template-columns: 1.25fr 0.85fr 1fr 1fr;
           gap: 10px;
           margin-top: 28px;
         }
@@ -732,6 +764,12 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           font-size: 0.95rem;
           line-height: 1.55;
           text-align: center;
+        }
+
+        @media (max-width: 900px) and (min-width: 721px) {
+          .deadline-rule-essential {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
         }
 
         @media (max-width: 720px) {
@@ -1598,6 +1636,7 @@ function resolveAskWhenQuery(
         date: toDateKey(deadlineInterpretation.triggerDate),
         days: String(deadlineInterpretation.duration),
         unit: deadlineInterpretation.unit,
+        direction: deadlineInterpretation.direction,
         startday: deadlineInterpretation.startDayConvention,
         endrule: deadlineInterpretation.endDayAdjustment,
         source: 'within',
