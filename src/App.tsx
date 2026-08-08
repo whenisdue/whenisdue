@@ -43,6 +43,11 @@ import {
 import {
   interpretDeadlinePhrase,
 } from './deadlinePhrase'
+import {
+  calculateDeadlineByRule,
+  type EndDayAdjustment,
+  type StartDayConvention,
+} from './deadlineRules'
 
 type SavedDeadline = {
   id: string
@@ -71,6 +76,7 @@ type RouteName =
   | 'business-hours-deadline'
   | 'saved-calculations'
   | 'next-payday'
+  | 'deadline-calculator'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -143,6 +149,10 @@ function App() {
 
   if (route === 'saved-calculations') {
     return <SavedCalculationsPage onNavigate={navigate} />
+  }
+
+  if (route === 'deadline-calculator') {
+    return <DeadlineCalculatorPage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -252,6 +262,429 @@ function getInitialPaySchedule(): PaySchedule {
     ? (value as PaySchedule)
     : 'biweekly'
 }
+
+
+function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
+  const [triggerDate, setTriggerDate] = useState(todayInputValue)
+  const [duration, setDuration] = useState('5')
+  const [unit, setUnit] = useState<'business-days' | 'calendar-days'>(
+    'business-days',
+  )
+  const [startDayConvention, setStartDayConvention] =
+    useState<StartDayConvention>('exclude-trigger')
+  const [endDayAdjustment, setEndDayAdjustment] =
+    useState<EndDayAdjustment>('none')
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+
+  const parsedTriggerDate = parsePlainDate(triggerDate)
+  const parsedDuration = parseInteger(duration)
+
+  const result = useMemo(() => {
+    if (!parsedTriggerDate || parsedDuration === null || parsedDuration < 0) {
+      return null
+    }
+
+    return calculateDeadlineByRule({
+      triggerDate: parsedTriggerDate,
+      duration: parsedDuration,
+      direction: 'after',
+      unit,
+      startDayConvention,
+      holidayCalendar,
+      endDayAdjustment,
+    })
+  }, [
+    parsedTriggerDate,
+    parsedDuration,
+    unit,
+    startDayConvention,
+    holidayCalendar,
+    endDayAdjustment,
+  ])
+
+  const holidayOption = getHolidayCalendarOption(holidayCalendar)
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      date: triggerDate,
+      days: duration,
+      unit,
+      startday: startDayConvention,
+      endrule: endDayAdjustment,
+      calendar: holidayCalendarQueryValue(holidayCalendar),
+    })
+  }, [
+    triggerDate,
+    duration,
+    unit,
+    startDayConvention,
+    endDayAdjustment,
+    holidayCalendar,
+  ])
+
+  return (
+    <main className="page-shell deadline-rule-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="deadline-rule-shell">
+        <header className="deadline-rule-intro">
+          <p className="friendly-eyebrow">Rule-aware deadline</p>
+          <h1>When is it due?</h1>
+          <p>
+            Start with the simple answer. Open the rule choices only when the
+            wording you were given needs them.
+          </p>
+        </header>
+
+        <div className="deadline-rule-essential">
+          <label>
+            <span>Start date</span>
+            <input
+              type="date"
+              value={triggerDate}
+              onChange={(event) => setTriggerDate(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>How many days?</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              inputMode="numeric"
+              value={duration}
+              onChange={(event) => setDuration(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Count as</span>
+            <select
+              value={unit}
+              onChange={(event) =>
+                setUnit(event.target.value as 'business-days' | 'calendar-days')
+              }
+            >
+              <option value="business-days">Business days</option>
+              <option value="calendar-days">Calendar days</option>
+            </select>
+          </label>
+        </div>
+
+        {result && parsedTriggerDate && parsedDuration !== null ? (
+          <section className="deadline-rule-answer" aria-live="polite">
+            <span>Due date</span>
+            <strong>{formatPlainDate(result.answerDate)}</strong>
+            <small>{formatWeekday(result.answerDate)}</small>
+
+            <p>
+              {parsedDuration} {unit === 'business-days' ? 'business' : 'calendar'}{' '}
+              {parsedDuration === 1 ? 'day' : 'days'} after{' '}
+              {formatPlainDate(parsedTriggerDate)}.{' '}
+              {startDayConvention === 'exclude-trigger'
+                ? 'The start date does not count. '
+                : 'The start date counts if it qualifies. '}
+              {unit === 'business-days'
+                ? holidayCalendar === 'none'
+                  ? 'Weekends are skipped; public holidays still count.'
+                  : `Weekends and ${holidayOption.shortLabel.toLowerCase()} holidays are skipped.`
+                : 'Calendar days are counted continuously.'}
+            </p>
+
+            <CalculationReceipt
+              analyticsContext="deadline_rule_calculator"
+              rows={[
+                {
+                  label: 'Start date',
+                  value: formatPlainDate(parsedTriggerDate),
+                },
+                {
+                  label: 'Duration',
+                  value: `${parsedDuration} ${
+                    unit === 'business-days'
+                      ? 'business days'
+                      : 'calendar days'
+                  }`,
+                },
+                {
+                  label: 'Start-day rule',
+                  value:
+                    startDayConvention === 'exclude-trigger'
+                      ? 'Start date excluded'
+                      : 'Start date included if qualifying',
+                },
+                {
+                  label: 'Holiday calendar',
+                  value:
+                    unit === 'business-days'
+                      ? holidayOption.label
+                      : 'Not used for calendar-day counting',
+                },
+                {
+                  label: 'Final-day rule',
+                  value:
+                    endDayAdjustment === 'none'
+                      ? 'No adjustment'
+                      : endDayAdjustment === 'next-business-day'
+                        ? 'Move to next business day'
+                        : 'Move to previous business day',
+                },
+                ...(result.skippedDates.length > 0
+                  ? [
+                      {
+                        label: 'Skipped dates',
+                        value: result.skippedDates
+                          .map((item) =>
+                            item.name
+                              ? `${item.date} (${item.name})`
+                              : item.date,
+                          )
+                          .join(', '),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          </section>
+        ) : (
+          <p className="deadline-rule-error" role="status">
+            Enter a valid start date and a whole number of days.
+          </p>
+        )}
+
+        <details className="deadline-rule-advanced">
+          <summary>Adjust the counting rules</summary>
+
+          <div className="deadline-rule-advanced-grid">
+            <label>
+              <span>Does the start date count?</span>
+              <select
+                value={startDayConvention}
+                onChange={(event) =>
+                  setStartDayConvention(
+                    event.target.value as StartDayConvention,
+                  )
+                }
+              >
+                <option value="exclude-trigger">
+                  No — start counting after it
+                </option>
+                <option value="include-if-qualifying">
+                  Yes — if that day qualifies
+                </option>
+              </select>
+            </label>
+
+            {unit === 'business-days' ? (
+              <label>
+                <span>Public holidays</span>
+                <select
+                  value={holidayCalendar}
+                  onChange={(event) => {
+                    const nextCalendar = event.target.value as HolidayCalendarId
+                    setHolidayCalendar(nextCalendar)
+                    saveHolidayCalendar(nextCalendar)
+                  }}
+                >
+                  {holidayCalendarOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+
+            <label>
+              <span>If the final date is not a business day</span>
+              <select
+                value={endDayAdjustment}
+                onChange={(event) =>
+                  setEndDayAdjustment(
+                    event.target.value as EndDayAdjustment,
+                  )
+                }
+              >
+                <option value="none">Do not adjust it</option>
+                <option value="next-business-day">
+                  Move to the next business day
+                </option>
+                <option value="previous-business-day">
+                  Move to the previous business day
+                </option>
+              </select>
+            </label>
+          </div>
+        </details>
+
+        <p className="deadline-rule-caveat">
+          Use the rule in the contract, policy, law, or message that created the
+          deadline. WhenIsDue shows the result for the rules you select.
+        </p>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .deadline-rule-page {
+          background: #fffaf2;
+        }
+
+        .deadline-rule-shell {
+          width: min(100% - 24px, 860px);
+          margin: 0 auto;
+          padding: 36px 0 64px;
+        }
+
+        .deadline-rule-intro {
+          text-align: center;
+        }
+
+        .deadline-rule-intro h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.35rem, 7vw, 4rem);
+          line-height: 1;
+        }
+
+        .deadline-rule-intro > p:last-child {
+          max-width: 650px;
+          margin: 14px auto 0;
+          color: #61788f;
+          font-size: 1.05rem;
+          line-height: 1.6;
+        }
+
+        .deadline-rule-essential {
+          display: grid;
+          grid-template-columns: 1.35fr 0.8fr 1fr;
+          gap: 10px;
+          margin-top: 28px;
+        }
+
+        .deadline-rule-essential label,
+        .deadline-rule-advanced-grid label {
+          display: grid;
+          gap: 7px;
+        }
+
+        .deadline-rule-essential label > span,
+        .deadline-rule-advanced-grid label > span {
+          color: #526a82;
+          font-size: 0.92rem;
+          font-weight: 850;
+        }
+
+        .deadline-rule-essential input,
+        .deadline-rule-essential select,
+        .deadline-rule-advanced-grid select {
+          min-height: 52px;
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid rgba(22, 49, 78, 0.14);
+          border-radius: 12px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .deadline-rule-answer {
+          margin-top: 16px;
+          padding: 24px 18px;
+          border: 1px solid rgba(22, 49, 78, 0.09);
+          border-radius: 18px;
+          background: #fff;
+          text-align: center;
+        }
+
+        .deadline-rule-answer > span {
+          color: #71869b;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .deadline-rule-answer > strong {
+          display: block;
+          margin-top: 6px;
+          color: #132c47;
+          font-size: clamp(2.1rem, 7vw, 3.7rem);
+          line-height: 1.05;
+        }
+
+        .deadline-rule-answer > small {
+          display: block;
+          margin-top: 6px;
+          color: #6d8296;
+          font-size: 1rem;
+          font-weight: 750;
+        }
+
+        .deadline-rule-answer > p {
+          max-width: 680px;
+          margin: 16px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+
+        .deadline-rule-advanced {
+          margin-top: 16px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.7);
+        }
+
+        .deadline-rule-advanced summary {
+          min-height: 48px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #36526f;
+          font-size: 0.98rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .deadline-rule-advanced-grid {
+          display: grid;
+          gap: 12px;
+          padding: 0 14px 16px;
+        }
+
+        .deadline-rule-caveat,
+        .deadline-rule-error {
+          max-width: 680px;
+          margin: 16px auto 0;
+          color: #657b91;
+          font-size: 0.95rem;
+          line-height: 1.55;
+          text-align: center;
+        }
+
+        @media (max-width: 720px) {
+          .deadline-rule-shell {
+            padding-top: 24px;
+          }
+
+          .deadline-rule-essential {
+            grid-template-columns: 1fr;
+          }
+
+          .deadline-rule-answer {
+            padding: 20px 14px;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
 
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
@@ -2889,6 +3322,19 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
                 <span>Find the trial end date and suggested reminder.</span>
               </div>
             </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/deadline-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/deadline-calculator' })
+                onNavigate('/deadline-calculator')
+              }}
+            >
+              <strong>Rule-aware deadline</strong>
+              <span>Choose how the deadline should be counted.</span>
+            </a>
+
             <a
               className="intent-proof-card proof-calculator"
               href="/business-hours-deadline-calculator"
@@ -9009,6 +9455,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'next-payday'
   }
 
+  if (pathname === '/deadline-calculator') {
+    return 'deadline-calculator'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -9206,6 +9656,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Enter a known payday and pay schedule to calculate the next payday instantly.',
       twitterDescription: 'Calculate your next payday from a known payday and pay schedule.',
       path: '/next-payday-calculator',
+    }
+  }
+
+  if (route === 'deadline-calculator') {
+    return {
+      title: 'Deadline Calculator - Business or Calendar Day Rules | WhenIsDue',
+      description: 'Calculate a deadline with explicit rules for the start day, business or calendar days, public holidays, and final-day adjustment.',
+      openGraphDescription: 'Choose how a deadline should be counted and see the exact date plus the assumptions used.',
+      twitterDescription: 'Calculate a deadline with clear business-day, holiday, and counting rules.',
+      path: '/deadline-calculator',
     }
   }
 
@@ -9510,6 +9970,7 @@ function getRouteStructuredData(
     route === 'business-days-between' ||
     route === 'business-hours-deadline' ||
     route === 'next-payday' ||
+    route === 'deadline-calculator' ||
     route === 'free-trial' ||
     route === 'return-window' ||
     route === 'invoice-due-date' ||
