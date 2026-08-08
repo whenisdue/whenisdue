@@ -474,7 +474,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
 
         .next-payday-form label > span {
           color: #526a85;
-          font-size: 0.76rem;
+          font-size: 0.9rem;
           font-weight: 850;
         }
 
@@ -512,7 +512,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           background: #f7f9fb;
           color: #657a91;
           font: inherit;
-          font-size: 0.72rem;
+          font-size: 0.84rem;
           font-weight: 850;
           cursor: pointer;
         }
@@ -525,9 +525,9 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
 
         .next-payday-caveat {
           margin: 0;
-          color: #78899b;
-          font-size: 0.72rem;
-          line-height: 1.5;
+          color: #667c92;
+          font-size: 0.9rem;
+          line-height: 1.55;
         }
 
         .next-payday-result {
@@ -539,8 +539,8 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
 
         .next-payday-result > p:first-child {
           margin: 0;
-          color: #77899b;
-          font-size: 0.78rem;
+          color: #667c92;
+          font-size: 0.92rem;
           font-weight: 900;
           letter-spacing: 0.06em;
           text-transform: uppercase;
@@ -565,8 +565,9 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
 
         .next-payday-rule {
           margin: 9px 0 0;
-          color: #75879a;
-          font-size: 0.74rem;
+          color: #667c92;
+          font-size: 0.92rem;
+          line-height: 1.45;
         }
 
         .next-payday-empty {
@@ -883,7 +884,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
 
         .saved-calculations-group-heading span {
           color: #7d8fa2;
-          font-size: 0.68rem;
+          font-size: 0.78rem;
           font-weight: 900;
           letter-spacing: 0.07em;
           text-transform: uppercase;
@@ -903,7 +904,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
           background: #fff;
           color: #6b7f94;
           font: inherit;
-          font-size: 0.72rem;
+          font-size: 0.82rem;
           font-weight: 800;
           cursor: pointer;
         }
@@ -938,7 +939,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
 
         .saved-calculation-main > span {
           color: #8292a3;
-          font-size: 0.65rem;
+          font-size: 0.75rem;
           font-weight: 850;
           text-transform: uppercase;
         }
@@ -958,8 +959,9 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
 
         .saved-calculation-main > small {
           overflow: hidden;
-          color: #788a9d;
-          font-size: 0.7rem;
+          color: #667c92;
+          font-size: 0.84rem;
+          line-height: 1.4;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
@@ -979,7 +981,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
           background: #f7f9fb;
           color: #60758c;
           font: inherit;
-          font-size: 0.7rem;
+          font-size: 0.82rem;
           font-weight: 800;
           cursor: pointer;
         }
@@ -7016,7 +7018,7 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           background: #f4f7fa;
           color: #294766;
           font: inherit;
-          font-size: 0.72rem;
+          font-size: 0.84rem;
           font-weight: 850;
           cursor: pointer;
         }
@@ -7027,15 +7029,16 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
         }
 
         .business-hours-preference-actions span {
-          color: #718398;
-          font-size: 0.7rem;
+          color: #61778d;
+          font-size: 0.88rem;
+          line-height: 1.45;
         }
 
         .business-hours-default-note {
           margin: -3px 0 0;
-          color: #7a8999;
-          font-size: 0.7rem;
-          line-height: 1.4;
+          color: #61778d;
+          font-size: 0.88rem;
+          line-height: 1.45;
         }
 
         .business-hours-advanced {
@@ -7049,7 +7052,7 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           align-items: center;
           cursor: pointer;
           color: #526a85;
-          font-size: 0.76rem;
+          font-size: 0.9rem;
           font-weight: 850;
         }
 
