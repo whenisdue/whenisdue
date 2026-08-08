@@ -2447,6 +2447,10 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             return
           }
 
+          if (calculator instanceof HTMLDetailsElement) {
+            calculator.open = true
+          }
+
           const calculatorTop =
             calculator.getBoundingClientRect().top +
             window.scrollY -
@@ -2663,56 +2667,154 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               Business days, invoice due dates, returns, free trials, and date differences — with the answer shown as quickly as possible.
             </p>
 
-            <div className="dual-intent-actions">
-              <a
-                className="calculator-primary-choice"
-                href="#calculator"
-                onClick={(event) => {
-                  event.preventDefault()
-                  focusHomeSection('calculator', 'calculator-heading')
-                }}
-              >
-                Open quick calculator
-              </a>
-            </div>
+            <p className="friendly-subtitle">
+              Choose the calculator that matches your question. Dedicated tools are faster and easier to verify.
+            </p>
           </div>
 
-          <div className="dual-intent-proof utility-directory-cards" aria-label="Popular WhenIsDue tools">
+          <div className="dual-intent-proof utility-directory-cards" aria-label="WhenIsDue calculators">
             <a
               className="intent-proof-card proof-calculator"
               href="/business-days-calculator"
               onClick={(event) => {
                 event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/business-days-calculator' })
                 onNavigate('/business-days-calculator')
               }}
             >
               <span className="intent-proof-icon" aria-hidden="true">◷</span>
               <div>
                 <p>Business days</p>
-                <h2>Add or count working days</h2>
-                <span>Skip weekends and see the exact date.</span>
+                <h2>Add business days</h2>
+                <span>Skip weekends and optionally supported public holidays.</span>
               </div>
             </a>
             <a
-              className="intent-proof-card proof-workspace"
+              className="intent-proof-card proof-calculator"
+              href="/business-days-between-dates"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/business-days-between-dates' })
+                onNavigate('/business-days-between-dates')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">↔</span>
+              <div>
+                <p>Date difference</p>
+                <h2>Business days between dates</h2>
+                <span>Count working days between two dates.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
               href="/invoice-due-date-calculator"
               onClick={(event) => {
                 event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/invoice-due-date-calculator' })
                 onNavigate('/invoice-due-date-calculator')
               }}
             >
               <span className="intent-proof-icon" aria-hidden="true">#</span>
               <div>
                 <p>Invoices</p>
-                <h2>Calculate payment due dates</h2>
+                <h2>Invoice due date</h2>
                 <span>Net 7, 15, 30, 45, 60, 90, and EOM.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/return-window-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/return-window-calculator' })
+                onNavigate('/return-window-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">↩</span>
+              <div>
+                <p>Returns</p>
+                <h2>Return deadline</h2>
+                <span>Find the last day of a return window.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/free-trial-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/free-trial-calculator' })
+                onNavigate('/free-trial-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">◇</span>
+              <div>
+                <p>Subscriptions</p>
+                <h2>Free trial end date</h2>
+                <span>Find the trial end date and suggested reminder.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/business-hours-deadline-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/business-hours-deadline-calculator' })
+                onNavigate('/business-hours-deadline-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">⏱</span>
+              <div>
+                <p>SLA / response time</p>
+                <h2>Business-hours deadline</h2>
+                <span>Add working hours inside a business-day schedule.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/next-payday-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/next-payday-calculator' })
+                onNavigate('/next-payday-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">$</span>
+              <div>
+                <p>Pay schedule</p>
+                <h2>Next payday</h2>
+                <span>Weekly, biweekly, semimonthly, or monthly.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/net-30-due-date"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/net-30-due-date' })
+                onNavigate('/net-30-due-date')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">30</span>
+              <div>
+                <p>Popular answer</p>
+                <h2>Net 30 due date</h2>
+                <span>Fast one-input answer for a common invoice term.</span>
               </div>
             </a>
           </div>
         </div>
       </section>
 
-      <section id="calculator" className="friendly-calculator calculator-secondary-section" aria-label="Quick deadline calculators">
+      <details id="calculator" className="calculator-secondary-section">
+        <summary className="friendly-section-heading">
+          <span className="step-number">+</span>
+          <div>
+            <h2>Need one flexible calculator?</h2>
+            <p>Open the older all-in-one date calculator.</p>
+          </div>
+        </summary>
+
+        <section className="friendly-calculator" aria-label="Quick deadline calculators">
         <div className="scenario-section">
           <div className="friendly-section-heading">
             <span className="step-number">1</span>
@@ -2893,7 +2995,8 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           </button>
           {storageMessage ? <p className="form-message save-message">{storageMessage}</p> : null}
         </section>
-      </section>
+        </section>
+      </details>
 
       <section id="saved-dates" className="saved-dates-section" aria-labelledby="saved-title">
         <div className="saved-dates-heading">
