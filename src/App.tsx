@@ -8,7 +8,6 @@ import {
   type InvoiceTerm,
   type PlainDate,
   addCalendarDays,
-  addBusinessDays,
   daysBetween,
   formatPlainDate,
   formatWeekday,
@@ -213,13 +212,25 @@ function App() {
 function HomePage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
   const commonBusinessDays = useMemo(
     () =>
       [3, 5, 7, 10].map((dayCount) => ({
         dayCount,
-        date: addBusinessDays(today, dayCount),
+        date: calculateBusinessDaysWithCalendar(
+          today,
+          dayCount,
+          holidayCalendar,
+        ).date,
       })),
-    [today],
+    [today, holidayCalendar],
   )
 
   return (
@@ -273,10 +284,16 @@ function HomePage({ onNavigate }: NavigationProps) {
         <div className="date-home-section-heading">
           <h2 id="date-home-business-title">Business days from today</h2>
           <a
-            href="/business-days-calculator"
+            href={`/business-days-calculator${
+              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+            }`}
             onClick={(event) => {
               event.preventDefault()
-              onNavigate('/business-days-calculator')
+              onNavigate(
+                `/business-days-calculator${
+                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                }`,
+              )
             }}
           >
             Different date or number
@@ -288,10 +305,16 @@ function HomePage({ onNavigate }: NavigationProps) {
             <a
               key={dayCount}
               className="date-home-business-answer"
-              href={`/${dayCount}-business-days-from-today`}
+              href={`/${dayCount}-business-days-from-today${
+                holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+              }`}
               onClick={(event) => {
                 event.preventDefault()
-                onNavigate(`/${dayCount}-business-days-from-today`)
+                onNavigate(
+                  `/${dayCount}-business-days-from-today${
+                    holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                  }`,
+                )
               }}
             >
               <span>{dayCount} business days</span>
@@ -301,7 +324,50 @@ function HomePage({ onNavigate }: NavigationProps) {
           ))}
         </div>
 
-        <p className="date-home-rule">Weekends skipped. Public holidays still count as weekdays.</p>
+        <p className="date-home-rule">
+          {holidayCalendar === 'none'
+            ? 'Weekends skipped. Public holidays still count as weekdays.'
+            : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
+        </p>
+
+        <div className="date-home-calendar-preference">
+          <HolidayCalendarSelect
+            value={holidayCalendar}
+            onChange={(nextCalendar) => {
+              setHolidayCalendar(nextCalendar)
+              trackWhenIsDueEvent('holiday_calendar_changed', {
+                context: 'homepage',
+                value: nextCalendar,
+              })
+            }}
+            compact
+          />
+          <p>
+            {holidayCalendar === 'none'
+              ? 'Choose a calendar once and WhenIsDue will remember it on this device.'
+              : `${getHolidayCalendarOption(holidayCalendar).shortLabel} is remembered on this device.`}
+          </p>
+        </div>
+
+        <style>{`
+          .date-home-calendar-preference {
+            width: min(100%, 560px);
+            margin: 12px auto 0;
+          }
+
+          .date-home-calendar-preference > p {
+            margin: 6px 0 0;
+            color: #7a8999;
+            font-size: 0.72rem;
+            text-align: center;
+          }
+
+          @media (max-width: 560px) {
+            .date-home-calendar-preference > p {
+              text-align: left;
+            }
+          }
+        `}</style>
       </section>
 
       <section className="date-home-tools" aria-labelledby="date-home-tools-title">
@@ -309,10 +375,16 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         <div className="date-home-tool-grid">
           <a
-            href="/business-days-calculator"
+            href={`/business-days-calculator${
+              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+            }`}
             onClick={(event) => {
               event.preventDefault()
-              onNavigate('/business-days-calculator')
+              onNavigate(
+                `/business-days-calculator${
+                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                }`,
+              )
             }}
           >
             <span>Business days</span>
@@ -357,10 +429,16 @@ function HomePage({ onNavigate }: NavigationProps) {
           </a>
 
           <a
-            href="/business-days-between-dates"
+            href={`/business-days-between-dates${
+              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+            }`}
             onClick={(event) => {
               event.preventDefault()
-              onNavigate('/business-days-between-dates')
+              onNavigate(
+                `/business-days-between-dates${
+                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                }`,
+              )
             }}
           >
             <span>Date difference</span>
@@ -1474,6 +1552,11 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
     getInitialHolidayCalendarQueryParam,
   )
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
   const [title, setTitle] = useState(getDefaultTitle('business'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
@@ -2020,6 +2103,11 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
     getInitialHolidayCalendarQueryParam,
   )
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
   const answerCalculation = useMemo(
     () => calculateBusinessDaysWithCalendar(today, dayCount, holidayCalendar),
     [today, dayCount, holidayCalendar],
@@ -2685,6 +2773,10 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
     getInitialHolidayCalendarQueryParam,
   )
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
 
   const parsedStartDate = parsePlainDate(startDate)
   const parsedEndDate = parsePlainDate(endDate)
@@ -3782,9 +3874,32 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
 
 
+const HOLIDAY_CALENDAR_STORAGE_KEY = 'whenisdue:holiday-calendar'
+
+function getSavedHolidayCalendar(): HolidayCalendarId {
+  try {
+    const saved = window.localStorage.getItem(HOLIDAY_CALENDAR_STORAGE_KEY)
+    return isHolidayCalendarId(saved) ? saved : 'none'
+  } catch {
+    return 'none'
+  }
+}
+
+function saveHolidayCalendar(calendar: HolidayCalendarId) {
+  try {
+    if (calendar === 'none') {
+      window.localStorage.removeItem(HOLIDAY_CALENDAR_STORAGE_KEY)
+    } else {
+      window.localStorage.setItem(HOLIDAY_CALENDAR_STORAGE_KEY, calendar)
+    }
+  } catch {
+    // Local storage can be unavailable in strict privacy modes.
+  }
+}
+
 function getInitialHolidayCalendarQueryParam(): HolidayCalendarId {
   const value = new URLSearchParams(window.location.search).get('calendar')
-  return isHolidayCalendarId(value) ? value : 'none'
+  return isHolidayCalendarId(value) ? value : getSavedHolidayCalendar()
 }
 
 function holidayCalendarQueryValue(calendar: HolidayCalendarId) {
@@ -3832,6 +3947,7 @@ function HolidayCalendarSelect({
           onChange={(event) => {
             const next = event.target.value
             if (!isHolidayCalendarId(next)) return
+            saveHolidayCalendar(next)
             onChange(next)
           }}
         >
