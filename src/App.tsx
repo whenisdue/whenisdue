@@ -6793,7 +6793,12 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             <>
               <p>Deadline</p>
               <div className="business-hours-date">{formatPlainDate(result.date)}</div>
-              <div className="business-hours-time">{formatTime12Hour(result.time)}</div>
+
+              <div className="business-hours-time-block">
+                <span>Time</span>
+                <strong>{formatTime12Hour(result.time)}</strong>
+              </div>
+
               <div className="business-hours-weekday">{formatWeekday(result.date)}</div>
 
               <p className="business-hours-rule">
@@ -7087,25 +7092,47 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           text-wrap: balance;
         }
 
-        .business-hours-time {
-          margin-top: 5px;
+        .business-hours-time-block {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 10px;
+          align-self: center;
+          margin-top: 16px;
+          padding: 11px 18px 12px;
+          border: 1px solid rgba(23, 58, 99, 0.14);
+          border-radius: 14px;
+          background: #eef4f8;
           color: #173a63;
-          font-size: clamp(2rem, 4.5vw, 3.8rem);
+        }
+
+        .business-hours-time-block span {
+          font-size: 0.88rem;
           font-weight: 900;
-          line-height: 1;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .business-hours-time-block strong {
+          font-size: clamp(2.2rem, 4.7vw, 4rem);
+          font-weight: 950;
+          line-height: 0.95;
+          letter-spacing: -0.035em;
         }
 
         .business-hours-weekday {
-          margin-top: 6px;
-          color: #63788f;
-          font-size: 0.92rem;
-          font-weight: 800;
+          margin-top: 14px;
+          color: #536b85;
+          font-size: 1.15rem;
+          font-weight: 850;
         }
 
         .business-hours-rule {
-          margin: 10px 0 0;
-          color: #75879a;
-          font-size: 0.74rem;
+          margin: 12px 0 0;
+          color: #667c92;
+          font-size: 1rem;
+          font-weight: 650;
+          line-height: 1.45;
         }
 
         .business-hours-empty {
@@ -7142,8 +7169,26 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             font-size: clamp(3rem, 14vw, 4.8rem);
           }
 
-          .business-hours-time {
-            font-size: clamp(2rem, 10vw, 3.1rem);
+          .business-hours-time-block {
+            gap: 8px;
+            margin-top: 13px;
+            padding: 10px 14px 11px;
+          }
+
+          .business-hours-time-block span {
+            font-size: 0.8rem;
+          }
+
+          .business-hours-time-block strong {
+            font-size: clamp(2rem, 10vw, 3.15rem);
+          }
+
+          .business-hours-weekday {
+            font-size: 1.08rem;
+          }
+
+          .business-hours-rule {
+            font-size: 0.96rem;
           }
         }
       `}</style>
