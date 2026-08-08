@@ -215,15 +215,24 @@ type AskWhenMatch = {
   path: string
 }
 
-function resolveAskWhenQuery(
-  rawQuery: string,
-  holidayCalendar: HolidayCalendarId,
-): AskWhenMatch | null {
-  const query = rawQuery
+function normalizeAskWhenQuery(rawQuery: string) {
+  return rawQuery
     .trim()
     .toLowerCase()
     .replace(/[?.!,]+$/g, '')
     .replace(/\s+/g, ' ')
+    .replace(/^(?:what\s+is|what's|when\s+is|when's)\s+/i, '')
+    .replace(/^how\s+long\s+is\s+/i, '')
+    .replace(/^how\s+many\s+days\s+is\s+/i, '')
+    .replace(/^show\s+me\s+/i, '')
+    .trim()
+}
+
+function resolveAskWhenQuery(
+  rawQuery: string,
+  holidayCalendar: HolidayCalendarId,
+): AskWhenMatch | null {
+  const query = normalizeAskWhenQuery(rawQuery)
 
   if (!query) return null
 
@@ -232,35 +241,50 @@ function resolveAskWhenQuery(
   const calendarOnlySuffix =
     holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
 
-  const businessFromToday = query.match(
+  const businessPatterns = [
     /^(\d{1,3})\s+(?:business|working)\s+days?(?:\s+from\s+today)?$/,
-  )
+    /^in\s+(\d{1,3})\s+(?:business|working)\s+days?$/,
+    /^(\d{1,3})\s+(?:business|working)\s+days?\s+after\s+today$/,
+  ]
 
-  if (businessFromToday) {
-    const days = Number(businessFromToday[1])
+  let businessDays: number | null = null
 
-    if (days < 1 || days > 365) return null
+  for (const pattern of businessPatterns) {
+    const match = query.match(pattern)
+    if (match) {
+      businessDays = Number(match[1])
+      break
+    }
+  }
+
+  if (businessDays !== null) {
+    if (businessDays < 1 || businessDays > 365) return null
 
     const exactPages = new Set([3, 4, 5, 7, 8, 10, 20, 30])
 
     return {
-      label: `${days} business ${days === 1 ? 'day' : 'days'} from today`,
+      label: `${businessDays} business ${businessDays === 1 ? 'day' : 'days'} from today`,
       description:
         holidayCalendar === 'none'
           ? 'Skip weekends and show the exact date.'
           : `Skip weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays.`,
-      path: exactPages.has(days)
-        ? `/${days}-business-days-from-today${calendarOnlySuffix}`
-        : `/business-days-calculator?days=${days}${calendarSuffix}`,
+      path: exactPages.has(businessDays)
+        ? `/${businessDays}-business-days-from-today${calendarOnlySuffix}`
+        : `/business-days-calculator?days=${businessDays}${calendarSuffix}`,
     }
   }
 
-  const netTerms = query.match(
-    /^(?:net\s*)?(7|15|30|45|60|90)(?:\s+(?:due\s+date|invoice|terms?))?$/,
-  )
+  const netPatterns = [
+    /^net\s*(7|15|30|45|60|90)(?:\s+(?:due\s+date|invoice|terms?))?$/,
+    /^(?:invoice\s+)?net\s*(7|15|30|45|60|90)$/,
+    /^(?:invoice\s+)?due\s+(?:in\s+)?(7|15|30|45|60|90)\s+days?$/,
+  ]
 
-  if (netTerms && (query.startsWith('net') || query.includes('invoice') || query.includes('due'))) {
-    const days = Number(netTerms[1])
+  for (const pattern of netPatterns) {
+    const match = query.match(pattern)
+    if (!match) continue
+
+    const days = Number(match[1])
     return {
       label: `Net ${days} due date`,
       description: `Enter the invoice date and add ${days} calendar days.`,
@@ -268,12 +292,17 @@ function resolveAskWhenQuery(
     }
   }
 
-  const returnWindow = query.match(
+  const returnPatterns = [
     /^(\d{1,3})[\s-]*(?:day|days)\s+(?:return|return\s+window|return\s+deadline)$/,
-  )
+    /^(?:return|return\s+window|return\s+deadline)\s+(\d{1,3})[\s-]*(?:day|days)$/,
+    /^(\d{1,3})[\s-]*(?:day|days)\s+return\s+policy$/,
+  ]
 
-  if (returnWindow) {
-    const days = Number(returnWindow[1])
+  for (const pattern of returnPatterns) {
+    const match = query.match(pattern)
+    if (!match) continue
+
+    const days = Number(match[1])
     if (days < 1 || days > 365) return null
 
     return {
@@ -283,12 +312,17 @@ function resolveAskWhenQuery(
     }
   }
 
-  const freeTrial = query.match(
+  const trialPatterns = [
     /^(\d{1,3})[\s-]*(?:day|days)\s+(?:free\s+)?trial$/,
-  )
+    /^(?:free\s+)?trial\s+(\d{1,3})[\s-]*(?:day|days)$/,
+    /^when\s+does\s+(?:a\s+)?(\d{1,3})[\s-]*(?:day|days)\s+(?:free\s+)?trial\s+end$/,
+  ]
 
-  if (freeTrial) {
-    const days = Number(freeTrial[1])
+  for (const pattern of trialPatterns) {
+    const match = query.match(pattern)
+    if (!match) continue
+
+    const days = Number(match[1])
     if (days < 1 || days > 365) return null
 
     return {
@@ -301,7 +335,8 @@ function resolveAskWhenQuery(
   if (
     query === 'business days between dates' ||
     query === 'business days between' ||
-    query === 'working days between dates'
+    query === 'working days between dates' ||
+    query === 'working days between'
   ) {
     return {
       label: 'Business days between dates',
@@ -313,7 +348,8 @@ function resolveAskWhenQuery(
   if (
     query === 'business days' ||
     query === 'business day calculator' ||
-    query === 'working days'
+    query === 'working days' ||
+    query === 'working day calculator'
   ) {
     return {
       label: 'Business days calculator',
@@ -325,7 +361,8 @@ function resolveAskWhenQuery(
   if (
     query === 'invoice due date' ||
     query === 'invoice calculator' ||
-    query === 'payment due date'
+    query === 'payment due date' ||
+    query === 'invoice due date calculator'
   ) {
     return {
       label: 'Invoice due date',
@@ -337,7 +374,8 @@ function resolveAskWhenQuery(
   if (
     query === 'return deadline' ||
     query === 'return window' ||
-    query === 'return calculator'
+    query === 'return calculator' ||
+    query === 'return window calculator'
   ) {
     return {
       label: 'Return deadline',
@@ -349,7 +387,8 @@ function resolveAskWhenQuery(
   if (
     query === 'free trial' ||
     query === 'trial end date' ||
-    query === 'trial calculator'
+    query === 'trial calculator' ||
+    query === 'free trial calculator'
   ) {
     return {
       label: 'Free trial end date',
@@ -366,24 +405,37 @@ type AskWhenBoxProps = NavigationProps & {
 }
 
 function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(
+    () => new URLSearchParams(window.location.search).get('q') ?? '',
+  )
+  const [submittedWithoutMatch, setSubmittedWithoutMatch] = useState(false)
   const match = useMemo(
     () => resolveAskWhenQuery(query, holidayCalendar),
     [query, holidayCalendar],
   )
 
   const examples = [
-    '10 business days from today',
+    'what is 3 business days from today',
+    'how long is 5 business days',
     'Net 30 due date',
     '30 day return',
-    '14 day trial',
   ]
 
   function submitQuery() {
-    if (!match) return
+    if (!query.trim()) return
 
+    if (!match) {
+      setSubmittedWithoutMatch(true)
+      trackWhenIsDueEvent('ask_when_unrecognized', {
+        query: query.trim(),
+      })
+      return
+    }
+
+    setSubmittedWithoutMatch(false)
     trackWhenIsDueEvent('ask_when_submitted', {
-      query,
+      query: query.trim(),
+      normalized_query: normalizeAskWhenQuery(query),
       destination: match.path,
     })
     onNavigate(match.path)
@@ -394,7 +446,7 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
       <div className="ask-when-heading">
         <span>Quick answer finder</span>
         <h2 id="ask-when-title">Ask WhenIsDue</h2>
-        <p>Type the date question you have. No AI — it simply sends you to the right calculator.</p>
+        <p>Type a common date question. WhenIsDue recognizes practical patterns and sends you to the exact answer or calculator.</p>
       </div>
 
       <form
@@ -407,17 +459,20 @@ function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
         <input
           type="text"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setQuery(event.target.value)
+            setSubmittedWithoutMatch(false)
+          }}
           placeholder="Try: 10 business days from today"
           aria-label="Ask a date or deadline question"
           autoComplete="off"
         />
-        <button type="submit" disabled={!match}>
+        <button type="submit" disabled={!query.trim()}>
           Show answer
         </button>
       </form>
 
-      {query.trim() ? (
+      {query.trim() && (match || submittedWithoutMatch) ? (
         <div className={`ask-when-preview ${match ? 'has-match' : 'no-match'}`} aria-live="polite">
           {match ? (
             <>
