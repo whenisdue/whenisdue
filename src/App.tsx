@@ -27,6 +27,7 @@ import {
   calculateBusinessDaysWithCalendar,
   countBusinessDaysBetweenWithCalendar,
   getHolidayCalendarOption,
+  getHolidayOnDate,
   holidayCalendarOptions,
   isHolidayCalendarId,
 } from './holidayCalendars'
@@ -55,6 +56,7 @@ type RouteName =
   | 'calculators'
   | 'business-days'
   | 'business-days-between'
+  | 'business-hours-deadline'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -119,6 +121,10 @@ function App() {
 
   if (route === 'business-days-between') {
     return <BusinessDaysBetweenPage onNavigate={navigate} />
+  }
+
+  if (route === 'business-hours-deadline') {
+    return <BusinessHoursDeadlinePage onNavigate={navigate} />
   }
 
   if (route === 'three-business-days') {
@@ -329,6 +335,20 @@ function resolveAskWhenQuery(
       label: `${days}-day free trial`,
       description: 'Enter the trial start date.',
       path: `/free-trial-calculator?days=${days}`,
+    }
+  }
+
+  if (
+    query === 'sla deadline' ||
+    query === 'business hours deadline' ||
+    query === 'business hour deadline' ||
+    query === 'response deadline' ||
+    query === 'business hours calculator'
+  ) {
+    return {
+      label: 'Business-hours deadline',
+      description: 'Add working hours inside a business-day schedule.',
+      path: `/business-hours-deadline-calculator${calendarOnlySuffix}`,
     }
   }
 
@@ -1097,6 +1117,24 @@ function HomePage({ onNavigate }: NavigationProps) {
             <span>Subscriptions</span>
             <strong>When does my trial end?</strong>
             <small>Find the end date before renewal.</small>
+          </a>
+
+          <a
+            href={`/business-hours-deadline-calculator${
+              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+            }`}
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate(
+                `/business-hours-deadline-calculator${
+                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                }`,
+              )
+            }}
+          >
+            <span>SLA / response time</span>
+            <strong>Add business hours</strong>
+            <small>Calculate a deadline inside a workday schedule.</small>
           </a>
 
           <a
@@ -5522,6 +5560,522 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
   )
 }
 
+
+function timeToMinutes(value: string) {
+  const match = /^(\d{2}):(\d{2})$/.exec(value)
+  if (!match) return null
+
+  const hours = Number(match[1])
+  const minutes = Number(match[2])
+
+  if (
+    !Number.isInteger(hours) ||
+    !Number.isInteger(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null
+  }
+
+  return hours * 60 + minutes
+}
+
+function minutesToTime(value: number) {
+  const safe = Math.max(0, Math.min(1439, value))
+  const hours = Math.floor(safe / 60)
+  const minutes = safe % 60
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+function formatTime12Hour(value: string) {
+  const total = timeToMinutes(value)
+  if (total === null) return value
+
+  const hour24 = Math.floor(total / 60)
+  const minute = total % 60
+  const suffix = hour24 >= 12 ? 'PM' : 'AM'
+  const hour12 = hour24 % 12 || 12
+
+  return `${hour12}:${String(minute).padStart(2, '0')} ${suffix}`
+}
+
+function isBusinessDateForCalendar(
+  date: PlainDate,
+  holidayCalendar: HolidayCalendarId,
+) {
+  const weekday = new Date(`${toDateKey(date)}T12:00:00Z`).getUTCDay()
+  if (weekday === 0 || weekday === 6) return false
+
+  return getHolidayOnDate(date, holidayCalendar) === null
+}
+
+function nextBusinessDate(
+  date: PlainDate,
+  holidayCalendar: HolidayCalendarId,
+) {
+  let cursor = addCalendarDays(date, 1)
+
+  while (!isBusinessDateForCalendar(cursor, holidayCalendar)) {
+    cursor = addCalendarDays(cursor, 1)
+  }
+
+  return cursor
+}
+
+function calculateBusinessHoursDeadline(
+  startDate: PlainDate,
+  startTime: string,
+  hoursToAdd: number,
+  workdayStartTime: string,
+  workdayEndTime: string,
+  holidayCalendar: HolidayCalendarId,
+) {
+  const startMinutes = timeToMinutes(startTime)
+  const workdayStart = timeToMinutes(workdayStartTime)
+  const workdayEnd = timeToMinutes(workdayEndTime)
+
+  if (
+    startMinutes === null ||
+    workdayStart === null ||
+    workdayEnd === null ||
+    workdayEnd <= workdayStart ||
+    hoursToAdd <= 0
+  ) {
+    return null
+  }
+
+  let cursorDate = startDate
+  let cursorMinutes = startMinutes
+
+  if (!isBusinessDateForCalendar(cursorDate, holidayCalendar)) {
+    cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
+    cursorMinutes = workdayStart
+  } else if (cursorMinutes < workdayStart) {
+    cursorMinutes = workdayStart
+  } else if (cursorMinutes >= workdayEnd) {
+    cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
+    cursorMinutes = workdayStart
+  }
+
+  let remainingMinutes = Math.round(hoursToAdd * 60)
+
+  while (remainingMinutes > 0) {
+    const availableToday = workdayEnd - cursorMinutes
+
+    if (remainingMinutes <= availableToday) {
+      cursorMinutes += remainingMinutes
+      remainingMinutes = 0
+    } else {
+      remainingMinutes -= availableToday
+      cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
+      cursorMinutes = workdayStart
+    }
+  }
+
+  return {
+    date: cursorDate,
+    time: minutesToTime(cursorMinutes),
+  }
+}
+
+function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
+  const [startDate, setStartDate] = useState(() =>
+    getInitialDateQueryParam('date', todayInputValue()),
+  )
+  const [startTime, setStartTime] = useState(
+    () => new URLSearchParams(window.location.search).get('time') ?? '09:00',
+  )
+  const [hours, setHours] = useState(() =>
+    getInitialPositiveIntegerQueryParam('hours', '8', 1000),
+  )
+  const [workdayStart, setWorkdayStart] = useState(
+    () => new URLSearchParams(window.location.search).get('workstart') ?? '09:00',
+  )
+  const [workdayEnd, setWorkdayEnd] = useState(
+    () => new URLSearchParams(window.location.search).get('workend') ?? '17:00',
+  )
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+
+  const parsedStartDate = parsePlainDate(startDate)
+  const parsedHours = parseInteger(hours)
+  const workdayStartMinutes = timeToMinutes(workdayStart)
+  const workdayEndMinutes = timeToMinutes(workdayEnd)
+
+  const validationMessage =
+    !parsedStartDate
+      ? 'Choose a valid start date.'
+      : parsedHours === null || parsedHours <= 0
+        ? 'Enter a whole number of business hours greater than 0.'
+        : workdayStartMinutes === null || workdayEndMinutes === null
+          ? 'Choose valid workday times.'
+          : workdayEndMinutes <= workdayStartMinutes
+            ? 'Workday end must be later than workday start.'
+            : null
+
+  const result =
+    !validationMessage && parsedStartDate && parsedHours !== null
+      ? calculateBusinessHoursDeadline(
+          parsedStartDate,
+          startTime,
+          parsedHours,
+          workdayStart,
+          workdayEnd,
+          holidayCalendar,
+        )
+      : null
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      date: startDate,
+      time: startTime,
+      hours,
+      workstart: workdayStart,
+      workend: workdayEnd,
+      calendar: holidayCalendarQueryValue(holidayCalendar),
+    })
+  }, [startDate, startTime, hours, workdayStart, workdayEnd, holidayCalendar])
+
+  return (
+    <main className="site-shell business-hours-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="business-hours-hero" aria-labelledby="business-hours-title">
+        <p className="friendly-eyebrow">
+          <span aria-hidden="true">◷</span>
+          SLA / response deadline
+        </p>
+        <h1 id="business-hours-title">When is this due in business hours?</h1>
+        <p>
+          Add working hours inside a business-day schedule. Time outside the workday,
+          weekends, and selected public holidays does not count.
+        </p>
+      </section>
+
+      <section className="business-hours-workspace" aria-label="Business hours deadline calculator">
+        <div className="business-hours-form">
+          <label>
+            <span>Start date</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(event) => {
+                setStartDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'business_hours_deadline',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <label>
+            <span>Start time</span>
+            <input
+              type="time"
+              value={startTime}
+              onChange={(event) => setStartTime(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Business hours to add</span>
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              step="1"
+              value={hours}
+              onChange={(event) => setHours(event.target.value)}
+            />
+          </label>
+
+          <div className="business-hours-day">
+            <span>Workday</span>
+            <div>
+              <label>
+                <span>Starts</span>
+                <input
+                  type="time"
+                  value={workdayStart}
+                  onChange={(event) => setWorkdayStart(event.target.value)}
+                />
+              </label>
+
+              <label>
+                <span>Ends</span>
+                <input
+                  type="time"
+                  value={workdayEnd}
+                  onChange={(event) => setWorkdayEnd(event.target.value)}
+                />
+              </label>
+            </div>
+          </div>
+
+          <HolidayCalendarSelect
+            value={holidayCalendar}
+            onChange={(nextCalendar) => {
+              setHolidayCalendar(nextCalendar)
+              trackWhenIsDueEvent('holiday_calendar_changed', {
+                context: 'business_hours_deadline',
+                value: nextCalendar,
+              })
+            }}
+          />
+
+          {validationMessage ? (
+            <p className="business-hours-error" role="alert">{validationMessage}</p>
+          ) : null}
+        </div>
+
+        <div className="business-hours-result" aria-live="polite">
+          {result ? (
+            <>
+              <p>Deadline</p>
+              <div className="business-hours-date">{formatPlainDate(result.date)}</div>
+              <div className="business-hours-time">{formatTime12Hour(result.time)}</div>
+              <div className="business-hours-weekday">{formatWeekday(result.date)}</div>
+
+              <p className="business-hours-rule">
+                {parsedHours} business {parsedHours === 1 ? 'hour' : 'hours'} ·{' '}
+                {formatTime12Hour(workdayStart)}–{formatTime12Hour(workdayEnd)}
+              </p>
+
+              <CalculationReceipt
+                analyticsContext="business_hours_deadline"
+                rows={[
+                  {
+                    label: 'Start',
+                    value: `${formatPlainDate(parsedStartDate!)} · ${formatTime12Hour(startTime)}`,
+                  },
+                  {
+                    label: 'Business hours added',
+                    value: String(parsedHours),
+                  },
+                  {
+                    label: 'Workday',
+                    value: `${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)}`,
+                  },
+                  {
+                    label: 'Holiday calendar',
+                    value: getHolidayCalendarOption(holidayCalendar).label,
+                  },
+                  {
+                    label: 'Deadline',
+                    value: `${formatPlainDate(result.date)} · ${formatTime12Hour(result.time)}`,
+                  },
+                ]}
+              />
+            </>
+          ) : (
+            <p className="business-hours-empty">Enter valid details to calculate the deadline.</p>
+          )}
+        </div>
+      </section>
+
+      <section className="business-content" aria-label="Business-hour rules">
+        <div className="business-copy">
+          <h2>How the business-hour clock works</h2>
+          <p>
+            If the start is before the workday begins, counting starts at the workday
+            start. If it is at or after the workday end, counting starts at the next
+            business-day start. This is a calculation tool, not a substitute for the
+            SLA or contract you are checking.
+          </p>
+
+          <dl className="business-faq">
+            <div>
+              <dt>What if the SLA starts on a weekend?</dt>
+              <dd>Counting begins at the start of the next business day.</dd>
+            </div>
+            <div>
+              <dt>What if it starts after business hours?</dt>
+              <dd>The clock begins at the next business-day start time.</dd>
+            </div>
+            <div>
+              <dt>Do public holidays count?</dt>
+              <dd>They count by default. Choose a supported holiday calendar to skip known holidays.</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .business-hours-hero {
+          width: min(920px, calc(100% - 36px));
+          margin: 42px auto 0;
+          text-align: center;
+        }
+
+        .business-hours-hero h1 {
+          margin: 6px 0 0;
+          color: #10213b;
+          font-size: clamp(2.2rem, 5vw, 4.5rem);
+          line-height: 1;
+          letter-spacing: -0.045em;
+        }
+
+        .business-hours-hero > p:last-child {
+          max-width: 700px;
+          margin: 12px auto 0;
+          color: #6d8094;
+          line-height: 1.55;
+        }
+
+        .business-hours-workspace {
+          display: grid;
+          grid-template-columns: minmax(280px, 0.8fr) minmax(360px, 1.2fr);
+          gap: 14px;
+          width: min(1120px, calc(100% - 36px));
+          margin: 22px auto 0;
+        }
+
+        .business-hours-form,
+        .business-hours-result {
+          min-width: 0;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 18px;
+          background: #fff;
+        }
+
+        .business-hours-form {
+          display: grid;
+          gap: 14px;
+        }
+
+        .business-hours-form label,
+        .business-hours-day {
+          display: grid;
+          gap: 6px;
+        }
+
+        .business-hours-form label > span,
+        .business-hours-day > span,
+        .business-hours-day label > span {
+          color: #526a85;
+          font-size: 0.76rem;
+          font-weight: 850;
+        }
+
+        .business-hours-form input {
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          padding: 8px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 9px;
+          color: #243f5e;
+          font: inherit;
+        }
+
+        .business-hours-day > div {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+
+        .business-hours-error {
+          margin: 0;
+          color: #9a3f3f;
+          font-size: 0.78rem;
+          font-weight: 700;
+        }
+
+        .business-hours-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .business-hours-result > p:first-child {
+          margin: 0;
+          color: #77899b;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .business-hours-date {
+          margin-top: 7px;
+          color: #0c1931;
+          font-size: clamp(3.2rem, 6.8vw, 6.4rem);
+          font-weight: 950;
+          line-height: 0.98;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .business-hours-time {
+          margin-top: 5px;
+          color: #173a63;
+          font-size: clamp(2rem, 4.5vw, 3.8rem);
+          font-weight: 900;
+          line-height: 1;
+        }
+
+        .business-hours-weekday {
+          margin-top: 6px;
+          color: #63788f;
+          font-size: 0.92rem;
+          font-weight: 800;
+        }
+
+        .business-hours-rule {
+          margin: 10px 0 0;
+          color: #75879a;
+          font-size: 0.74rem;
+        }
+
+        .business-hours-empty {
+          margin: auto;
+          color: #7a8999;
+        }
+
+        @media (max-width: 760px) {
+          .business-hours-hero,
+          .business-hours-workspace {
+            width: calc(100% - 20px);
+          }
+
+          .business-hours-hero {
+            margin-top: 28px;
+          }
+
+          .business-hours-workspace {
+            grid-template-columns: 1fr;
+          }
+
+          .business-hours-form,
+          .business-hours-result {
+            padding: 15px;
+          }
+
+          .business-hours-date {
+            font-size: clamp(3rem, 14vw, 4.8rem);
+          }
+
+          .business-hours-time {
+            font-size: clamp(2rem, 10vw, 3.1rem);
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
 type StaticPageRoute = Extract<RouteName, 'about' | 'privacy' | 'terms' | 'contact'>
 
 type StaticPageProps = NavigationProps & {
@@ -6270,6 +6824,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'business-days-between'
   }
 
+  if (pathname === '/business-hours-deadline-calculator') {
+    return 'business-hours-deadline'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -6436,6 +6994,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Count weekdays between two dates instantly with a clear start-date and end-date counting rule.',
       twitterDescription: 'Count business days between two dates instantly.',
       path: '/business-days-between-dates',
+    }
+  }
+
+  if (route === 'business-hours-deadline') {
+    return {
+      title: 'Business Hours Deadline Calculator for SLAs | WhenIsDue',
+      description: 'Add business hours to a date and time using a workday schedule. Skip weekends and optionally supported public holidays.',
+      openGraphDescription: 'Calculate an SLA or response deadline using business hours, workday times, weekends, and optional holiday calendars.',
+      twitterDescription: 'Add business hours to a date and time and calculate the exact deadline.',
+      path: '/business-hours-deadline-calculator',
     }
   }
 
@@ -6713,6 +7281,7 @@ function getRouteStructuredData(
   if (
     route === 'calculators' ||
     route === 'business-days-between' ||
+    route === 'business-hours-deadline' ||
     route === 'free-trial' ||
     route === 'return-window' ||
     route === 'invoice-due-date' ||
