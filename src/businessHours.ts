@@ -8,6 +8,11 @@ import {
   getHolidayOnDate,
 } from './holidayCalendars.ts'
 
+export type SkippedBusinessHoliday = {
+  date: string
+  name: string
+}
+
 export function timeToMinutes(value: string) {
   const match = /^(\d{1,2}):(\d{2})$/.exec(value)
   if (!match) return null
@@ -48,22 +53,48 @@ export function formatTime12Hour(value: string) {
   return `${hour12}:${String(minute).padStart(2, '0')} ${suffix}`
 }
 
+function isWeekend(date: PlainDate) {
+  const weekday = new Date(`${toDateKey(date)}T12:00:00Z`).getUTCDay()
+  return weekday === 0 || weekday === 6
+}
+
+function rememberSkippedHoliday(
+  date: PlainDate,
+  holidayCalendar: HolidayCalendarId,
+  skippedHolidays: SkippedBusinessHoliday[],
+) {
+  if (holidayCalendar === 'none' || isWeekend(date)) return
+
+  const holiday = getHolidayOnDate(date, holidayCalendar)
+  if (!holiday) return
+
+  const key = toDateKey(date)
+
+  if (!skippedHolidays.some((item) => item.date === key)) {
+    skippedHolidays.push({
+      date: key,
+      name: holiday.name,
+    })
+  }
+}
+
 function isBusinessDateForCalendar(
   date: PlainDate,
   holidayCalendar: HolidayCalendarId,
 ) {
-  const weekday = new Date(`${toDateKey(date)}T12:00:00Z`).getUTCDay()
-  if (weekday === 0 || weekday === 6) return false
+  if (isWeekend(date)) return false
   return getHolidayOnDate(date, holidayCalendar) === null
 }
 
 function nextBusinessDate(
   date: PlainDate,
   holidayCalendar: HolidayCalendarId,
+  skippedHolidays: SkippedBusinessHoliday[],
 ) {
   let cursor = addCalendarDays(date, 1)
 
   while (!isBusinessDateForCalendar(cursor, holidayCalendar)) {
+    rememberSkippedHoliday(cursor, holidayCalendar, skippedHolidays)
     cursor = addCalendarDays(cursor, 1)
   }
 
@@ -92,16 +123,26 @@ export function calculateBusinessHoursDeadline(
     return null
   }
 
+  const skippedHolidays: SkippedBusinessHoliday[] = []
   let cursorDate = startDate
   let cursorMinutes = startMinutes
 
   if (!isBusinessDateForCalendar(cursorDate, holidayCalendar)) {
-    cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
+    rememberSkippedHoliday(cursorDate, holidayCalendar, skippedHolidays)
+    cursorDate = nextBusinessDate(
+      cursorDate,
+      holidayCalendar,
+      skippedHolidays,
+    )
     cursorMinutes = workdayStart
   } else if (cursorMinutes < workdayStart) {
     cursorMinutes = workdayStart
   } else if (cursorMinutes >= workdayEnd) {
-    cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
+    cursorDate = nextBusinessDate(
+      cursorDate,
+      holidayCalendar,
+      skippedHolidays,
+    )
     cursorMinutes = workdayStart
   }
 
@@ -115,7 +156,11 @@ export function calculateBusinessHoursDeadline(
       remainingMinutes = 0
     } else {
       remainingMinutes -= availableToday
-      cursorDate = nextBusinessDate(cursorDate, holidayCalendar)
+      cursorDate = nextBusinessDate(
+        cursorDate,
+        holidayCalendar,
+        skippedHolidays,
+      )
       cursorMinutes = workdayStart
     }
   }
@@ -123,5 +168,6 @@ export function calculateBusinessHoursDeadline(
   return {
     date: cursorDate,
     time: minutesToTime(cursorMinutes),
+    skippedHolidays,
   }
 }

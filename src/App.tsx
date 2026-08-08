@@ -7067,6 +7067,14 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
                     label: 'Holiday calendar',
                     value: getHolidayCalendarOption(holidayCalendar).label,
                   },
+                  ...(holidayCalendar !== 'none'
+                    ? [
+                        {
+                          label: 'Holidays skipped',
+                          value: formatSkippedHolidaySummary(result.skippedHolidays),
+                        },
+                      ]
+                    : []),
                   {
                     label: 'Deadline',
                     value: `${formatPlainDate(result.date)} · ${formatTime12Hour(result.time)}`,
