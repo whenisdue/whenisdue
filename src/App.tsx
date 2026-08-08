@@ -8793,18 +8793,18 @@ function applyRouteMetadata(route: RouteName) {
 function getRouteMetadata(route: RouteName): RouteMetadata {
   if (route === 'calculators') {
     return {
-      title: 'Free Deadline Calculators - WhenIsDue',
-      description: 'Use free calculators for calendar days, business days, invoice due dates, free trials, and return windows.',
+      title: 'Date & Deadline Calculators - Business Days, Invoices, Returns & More | WhenIsDue',
+      description: 'Choose a focused calculator for business days, invoice due dates, return deadlines, free trials, SLA business hours, paydays and more.',
       path: '/calculators',
     }
   }
 
   if (route === 'business-days') {
     return {
-      title: 'Business Days Calculator: Days From Today | WhenIsDue',
-      description: 'Find 3, 5, 7, 10 or any number of business days from today or another date. Get the exact date instantly while skipping weekends.',
-      openGraphDescription: 'Calculate business days from today or any start date. Quick answers for 3, 5, 7 and 10 business days, with weekends skipped.',
-      twitterDescription: 'Find 3, 5, 7, 10 or any number of business days from today or another date.',
+      title: 'Business Days Calculator - What Date Is 3, 5, 7 or 10 Business Days From Today? | WhenIsDue',
+      description: 'See the exact date 3, 5, 7, 10 or any number of business days from today or another date. Weekends are skipped, with optional supported holiday calendars.',
+      openGraphDescription: 'See the exact date 3, 5, 7 or 10 business days from today or calculate from any start date.',
+      twitterDescription: 'Find the exact date 3, 5, 7 or 10 business days from today.',
       path: '/business-days-calculator',
     }
   }
@@ -8888,18 +8888,20 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'return-window') {
     return {
-      title: 'Return Window Calculator: Find Your Last Return Day | WhenIsDue',
-      description: 'Find the last day to return an item for common 7, 14, 30, 60, or 90-day return windows, or calculate from any purchase or delivery date.',
-      openGraphDescription: 'See common return deadlines instantly or calculate the last return day from any purchase or delivery date.',
-      twitterDescription: 'Find the last day to return an item for 7, 14, 30, 60, 90-day or custom return windows.',
+      title: 'Return Window Calculator - What Is My Last Day to Return an Item? | WhenIsDue',
+      description: 'Enter the purchase or delivery date and return window to see the last day to return an item. Supports common 7, 14, 30, 60 and 90-day windows.',
+      openGraphDescription: 'Enter a purchase or delivery date and instantly see the last day of the return window.',
+      twitterDescription: 'Find the last day to return an item from the purchase or delivery date.',
       path: '/return-window-calculator',
     }
   }
 
   if (route === 'invoice-due-date') {
     return {
-      title: 'Invoice Due Date Calculator - WhenIsDue',
-      description: 'Calculate invoice due dates from common payment terms like Net 7, Net 15, Net 30, Net 45, and Net 60.',
+      title: 'Invoice Due Date Calculator - Net 7, 15, 30, 45, 60 & 90 | WhenIsDue',
+      description: 'Enter an invoice date and payment terms to see the due date instantly. Calculate Net 7, Net 15, Net 30, Net 45, Net 60, Net 90 and EOM terms.',
+      openGraphDescription: 'Calculate an invoice due date instantly from common Net payment terms or end-of-month terms.',
+      twitterDescription: 'Enter an invoice date and payment terms to see the due date instantly.',
       path: '/invoice-due-date-calculator',
     }
   }
