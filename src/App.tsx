@@ -209,6 +209,392 @@ function App() {
 }
 
 
+type AskWhenMatch = {
+  label: string
+  description: string
+  path: string
+}
+
+function resolveAskWhenQuery(
+  rawQuery: string,
+  holidayCalendar: HolidayCalendarId,
+): AskWhenMatch | null {
+  const query = rawQuery
+    .trim()
+    .toLowerCase()
+    .replace(/[?.!,]+$/g, '')
+    .replace(/\s+/g, ' ')
+
+  if (!query) return null
+
+  const calendarSuffix =
+    holidayCalendar === 'none' ? '' : `&calendar=${holidayCalendar}`
+  const calendarOnlySuffix =
+    holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+
+  const businessFromToday = query.match(
+    /^(\d{1,3})\s+(?:business|working)\s+days?(?:\s+from\s+today)?$/,
+  )
+
+  if (businessFromToday) {
+    const days = Number(businessFromToday[1])
+
+    if (days < 1 || days > 365) return null
+
+    const exactPages = new Set([3, 4, 5, 7, 8, 10, 20, 30])
+
+    return {
+      label: `${days} business ${days === 1 ? 'day' : 'days'} from today`,
+      description:
+        holidayCalendar === 'none'
+          ? 'Skip weekends and show the exact date.'
+          : `Skip weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays.`,
+      path: exactPages.has(days)
+        ? `/${days}-business-days-from-today${calendarOnlySuffix}`
+        : `/business-days-calculator?days=${days}${calendarSuffix}`,
+    }
+  }
+
+  const netTerms = query.match(
+    /^(?:net\s*)?(7|15|30|45|60|90)(?:\s+(?:due\s+date|invoice|terms?))?$/,
+  )
+
+  if (netTerms && (query.startsWith('net') || query.includes('invoice') || query.includes('due'))) {
+    const days = Number(netTerms[1])
+    return {
+      label: `Net ${days} due date`,
+      description: `Enter the invoice date and add ${days} calendar days.`,
+      path: `/net-${days}-due-date`,
+    }
+  }
+
+  const returnWindow = query.match(
+    /^(\d{1,3})[\s-]*(?:day|days)\s+(?:return|return\s+window|return\s+deadline)$/,
+  )
+
+  if (returnWindow) {
+    const days = Number(returnWindow[1])
+    if (days < 1 || days > 365) return null
+
+    return {
+      label: `${days}-day return deadline`,
+      description: 'Enter the purchase or delivery date.',
+      path: `/return-window-calculator?days=${days}`,
+    }
+  }
+
+  const freeTrial = query.match(
+    /^(\d{1,3})[\s-]*(?:day|days)\s+(?:free\s+)?trial$/,
+  )
+
+  if (freeTrial) {
+    const days = Number(freeTrial[1])
+    if (days < 1 || days > 365) return null
+
+    return {
+      label: `${days}-day free trial`,
+      description: 'Enter the trial start date.',
+      path: `/free-trial-calculator?days=${days}`,
+    }
+  }
+
+  if (
+    query === 'business days between dates' ||
+    query === 'business days between' ||
+    query === 'working days between dates'
+  ) {
+    return {
+      label: 'Business days between dates',
+      description: 'Enter two dates and count the weekdays between them.',
+      path: `/business-days-between-dates${calendarOnlySuffix}`,
+    }
+  }
+
+  if (
+    query === 'business days' ||
+    query === 'business day calculator' ||
+    query === 'working days'
+  ) {
+    return {
+      label: 'Business days calculator',
+      description: 'Add business days to today or another start date.',
+      path: `/business-days-calculator${calendarOnlySuffix}`,
+    }
+  }
+
+  if (
+    query === 'invoice due date' ||
+    query === 'invoice calculator' ||
+    query === 'payment due date'
+  ) {
+    return {
+      label: 'Invoice due date',
+      description: 'Calculate common Net terms or end-of-month terms.',
+      path: '/invoice-due-date-calculator',
+    }
+  }
+
+  if (
+    query === 'return deadline' ||
+    query === 'return window' ||
+    query === 'return calculator'
+  ) {
+    return {
+      label: 'Return deadline',
+      description: 'Calculate the last day of a return window.',
+      path: '/return-window-calculator',
+    }
+  }
+
+  if (
+    query === 'free trial' ||
+    query === 'trial end date' ||
+    query === 'trial calculator'
+  ) {
+    return {
+      label: 'Free trial end date',
+      description: 'Estimate the trial end and a one-day-before reminder.',
+      path: '/free-trial-calculator',
+    }
+  }
+
+  return null
+}
+
+type AskWhenBoxProps = NavigationProps & {
+  holidayCalendar: HolidayCalendarId
+}
+
+function AskWhenBox({ onNavigate, holidayCalendar }: AskWhenBoxProps) {
+  const [query, setQuery] = useState('')
+  const match = useMemo(
+    () => resolveAskWhenQuery(query, holidayCalendar),
+    [query, holidayCalendar],
+  )
+
+  const examples = [
+    '10 business days from today',
+    'Net 30 due date',
+    '30 day return',
+    '14 day trial',
+  ]
+
+  function submitQuery() {
+    if (!match) return
+
+    trackWhenIsDueEvent('ask_when_submitted', {
+      query,
+      destination: match.path,
+    })
+    onNavigate(match.path)
+  }
+
+  return (
+    <section className="ask-when-box" aria-labelledby="ask-when-title">
+      <div className="ask-when-heading">
+        <span>Quick answer finder</span>
+        <h2 id="ask-when-title">Ask WhenIsDue</h2>
+        <p>Type the date question you have. No AI — it simply sends you to the right calculator.</p>
+      </div>
+
+      <form
+        className="ask-when-form"
+        onSubmit={(event) => {
+          event.preventDefault()
+          submitQuery()
+        }}
+      >
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Try: 10 business days from today"
+          aria-label="Ask a date or deadline question"
+          autoComplete="off"
+        />
+        <button type="submit" disabled={!match}>
+          Show answer
+        </button>
+      </form>
+
+      {query.trim() ? (
+        <div className={`ask-when-preview ${match ? 'has-match' : 'no-match'}`} aria-live="polite">
+          {match ? (
+            <>
+              <strong>{match.label}</strong>
+              <span>{match.description}</span>
+            </>
+          ) : (
+            <>
+              <strong>I don't recognize that one yet.</strong>
+              <span>Try one of the examples below or choose a calculator.</span>
+            </>
+          )}
+        </div>
+      ) : null}
+
+      <div className="ask-when-examples" aria-label="Ask WhenIsDue examples">
+        {examples.map((example) => (
+          <button
+            type="button"
+            key={example}
+            onClick={() => {
+              setQuery(example)
+              trackWhenIsDueEvent('ask_when_example_clicked', { query: example })
+            }}
+          >
+            {example}
+          </button>
+        ))}
+      </div>
+
+      <style>{`
+        .ask-when-box {
+          width: min(920px, calc(100% - 36px));
+          margin: 24px auto 0;
+          padding: 22px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 22px;
+          background: #fff;
+          box-shadow: 0 14px 44px rgba(19, 38, 70, 0.06);
+          text-align: center;
+        }
+
+        .ask-when-heading > span {
+          display: block;
+          margin-bottom: 4px;
+          color: #78899b;
+          font-size: 0.72rem;
+          font-weight: 900;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+        }
+
+        .ask-when-heading h2 {
+          margin: 0;
+          color: #10213b;
+          font-size: clamp(1.45rem, 3vw, 2.1rem);
+        }
+
+        .ask-when-heading p {
+          margin: 7px auto 0;
+          max-width: 620px;
+          color: #6d8094;
+          font-size: 0.84rem;
+          line-height: 1.5;
+        }
+
+        .ask-when-form {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 8px;
+          margin: 18px auto 0;
+          max-width: 720px;
+        }
+
+        .ask-when-form input {
+          min-width: 0;
+          min-height: 50px;
+          padding: 10px 14px;
+          border: 1px solid rgba(19, 38, 70, 0.16);
+          border-radius: 11px;
+          color: #18314e;
+          font: inherit;
+          font-size: 0.95rem;
+        }
+
+        .ask-when-form button {
+          min-height: 50px;
+          padding: 10px 18px;
+          border: 0;
+          border-radius: 11px;
+          background: #173a63;
+          color: #fff;
+          font: inherit;
+          font-size: 0.84rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .ask-when-form button:disabled {
+          opacity: 0.42;
+          cursor: default;
+        }
+
+        .ask-when-preview {
+          display: grid;
+          gap: 2px;
+          max-width: 720px;
+          margin: 9px auto 0;
+          padding: 9px 11px;
+          border-radius: 10px;
+          text-align: left;
+        }
+
+        .ask-when-preview.has-match {
+          background: #f2f7f4;
+        }
+
+        .ask-when-preview.no-match {
+          background: #f7f5f2;
+        }
+
+        .ask-when-preview strong {
+          color: #314b66;
+          font-size: 0.8rem;
+        }
+
+        .ask-when-preview span {
+          color: #738599;
+          font-size: 0.72rem;
+        }
+
+        .ask-when-examples {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 7px;
+          margin-top: 12px;
+        }
+
+        .ask-when-examples button {
+          min-height: 40px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #f7f9fb;
+          color: #60758c;
+          font: inherit;
+          font-size: 0.72rem;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        @media (max-width: 620px) {
+          .ask-when-box {
+            width: calc(100% - 20px);
+            padding: 16px;
+          }
+
+          .ask-when-form {
+            grid-template-columns: 1fr;
+          }
+
+          .ask-when-form button,
+          .ask-when-examples button {
+            min-height: 44px;
+          }
+
+          .ask-when-examples {
+            justify-content: flex-start;
+          }
+        }
+      `}</style>
+    </section>
+  )
+}
+
+
 function HomePage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
@@ -390,6 +776,8 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
         `}</style>
       </section>
+
+      <AskWhenBox onNavigate={onNavigate} holidayCalendar={holidayCalendar} />
 
       {(favoriteCalculations.length > 0 || recentCalculations.length > 0) ? (
         <section className="date-home-saved" aria-labelledby="date-home-saved-title">
