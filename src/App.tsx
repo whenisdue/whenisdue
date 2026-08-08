@@ -215,10 +215,31 @@ function HomePage({ onNavigate }: NavigationProps) {
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
     getInitialHolidayCalendarQueryParam,
   )
+  const [recentCalculations, setRecentCalculations] = useState<SavedCalculation[]>(() =>
+    readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY),
+  )
+  const [favoriteCalculations, setFavoriteCalculations] = useState<SavedCalculation[]>(() =>
+    readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
+  )
 
   useEffect(() => {
     saveHolidayCalendar(holidayCalendar)
   }, [holidayCalendar])
+
+  useEffect(() => {
+    const refreshSavedCalculations = () => {
+      setRecentCalculations(readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY))
+      setFavoriteCalculations(readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY))
+    }
+
+    window.addEventListener(SAVED_CALCULATIONS_EVENT, refreshSavedCalculations)
+    window.addEventListener('storage', refreshSavedCalculations)
+
+    return () => {
+      window.removeEventListener(SAVED_CALCULATIONS_EVENT, refreshSavedCalculations)
+      window.removeEventListener('storage', refreshSavedCalculations)
+    }
+  }, [])
 
   const commonBusinessDays = useMemo(
     () =>
@@ -369,6 +390,213 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
         `}</style>
       </section>
+
+      {(favoriteCalculations.length > 0 || recentCalculations.length > 0) ? (
+        <section className="date-home-saved" aria-labelledby="date-home-saved-title">
+          <div className="date-home-section-heading">
+            <h2 id="date-home-saved-title">Your saved calculations</h2>
+            <span>Stored only on this device</span>
+          </div>
+
+          {favoriteCalculations.length > 0 ? (
+            <div className="date-home-saved-group">
+              <h3>Favorites</h3>
+              <div className="date-home-saved-grid">
+                {favoriteCalculations.slice(0, 6).map((item) => (
+                  <article className="date-home-saved-card" key={item.id}>
+                    <a
+                      href={item.url}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        trackWhenIsDueEvent('saved_calculation_opened', {
+                          type: 'favorite',
+                          title: item.title,
+                        })
+                        onNavigate(item.url)
+                      }}
+                    >
+                      <span>Favorite</span>
+                      <strong>{item.title}</strong>
+                      <b>{item.dateText}</b>
+                      {item.details ? <small>{item.details}</small> : null}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        removeSavedCalculation(FAVORITE_CALCULATIONS_STORAGE_KEY, item.id)
+                        trackWhenIsDueEvent('favorite_removed', { title: item.title })
+                      }}
+                      aria-label={`Remove ${item.title} from favorites`}
+                    >
+                      Remove
+                    </button>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {recentCalculations.length > 0 ? (
+            <div className="date-home-saved-group">
+              <div className="date-home-saved-group-heading">
+                <h3>Recent</h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    writeSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY, [])
+                    trackWhenIsDueEvent('recent_calculations_cleared')
+                  }}
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="date-home-saved-grid">
+                {recentCalculations.slice(0, 6).map((item) => (
+                  <article className="date-home-saved-card" key={item.id}>
+                    <a
+                      href={item.url}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        trackWhenIsDueEvent('saved_calculation_opened', {
+                          type: 'recent',
+                          title: item.title,
+                        })
+                        onNavigate(item.url)
+                      }}
+                    >
+                      <span>Recent</span>
+                      <strong>{item.title}</strong>
+                      <b>{item.dateText}</b>
+                      {item.details ? <small>{item.details}</small> : null}
+                    </a>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <style>{`
+            .date-home-saved {
+              width: min(1180px, calc(100% - 36px));
+              margin: 22px auto 0;
+              padding: 20px;
+              border: 1px solid rgba(19, 38, 70, 0.08);
+              border-radius: 20px;
+              background: rgba(255, 255, 255, 0.72);
+            }
+
+            .date-home-saved .date-home-section-heading > span {
+              color: #7a8999;
+              font-size: 0.74rem;
+            }
+
+            .date-home-saved-group + .date-home-saved-group {
+              margin-top: 18px;
+            }
+
+            .date-home-saved-group h3,
+            .date-home-saved-group-heading h3 {
+              margin: 0 0 9px;
+              color: #526a85;
+              font-size: 0.76rem;
+              font-weight: 900;
+              letter-spacing: 0.05em;
+              text-transform: uppercase;
+            }
+
+            .date-home-saved-group-heading {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+            }
+
+            .date-home-saved-group-heading button,
+            .date-home-saved-card > button {
+              min-height: 36px;
+              padding: 6px 9px;
+              border: 0;
+              background: transparent;
+              color: #74869a;
+              font: inherit;
+              font-size: 0.72rem;
+              font-weight: 800;
+              cursor: pointer;
+            }
+
+            .date-home-saved-grid {
+              display: grid;
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+              gap: 10px;
+            }
+
+            .date-home-saved-card {
+              min-width: 0;
+              overflow: hidden;
+              border: 1px solid rgba(19, 38, 70, 0.09);
+              border-radius: 13px;
+              background: #fff;
+            }
+
+            .date-home-saved-card > a {
+              display: grid;
+              gap: 4px;
+              padding: 13px;
+              color: inherit;
+              text-decoration: none;
+            }
+
+            .date-home-saved-card > a > span {
+              color: #7c8fa4;
+              font-size: 0.68rem;
+              font-weight: 850;
+              text-transform: uppercase;
+            }
+
+            .date-home-saved-card > a > strong {
+              overflow: hidden;
+              color: #2b435e;
+              font-size: 0.85rem;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            .date-home-saved-card > a > b {
+              color: #0c1931;
+              font-size: 1rem;
+            }
+
+            .date-home-saved-card > a > small {
+              overflow: hidden;
+              color: #77899c;
+              font-size: 0.7rem;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            .date-home-saved-card > button {
+              width: 100%;
+              border-top: 1px solid rgba(19, 38, 70, 0.06);
+            }
+
+            @media (max-width: 760px) {
+              .date-home-saved {
+                width: min(100% - 20px, 1180px);
+                padding: 14px;
+              }
+
+              .date-home-saved-grid {
+                grid-template-columns: 1fr;
+              }
+
+              .date-home-saved-group-heading button,
+              .date-home-saved-card > button {
+                min-height: 44px;
+              }
+            }
+          `}</style>
+        </section>
+      ) : null}
 
       <section className="date-home-tools" aria-labelledby="date-home-tools-title">
         <h2 id="date-home-tools-title">What do you need to know?</h2>
@@ -2549,13 +2777,36 @@ type ResultActionsProps = {
 
 function ResultActions({ title, date, details }: ResultActionsProps) {
   const [message, setMessage] = useState<string | null>(null)
+  const [isFavorite, setIsFavorite] = useState(() =>
+    isFavoriteCalculation(
+      title,
+      `${window.location.pathname}${window.location.search}`,
+    ),
+  )
   const dateText = formatPlainDate(date)
   const shareText = `${title}: ${dateText}${details ? ` — ${details}` : ''}`
+
+  useEffect(() => {
+    const refreshFavoriteState = () => {
+      setIsFavorite(
+        isFavoriteCalculation(
+          title,
+          `${window.location.pathname}${window.location.search}`,
+        ),
+      )
+    }
+
+    window.addEventListener(SAVED_CALCULATIONS_EVENT, refreshFavoriteState)
+    return () => {
+      window.removeEventListener(SAVED_CALCULATIONS_EVENT, refreshFavoriteState)
+    }
+  }, [title])
 
   async function copyAnswer() {
     try {
       await navigator.clipboard.writeText(shareText)
       setMessage('Copied.')
+      recordRecentCalculation(title, date, details)
       trackWhenIsDueEvent('copy_result', { title, result_date: toDateKey(date), status: 'success' })
     } catch {
       setMessage('Copy is not available in this browser.')
@@ -2576,6 +2827,7 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
         url: window.location.href,
       })
       setMessage('Shared.')
+      recordRecentCalculation(title, date, details)
       trackWhenIsDueEvent('share_result', { title, result_date: toDateKey(date), status: 'success' })
     } catch {
       setMessage('Share cancelled or unavailable.')
@@ -2619,12 +2871,35 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
     link.remove()
     URL.revokeObjectURL(url)
     setMessage('Calendar file created.')
+    recordRecentCalculation(title, date, details)
     trackWhenIsDueEvent('calendar_export', { title, result_date: toDateKey(date), status: 'created' })
+  }
+
+  function toggleFavorite() {
+    const nextFavoriteState = toggleFavoriteCalculation(title, date, details)
+    setIsFavorite(nextFavoriteState)
+    recordRecentCalculation(title, date, details)
+    setMessage(nextFavoriteState ? 'Saved to favorites.' : 'Removed from favorites.')
+    trackWhenIsDueEvent(
+      nextFavoriteState ? 'favorite_added' : 'favorite_removed',
+      {
+        title,
+        result_date: toDateKey(date),
+      },
+    )
   }
 
   return (
     <>
       <div className="result-actions" aria-label="Result actions">
+        <button
+          type="button"
+          className={isFavorite ? 'is-favorite' : ''}
+          onClick={toggleFavorite}
+          aria-pressed={isFavorite}
+        >
+          {isFavorite ? 'Favorited' : 'Favorite'}
+        </button>
         <button type="button" onClick={copyAnswer}>Copy</button>
         <button type="button" onClick={shareAnswer}>Share</button>
         <button type="button" onClick={addToCalendar}>Add to calendar</button>
@@ -2655,6 +2930,12 @@ function ResultActions({ title, date, details }: ResultActionsProps) {
 
         .result-actions button:hover {
           border-color: rgba(19, 38, 70, 0.28);
+        }
+
+        .result-actions button.is-favorite {
+          border-color: rgba(19, 38, 70, 0.26);
+          background: #f4f7fa;
+          color: #243e5c;
         }
 
         .result-actions span {
@@ -3873,6 +4154,122 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 }
 
 
+
+const RECENT_CALCULATIONS_STORAGE_KEY = 'whenisdue:recent-calculations'
+const FAVORITE_CALCULATIONS_STORAGE_KEY = 'whenisdue:favorite-calculations'
+const SAVED_CALCULATIONS_EVENT = 'whenisdue:saved-calculations-changed'
+
+type SavedCalculation = {
+  id: string
+  title: string
+  dateText: string
+  details?: string
+  url: string
+  savedAt: number
+}
+
+function readSavedCalculations(key: string): SavedCalculation[] {
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (!raw) return []
+
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+
+    return parsed.filter((item): item is SavedCalculation => (
+      item &&
+      typeof item.id === 'string' &&
+      typeof item.title === 'string' &&
+      typeof item.dateText === 'string' &&
+      typeof item.url === 'string' &&
+      typeof item.savedAt === 'number'
+    ))
+  } catch {
+    return []
+  }
+}
+
+function writeSavedCalculations(key: string, items: SavedCalculation[]) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(items))
+    window.dispatchEvent(new Event(SAVED_CALCULATIONS_EVENT))
+  } catch {
+    // Local storage can be unavailable in strict privacy modes.
+  }
+}
+
+function calculationId(title: string, url: string) {
+  return `${title}::${url}`
+}
+
+function buildSavedCalculation(
+  title: string,
+  date: PlainDate,
+  details?: string,
+): SavedCalculation {
+  const url = `${window.location.pathname}${window.location.search}`
+
+  return {
+    id: calculationId(title, url),
+    title,
+    dateText: formatPlainDate(date),
+    details,
+    url,
+    savedAt: Date.now(),
+  }
+}
+
+function recordRecentCalculation(
+  title: string,
+  date: PlainDate,
+  details?: string,
+) {
+  const next = buildSavedCalculation(title, date, details)
+  const existing = readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY)
+    .filter((item) => item.id !== next.id)
+
+  writeSavedCalculations(
+    RECENT_CALCULATIONS_STORAGE_KEY,
+    [next, ...existing].slice(0, 8),
+  )
+}
+
+function isFavoriteCalculation(title: string, url: string) {
+  const id = calculationId(title, url)
+  return readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY)
+    .some((item) => item.id === id)
+}
+
+function toggleFavoriteCalculation(
+  title: string,
+  date: PlainDate,
+  details?: string,
+) {
+  const next = buildSavedCalculation(title, date, details)
+  const favorites = readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY)
+  const exists = favorites.some((item) => item.id === next.id)
+
+  if (exists) {
+    writeSavedCalculations(
+      FAVORITE_CALCULATIONS_STORAGE_KEY,
+      favorites.filter((item) => item.id !== next.id),
+    )
+    return false
+  }
+
+  writeSavedCalculations(
+    FAVORITE_CALCULATIONS_STORAGE_KEY,
+    [next, ...favorites].slice(0, 12),
+  )
+  return true
+}
+
+function removeSavedCalculation(key: string, id: string) {
+  writeSavedCalculations(
+    key,
+    readSavedCalculations(key).filter((item) => item.id !== id),
+  )
+}
 
 const HOLIDAY_CALENDAR_STORAGE_KEY = 'whenisdue:holiday-calendar'
 
