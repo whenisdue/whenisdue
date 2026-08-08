@@ -58,6 +58,7 @@ type RouteName =
   | 'business-days-between'
   | 'business-hours-deadline'
   | 'saved-calculations'
+  | 'next-payday'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -130,6 +131,10 @@ function App() {
 
   if (route === 'saved-calculations') {
     return <SavedCalculationsPage onNavigate={navigate} />
+  }
+
+  if (route === 'next-payday') {
+    return <NextPaydayPage onNavigate={navigate} />
   }
 
   if (route === 'three-business-days') {
@@ -220,6 +225,467 @@ function App() {
 }
 
 
+
+
+type PaySchedule =
+  | 'weekly'
+  | 'biweekly'
+  | 'semimonthly-1-15'
+  | 'semimonthly-15-last'
+  | 'monthly'
+
+function getInitialPaySchedule(): PaySchedule {
+  const value = new URLSearchParams(window.location.search).get('schedule')
+  const allowed: PaySchedule[] = [
+    'weekly',
+    'biweekly',
+    'semimonthly-1-15',
+    'semimonthly-15-last',
+    'monthly',
+  ]
+  return allowed.includes(value as PaySchedule)
+    ? (value as PaySchedule)
+    : 'biweekly'
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(Date.UTC(year, month, 0, 12)).getUTCDate()
+}
+
+function compareDateKeys(a: PlainDate, b: PlainDate) {
+  return toDateKey(a).localeCompare(toDateKey(b))
+}
+
+function dateParts(date: PlainDate) {
+  const key = toDateKey(date)
+  return {
+    year: Number(key.slice(0, 4)),
+    month: Number(key.slice(5, 7)),
+    day: Number(key.slice(8, 10)),
+  }
+}
+
+function makePlainDate(year: number, month: number, day: number) {
+  return parsePlainDate(
+    `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+  )
+}
+
+function nextSemimonthlyDate(
+  afterDate: PlainDate,
+  firstDay: number | 'last',
+  secondDay: number | 'last',
+) {
+  const { year, month } = dateParts(afterDate)
+
+  for (let monthOffset = 0; monthOffset < 18; monthOffset += 1) {
+    const monthIndex = month - 1 + monthOffset
+    const candidateYear = year + Math.floor(monthIndex / 12)
+    const candidateMonth = (monthIndex % 12) + 1
+    const lastDay = daysInMonth(candidateYear, candidateMonth)
+
+    const resolveDay = (day: number | 'last') =>
+      day === 'last' ? lastDay : Math.min(day, lastDay)
+
+    const days = [
+      resolveDay(firstDay),
+      resolveDay(secondDay),
+    ]
+      .sort((a, b) => a - b)
+      .filter((day, index, list) => index === 0 || day !== list[index - 1])
+
+    for (const day of days) {
+      const candidate = makePlainDate(candidateYear, candidateMonth, day)
+      if (candidate && compareDateKeys(candidate, afterDate) > 0) {
+        return candidate
+      }
+    }
+  }
+
+  return null
+}
+
+function calculateNextPayday(
+  knownPayday: PlainDate,
+  schedule: PaySchedule,
+) {
+  if (schedule === 'weekly') {
+    return addCalendarDays(knownPayday, 7)
+  }
+
+  if (schedule === 'biweekly') {
+    return addCalendarDays(knownPayday, 14)
+  }
+
+  if (schedule === 'semimonthly-1-15') {
+    return nextSemimonthlyDate(knownPayday, 1, 15)
+  }
+
+  if (schedule === 'semimonthly-15-last') {
+    return nextSemimonthlyDate(knownPayday, 15, 'last')
+  }
+
+  const { year, month, day } = dateParts(knownPayday)
+  const nextMonthIndex = month
+  const nextYear = year + Math.floor(nextMonthIndex / 12)
+  const nextMonth = (nextMonthIndex % 12) + 1
+  const nextDay = Math.min(day, daysInMonth(nextYear, nextMonth))
+  return makePlainDate(nextYear, nextMonth, nextDay)
+}
+
+function payScheduleLabel(schedule: PaySchedule) {
+  if (schedule === 'weekly') return 'Weekly · every 7 days'
+  if (schedule === 'biweekly') return 'Biweekly · every 14 days'
+  if (schedule === 'semimonthly-1-15') return 'Semimonthly · 1st and 15th'
+  if (schedule === 'semimonthly-15-last') return 'Semimonthly · 15th and last day'
+  return 'Monthly · same calendar day when possible'
+}
+
+function NextPaydayPage({ onNavigate }: NavigationProps) {
+  const [knownPayday, setKnownPayday] = useState(() =>
+    getInitialDateQueryParam('payday', todayInputValue()),
+  )
+  const [schedule, setSchedule] = useState<PaySchedule>(getInitialPaySchedule)
+
+  const parsedKnownPayday = parsePlainDate(knownPayday)
+  const nextPayday = parsedKnownPayday
+    ? calculateNextPayday(parsedKnownPayday, schedule)
+    : null
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      payday: knownPayday,
+      schedule,
+    })
+  }, [knownPayday, schedule])
+
+  return (
+    <main className="page-shell next-payday-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="next-payday-hero">
+        <p className="friendly-eyebrow">
+          <span aria-hidden="true">$</span>
+          Pay schedule
+        </p>
+        <h1>When is my next payday?</h1>
+        <p>
+          Enter one payday you already know, then choose how often you are paid.
+          Your next payday appears immediately.
+        </p>
+      </section>
+
+      <section className="next-payday-workspace" aria-label="Next payday calculator">
+        <div className="next-payday-form">
+          <label>
+            <span>Known payday</span>
+            <input
+              type="date"
+              value={knownPayday}
+              onChange={(event) => {
+                setKnownPayday(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'next_payday',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <label>
+            <span>Pay schedule</span>
+            <select
+              value={schedule}
+              onChange={(event) => {
+                const next = event.target.value as PaySchedule
+                setSchedule(next)
+                trackWhenIsDueEvent('pay_schedule_changed', { value: next })
+              }}
+            >
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Biweekly · every 2 weeks</option>
+              <option value="semimonthly-1-15">Semimonthly · 1st and 15th</option>
+              <option value="semimonthly-15-last">Semimonthly · 15th and last day</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+
+          <div className="next-payday-quick-picks" aria-label="Common pay schedules">
+            {[
+              ['Weekly', 'weekly'],
+              ['Every 2 weeks', 'biweekly'],
+              ['1st & 15th', 'semimonthly-1-15'],
+              ['15th & last', 'semimonthly-15-last'],
+            ].map(([label, value]) => (
+              <button
+                type="button"
+                key={value}
+                className={schedule === value ? 'is-active' : ''}
+                onClick={() => {
+                  setSchedule(value as PaySchedule)
+                  trackWhenIsDueEvent('quick_pick', {
+                    context: 'next_payday',
+                    value,
+                  })
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <p className="next-payday-caveat">
+            This calculates the schedule only. Employers and banks may move payments
+            for weekends, holidays, payroll processing, or local rules.
+          </p>
+        </div>
+
+        <div className="next-payday-result" aria-live="polite">
+          {nextPayday && parsedKnownPayday ? (
+            <>
+              <p>Next payday</p>
+              <div className="next-payday-date">{formatPlainDate(nextPayday)}</div>
+              <div className="next-payday-weekday">{formatWeekday(nextPayday)}</div>
+              <p className="next-payday-rule">{payScheduleLabel(schedule)}</p>
+
+              <CalculationReceipt
+                analyticsContext="next_payday"
+                rows={[
+                  {
+                    label: 'Known payday',
+                    value: `${formatWeekday(parsedKnownPayday)}, ${formatPlainDate(parsedKnownPayday)}`,
+                  },
+                  {
+                    label: 'Pay schedule',
+                    value: payScheduleLabel(schedule),
+                  },
+                  {
+                    label: 'Weekend / holiday adjustment',
+                    value: 'Not automatically applied',
+                  },
+                  {
+                    label: 'Next payday',
+                    value: `${formatWeekday(nextPayday)}, ${formatPlainDate(nextPayday)}`,
+                  },
+                ]}
+              />
+
+              <ResultActions
+                title="Next payday"
+                date={nextPayday}
+                details={payScheduleLabel(schedule)}
+              />
+            </>
+          ) : (
+            <p className="next-payday-empty">Choose a valid known payday.</p>
+          )}
+        </div>
+      </section>
+
+      <section className="business-content" aria-label="Pay schedule help">
+        <div className="business-copy">
+          <h2>How this payday calculator works</h2>
+          <p>
+            Weekly and biweekly schedules add 7 or 14 calendar days. Semimonthly
+            schedules use the selected dates each month. Monthly schedules use the
+            same calendar day when that day exists, or the last day of a shorter month.
+          </p>
+
+          <dl className="business-faq">
+            <div>
+              <dt>Is biweekly the same as twice a month?</dt>
+              <dd>No. Biweekly means every 14 days. Semimonthly means two scheduled pay dates each month.</dd>
+            </div>
+            <div>
+              <dt>Does this move payday for a weekend or holiday?</dt>
+              <dd>No. Payroll policies differ, so the displayed date is the schedule date before employer or bank adjustments.</dd>
+            </div>
+            <div>
+              <dt>What if my employer uses a different schedule?</dt>
+              <dd>Use the closest matching schedule here and confirm the actual payroll policy with your employer.</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <SiteFooter onNavigate={onNavigate} />
+
+      <style>{`
+        .next-payday-hero {
+          width: min(900px, calc(100% - 36px));
+          margin: 42px auto 0;
+          text-align: center;
+        }
+
+        .next-payday-hero h1 {
+          margin: 6px 0 0;
+          color: #10213b;
+          font-size: clamp(2.3rem, 5vw, 4.7rem);
+          line-height: 1;
+          letter-spacing: -0.045em;
+        }
+
+        .next-payday-hero > p:last-child {
+          max-width: 650px;
+          margin: 12px auto 0;
+          color: #6d8094;
+          line-height: 1.55;
+        }
+
+        .next-payday-workspace {
+          display: grid;
+          grid-template-columns: minmax(280px, 0.8fr) minmax(360px, 1.2fr);
+          gap: 14px;
+          width: min(1080px, calc(100% - 36px));
+          margin: 22px auto 0;
+        }
+
+        .next-payday-form,
+        .next-payday-result {
+          min-width: 0;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 18px;
+          background: #fff;
+        }
+
+        .next-payday-form {
+          display: grid;
+          align-content: start;
+          gap: 14px;
+        }
+
+        .next-payday-form label {
+          display: grid;
+          gap: 6px;
+        }
+
+        .next-payday-form label > span {
+          color: #526a85;
+          font-size: 0.76rem;
+          font-weight: 850;
+        }
+
+        .next-payday-form input,
+        .next-payday-form select {
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          padding: 8px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 9px;
+          background: #fff;
+          color: #243f5e;
+          font: inherit;
+        }
+
+        .next-payday-quick-picks {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .next-payday-quick-picks button {
+          min-height: 40px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.11);
+          border-radius: 999px;
+          background: #f7f9fb;
+          color: #657a91;
+          font: inherit;
+          font-size: 0.72rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .next-payday-quick-picks button.is-active {
+          border-color: rgba(23, 58, 99, 0.28);
+          background: #eef3f7;
+          color: #173a63;
+        }
+
+        .next-payday-caveat {
+          margin: 0;
+          color: #78899b;
+          font-size: 0.72rem;
+          line-height: 1.5;
+        }
+
+        .next-payday-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .next-payday-result > p:first-child {
+          margin: 0;
+          color: #77899b;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .next-payday-date {
+          margin-top: 7px;
+          color: #0c1931;
+          font-size: clamp(3.5rem, 7.2vw, 6.7rem);
+          font-weight: 950;
+          line-height: 0.98;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .next-payday-weekday {
+          margin-top: 6px;
+          color: #63788f;
+          font-size: 0.92rem;
+          font-weight: 800;
+        }
+
+        .next-payday-rule {
+          margin: 9px 0 0;
+          color: #75879a;
+          font-size: 0.74rem;
+        }
+
+        .next-payday-empty {
+          margin: auto;
+          color: #7a8999;
+        }
+
+        @media (max-width: 760px) {
+          .next-payday-hero,
+          .next-payday-workspace {
+            width: calc(100% - 20px);
+          }
+
+          .next-payday-hero {
+            margin-top: 28px;
+          }
+
+          .next-payday-workspace {
+            grid-template-columns: 1fr;
+          }
+
+          .next-payday-form,
+          .next-payday-result {
+            padding: 15px;
+          }
+
+          .next-payday-quick-picks button {
+            min-height: 44px;
+          }
+
+          .next-payday-date {
+            font-size: clamp(3.1rem, 14vw, 5rem);
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
 
 async function copySavedCalculationLink(item: SavedCalculation) {
   const absoluteUrl = new URL(item.url, window.location.origin).toString()
@@ -751,6 +1217,21 @@ function resolveAskWhenQuery(
       label: `${days}-day free trial`,
       description: 'Enter the trial start date.',
       path: `/free-trial-calculator?days=${days}`,
+    }
+  }
+
+  if (
+    query === 'next payday' ||
+    query === 'next pay day' ||
+    query === 'payday calculator' ||
+    query === 'pay day calculator' ||
+    query === 'when is my next payday' ||
+    query === 'when is my next pay day'
+  ) {
+    return {
+      label: 'Next payday',
+      description: 'Enter a known payday and your pay schedule.',
+      path: '/next-payday-calculator',
     }
   }
 
@@ -1564,6 +2045,18 @@ function HomePage({ onNavigate }: NavigationProps) {
             <span>Subscriptions</span>
             <strong>When does my trial end?</strong>
             <small>Find the end date before renewal.</small>
+          </a>
+
+          <a
+            href="/next-payday-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/next-payday-calculator')
+            }}
+          >
+            <span>Pay schedule</span>
+            <strong>When is my next payday?</strong>
+            <small>Weekly, biweekly, semimonthly, or monthly.</small>
           </a>
 
           <a
@@ -7557,6 +8050,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'saved-calculations'
   }
 
+  if (pathname === '/next-payday-calculator') {
+    return 'next-payday'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -7744,6 +8241,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       title: 'Saved Calculations - WhenIsDue',
       description: 'Reopen recent and favorite WhenIsDue calculations saved on this device.',
       path: '/saved-calculations',
+    }
+  }
+
+  if (route === 'next-payday') {
+    return {
+      title: 'Next Payday Calculator | WhenIsDue',
+      description: 'Find your next payday for weekly, biweekly, semimonthly, or monthly pay schedules.',
+      openGraphDescription: 'Enter a known payday and pay schedule to calculate the next payday instantly.',
+      twitterDescription: 'Calculate your next payday from a known payday and pay schedule.',
+      path: '/next-payday-calculator',
     }
   }
 
@@ -8022,6 +8529,7 @@ function getRouteStructuredData(
     route === 'calculators' ||
     route === 'business-days-between' ||
     route === 'business-hours-deadline' ||
+    route === 'next-payday' ||
     route === 'free-trial' ||
     route === 'return-window' ||
     route === 'invoice-due-date' ||
