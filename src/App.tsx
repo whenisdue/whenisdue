@@ -322,6 +322,14 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
               <div className="next-payday-weekday">{formatWeekday(nextPayday)}</div>
               <p className="next-payday-rule">{payScheduleLabel(schedule)}</p>
 
+              <p className="next-payday-citation-explanation">
+                {formatPaydayExplanation(
+                  parsedKnownPayday,
+                  schedule,
+                  nextPayday,
+                )}
+              </p>
+
               <CalculationReceipt
                 analyticsContext="next_payday"
                 rows={[
@@ -416,6 +424,15 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
       <SiteFooter onNavigate={onNavigate} />
 
       <style>{`
+        .next-payday-citation-explanation {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
+        }
+
         .next-payday-hero {
           width: min(900px, calc(100% - 36px));
           margin: 42px auto 0;
@@ -6124,6 +6141,34 @@ function formatFreeTrialExplanation(
   return `A ${trialDays}-${dayWord} trial starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(endDate)} using calendar-day counting. The actual cancellation cutoff can depend on the service's billing terms, time zone, and whether the start date counts as day one.`
 }
 
+function formatPaydayExplanation(
+  knownPayday: PlainDate,
+  schedule: PaySchedule,
+  nextPayday: PlainDate,
+) {
+  return `With a ${payScheduleLabel(schedule).toLowerCase()} schedule and a known payday of ${formatPlainDate(knownPayday)}, the next scheduled payday is ${formatPlainDate(nextPayday)}. Weekend, holiday, bank, or employer payroll adjustments are not applied automatically.`
+}
+
+function formatBusinessHoursExplanation(
+  startDate: PlainDate,
+  startTime: string,
+  businessHours: number,
+  workdayStart: string,
+  workdayEnd: string,
+  holidayCalendar: HolidayCalendarId,
+  deadlineDate: PlainDate,
+  deadlineTime: string,
+) {
+  const calendar = getHolidayCalendarOption(holidayCalendar)
+  const holidayRule =
+    holidayCalendar === 'none'
+      ? 'Weekends and time outside the workday are skipped; public holidays still count as weekdays.'
+      : `Weekends, time outside the workday, and ${calendar.shortLabel.toLowerCase()} holidays are skipped.`
+
+  return `Adding ${businessHours} business ${businessHours === 1 ? 'hour' : 'hours'} from ${formatPlainDate(startDate)} at ${formatTime12Hour(startTime)}, using a ${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)} workday, gives a deadline of ${formatPlainDate(deadlineDate)} at ${formatTime12Hour(deadlineTime)}. ${holidayRule}`
+}
+
+
 
 
 
@@ -7232,6 +7277,19 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
                 {formatTime12Hour(workdayStart)}–{formatTime12Hour(workdayEnd)}
               </p>
 
+              <p className="business-hours-citation-explanation">
+                {formatBusinessHoursExplanation(
+                  parsedStartDate!,
+                  startTime,
+                  parsedHours!,
+                  workdayStart,
+                  workdayEnd,
+                  holidayCalendar,
+                  result.date,
+                  result.time,
+                )}
+              </p>
+
               <CalculationReceipt
                 analyticsContext="business_hours_deadline"
                 rows={[
@@ -7409,6 +7467,15 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
       <SiteFooter onNavigate={onNavigate} />
 
       <style>{`
+        .business-hours-citation-explanation {
+          max-width: 700px;
+          margin: 14px auto 0;
+          color: #536b85;
+          font-size: 1rem;
+          line-height: 1.55;
+          text-align: center;
+        }
+
         .business-hours-hero {
           width: min(920px, calc(100% - 36px));
           margin: 42px auto 0;
