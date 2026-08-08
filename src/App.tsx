@@ -6688,6 +6688,68 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             />
           </label>
 
+          {validationMessage ? (
+            <p className="business-hours-error" role="alert">{validationMessage}</p>
+          ) : null}
+        </div>
+
+        <div className="business-hours-result" aria-live="polite">
+          {result ? (
+            <>
+              <p>Deadline</p>
+              <div className="business-hours-date">{formatPlainDate(result.date)}</div>
+
+              <div className="business-hours-time-block">
+                <span>Time</span>
+                <strong>{formatTime12Hour(result.time)}</strong>
+              </div>
+
+              <div className="business-hours-weekday">{formatWeekday(result.date)}</div>
+
+              <p className="business-hours-rule">
+                {parsedHours} business {parsedHours === 1 ? 'hour' : 'hours'} ·{' '}
+                {formatTime12Hour(workdayStart)}–{formatTime12Hour(workdayEnd)}
+              </p>
+
+              <CalculationReceipt
+                analyticsContext="business_hours_deadline"
+                rows={[
+                  {
+                    label: 'Start',
+                    value: `${formatPlainDate(parsedStartDate!)} · ${formatTime12Hour(startTime)}`,
+                  },
+                  {
+                    label: 'Business hours added',
+                    value: String(parsedHours),
+                  },
+                  {
+                    label: 'Workday',
+                    value: `${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)}`,
+                  },
+                  {
+                    label: 'Holiday calendar',
+                    value: getHolidayCalendarOption(holidayCalendar).label,
+                  },
+                  {
+                    label: 'Deadline',
+                    value: `${formatPlainDate(result.date)} · ${formatTime12Hour(result.time)}`,
+                  },
+                ]}
+              />
+
+              <ResultActions
+                title={`${parsedHours}-business-hour deadline`}
+                date={result.date}
+                time={result.time}
+                details={`${formatTime12Hour(result.time)} · ${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)} workday · ${getHolidayCalendarOption(holidayCalendar).shortLabel}`}
+              />
+            </>
+          ) : (
+            <p className="business-hours-empty">Enter valid details to calculate the deadline.</p>
+          )}
+        </div>
+
+        <div className="business-hours-secondary">
           <div className="business-hours-presets" aria-label="Common SLA hour presets">
             {slaPresets.map((preset) => (
               <button
@@ -6785,65 +6847,6 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             </div>
           </details>
 
-          {validationMessage ? (
-            <p className="business-hours-error" role="alert">{validationMessage}</p>
-          ) : null}
-        </div>
-
-        <div className="business-hours-result" aria-live="polite">
-          {result ? (
-            <>
-              <p>Deadline</p>
-              <div className="business-hours-date">{formatPlainDate(result.date)}</div>
-
-              <div className="business-hours-time-block">
-                <span>Time</span>
-                <strong>{formatTime12Hour(result.time)}</strong>
-              </div>
-
-              <div className="business-hours-weekday">{formatWeekday(result.date)}</div>
-
-              <p className="business-hours-rule">
-                {parsedHours} business {parsedHours === 1 ? 'hour' : 'hours'} ·{' '}
-                {formatTime12Hour(workdayStart)}–{formatTime12Hour(workdayEnd)}
-              </p>
-
-              <CalculationReceipt
-                analyticsContext="business_hours_deadline"
-                rows={[
-                  {
-                    label: 'Start',
-                    value: `${formatPlainDate(parsedStartDate!)} · ${formatTime12Hour(startTime)}`,
-                  },
-                  {
-                    label: 'Business hours added',
-                    value: String(parsedHours),
-                  },
-                  {
-                    label: 'Workday',
-                    value: `${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)}`,
-                  },
-                  {
-                    label: 'Holiday calendar',
-                    value: getHolidayCalendarOption(holidayCalendar).label,
-                  },
-                  {
-                    label: 'Deadline',
-                    value: `${formatPlainDate(result.date)} · ${formatTime12Hour(result.time)}`,
-                  },
-                ]}
-              />
-
-              <ResultActions
-                title={`${parsedHours}-business-hour deadline`}
-                date={result.date}
-                time={result.time}
-                details={`${formatTime12Hour(result.time)} · ${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)} workday · ${getHolidayCalendarOption(holidayCalendar).shortLabel}`}
-              />
-            </>
-          ) : (
-            <p className="business-hours-empty">Enter valid details to calculate the deadline.</p>
-          )}
         </div>
       </section>
 
@@ -7062,6 +7065,13 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           padding-top: 8px;
         }
 
+        .business-hours-secondary {
+          grid-column: 1 / -1;
+          display: grid;
+          gap: 8px;
+          padding: 2px 0 0;
+        }
+
         .business-hours-error {
           margin: 0;
           color: #9a3f3f;
@@ -7173,6 +7183,11 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
 
           .business-hours-result {
             order: 2;
+          }
+
+          .business-hours-secondary {
+            order: 3;
+            padding-top: 2px;
           }
 
           .business-hours-presets button,
@@ -7555,6 +7570,7 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
             background: transparent !important;
             box-shadow: none !important;
             text-align: center !important;
+            overflow: hidden !important;
           }
 
           .next-payday-result > p:first-child,
@@ -7642,9 +7658,32 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
           .invoice-due-date-page .status-badge,
           .free-trial-page .status-badge,
           .return-window-page .status-badge {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            overflow-wrap: anywhere !important;
+            word-break: normal !important;
+            text-align: center !important;
             border-color: rgba(19, 38, 70, 0.12) !important;
             background: #f5f7f9 !important;
             color: #536b85 !important;
+          }
+
+          .invoice-due-date-page .result-meta,
+          .free-trial-page .result-meta,
+          .return-window-page .result-meta,
+          .invoice-due-date-page .result-note,
+          .free-trial-page .result-note,
+          .return-window-page .result-note {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            overflow-wrap: anywhere !important;
+            word-break: normal !important;
           }
 
           .invoice-due-date-page .invoice-due-date-result,
