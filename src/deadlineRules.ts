@@ -7,6 +7,11 @@ import {
   type HolidayCalendarId,
   getHolidayOnDate,
 } from './holidayCalendars.ts'
+import {
+  type WorkingScheduleId,
+  getDefaultWorkingScheduleId,
+  isWorkingWeekday,
+} from './workingSchedules.ts'
 
 export type DeadlineDirection = 'after' | 'before'
 export type DeadlineUnit = 'calendar-days' | 'business-days'
@@ -24,6 +29,7 @@ export type DeadlineRuleInput = {
   startDayConvention: StartDayConvention
   holidayCalendar: HolidayCalendarId
   endDayAdjustment: EndDayAdjustment
+  workingScheduleId?: WorkingScheduleId
 }
 
 export type SkippedDeadlineDate = {
@@ -41,33 +47,31 @@ export type DeadlineAnswer = {
   startDayConvention: StartDayConvention
   holidayCalendar: HolidayCalendarId
   endDayAdjustment: EndDayAdjustment
+  workingScheduleId: WorkingScheduleId
   skippedDates: SkippedDeadlineDate[]
   ruleVersion: 'deadline-rule-v1'
-}
-
-function isWeekend(date: PlainDate) {
-  const weekday = new Date(`${toDateKey(date)}T12:00:00Z`).getUTCDay()
-  return weekday === 0 || weekday === 6
 }
 
 function isBusinessDate(
   date: PlainDate,
   holidayCalendar: HolidayCalendarId,
+  workingScheduleId: WorkingScheduleId,
 ) {
-  if (isWeekend(date)) return false
+  if (!isWorkingWeekday(date, workingScheduleId)) return false
   return getHolidayOnDate(date, holidayCalendar) === null
 }
 
 function rememberSkippedDate(
   date: PlainDate,
   holidayCalendar: HolidayCalendarId,
+  workingScheduleId: WorkingScheduleId,
   skippedDates: SkippedDeadlineDate[],
 ) {
   const key = toDateKey(date)
 
   if (skippedDates.some((item) => item.date === key)) return
 
-  if (isWeekend(date)) {
+  if (!isWorkingWeekday(date, workingScheduleId)) {
     skippedDates.push({
       date: key,
       reason: 'weekend',
@@ -93,13 +97,21 @@ function moveToBusinessDate(
   date: PlainDate,
   direction: 'forward' | 'backward',
   holidayCalendar: HolidayCalendarId,
+  workingScheduleId: WorkingScheduleId,
   skippedDates: SkippedDeadlineDate[],
 ) {
   let cursor = date
   const amount = direction === 'forward' ? 1 : -1
 
-  while (!isBusinessDate(cursor, holidayCalendar)) {
-    rememberSkippedDate(cursor, holidayCalendar, skippedDates)
+  while (
+    !isBusinessDate(cursor, holidayCalendar, workingScheduleId)
+  ) {
+    rememberSkippedDate(
+      cursor,
+      holidayCalendar,
+      workingScheduleId,
+      skippedDates,
+    )
     cursor = addCalendarDays(cursor, amount)
   }
 
@@ -110,15 +122,25 @@ function applyEndDayAdjustment(
   date: PlainDate,
   adjustment: EndDayAdjustment,
   holidayCalendar: HolidayCalendarId,
+  workingScheduleId: WorkingScheduleId,
   skippedDates: SkippedDeadlineDate[],
 ) {
   if (adjustment === 'none') return date
-  if (isBusinessDate(date, holidayCalendar)) return date
+  if (
+    isBusinessDate(
+      date,
+      holidayCalendar,
+      workingScheduleId,
+    )
+  ) {
+    return date
+  }
 
   return moveToBusinessDate(
     date,
     adjustment === 'next-business-day' ? 'forward' : 'backward',
     holidayCalendar,
+    workingScheduleId,
     skippedDates,
   )
 }
@@ -131,13 +153,19 @@ export function calculateDeadlineByRule(
   }
 
   const skippedDates: SkippedDeadlineDate[] = []
+  const workingScheduleId =
+    input.workingScheduleId ?? getDefaultWorkingScheduleId()
   let cursor = input.triggerDate
   let counted = 0
 
   const qualifies = (date: PlainDate) =>
     input.unit === 'calendar-days'
       ? true
-      : isBusinessDate(date, input.holidayCalendar)
+      : isBusinessDate(
+          date,
+          input.holidayCalendar,
+          workingScheduleId,
+        )
 
   if (
     input.duration > 0 &&
@@ -149,6 +177,7 @@ export function calculateDeadlineByRule(
       rememberSkippedDate(
         cursor,
         input.holidayCalendar,
+        workingScheduleId,
         skippedDates,
       )
     }
@@ -163,6 +192,7 @@ export function calculateDeadlineByRule(
       rememberSkippedDate(
         cursor,
         input.holidayCalendar,
+        workingScheduleId,
         skippedDates,
       )
     }
@@ -172,6 +202,7 @@ export function calculateDeadlineByRule(
     cursor,
     input.endDayAdjustment,
     input.holidayCalendar,
+    workingScheduleId,
     skippedDates,
   )
 
@@ -184,6 +215,7 @@ export function calculateDeadlineByRule(
     startDayConvention: input.startDayConvention,
     holidayCalendar: input.holidayCalendar,
     endDayAdjustment: input.endDayAdjustment,
+    workingScheduleId,
     skippedDates,
     ruleVersion: 'deadline-rule-v1',
   }
