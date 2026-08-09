@@ -129,6 +129,8 @@ export function interpretDeadlinePhrase(
 
   const explicitPattern =
     /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)\s+(after|before)\s+(today|\d{4}-\d{2}-\d{2})$/
+  const eventDatePattern =
+    /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)\s+(after|before)\s+(.+?)\s+(?:on|at)\s+(today|\d{4}-\d{2}-\d{2})$/
   const eventPattern =
     /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)\s+(after|before)\s+(.+)$/
   const fromPattern =
@@ -139,6 +141,7 @@ export function interpretDeadlinePhrase(
     /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)$/
 
   const explicitMatch = explicitPattern.exec(normalized)
+  const eventDateMatch = eventDatePattern.exec(normalized)
   const eventMatch = eventPattern.exec(normalized)
   const fromMatch = fromPattern.exec(normalized)
   const ofMatch = ofPattern.exec(normalized)
@@ -154,6 +157,13 @@ export function interpretDeadlinePhrase(
   if (explicitMatch) {
     [, , durationText, unitText, , triggerText] = explicitMatch
     connector = explicitMatch[4] === 'before' ? 'before' : 'after'
+  } else if (eventDateMatch) {
+    [, , durationText, unitText, , triggerEventText, triggerText] =
+      eventDateMatch
+    connector = eventDateMatch[4] === 'before' ? 'before' : 'after'
+    triggerEvent = parseTriggerEventPhrase(triggerEventText)
+
+    if (!triggerEvent) return null
   } else if (eventMatch) {
     [, , durationText, unitText, , triggerEventText] = eventMatch
     connector = eventMatch[4] === 'before' ? 'before' : 'after'
