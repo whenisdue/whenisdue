@@ -2,6 +2,9 @@ import {
   type DeadlineRuleProfile,
   createDeadlineRuleProfile,
 } from './deadlineRuleProfile.ts'
+import {
+  recordDeadlineRuleProfileMetric,
+} from './deadlineRuleProfileMetrics.ts'
 
 const STORAGE_KEY = 'whenisdue:deadline-rule-profiles'
 const CHANGE_EVENT = 'whenisdue:deadline-rule-profiles-changed'
@@ -89,16 +92,23 @@ export function saveDeadlineRuleProfile(
   )
 
   if (duplicateIndex >= 0) {
+    recordDeadlineRuleProfileMetric('rule_save_deduped')
     return current[duplicateIndex]
   }
 
   writeProfiles([profile, ...current])
+  recordDeadlineRuleProfileMetric('rule_saved')
   return profile
 }
 
 export function deleteDeadlineRuleProfile(id: string) {
   const current = getDeadlineRuleProfiles()
-  writeProfiles(current.filter((profile) => profile.id !== id))
+  const next = current.filter((profile) => profile.id !== id)
+
+  if (next.length === current.length) return
+
+  writeProfiles(next)
+  recordDeadlineRuleProfileMetric('rule_deleted')
 }
 
 export function clearDeadlineRuleProfiles() {

@@ -5,6 +5,9 @@ import {
   describeDeadlineRuleProfile,
 } from './deadlineRuleProfile.ts'
 import {
+  recordDeadlineRuleProfileMetric,
+} from './deadlineRuleProfileMetrics.ts'
+import {
   deleteDeadlineRuleProfile,
   getDeadlineRuleProfileChangeEvent,
   getDeadlineRuleProfiles,
@@ -19,7 +22,6 @@ type SavedDeadlineRulesViewProps = {
 
 function triggerLabel(profile: DeadlineRuleProfile) {
   if (!profile.triggerKind) return 'Start date'
-
   return getDeadlineTriggerEvent(profile.triggerKind).label
 }
 
@@ -55,14 +57,17 @@ export function SavedDeadlineRulesView({
     }
   }, [])
 
-  const hasProfiles = profiles.length > 0
-
   const sortedProfiles = useMemo(
     () => [...profiles].sort((a, b) => a.name.localeCompare(b.name)),
     [profiles],
   )
 
-  if (!hasProfiles) {
+  function handleUseRule(profile: DeadlineRuleProfile) {
+    recordDeadlineRuleProfileMetric('rule_applied')
+    onUseRule(profile)
+  }
+
+  if (profiles.length === 0) {
     return (
       <section className="saved-deadline-rules">
         <div className="saved-deadline-rules-empty">
@@ -108,9 +113,7 @@ export function SavedDeadlineRulesView({
       <div className="saved-deadline-rules-heading">
         <span>Saved on this device</span>
         <h2 id="saved-rules-title">Saved rules</h2>
-        <p>
-          Reuse the same counting setup with a new start date.
-        </p>
+        <p>Reuse the same counting setup with a new start date.</p>
       </div>
 
       <div className="saved-deadline-rules-list">
@@ -130,7 +133,7 @@ export function SavedDeadlineRulesView({
               <button
                 type="button"
                 className="primary"
-                onClick={() => onUseRule(profile)}
+                onClick={() => handleUseRule(profile)}
               >
                 Use this rule
               </button>
