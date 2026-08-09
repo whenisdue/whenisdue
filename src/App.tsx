@@ -52,6 +52,7 @@ import {
   type DeadlineTriggerKind,
   getDeadlineTriggerEvent,
 } from './deadlineTrigger.ts'
+import { SaveDeadlineRuleButton } from './SaveDeadlineRuleButton.tsx'
 
 type SavedDeadline = {
   id: string
@@ -660,6 +661,18 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
               </p>
             )}
           </section>
+        ) : null}
+
+        {result && parsedDuration !== null ? (
+          <SaveDeadlineRuleButton
+            triggerKind={triggerKind}
+            duration={parsedDuration}
+            direction={direction}
+            unit={unit}
+            startDayConvention={startDayConvention}
+            holidayCalendar={holidayCalendar}
+            endDayAdjustment={endDayAdjustment}
+          />
         ) : null}
 
         <details className="deadline-rule-advanced">
