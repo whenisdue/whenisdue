@@ -61,6 +61,7 @@ import {
   recordDeadlineSetupApplied,
 } from './deadlineRuleProfileExperiment.ts'
 import { getWorkingSchedule } from './workingSchedules.ts'
+import { DeadlineProvenanceDetails } from './DeadlineProvenanceDetails.tsx'
 
 type SavedDeadline = {
   id: string
@@ -629,6 +630,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                   : []),
               ]}
             />
+            {result ? <DeadlineProvenanceDetails answer={result} /> : null}
           </section>
         ) : (
           <p className="deadline-rule-error" role="status">
