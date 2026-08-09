@@ -60,6 +60,7 @@ import {
 import {
   recordDeadlineSetupApplied,
 } from './deadlineRuleProfileExperiment.ts'
+import { getWorkingSchedule } from './workingSchedules.ts'
 
 type SavedDeadline = {
   id: string
@@ -423,6 +424,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
   ])
 
   const holidayOption = getHolidayCalendarOption(holidayCalendar)
+  const workingSchedule = result
+    ? getWorkingSchedule(result.workingScheduleId)
+    : null
   const triggerEvent = triggerKind
     ? getDeadlineTriggerEvent(triggerKind)
     : null
@@ -581,6 +585,14 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                       : 'calendar days'
                   }`,
                 },
+                ...(unit === 'business-days' && workingSchedule
+                  ? [
+                      {
+                        label: 'Working days',
+                        value: workingSchedule.label,
+                      },
+                    ]
+                  : []),
                 {
                   label: 'Start-day rule',
                   value:
