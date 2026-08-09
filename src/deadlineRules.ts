@@ -12,6 +12,10 @@ import {
   getDefaultWorkingScheduleId,
   isWorkingWeekday,
 } from './workingSchedules.ts'
+import {
+  type HolidayCalendarVersion,
+  getHolidayCalendarVersion,
+} from './holidayCalendarVersions.ts'
 
 export type DeadlineDirection = 'after' | 'before'
 export type DeadlineUnit = 'calendar-days' | 'business-days'
@@ -46,6 +50,7 @@ export type DeadlineAnswer = {
   unit: DeadlineUnit
   startDayConvention: StartDayConvention
   holidayCalendar: HolidayCalendarId
+  holidayCalendarVersion: HolidayCalendarVersion
   endDayAdjustment: EndDayAdjustment
   workingScheduleId: WorkingScheduleId
   skippedDates: SkippedDeadlineDate[]
@@ -155,6 +160,8 @@ export function calculateDeadlineByRule(
   const skippedDates: SkippedDeadlineDate[] = []
   const workingScheduleId =
     input.workingScheduleId ?? getDefaultWorkingScheduleId()
+  const holidayCalendarVersion =
+    getHolidayCalendarVersion(input.holidayCalendar)
   let cursor = input.triggerDate
   let counted = 0
 
@@ -214,6 +221,7 @@ export function calculateDeadlineByRule(
     unit: input.unit,
     startDayConvention: input.startDayConvention,
     holidayCalendar: input.holidayCalendar,
+    holidayCalendarVersion,
     endDayAdjustment: input.endDayAdjustment,
     workingScheduleId,
     skippedDates,
