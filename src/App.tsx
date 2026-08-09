@@ -1810,9 +1810,20 @@ function resolveAskWhenQuery(
   })
 
   if (deadlineInterpretation) {
-    const usesWithin = deadlineInterpretation.ambiguities.includes('within-wording')
+    if (deadlineInterpretation.classification === 'underspecified') {
+      return {
+        kind: 'clarification',
+        label: 'What date should I start from?',
+        description:
+          'I know how many days you want to count, but I still need the date that starts the deadline.',
+        path: null,
+      }
+    }
 
-    if (usesWithin) {
+    if (
+      deadlineInterpretation.classification === 'ambiguous' &&
+      deadlineInterpretation.triggerDate
+    ) {
       const query = new URLSearchParams({
         date: toDateKey(deadlineInterpretation.triggerDate),
         days: String(deadlineInterpretation.duration),
@@ -1831,35 +1842,49 @@ function resolveAskWhenQuery(
 
       return {
         kind: 'clarification',
-        label: 'This wording needs one more rule',
+        label: 'This wording can be counted two ways',
         description:
-          '“Within” can use different counting conventions. Open the deadline calculator with your date and duration already filled in, then choose the rule that applies.',
+          'See both possible dates and choose whether the start date should count.',
         path: `/deadline-calculator?${query.toString()}`,
       }
     }
 
-    const answerDate = deadlineInterpretation.answer.answerDate
-    const directionLabel =
-      deadlineInterpretation.direction === 'before' ? 'before' : 'after'
-    const unitLabel =
-      deadlineInterpretation.unit === 'business-days'
-        ? `business ${deadlineInterpretation.duration === 1 ? 'day' : 'days'}`
-        : `calendar ${deadlineInterpretation.duration === 1 ? 'day' : 'days'}`
+    if (
+      deadlineInterpretation.classification === 'resolved' &&
+      deadlineInterpretation.answer &&
+      deadlineInterpretation.triggerDate
+    ) {
+      const answerDate = deadlineInterpretation.answer.answerDate
 
-    let ruleText = 'Calendar days counted, including weekends.'
+      const directionLabel =
+        deadlineInterpretation.direction === 'before' ? 'before' : 'after'
 
-    if (deadlineInterpretation.unit === 'business-days') {
-      ruleText =
-        holidayCalendar === 'none'
-          ? 'Trigger day not counted. Weekends skipped; public holidays still count as weekdays.'
-          : `Trigger day not counted. Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`
-    }
+      const unitLabel =
+        deadlineInterpretation.unit === 'business-days'
+          ? `business ${
+              deadlineInterpretation.duration === 1 ? 'day' : 'days'
+            }`
+          : `calendar ${
+              deadlineInterpretation.duration === 1 ? 'day' : 'days'
+            }`
 
-    return {
-      kind: 'deadline-answer',
-      label: formatPlainDate(answerDate),
-      description: `${deadlineInterpretation.duration} ${unitLabel} ${directionLabel} ${formatPlainDate(deadlineInterpretation.triggerDate)}. ${ruleText}`,
-      path: null,
+      let ruleText = 'Calendar days counted, including weekends.'
+
+      if (deadlineInterpretation.unit === 'business-days') {
+        ruleText =
+          holidayCalendar === 'none'
+            ? 'Start day not counted. Weekends skipped; public holidays still count as weekdays.'
+            : `Start day not counted. Weekends and ${
+                getHolidayCalendarOption(holidayCalendar).shortLabel
+              } holidays skipped.`
+      }
+
+      return {
+        kind: 'deadline-answer',
+        label: formatPlainDate(answerDate),
+        description: `${deadlineInterpretation.duration} ${unitLabel} ${directionLabel} ${formatPlainDate(deadlineInterpretation.triggerDate)}. ${ruleText}`,
+        path: null,
+      }
     }
   }
 
