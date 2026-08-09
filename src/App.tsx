@@ -48,6 +48,10 @@ import {
   type EndDayAdjustment,
   type StartDayConvention,
 } from './deadlineRules'
+import {
+  type DeadlineTriggerKind,
+  getDeadlineTriggerEvent,
+} from './deadlineTrigger.ts'
 
 type SavedDeadline = {
   id: string
@@ -270,6 +274,24 @@ function getDeadlineCalculatorQueryParam(name: string) {
   return new URLSearchParams(window.location.search).get(name)
 }
 
+function getInitialDeadlineTriggerKind(): DeadlineTriggerKind | null {
+  const value = getDeadlineCalculatorQueryParam('trigger')
+
+  if (
+    value === 'issued' ||
+    value === 'sent' ||
+    value === 'received' ||
+    value === 'delivered' ||
+    value === 'accepted' ||
+    value === 'filed' ||
+    value === 'served'
+  ) {
+    return value
+  }
+
+  return null
+}
+
 function getInitialDeadlineUnit() {
   const value = getDeadlineCalculatorQueryParam('unit')
   return value === 'calendar-days' ? 'calendar-days' : 'business-days'
@@ -311,6 +333,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
   const [direction, setDirection] = useState<'after' | 'before'>(
     getInitialDeadlineDirection,
   )
+  const [triggerKind, setTriggerKind] =
+    useState<DeadlineTriggerKind | null>(
+      getInitialDeadlineTriggerKind,
+    )
   const [startDayConvention, setStartDayConvention] =
     useState<StartDayConvention>(getInitialStartDayConvention)
   const [endDayAdjustment, setEndDayAdjustment] =
@@ -389,6 +415,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
   ])
 
   const holidayOption = getHolidayCalendarOption(holidayCalendar)
+  const triggerEvent = triggerKind
+    ? getDeadlineTriggerEvent(triggerKind)
+    : null
   const cameFromWithinPhrase =
     getDeadlineCalculatorQueryParam('source') === 'within'
 
@@ -401,6 +430,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
       startday: startDayConvention,
       endrule: endDayAdjustment,
       calendar: holidayCalendarQueryValue(holidayCalendar),
+      trigger: triggerKind,
       source: cameFromWithinPhrase ? 'within' : null,
     })
   }, [
@@ -411,6 +441,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     startDayConvention,
     endDayAdjustment,
     holidayCalendar,
+    triggerKind,
   ])
 
   return (
@@ -511,8 +542,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
               analyticsContext="deadline_rule_calculator"
               rows={[
                 {
-                  label: 'Start date',
-                  value: formatPlainDate(parsedTriggerDate),
+                  label: triggerEvent ? 'Clock starts' : 'Start date',
+                  value: triggerEvent
+                    ? `${triggerEvent.label} — ${formatPlainDate(parsedTriggerDate)}`
+                    : formatPlainDate(parsedTriggerDate),
                 },
                 {
                   label: 'Direction',
@@ -636,6 +669,29 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           <summary>Adjust the counting rules</summary>
 
           <div className="deadline-rule-advanced-grid">
+            <label>
+              <span>What starts the clock?</span>
+              <select
+                value={triggerKind ?? ''}
+                onChange={(event) =>
+                  setTriggerKind(
+                    event.target.value
+                      ? (event.target.value as DeadlineTriggerKind)
+                      : null,
+                  )
+                }
+              >
+                <option value="">Just use the start date</option>
+                <option value="issued">Issued</option>
+                <option value="sent">Sent</option>
+                <option value="received">Received</option>
+                <option value="delivered">Delivered</option>
+                <option value="accepted">Accepted</option>
+                <option value="filed">Filed</option>
+                <option value="served">Served</option>
+              </select>
+            </label>
+
             <label>
               <span>Does the start date count?</span>
               <select
