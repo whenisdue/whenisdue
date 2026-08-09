@@ -589,13 +589,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                   ? [
                       {
                         label: 'Skipped dates',
-                        value: result.skippedDates
-                          .map((item) =>
-                            item.name
-                              ? `${item.date} (${item.name})`
-                              : item.date,
-                          )
-                          .join(', '),
+                        value:
+                          result.skippedDates.length === 1
+                            ? '1 non-working day skipped'
+                            : `${result.skippedDates.length} non-working days skipped`,
                       },
                     ]
                   : []),
