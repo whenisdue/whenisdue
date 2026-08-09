@@ -53,6 +53,10 @@ import {
   getDeadlineTriggerEvent,
 } from './deadlineTrigger.ts'
 import { SaveDeadlineRuleButton } from './SaveDeadlineRuleButton.tsx'
+import { SavedDeadlineRulesView } from './SavedDeadlineRulesView.tsx'
+import {
+  type DeadlineRuleProfile,
+} from './deadlineRuleProfile.ts'
 
 type SavedDeadline = {
   id: string
@@ -445,6 +449,16 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     triggerKind,
   ])
 
+  function applySavedRule(profile: DeadlineRuleProfile) {
+    setDuration(String(profile.duration))
+    setDirection(profile.direction)
+    setUnit(profile.unit)
+    setStartDayConvention(profile.startDayConvention)
+    setHolidayCalendar(profile.holidayCalendar)
+    setEndDayAdjustment(profile.endDayAdjustment)
+    setTriggerKind(profile.triggerKind)
+  }
+
   return (
     <main className="page-shell deadline-rule-page">
       <IdentityRow onNavigate={onNavigate} showHomeLink />
@@ -674,6 +688,8 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             endDayAdjustment={endDayAdjustment}
           />
         ) : null}
+
+        <SavedDeadlineRulesView onUseRule={applySavedRule} />
 
         <details className="deadline-rule-advanced">
           <summary>Adjust the counting rules</summary>
