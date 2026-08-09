@@ -57,6 +57,9 @@ import { SavedDeadlineRulesView } from './SavedDeadlineRulesView.tsx'
 import {
   type DeadlineRuleProfile,
 } from './deadlineRuleProfile.ts'
+import {
+  recordDeadlineSetupApplied,
+} from './deadlineRuleProfileExperiment.ts'
 
 type SavedDeadline = {
   id: string
@@ -450,6 +453,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
   ])
 
   function applySavedRule(profile: DeadlineRuleProfile) {
+    recordDeadlineSetupApplied(profile.id, triggerDate)
     setDuration(String(profile.duration))
     setDirection(profile.direction)
     setUnit(profile.unit)
@@ -679,6 +683,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         {result && parsedDuration !== null ? (
           <SaveDeadlineRuleButton
+            triggerDateKey={triggerDate}
             triggerKind={triggerKind}
             duration={parsedDuration}
             direction={direction}

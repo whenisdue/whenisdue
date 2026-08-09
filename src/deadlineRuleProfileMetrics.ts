@@ -1,44 +1,43 @@
 export type DeadlineRuleProfileMetric =
+  | 'eligible_calculation_completed'
   | 'rule_saved'
   | 'rule_save_deduped'
   | 'rule_applied'
+  | 'rule_reused_later_with_new_date'
   | 'rule_deleted'
 
 export type DeadlineRuleProfileMetrics = {
+  eligible_calculation_completed: number
   rule_saved: number
   rule_save_deduped: number
   rule_applied: number
+  rule_reused_later_with_new_date: number
   rule_deleted: number
   updatedAt: string | null
-  metricsVersion: 'deadline-rule-profile-metrics-v1'
+  metricsVersion: 'deadline-rule-profile-metrics-v2'
 }
 
 const STORAGE_KEY = 'whenisdue:deadline-rule-profile-metrics'
 
 function emptyMetrics(): DeadlineRuleProfileMetrics {
   return {
+    eligible_calculation_completed: 0,
     rule_saved: 0,
     rule_save_deduped: 0,
     rule_applied: 0,
+    rule_reused_later_with_new_date: 0,
     rule_deleted: 0,
     updatedAt: null,
-    metricsVersion: 'deadline-rule-profile-metrics-v1',
+    metricsVersion: 'deadline-rule-profile-metrics-v2',
   }
 }
 
-function isMetrics(value: unknown): value is DeadlineRuleProfileMetrics {
-  if (!value || typeof value !== 'object') return false
-
-  const metrics = value as Partial<DeadlineRuleProfileMetrics>
-
-  return (
-    Number.isInteger(metrics.rule_saved) &&
-    Number.isInteger(metrics.rule_save_deduped) &&
-    Number.isInteger(metrics.rule_applied) &&
-    Number.isInteger(metrics.rule_deleted) &&
-    (metrics.updatedAt === null || typeof metrics.updatedAt === 'string') &&
-    metrics.metricsVersion === 'deadline-rule-profile-metrics-v1'
-  )
+function readLegacyMetric(
+  value: Record<string, unknown>,
+  key: DeadlineRuleProfileMetric,
+) {
+  const candidate = value[key]
+  return Number.isInteger(candidate) ? Number(candidate) : 0
 }
 
 export function getDeadlineRuleProfileMetrics(): DeadlineRuleProfileMetrics {
@@ -49,7 +48,27 @@ export function getDeadlineRuleProfileMetrics(): DeadlineRuleProfileMetrics {
     if (!raw) return emptyMetrics()
 
     const parsed: unknown = JSON.parse(raw)
-    return isMetrics(parsed) ? parsed : emptyMetrics()
+    if (!parsed || typeof parsed !== 'object') return emptyMetrics()
+
+    const value = parsed as Record<string, unknown>
+
+    return {
+      eligible_calculation_completed: readLegacyMetric(
+        value,
+        'eligible_calculation_completed',
+      ),
+      rule_saved: readLegacyMetric(value, 'rule_saved'),
+      rule_save_deduped: readLegacyMetric(value, 'rule_save_deduped'),
+      rule_applied: readLegacyMetric(value, 'rule_applied'),
+      rule_reused_later_with_new_date: readLegacyMetric(
+        value,
+        'rule_reused_later_with_new_date',
+      ),
+      rule_deleted: readLegacyMetric(value, 'rule_deleted'),
+      updatedAt:
+        typeof value.updatedAt === 'string' ? value.updatedAt : null,
+      metricsVersion: 'deadline-rule-profile-metrics-v2',
+    }
   } catch {
     return emptyMetrics()
   }

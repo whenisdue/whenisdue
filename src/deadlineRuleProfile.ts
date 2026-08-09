@@ -11,6 +11,8 @@ import {
   type HolidayCalendarId,
 } from './holidayCalendars.ts'
 
+export type DeadlineWorkingScheduleId = 'standard_mon_fri'
+
 export type DeadlineRuleProfile = {
   id: string
   name: string
@@ -21,14 +23,17 @@ export type DeadlineRuleProfile = {
   startDayConvention: StartDayConvention
   holidayCalendar: HolidayCalendarId
   endDayAdjustment: EndDayAdjustment
+  workingScheduleId: DeadlineWorkingScheduleId
+  schemaVersion: 2
   ruleVersion: 'deadline-rule-profile-v1'
 }
 
 export type DeadlineRuleProfileInput = Omit<
   DeadlineRuleProfile,
-  'id' | 'ruleVersion'
+  'id' | 'workingScheduleId' | 'schemaVersion' | 'ruleVersion'
 > & {
   id?: string
+  workingScheduleId?: DeadlineWorkingScheduleId
 }
 
 function normalizeName(value: string) {
@@ -55,7 +60,9 @@ export function createDeadlineRuleProfile(
   }
 
   if (!Number.isInteger(input.duration) || input.duration < 0) {
-    throw new Error('Deadline rule profile duration must be a non-negative integer.')
+    throw new Error(
+      'Deadline rule profile duration must be a non-negative integer.',
+    )
   }
 
   return {
@@ -68,6 +75,8 @@ export function createDeadlineRuleProfile(
     startDayConvention: input.startDayConvention,
     holidayCalendar: input.holidayCalendar,
     endDayAdjustment: input.endDayAdjustment,
+    workingScheduleId: input.workingScheduleId ?? 'standard_mon_fri',
+    schemaVersion: 2,
     ruleVersion: 'deadline-rule-profile-v1',
   }
 }
@@ -85,6 +94,8 @@ export function summarizeDeadlineRuleProfile(
     startDayConvention: profile.startDayConvention,
     holidayCalendar: profile.holidayCalendar,
     endDayAdjustment: profile.endDayAdjustment,
+    workingScheduleId: profile.workingScheduleId,
+    schemaVersion: profile.schemaVersion,
     ruleVersion: profile.ruleVersion,
   }
 }

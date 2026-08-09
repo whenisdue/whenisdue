@@ -14,10 +14,14 @@ import {
   type HolidayCalendarId,
 } from './holidayCalendars.ts'
 import {
+  markDeadlineSetupSaved,
+} from './deadlineRuleProfileExperiment.ts'
+import {
   saveDeadlineRuleProfile,
 } from './deadlineRuleProfileStorage.ts'
 
 type SaveDeadlineRuleButtonProps = {
+  triggerDateKey: string
   triggerKind: DeadlineTriggerKind | null
   duration: number
   direction: DeadlineDirection
@@ -80,7 +84,7 @@ export function SaveDeadlineRuleButton(
     const trimmedName = name.trim()
     if (!trimmedName) return
 
-    saveDeadlineRuleProfile({
+    const profile = saveDeadlineRuleProfile({
       name: trimmedName,
       triggerKind: props.triggerKind,
       duration: props.duration,
@@ -91,6 +95,7 @@ export function SaveDeadlineRuleButton(
       endDayAdjustment: props.endDayAdjustment,
     })
 
+    markDeadlineSetupSaved(profile.id, props.triggerDateKey)
     setStatus('saved')
   }
 
@@ -98,7 +103,7 @@ export function SaveDeadlineRuleButton(
     return (
       <div className="save-deadline-rule">
         <button type="button" onClick={openEditor}>
-          Save this rule
+          Save deadline setup
         </button>
 
         <style>{`
@@ -130,14 +135,14 @@ export function SaveDeadlineRuleButton(
   return (
     <div className="save-deadline-rule save-deadline-rule-editor">
       <div className="save-deadline-rule-copy">
-        <strong>Save this rule</strong>
+        <strong>Save deadline setup</strong>
         <span>
-          Reuse the same counting rules later with a different start date.
+          Reuse these counting rules later with a different start date.
         </span>
       </div>
 
       <label>
-        <span>Rule name</span>
+        <span>Setup name</span>
         <input
           type="text"
           value={name}
@@ -156,7 +161,7 @@ export function SaveDeadlineRuleButton(
           disabled={!name.trim()}
           onClick={handleSave}
         >
-          {status === 'saved' ? 'Saved' : 'Save rule'}
+          {status === 'saved' ? 'Saved' : 'Save setup'}
         </button>
 
         <button
@@ -171,9 +176,7 @@ export function SaveDeadlineRuleButton(
       </div>
 
       {status === 'saved' ? (
-        <p>
-          Saved on this device. We’ll add a reusable-rules view next.
-        </p>
+        <p>Saved on this device.</p>
       ) : null}
 
       <style>{`
