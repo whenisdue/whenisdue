@@ -1856,6 +1856,13 @@ function resolveAskWhenQuery(
     ) {
       const answerDate = deadlineInterpretation.answer.answerDate
 
+      const triggerEventLabel = deadlineInterpretation.triggerEvent
+        ? deadlineInterpretation.triggerEventText
+          ? deadlineInterpretation.triggerEventText
+              .replace(/\b\w/g, (character) => character.toUpperCase())
+          : deadlineInterpretation.triggerEvent.label
+        : null
+
       const directionLabel =
         deadlineInterpretation.direction === 'before' ? 'before' : 'after'
 
@@ -1882,7 +1889,13 @@ function resolveAskWhenQuery(
       return {
         kind: 'deadline-answer',
         label: formatPlainDate(answerDate),
-        description: `${deadlineInterpretation.duration} ${unitLabel} ${directionLabel} ${formatPlainDate(deadlineInterpretation.triggerDate)}. ${ruleText}`,
+        description: triggerEventLabel
+          ? `Clock starts: ${triggerEventLabel} — ${formatPlainDate(
+              deadlineInterpretation.triggerDate,
+            )}. ${deadlineInterpretation.duration} ${unitLabel} ${directionLabel} that event. ${ruleText}`
+          : `${deadlineInterpretation.duration} ${unitLabel} ${directionLabel} ${formatPlainDate(
+              deadlineInterpretation.triggerDate,
+            )}. ${ruleText}`,
         path: null,
       }
     }
@@ -2292,7 +2305,7 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
           gap: 4px;
           max-width: 720px;
           margin: 10px auto 0;
-          padding: 12px 14px;
+          padding: 16px 16px;
           border-radius: 10px;
           text-align: left;
         }
@@ -2333,14 +2346,19 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
         }
 
         .ask-when-preview strong {
-          color: #314b66;
-          font-size: 0.8rem;
+          display: block;
+          margin-bottom: 5px;
+          color: #17304d;
+          font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+          line-height: 1.15;
+          font-weight: 900;
+          letter-spacing: -0.015em;
         }
 
         .ask-when-preview span {
           color: #738599;
-          font-size: 0.92rem;
-          line-height: 1.5;
+          font-size: 0.96rem;
+          line-height: 1.55;
         }
 
         .ask-when-examples {
