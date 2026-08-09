@@ -14,6 +14,10 @@ import {
   type StartDayConvention,
   calculateDeadlineByRule,
 } from './deadlineRules.ts'
+import {
+  type DeadlineTriggerEvent,
+  parseDeadlineTriggerEvent,
+} from './deadlineTrigger.ts'
 
 export type DeadlinePhraseClassification =
   | 'resolved'
@@ -43,6 +47,8 @@ export type DeadlinePhraseInterpretation = {
   direction: DeadlineDirection
   triggerDate: PlainDate | null
   triggerSource: 'explicit-date' | 'today' | 'missing'
+  triggerEvent: DeadlineTriggerEvent | null
+  triggerEventText: string | null
   startDayConvention: StartDayConvention
   holidayCalendar: HolidayCalendarId
   endDayAdjustment: EndDayAdjustment
@@ -103,6 +109,18 @@ function parseTriggerDate(
   return { date: parsed, source: 'explicit-date' }
 }
 
+function parseTriggerEventPhrase(value: string): DeadlineTriggerEvent | null {
+  const normalized = normalizePhrase(value)
+
+  const direct = parseDeadlineTriggerEvent(normalized)
+  if (direct) return direct
+
+  const finalWord = normalized.split(' ').at(-1)
+  if (!finalWord) return null
+
+  return parseDeadlineTriggerEvent(finalWord)
+}
+
 export function interpretDeadlinePhrase(
   phrase: string,
   options: DeadlinePhraseOptions = {},
@@ -111,6 +129,8 @@ export function interpretDeadlinePhrase(
 
   const explicitPattern =
     /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)\s+(after|before)\s+(today|\d{4}-\d{2}-\d{2})$/
+  const eventPattern =
+    /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)\s+(after|before)\s+(.+)$/
   const fromPattern =
     /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)\s+from\s+(today|\d{4}-\d{2}-\d{2})$/
   const ofPattern =
@@ -119,6 +139,7 @@ export function interpretDeadlinePhrase(
     /^(within\s+)?(\d+)\s+(business days?|working days?|calendar days?|days?)$/
 
   const explicitMatch = explicitPattern.exec(normalized)
+  const eventMatch = eventPattern.exec(normalized)
   const fromMatch = fromPattern.exec(normalized)
   const ofMatch = ofPattern.exec(normalized)
   const missingMatch = missingTriggerPattern.exec(normalized)
@@ -127,10 +148,20 @@ export function interpretDeadlinePhrase(
   let unitText: string
   let connector: 'after' | 'before' | 'from' | 'of'
   let triggerText: string | undefined
+  let triggerEvent: DeadlineTriggerEvent | null = null
+  let triggerEventText: string | null = null
 
   if (explicitMatch) {
     [, , durationText, unitText, , triggerText] = explicitMatch
     connector = explicitMatch[4] === 'before' ? 'before' : 'after'
+  } else if (eventMatch) {
+    [, , durationText, unitText, , triggerEventText] = eventMatch
+    connector = eventMatch[4] === 'before' ? 'before' : 'after'
+    triggerEvent = parseTriggerEventPhrase(triggerEventText)
+
+    if (!triggerEvent) return null
+
+    triggerText = undefined
   } else if (fromMatch) {
     [, , durationText, unitText, triggerText] = fromMatch
     connector = 'from'
@@ -175,10 +206,21 @@ export function interpretDeadlinePhrase(
     missing.push('trigger-date')
   }
 
-  if (trigger.source === 'today') ambiguities.push('today-reference')
-  if (options.holidayCalendar === undefined) ambiguities.push('holiday-calendar-defaulted')
-  if (options.startDayConvention === undefined) ambiguities.push('start-day-rule-defaulted')
-  if (options.endDayAdjustment === undefined) ambiguities.push('end-day-adjustment-defaulted')
+  if (trigger.source === 'today') {
+    ambiguities.push('today-reference')
+  }
+
+  if (options.holidayCalendar === undefined) {
+    ambiguities.push('holiday-calendar-defaulted')
+  }
+
+  if (options.startDayConvention === undefined) {
+    ambiguities.push('start-day-rule-defaulted')
+  }
+
+  if (options.endDayAdjustment === undefined) {
+    ambiguities.push('end-day-adjustment-defaulted')
+  }
 
   const answer =
     trigger.date === null
@@ -204,6 +246,8 @@ export function interpretDeadlinePhrase(
     direction,
     triggerDate: trigger.date,
     triggerSource: trigger.source,
+    triggerEvent,
+    triggerEventText,
     startDayConvention,
     holidayCalendar,
     endDayAdjustment,
@@ -226,6 +270,8 @@ export function summarizeDeadlineInterpretation(
     trigger: interpretation.triggerDate
       ? toDateKey(interpretation.triggerDate)
       : null,
+    triggerEvent: interpretation.triggerEvent?.kind ?? null,
+    triggerEventText: interpretation.triggerEventText,
     direction: interpretation.direction,
     duration: interpretation.duration,
     unit: unitLabel,
