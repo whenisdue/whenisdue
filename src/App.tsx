@@ -96,6 +96,7 @@ type RouteName =
   | 'start-date-count-guide'
   | 'weekends-business-days-guide'
   | 'public-holidays-business-days-guide'
+  | 'shipping-delivery-range'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -184,6 +185,10 @@ function App() {
 
   if (route === 'public-holidays-business-days-guide') {
     return <PublicHolidaysBusinessDaysGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'shipping-delivery-range') {
+    return <ShippingDeliveryRangePage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -2635,6 +2640,694 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 }
 
 
+function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
+  const [startDate, setStartDate] = useState(() =>
+    getInitialDateQueryParam('start', todayInputValue()),
+  )
+  const [minimumDays, setMinimumDays] = useState(() =>
+    getInitialPositiveIntegerQueryParam('min', '3', 365),
+  )
+  const [maximumDays, setMaximumDays] = useState(() =>
+    getInitialPositiveIntegerQueryParam('max', '5', 365),
+  )
+  const [countMode, setCountMode] = useState<'business' | 'calendar'>(() =>
+    new URLSearchParams(window.location.search).get('mode') === 'calendar'
+      ? 'calendar'
+      : 'business',
+  )
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
+  const parsedStart = parsePlainDate(startDate)
+  const parsedMin = parseInteger(minimumDays)
+  const parsedMax = parseInteger(maximumDays)
+
+  const validationMessage =
+    !parsedStart
+      ? 'Choose a valid order or ship date.'
+      : parsedMin === null || parsedMin < 0
+        ? 'Enter a valid earliest number of days.'
+        : parsedMax === null || parsedMax < 0
+          ? 'Enter a valid latest number of days.'
+          : parsedMin > parsedMax
+            ? 'The earliest estimate cannot be greater than the latest estimate.'
+            : null
+
+  const earliest =
+    !validationMessage && parsedStart && parsedMin !== null
+      ? countMode === 'business'
+        ? calculateBusinessDaysWithCalendar(
+            parsedStart,
+            parsedMin,
+            holidayCalendar,
+          ).date
+        : addCalendarDays(parsedStart, parsedMin)
+      : null
+
+  const latest =
+    !validationMessage && parsedStart && parsedMax !== null
+      ? countMode === 'business'
+        ? calculateBusinessDaysWithCalendar(
+            parsedStart,
+            parsedMax,
+            holidayCalendar,
+          ).date
+        : addCalendarDays(parsedStart, parsedMax)
+      : null
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      start: startDate,
+      min: minimumDays,
+      max: maximumDays,
+      mode: countMode,
+      calendar:
+        countMode === 'business'
+          ? holidayCalendarQueryValue(holidayCalendar)
+          : null,
+    })
+  }, [
+    startDate,
+    minimumDays,
+    maximumDays,
+    countMode,
+    holidayCalendar,
+  ])
+
+  const rangeSummary =
+    earliest && latest && parsedMin !== null && parsedMax !== null
+      ? parsedMin === parsedMax
+        ? `${parsedMin} ${countMode === 'business' ? 'business' : 'calendar'} ${
+            parsedMin === 1 ? 'day' : 'days'
+          }`
+        : `${parsedMin}–${parsedMax} ${
+            countMode === 'business' ? 'business' : 'calendar'
+          } days`
+      : ''
+
+  return (
+    <main className="page-shell shipping-range-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="shipping-range-shell">
+        <header className="shipping-range-intro">
+          <p className="friendly-eyebrow">Delivery estimate</p>
+          <h1>When will 3–5 business days arrive?</h1>
+          <p>
+            Turn a shipping estimate into actual earliest and latest delivery
+            dates.
+          </p>
+        </header>
+
+        <section
+          className="shipping-range-workspace"
+          aria-label="Shipping and delivery range calculator"
+        >
+          <form
+            className="shipping-range-form"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            <label>
+              <span>Order or ship date</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+              />
+            </label>
+
+            <div className="shipping-range-days-grid">
+              <label>
+                <span>Earliest</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  step="1"
+                  value={minimumDays}
+                  onChange={(event) => setMinimumDays(event.target.value)}
+                />
+              </label>
+
+              <label>
+                <span>Latest</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  step="1"
+                  value={maximumDays}
+                  onChange={(event) => setMaximumDays(event.target.value)}
+                />
+              </label>
+            </div>
+
+            <fieldset className="shipping-range-mode">
+              <legend>Count as</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="shipping-range-mode"
+                  value="business"
+                  checked={countMode === 'business'}
+                  onChange={() => setCountMode('business')}
+                />
+                <span>Business days</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="shipping-range-mode"
+                  value="calendar"
+                  checked={countMode === 'calendar'}
+                  onChange={() => setCountMode('calendar')}
+                />
+                <span>Calendar days</span>
+              </label>
+            </fieldset>
+
+            {countMode === 'business' ? (
+              <div className="shipping-range-calendar">
+                <HolidayCalendarSelect
+                  value={holidayCalendar}
+                  onChange={(nextCalendar) => {
+                    setHolidayCalendar(nextCalendar)
+                    trackWhenIsDueEvent('holiday_calendar_changed', {
+                      context: 'shipping_delivery_range',
+                      value: nextCalendar,
+                    })
+                  }}
+                  compact
+                />
+              </div>
+            ) : null}
+
+            <div className="shipping-range-quick-picks" aria-label="Common shipping windows">
+              {[
+                ['3–5', '3', '5'],
+                ['5–7', '5', '7'],
+                ['7–10', '7', '10'],
+              ].map(([label, min, max]) => (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={() => {
+                    setMinimumDays(min)
+                    setMaximumDays(max)
+                    trackWhenIsDueEvent('quick_pick', {
+                      context: 'shipping_delivery_range',
+                      value: label,
+                    })
+                  }}
+                >
+                  {label} days
+                </button>
+              ))}
+            </div>
+          </form>
+
+          <section className="shipping-range-result" aria-live="polite">
+            {earliest && latest ? (
+              <>
+                <span>Estimated delivery</span>
+                <div className="shipping-range-result-grid">
+                  <div>
+                    <small>Earliest</small>
+                    <strong>{formatPlainDate(earliest)}</strong>
+                    <b>{formatWeekday(earliest)}</b>
+                  </div>
+
+                  <div>
+                    <small>Latest</small>
+                    <strong>{formatPlainDate(latest)}</strong>
+                    <b>{formatWeekday(latest)}</b>
+                  </div>
+                </div>
+
+                <p>
+                  {rangeSummary} after {formatPlainDate(parsedStart!)}.{' '}
+                  {countMode === 'business'
+                    ? holidayCalendar === 'none'
+                      ? 'Weekends skipped. Public holidays still count as weekdays.'
+                      : `Weekends and ${
+                          getHolidayCalendarOption(holidayCalendar).shortLabel
+                        } holidays skipped.`
+                    : 'Calendar days counted, including weekends.'}
+                </p>
+
+                <CalculationReceipt
+                  analyticsContext="shipping_delivery_range"
+                  rows={[
+                    {
+                      label: 'Order / ship date',
+                      value: `${formatWeekday(parsedStart!)}, ${formatPlainDate(
+                        parsedStart!,
+                      )}`,
+                    },
+                    {
+                      label: 'Delivery estimate',
+                      value: rangeSummary,
+                    },
+                    {
+                      label: 'Counting method',
+                      value:
+                        countMode === 'business'
+                          ? 'Business days'
+                          : 'Calendar days',
+                    },
+                    ...(countMode === 'business'
+                      ? [
+                          {
+                            label: 'Holiday calendar',
+                            value:
+                              getHolidayCalendarOption(holidayCalendar).label,
+                          },
+                        ]
+                      : []),
+                    {
+                      label: 'Earliest date',
+                      value: `${formatWeekday(earliest)}, ${formatPlainDate(
+                        earliest,
+                      )}`,
+                    },
+                    {
+                      label: 'Latest date',
+                      value: `${formatWeekday(latest)}, ${formatPlainDate(
+                        latest,
+                      )}`,
+                    },
+                  ]}
+                />
+
+                <div className="shipping-range-actions">
+                  <ResultActions
+                    title="Estimated delivery window"
+                    date={latest}
+                    details={`${formatPlainDate(earliest)} to ${formatPlainDate(
+                      latest,
+                    )}`}
+                  />
+                </div>
+              </>
+            ) : (
+              <p className="shipping-range-error" role="status">
+                {validationMessage}
+              </p>
+            )}
+          </section>
+        </section>
+
+        <section className="shipping-range-content">
+          <article>
+            <h2>What does 3–5 business days mean?</h2>
+            <p>
+              It means the delivery estimate is a range, not one exact date.
+              The earliest date is three qualifying business days after the
+              order or ship date, and the latest date is five qualifying
+              business days after it.
+            </p>
+          </article>
+
+          <article>
+            <h2>Do weekends count?</h2>
+            <p>
+              Not when the estimate is stated in business days. Saturday and
+              Sunday are skipped under the standard Monday–Friday schedule.
+              Calendar-day estimates count weekends.
+            </p>
+          </article>
+
+          <article>
+            <h2>Do holidays count?</h2>
+            <p>
+              That depends on the shipping promise. Use a supported holiday
+              calendar when the carrier or seller excludes those holidays.
+              Otherwise, leave the calculator on weekends-only counting.
+            </p>
+          </article>
+
+          <article>
+            <h2>Is this a carrier tracking estimate?</h2>
+            <p>
+              No. This calculator only translates a stated delivery window
+              such as “3–5 business days” into actual dates. Carrier delays,
+              cut-off times, weather, handling time, and local delivery rules
+              can change the real arrival date.
+            </p>
+          </article>
+        </section>
+
+        <section className="shipping-range-related" aria-label="Related date tools">
+          <div>
+            <span>Related tools</span>
+            <h2>Need a different kind of date?</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/business-days-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/business-days-calculator')
+              }}
+            >
+              Business days calculator
+            </a>
+            <a
+              href="/do-weekends-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-weekends-count-as-business-days')
+              }}
+            >
+              Do weekends count as business days?
+            </a>
+            <a
+              href="/do-public-holidays-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-public-holidays-count-as-business-days')
+              }}
+            >
+              Do public holidays count?
+            </a>
+          </nav>
+        </section>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Shipping promises, cut-off times, handling time, carrier delays, and local delivery rules can change the actual arrival date."
+      />
+
+      <style>{`
+        .shipping-range-page {
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .shipping-range-shell {
+          width: min(100% - 32px, 980px);
+          margin: 0 auto;
+          padding: 34px 0 64px;
+        }
+
+        .shipping-range-intro {
+          text-align: center;
+        }
+
+        .shipping-range-intro h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.25rem, 6vw, 4.4rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .shipping-range-intro > p:last-child {
+          max-width: 660px;
+          margin: 12px auto 0;
+          color: #61788f;
+          font-size: 1rem;
+          line-height: 1.55;
+        }
+
+        .shipping-range-workspace {
+          display: grid;
+          grid-template-columns: minmax(280px, 0.85fr) minmax(380px, 1.15fr);
+          gap: 14px;
+          margin-top: 24px;
+        }
+
+        .shipping-range-form,
+        .shipping-range-result {
+          min-width: 0;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 18px;
+          background: #fff;
+        }
+
+        .shipping-range-form {
+          display: grid;
+          gap: 14px;
+          align-content: start;
+        }
+
+        .shipping-range-form label {
+          display: grid;
+          gap: 6px;
+        }
+
+        .shipping-range-form label > span,
+        .shipping-range-mode legend {
+          color: #526a82;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .shipping-range-form input[type='date'],
+        .shipping-range-form input[type='number'] {
+          min-height: 48px;
+          width: 100%;
+          padding: 9px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 10px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .shipping-range-days-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .shipping-range-mode {
+          display: grid;
+          gap: 8px;
+          margin: 0;
+          padding: 0;
+          border: 0;
+        }
+
+        .shipping-range-mode label {
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 10px;
+          background: #f8fafb;
+          color: #304b67;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .shipping-range-mode input {
+          width: 18px;
+          height: 18px;
+          margin: 0;
+        }
+
+        .shipping-range-calendar {
+          padding-top: 2px;
+        }
+
+        .shipping-range-quick-picks {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .shipping-range-quick-picks button {
+          min-height: 40px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #f7f9fb;
+          color: #5e748b;
+          font: inherit;
+          font-size: 0.84rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .shipping-range-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .shipping-range-result > span {
+          color: #71869b;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .shipping-range-result-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin-top: 12px;
+        }
+
+        .shipping-range-result-grid > div {
+          padding: 16px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 13px;
+          background: #fffdf9;
+        }
+
+        .shipping-range-result-grid small {
+          display: block;
+          color: #73869a;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .shipping-range-result-grid strong {
+          display: block;
+          margin-top: 6px;
+          color: #10213f;
+          font-size: clamp(1.65rem, 3.4vw, 2.5rem);
+          line-height: 1.05;
+        }
+
+        .shipping-range-result-grid b {
+          display: block;
+          margin-top: 5px;
+          color: #667c92;
+          font-size: 0.92rem;
+        }
+
+        .shipping-range-result > p {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #586f86;
+          font-size: 0.96rem;
+          line-height: 1.55;
+        }
+
+        .shipping-range-error {
+          margin: auto !important;
+          color: #7a8999 !important;
+        }
+
+        .shipping-range-actions {
+          margin-top: 4px;
+        }
+
+        .shipping-range-content {
+          display: grid;
+          gap: 12px;
+          margin-top: 22px;
+        }
+
+        .shipping-range-content article {
+          padding: 18px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .shipping-range-content h2 {
+          margin: 0;
+          color: #29435e;
+          font-size: 1.12rem;
+        }
+
+        .shipping-range-content p {
+          margin: 8px 0 0;
+          color: #5f748a;
+          font-size: 0.97rem;
+          line-height: 1.6;
+        }
+
+        .shipping-range-related {
+          margin-top: 24px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .shipping-range-related > div > span {
+          color: #7a8da1;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .shipping-range-related h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.2rem;
+        }
+
+        .shipping-range-related nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .shipping-range-related a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+          .shipping-range-shell {
+            width: min(100% - 20px, 980px);
+            padding-top: 24px;
+          }
+
+          .shipping-range-workspace {
+            grid-template-columns: 1fr;
+          }
+
+          .shipping-range-days-grid,
+          .shipping-range-result-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .shipping-range-form,
+          .shipping-range-result {
+            padding: 16px;
+          }
+
+          .shipping-range-quick-picks button {
+            min-height: 44px;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
     getInitialDateQueryParam('payday', todayInputValue()),
@@ -4790,6 +5483,18 @@ function HomePage({ onNavigate }: NavigationProps) {
             <strong>Net 30 due date</strong>
             <small>Enter an invoice date and get the due date immediately.</small>
           </a>
+
+          <a
+            href="/shipping-delivery-range-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/shipping-delivery-range-calculator')
+            }}
+          >
+            <span>Shipping</span>
+            <strong>Delivery date range</strong>
+            <small>Turn 3–5 business days into earliest and latest dates.</small>
+          </a>
         </div>
       </section>
 
@@ -5690,6 +6395,23 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
                 <p>Popular answer</p>
                 <h2>Net 30 due date</h2>
                 <span>Fast one-input answer for a common invoice term.</span>
+              </div>
+            </a>
+
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/shipping-delivery-range-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/shipping-delivery-range-calculator' })
+                onNavigate('/shipping-delivery-range-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">⇢</span>
+              <div>
+                <p>Shipping</p>
+                <h2>Delivery date range</h2>
+                <span>Convert 3–5 business days into an earliest and latest date.</span>
               </div>
             </a>
           </div>
@@ -11835,6 +12557,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'public-holidays-business-days-guide'
   }
 
+  if (pathname === '/shipping-delivery-range-calculator') {
+    return 'shipping-delivery-range'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -12072,6 +12798,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Learn how public holidays affect business-day deadlines with a clear US Labor Day example.',
       twitterDescription: 'Do public holidays count as business days? See when they count, when they are skipped, and why the calendar matters.',
       path: '/do-public-holidays-count-as-business-days',
+    }
+  }
+
+  if (route === 'shipping-delivery-range') {
+    return {
+      title: 'Shipping Delivery Date Range Calculator | WhenIsDue',
+      description: 'Turn a shipping estimate such as 3–5 business days into exact earliest and latest delivery dates, with optional holiday-aware counting.',
+      openGraphDescription: 'Enter an order or ship date and convert a business-day or calendar-day shipping range into actual delivery dates.',
+      twitterDescription: 'Convert 3–5 business days into exact earliest and latest delivery dates.',
+      path: '/shipping-delivery-range-calculator',
     }
   }
 
@@ -12450,6 +13186,7 @@ function getRouteStructuredData(
     route === 'calculators' ||
     route === 'business-days-between' ||
     route === 'business-hours-deadline' ||
+    route === 'shipping-delivery-range' ||
     route === 'next-payday' ||
     route === 'deadline-calculator' ||
     route === 'free-trial' ||
