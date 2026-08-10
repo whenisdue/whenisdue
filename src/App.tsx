@@ -97,6 +97,7 @@ type RouteName =
   | 'weekends-business-days-guide'
   | 'public-holidays-business-days-guide'
   | 'shipping-delivery-range'
+  | 'two-ten-net-30'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -189,6 +190,10 @@ function App() {
 
   if (route === 'shipping-delivery-range') {
     return <ShippingDeliveryRangePage onNavigate={navigate} />
+  }
+
+  if (route === 'two-ten-net-30') {
+    return <TwoTenNetThirtyPage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -4357,6 +4362,21 @@ function resolveAskWhenQuery(
     }
   }
 
+  const twoTenNetThirtyPatterns = [
+    /^2\s*\/\s*10\s*,?\s*net\s*30(?:\s+(?:due\s+date|terms?|calculator))?$/,
+    /^2\s*%?\s*10\s+net\s*30(?:\s+(?:due\s+date|terms?|calculator))?$/,
+    /^(?:what\s+does\s+)?2\s*\/\s*10\s*,?\s*net\s*30\s+mean$/,
+  ]
+
+  if (twoTenNetThirtyPatterns.some((pattern) => pattern.test(query))) {
+    return {
+      label: '2/10 Net 30',
+      description:
+        'See the early-payment discount deadline and the final Net 30 due date.',
+      path: '/2-10-net-30-calculator',
+    }
+  }
+
   const netPatterns = [
     /^net\s*(7|15|30|45|60|90)(?:\s+(?:due\s+date|invoice|terms?))?$/,
     /^(?:invoice\s+)?net\s*(7|15|30|45|60|90)$/,
@@ -6473,6 +6493,22 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
                 <p>Popular answer</p>
                 <h2>Net 30 due date</h2>
                 <span>Fast one-input answer for a common invoice term.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/2-10-net-30-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/2-10-net-30-calculator' })
+                onNavigate('/2-10-net-30-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">2%</span>
+              <div>
+                <p>Invoice discount terms</p>
+                <h2>2/10 Net 30</h2>
+                <span>See the discount deadline and the final payment due date.</span>
               </div>
             </a>
 
@@ -9979,6 +10015,488 @@ function getInitialInvoiceTermQueryParam(name: string, fallback: InvoiceTerm): I
   return value && invoiceTerms.includes(value) ? value : fallback
 }
 
+function TwoTenNetThirtyPage({ onNavigate }: NavigationProps) {
+  const [invoiceDate, setInvoiceDate] = useState(() =>
+    getInitialDateQueryParam('date', todayInputValue()),
+  )
+
+  const parsedInvoiceDate = parsePlainDate(invoiceDate)
+  const discountDeadline = parsedInvoiceDate
+    ? addCalendarDays(parsedInvoiceDate, 10)
+    : null
+  const finalDueDate = parsedInvoiceDate
+    ? getDueDateForMode('invoice', parsedInvoiceDate, 0, 'net30')
+    : null
+
+  useEffect(() => {
+    syncShareableQueryParams({ date: invoiceDate })
+  }, [invoiceDate])
+
+  return (
+    <main className="page-shell two-ten-net-thirty-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="two-ten-net-thirty-shell">
+        <header className="two-ten-net-thirty-intro">
+          <p className="friendly-eyebrow">Invoice payment terms</p>
+          <h1>2/10 Net 30 calculator</h1>
+          <p>
+            Enter the invoice date to see the early-payment discount deadline
+            and the final Net 30 due date.
+          </p>
+        </header>
+
+        <section
+          className="two-ten-net-thirty-workspace"
+          aria-label="2/10 Net 30 calculator"
+        >
+          <form
+            className="two-ten-net-thirty-form"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            <label>
+              <span>Invoice date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={invoiceDate}
+                onChange={(event) => {
+                  setInvoiceDate(event.target.value)
+                  trackWhenIsDueEvent('date_changed', {
+                    context: 'two_ten_net_30',
+                    value: event.target.value,
+                  })
+                }}
+              />
+            </label>
+
+            <div className="two-ten-net-thirty-definition">
+              <strong>2/10 Net 30 means:</strong>
+              <span>
+                2% discount if payment is made within 10 calendar days;
+                otherwise the full invoice amount is due in 30 calendar days.
+              </span>
+            </div>
+          </form>
+
+          <section className="two-ten-net-thirty-result" aria-live="polite">
+            {parsedInvoiceDate && discountDeadline && finalDueDate ? (
+              <>
+                <span>Payment deadlines</span>
+
+                <div className="two-ten-net-thirty-result-grid">
+                  <div className="two-ten-net-thirty-discount">
+                    <small>Pay by this date for 2% discount</small>
+                    <strong>{formatPlainDate(discountDeadline)}</strong>
+                    <b>{formatWeekday(discountDeadline)}</b>
+                    <p>10 calendar days after the invoice date.</p>
+                  </div>
+
+                  <div>
+                    <small>Full payment due</small>
+                    <strong>{formatPlainDate(finalDueDate)}</strong>
+                    <b>{formatWeekday(finalDueDate)}</b>
+                    <p>30 calendar days after the invoice date.</p>
+                  </div>
+                </div>
+
+                <p className="two-ten-net-thirty-note">
+                  The invoice date is treated as day zero. Weekends and public
+                  holidays are not automatically moved. The written invoice or
+                  contract controls if it uses a different rule.
+                </p>
+
+                <CalculationReceipt
+                  analyticsContext="two_ten_net_30"
+                  rows={[
+                    {
+                      label: 'Invoice date',
+                      value: `${formatWeekday(
+                        parsedInvoiceDate,
+                      )}, ${formatPlainDate(parsedInvoiceDate)}`,
+                    },
+                    {
+                      label: 'Early-payment term',
+                      value: '2% discount within 10 calendar days',
+                    },
+                    {
+                      label: 'Discount deadline',
+                      value: `${formatWeekday(
+                        discountDeadline,
+                      )}, ${formatPlainDate(discountDeadline)}`,
+                    },
+                    {
+                      label: 'Final payment term',
+                      value: 'Net 30 — 30 calendar days',
+                    },
+                    {
+                      label: 'Final due date',
+                      value: `${formatWeekday(
+                        finalDueDate,
+                      )}, ${formatPlainDate(finalDueDate)}`,
+                    },
+                  ]}
+                />
+
+                <ResultActions
+                  title="2/10 Net 30 final due date"
+                  date={finalDueDate}
+                  details={`2% discount deadline: ${formatPlainDate(
+                    discountDeadline,
+                  )}`}
+                />
+              </>
+            ) : (
+              <p className="two-ten-net-thirty-error">
+                Enter a valid invoice date.
+              </p>
+            )}
+          </section>
+        </section>
+
+        <section className="two-ten-net-thirty-content">
+          <article>
+            <h2>What does 2/10 Net 30 mean?</h2>
+            <p>
+              “2/10” is the early-payment discount: the buyer may take a 2%
+              discount when paying within 10 days. “Net 30” is the final
+              payment term: if the discount is not taken, the full invoice is
+              due 30 days after the invoice date.
+            </p>
+          </article>
+
+          <article>
+            <h2>Example</h2>
+            <p>
+              For an invoice dated August 10, the discount deadline is August
+              20 and the Net 30 due date is September 9 when both periods are
+              counted as calendar days from the invoice date.
+            </p>
+          </article>
+
+          <article>
+            <h2>Do weekends and holidays change the dates?</h2>
+            <p>
+              Not automatically in this calculator. Some contracts or company
+              policies move a payment date that lands on a weekend or holiday,
+              while others do not. Use the written payment terms that apply to
+              the invoice.
+            </p>
+          </article>
+
+          <article>
+            <h2>What this calculator does not calculate</h2>
+            <p>
+              It does not calculate late fees, interest, penalties, or legal
+              payment rules. Those can depend on the contract and applicable
+              law.
+            </p>
+          </article>
+        </section>
+
+        <section
+          className="two-ten-net-thirty-related"
+          aria-label="Related invoice calculators"
+        >
+          <div>
+            <span>Related invoice tools</span>
+            <h2>Need a different payment term?</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/invoice-due-date-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/invoice-due-date-calculator')
+              }}
+            >
+              Invoice due date calculator
+            </a>
+            <a
+              href="/net-30-due-date"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/net-30-due-date')
+              }}
+            >
+              Net 30 due date
+            </a>
+          </nav>
+        </section>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. The invoice or contract controls the actual payment terms and any weekend, holiday, late-fee, or interest rules."
+      />
+
+      <style>{`
+        .two-ten-net-thirty-page {
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .two-ten-net-thirty-shell {
+          width: min(100% - 32px, 980px);
+          margin: 0 auto;
+          padding: 34px 0 64px;
+        }
+
+        .two-ten-net-thirty-intro {
+          text-align: center;
+        }
+
+        .two-ten-net-thirty-intro h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.35rem, 6vw, 4.4rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .two-ten-net-thirty-intro > p:last-child {
+          max-width: 680px;
+          margin: 12px auto 0;
+          color: #61788f;
+          font-size: 1rem;
+          line-height: 1.55;
+        }
+
+        .two-ten-net-thirty-workspace {
+          display: grid;
+          grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.2fr);
+          gap: 14px;
+          margin-top: 24px;
+        }
+
+        .two-ten-net-thirty-form,
+        .two-ten-net-thirty-result {
+          min-width: 0;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 18px;
+          background: #fff;
+        }
+
+        .two-ten-net-thirty-form {
+          display: grid;
+          gap: 14px;
+          align-content: start;
+        }
+
+        .two-ten-net-thirty-form label {
+          display: grid;
+          gap: 6px;
+        }
+
+        .two-ten-net-thirty-form label > span {
+          color: #526a82;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .two-ten-net-thirty-form input {
+          min-height: 48px;
+          width: 100%;
+          padding: 9px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 10px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .two-ten-net-thirty-definition {
+          display: grid;
+          gap: 5px;
+          padding: 14px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 12px;
+          background: #f8fafb;
+        }
+
+        .two-ten-net-thirty-definition strong {
+          color: #2d4965;
+          font-size: 0.94rem;
+        }
+
+        .two-ten-net-thirty-definition span {
+          color: #667c92;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .two-ten-net-thirty-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .two-ten-net-thirty-result > span {
+          color: #71869b;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .two-ten-net-thirty-result-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin-top: 12px;
+        }
+
+        .two-ten-net-thirty-result-grid > div {
+          padding: 17px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 13px;
+          background: #fffdf9;
+        }
+
+        .two-ten-net-thirty-result-grid .two-ten-net-thirty-discount {
+          background: #f7fcf7;
+          border-color: rgba(62, 126, 82, 0.14);
+        }
+
+        .two-ten-net-thirty-result-grid small {
+          display: block;
+          color: #72869a;
+          font-size: 0.78rem;
+          font-weight: 900;
+          line-height: 1.35;
+          letter-spacing: 0.035em;
+          text-transform: uppercase;
+        }
+
+        .two-ten-net-thirty-result-grid strong {
+          display: block;
+          margin-top: 7px;
+          color: #10213f;
+          font-size: clamp(1.7rem, 3.4vw, 2.55rem);
+          line-height: 1.05;
+        }
+
+        .two-ten-net-thirty-result-grid b {
+          display: block;
+          margin-top: 5px;
+          color: #667c92;
+          font-size: 0.92rem;
+        }
+
+        .two-ten-net-thirty-result-grid p {
+          margin: 9px 0 0;
+          color: #667c92;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
+        .two-ten-net-thirty-note {
+          max-width: 700px;
+          margin: 14px auto 0;
+          color: #586f86;
+          font-size: 0.95rem;
+          line-height: 1.55;
+        }
+
+        .two-ten-net-thirty-error {
+          margin: auto;
+          color: #73869a;
+        }
+
+        .two-ten-net-thirty-content {
+          display: grid;
+          gap: 12px;
+          margin-top: 22px;
+        }
+
+        .two-ten-net-thirty-content article {
+          padding: 18px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .two-ten-net-thirty-content h2 {
+          margin: 0;
+          color: #29435e;
+          font-size: 1.12rem;
+        }
+
+        .two-ten-net-thirty-content p {
+          margin: 8px 0 0;
+          color: #5f748a;
+          font-size: 0.97rem;
+          line-height: 1.6;
+        }
+
+        .two-ten-net-thirty-related {
+          margin-top: 24px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .two-ten-net-thirty-related > div > span {
+          color: #7a8da1;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .two-ten-net-thirty-related h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.2rem;
+        }
+
+        .two-ten-net-thirty-related nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .two-ten-net-thirty-related a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+          .two-ten-net-thirty-shell {
+            width: min(100% - 20px, 980px);
+            padding-top: 24px;
+          }
+
+          .two-ten-net-thirty-workspace,
+          .two-ten-net-thirty-result-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .two-ten-net-thirty-form,
+          .two-ten-net-thirty-result {
+            padding: 16px;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
   const [invoiceDate, setInvoiceDate] = useState(() => getInitialDateQueryParam('date', todayInputValue()))
   const [invoiceTerm, setInvoiceTerm] = useState<InvoiceTerm>(() =>
@@ -10178,6 +10696,24 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             ))}
             <li>EOM — last calendar day of the invoice month</li>
           </ul>
+        </article>
+
+        <article>
+          <h2>Have 2/10 Net 30 terms?</h2>
+          <p>
+            Use the{' '}
+            <a
+              href="/2-10-net-30-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/2-10-net-30-calculator')
+              }}
+            >
+              2/10 Net 30 calculator
+            </a>{' '}
+            to see both the 2% early-payment discount deadline and the final
+            Net 30 due date.
+          </p>
         </article>
 
         <article>
@@ -12639,6 +13175,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'shipping-delivery-range'
   }
 
+  if (pathname === '/2-10-net-30-calculator') {
+    return 'two-ten-net-30'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -12886,6 +13426,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Enter an order or ship date and convert a business-day or calendar-day shipping range into actual delivery dates.',
       twitterDescription: 'Convert 3–5 business days into exact earliest and latest delivery dates.',
       path: '/shipping-delivery-range-calculator',
+    }
+  }
+
+  if (route === 'two-ten-net-30') {
+    return {
+      title: '2/10 Net 30 Calculator - Discount & Due Date | WhenIsDue',
+      description: 'Enter an invoice date to calculate the 2% early-payment discount deadline and the final Net 30 due date for 2/10 Net 30 terms.',
+      openGraphDescription: 'Calculate both dates in 2/10 Net 30 payment terms: the 10-day discount deadline and the 30-day final due date.',
+      twitterDescription: 'Calculate the 2/10 Net 30 discount deadline and final invoice due date.',
+      path: '/2-10-net-30-calculator',
     }
   }
 
@@ -13265,6 +13815,7 @@ function getRouteStructuredData(
     route === 'business-days-between' ||
     route === 'business-hours-deadline' ||
     route === 'shipping-delivery-range' ||
+    route === 'two-ten-net-30' ||
     route === 'next-payday' ||
     route === 'deadline-calculator' ||
     route === 'free-trial' ||
