@@ -321,6 +321,10 @@ function getInitialStartDayConvention(): StartDayConvention {
     : 'exclude-trigger'
 }
 
+function getInitialStartDayWordingUnspecified() {
+  return getDeadlineCalculatorQueryParam('startday') === 'unspecified'
+}
+
 function getInitialEndDayAdjustment(): EndDayAdjustment {
   const value = getDeadlineCalculatorQueryParam('endrule')
 
@@ -351,6 +355,8 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     )
   const [startDayConvention, setStartDayConvention] =
     useState<StartDayConvention>(getInitialStartDayConvention)
+  const [startDayWordingUnspecified, setStartDayWordingUnspecified] =
+    useState(getInitialStartDayWordingUnspecified)
   const [endDayAdjustment, setEndDayAdjustment] =
     useState<EndDayAdjustment>(getInitialEndDayAdjustment)
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
@@ -442,7 +448,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
       days: duration,
       unit,
       direction,
-      startday: startDayConvention,
+      startday: startDayWordingUnspecified
+        ? 'unspecified'
+        : startDayConvention,
       endrule: endDayAdjustment,
       calendar: holidayCalendarQueryValue(holidayCalendar),
       trigger: triggerKind,
@@ -454,6 +462,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     unit,
     direction,
     startDayConvention,
+    startDayWordingUnspecified,
     endDayAdjustment,
     holidayCalendar,
     triggerKind,
@@ -465,6 +474,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     setDirection(profile.direction)
     setUnit(profile.unit)
     setStartDayConvention(profile.startDayConvention)
+    setStartDayWordingUnspecified(false)
     setHolidayCalendar(profile.holidayCalendar)
     setEndDayAdjustment(profile.endDayAdjustment)
     setTriggerKind(profile.triggerKind)
@@ -544,7 +554,65 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           </label>
         </div>
 
-        {result && parsedTriggerDate && parsedDuration !== null ? (
+        {startDayWordingUnspecified &&
+        startRuleComparison &&
+        parsedTriggerDate &&
+        parsedDuration !== null ? (
+          <section
+            className="deadline-rule-compare deadline-rule-ambiguity"
+            aria-labelledby="deadline-rule-ambiguity-title"
+            aria-live="polite"
+          >
+            <div className="deadline-rule-compare-heading">
+              <span>Start-day rule is unclear</span>
+              <h2 id="deadline-rule-ambiguity-title">
+                The wording doesn’t say whether the start date counts.
+              </h2>
+            </div>
+
+            <div className="deadline-rule-compare-grid">
+              <button
+                type="button"
+                onClick={() => {
+                  setStartDayConvention('exclude-trigger')
+                  setStartDayWordingUnspecified(false)
+                }}
+              >
+                <span>If the start date is not counted</span>
+                <strong>{formatPlainDate(startRuleComparison.excluded)}</strong>
+                <small>Start counting on the next qualifying day.</small>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setStartDayConvention('include-if-qualifying')
+                  setStartDayWordingUnspecified(false)
+                }}
+              >
+                <span>If the start date counts as day 1</span>
+                <strong>{formatPlainDate(startRuleComparison.included)}</strong>
+                <small>
+                  Count the start date only when it qualifies under the selected
+                  rules.
+                </small>
+              </button>
+            </div>
+
+            {startRuleComparison.sameResult ? (
+              <p>
+                Both interpretations happen to produce the same date here, but
+                the original rule should still decide how the start date is
+                treated.
+              </p>
+            ) : (
+              <p>
+                Check the original policy, contract, or instruction before
+                choosing one.
+              </p>
+            )}
+          </section>
+        ) : result && parsedTriggerDate && parsedDuration !== null ? (
           <section className="deadline-rule-answer" aria-live="polite">
             <span>Due date</span>
             <strong>{formatPlainDate(result.answerDate)}</strong>
@@ -632,7 +700,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           </p>
         )}
 
-        {cameFromWithinPhrase && startRuleComparison ? (
+        {cameFromWithinPhrase &&
+        startRuleComparison &&
+        !startDayWordingUnspecified ? (
           <section className="deadline-rule-compare" aria-labelledby="deadline-rule-compare-title">
             <div className="deadline-rule-compare-heading">
               <span>Compare the start-day rule</span>
@@ -649,7 +719,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                     ? 'is-selected'
                     : undefined
                 }
-                onClick={() => setStartDayConvention('exclude-trigger')}
+                onClick={() => {
+                  setStartDayConvention('exclude-trigger')
+                  setStartDayWordingUnspecified(false)
+                }}
               >
                 <span>Start date does not count</span>
                 <strong>{formatPlainDate(startRuleComparison.excluded)}</strong>
@@ -663,9 +736,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                     ? 'is-selected'
                     : undefined
                 }
-                onClick={() =>
+                onClick={() => {
                   setStartDayConvention('include-if-qualifying')
-                }
+                  setStartDayWordingUnspecified(false)
+                }}
               >
                 <span>Start date counts if it qualifies</span>
                 <strong>{formatPlainDate(startRuleComparison.included)}</strong>
@@ -689,7 +763,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           </section>
         ) : null}
 
-        {result && parsedDuration !== null ? (
+        {result &&
+        parsedDuration !== null &&
+        !startDayWordingUnspecified ? (
           <SaveDeadlineRuleButton
             triggerDateKey={triggerDate}
             triggerKind={triggerKind}
@@ -734,18 +810,31 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             <label>
               <span>Does the start date count?</span>
               <select
-                value={startDayConvention}
-                onChange={(event) =>
+                value={
+                  startDayWordingUnspecified
+                    ? 'unspecified'
+                    : startDayConvention
+                }
+                onChange={(event) => {
+                  if (event.target.value === 'unspecified') {
+                    setStartDayWordingUnspecified(true)
+                    return
+                  }
+
                   setStartDayConvention(
                     event.target.value as StartDayConvention,
                   )
-                }
+                  setStartDayWordingUnspecified(false)
+                }}
               >
                 <option value="exclude-trigger">
                   No — start counting after it
                 </option>
                 <option value="include-if-qualifying">
                   Yes — if that day qualifies
+                </option>
+                <option value="unspecified">
+                  The wording doesn’t say
                 </option>
               </select>
             </label>
@@ -932,6 +1021,14 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           border: 1px solid rgba(183, 121, 31, 0.16);
           border-radius: 16px;
           background: #fffdf8;
+        }
+
+        .deadline-rule-ambiguity {
+          margin-top: 16px;
+        }
+
+        .deadline-rule-ambiguity .deadline-rule-compare-grid button {
+          min-height: 136px;
         }
 
         .deadline-rule-compare-heading {
