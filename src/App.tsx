@@ -6600,7 +6600,27 @@ function HomepageQuestionMap({ onNavigate }: NavigationProps) {
         </a>
       </div>
 
-      <div className="homepage-question-cloud">
+      <div className="homepage-question-cloud homepage-question-cloud-desktop">
+        {questions.map((question, index) => (
+          <a
+            key={question.label}
+            className={`question-map-link question-map-${question.weight} question-map-pos-${index + 1}`}
+            href={question.path}
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('homepage_question_map_opened', {
+                path: question.path,
+                label: question.label,
+              })
+              onNavigate(question.path)
+            }}
+          >
+            {question.label}
+          </a>
+        ))}
+      </div>
+
+      <div className="homepage-question-cloud-mobile">
         {questions.map((question) => (
           <a
             key={question.label}
@@ -7534,20 +7554,23 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .homepage-question-cloud {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          justify-content: center;
-          gap: 10px 14px;
+          position: relative;
+          min-height: 390px;
           margin-top: 20px;
-          padding: 22px 12px 18px;
           border-radius: 14px;
           background: #17304d;
+          overflow: hidden;
+        }
+
+        .homepage-question-cloud-mobile {
+          display: none;
         }
 
         .question-map-link {
+          position: absolute;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           min-height: 38px;
           padding: 5px 8px;
           border-radius: 8px;
@@ -7562,7 +7585,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .question-map-link:hover {
-          transform: translateY(-1px);
+          transform: translateY(-1px) scale(1.015);
           background: rgba(255, 255, 255, 0.1);
           color: #fff;
         }
@@ -7579,6 +7602,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           font-size: clamp(1.55rem, 3vw, 2.2rem);
           font-weight: 950;
           letter-spacing: -0.035em;
+          z-index: 3;
         }
 
         .question-map-xl:hover {
@@ -7589,17 +7613,116 @@ function HomePage({ onNavigate }: NavigationProps) {
         .question-map-lg {
           font-size: clamp(1.2rem, 2vw, 1.55rem);
           font-weight: 900;
+          z-index: 2;
         }
 
         .question-map-md {
           font-size: clamp(1rem, 1.6vw, 1.2rem);
           font-weight: 800;
+          z-index: 2;
         }
 
         .question-map-sm {
           font-size: 0.92rem;
           font-weight: 750;
           color: rgba(255, 255, 255, 0.72);
+          z-index: 1;
+        }
+
+        /* Desktop "organized chaos": larger anchors live near the center,
+           smaller questions orbit them without overlapping. */
+        .question-map-pos-1  { left: 50%; top: 44%; transform: translate(-50%, -50%); }
+        .question-map-pos-2  { left: 66%; top: 28%; transform: translate(-50%, -50%); }
+        .question-map-pos-3  { left: 31%; top: 27%; transform: translate(-50%, -50%); }
+        .question-map-pos-4  { left: 51%; top: 18%; transform: translate(-50%, -50%); }
+        .question-map-pos-5  { left: 20%; top: 45%; transform: translate(-50%, -50%); }
+        .question-map-pos-6  { left: 51%; top: 67%; transform: translate(-50%, -50%); }
+        .question-map-pos-7  { left: 76%; top: 51%; transform: translate(-50%, -50%); }
+        .question-map-pos-8  { left: 27%; top: 69%; transform: translate(-50%, -50%); }
+        .question-map-pos-9  { left: 83%; top: 69%; transform: translate(-50%, -50%); }
+        .question-map-pos-10 { left: 16%; top: 17%; transform: translate(-50%, -50%); }
+        .question-map-pos-11 { left: 18%; top: 84%; transform: translate(-50%, -50%); }
+        .question-map-pos-12 { left: 76%; top: 84%; transform: translate(-50%, -50%); }
+        .question-map-pos-13 { left: 84%; top: 19%; transform: translate(-50%, -50%); }
+        .question-map-pos-14 { left: 42%; top: 84%; transform: translate(-50%, -50%); }
+        .question-map-pos-15 { left: 88%; top: 39%; transform: translate(-50%, -50%); }
+        .question-map-pos-16 { left: 10%; top: 63%; transform: translate(-50%, -50%); }
+
+        .homepage-question-cloud-desktop .question-map-link:hover {
+          transform: translate(-50%, -50%) scale(1.025);
+        }
+
+        @media (max-width: 900px) {
+          .homepage-question-cloud {
+            min-height: 430px;
+          }
+
+          .question-map-pos-1  { left: 50%; top: 42%; }
+          .question-map-pos-2  { left: 68%; top: 25%; }
+          .question-map-pos-3  { left: 29%; top: 25%; }
+          .question-map-pos-4  { left: 49%; top: 14%; }
+          .question-map-pos-5  { left: 18%; top: 47%; }
+          .question-map-pos-6  { left: 50%; top: 66%; }
+          .question-map-pos-7  { left: 76%; top: 48%; }
+          .question-map-pos-8  { left: 28%; top: 72%; }
+          .question-map-pos-9  { left: 82%; top: 69%; }
+          .question-map-pos-10 { left: 13%; top: 12%; }
+          .question-map-pos-11 { left: 17%; top: 86%; }
+          .question-map-pos-12 { left: 74%; top: 86%; }
+          .question-map-pos-13 { left: 84%; top: 12%; }
+          .question-map-pos-14 { left: 44%; top: 87%; }
+          .question-map-pos-15 { left: 88%; top: 36%; }
+          .question-map-pos-16 { left: 9%; top: 66%; }
+        }
+
+        @media (max-width: 760px) {
+          .homepage-question-cloud-desktop {
+            display: none;
+          }
+
+          .homepage-question-cloud-mobile {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 4px;
+            margin-top: 15px;
+            padding: 10px 0;
+            border-radius: 14px;
+            background: #17304d;
+          }
+
+          .homepage-question-cloud-mobile .question-map-link {
+            position: static;
+            justify-content: flex-start;
+            min-height: 52px;
+            padding: 9px 16px;
+            border-radius: 0;
+            text-align: left;
+            transform: none;
+          }
+
+          .homepage-question-cloud-mobile .question-map-link:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.08);
+          }
+
+          .homepage-question-cloud-mobile .question-map-xl {
+            margin: 6px 10px;
+            border-radius: 12px;
+            font-size: 1.45rem;
+          }
+
+          .homepage-question-cloud-mobile .question-map-lg {
+            font-size: 1.15rem;
+          }
+
+          .homepage-question-cloud-mobile .question-map-md {
+            font-size: 1rem;
+          }
+
+          .homepage-question-cloud-mobile .question-map-sm {
+            font-size: 0.9rem;
+          }
         }
 
         .homepage-question-map-note {
@@ -7620,34 +7743,6 @@ function HomePage({ onNavigate }: NavigationProps) {
             align-items: flex-start;
             flex-direction: column;
             gap: 6px;
-          }
-
-          .homepage-question-cloud {
-            justify-content: flex-start;
-            gap: 8px 10px;
-            margin-top: 15px;
-            padding: 16px 10px;
-          }
-
-          .question-map-link {
-            min-height: 44px;
-            text-align: left;
-          }
-
-          .question-map-xl {
-            font-size: 1.45rem;
-          }
-
-          .question-map-lg {
-            font-size: 1.15rem;
-          }
-
-          .question-map-md {
-            font-size: 1rem;
-          }
-
-          .question-map-sm {
-            font-size: 0.9rem;
           }
         }
 
