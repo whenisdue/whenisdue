@@ -102,6 +102,7 @@ type RouteName =
   | 'subscription-renewal'
   | 'within-days-guide'
   | 'net-30-vs-30-days-guide'
+  | 'deadline-weekend-extension-guide'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -214,6 +215,10 @@ function App() {
 
   if (route === 'net-30-vs-30-days-guide') {
     return <NetThirtyVsThirtyDaysGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'deadline-weekend-extension-guide') {
+    return <DeadlineWeekendExtensionGuidePage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -5020,6 +5025,394 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
 }
 
 
+function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
+  const [deadlineDate, setDeadlineDate] = useState(() =>
+    getInitialDateQueryParam('date', '2026-08-15'),
+  )
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+
+  const parsedDeadlineDate = parsePlainDate(deadlineDate)
+  const nextBusinessDay = parsedDeadlineDate
+    ? calculateBusinessDaysWithCalendar(
+        parsedDeadlineDate,
+        1,
+        holidayCalendar,
+      ).date
+    : null
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      date: deadlineDate,
+      calendar: holidayCalendarQueryValue(holidayCalendar),
+    })
+  }, [deadlineDate, holidayCalendar])
+
+  return (
+    <main className="page-shell weekend-deadline-guide-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="weekend-deadline-guide-shell">
+        <header className="weekend-deadline-guide-intro">
+          <p className="friendly-eyebrow">Deadline interpretation</p>
+          <h1>What if a deadline falls on a weekend?</h1>
+          <p>
+            Sometimes the deadline moves to the next business day. Sometimes
+            it does not. The rule that created the deadline decides.
+          </p>
+        </header>
+
+        <section className="weekend-deadline-guide-bam">
+          <strong>
+            Do not automatically assume “Saturday means Monday.”
+          </strong>
+          <p>
+            Many rules extend a deadline that lands on a weekend or holiday to
+            the next business day, but that is not universal. Contracts,
+            policies, court rules, and laws can define the final-day rule
+            differently.
+          </p>
+        </section>
+
+        <section className="weekend-deadline-guide-workspace">
+          <form onSubmit={(event) => event.preventDefault()}>
+            <label>
+              <span>Deadline date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={deadlineDate}
+                onChange={(event) => setDeadlineDate(event.target.value)}
+              />
+            </label>
+
+            <HolidayCalendarSelect
+              value={holidayCalendar}
+              onChange={(nextCalendar) => {
+                setHolidayCalendar(nextCalendar)
+                trackWhenIsDueEvent('holiday_calendar_changed', {
+                  context: 'deadline_weekend_extension_guide',
+                  value: nextCalendar,
+                })
+              }}
+              compact
+            />
+          </form>
+
+          <section className="weekend-deadline-guide-result" aria-live="polite">
+            {parsedDeadlineDate && nextBusinessDay ? (
+              <>
+                <span>If the rule says “next business day”</span>
+                <strong>{formatPlainDate(nextBusinessDay)}</strong>
+                <b>{formatWeekday(nextBusinessDay)}</b>
+                <p>
+                  Starting from {formatPlainDate(parsedDeadlineDate)}, WhenIsDue
+                  moves forward to the next qualifying business day under the
+                  selected calendar.
+                </p>
+              </>
+            ) : (
+              <p>Enter a valid deadline date.</p>
+            )}
+          </section>
+        </section>
+
+        <section className="weekend-deadline-guide-copy">
+          <article>
+            <h2>When does a weekend deadline usually move?</h2>
+            <p>
+              It moves when the governing rule explicitly says the final day
+              must be a business day, working day, or non-holiday, or when that
+              rule provides a next-business-day adjustment.
+            </p>
+          </article>
+
+          <article>
+            <h2>When might it stay on Saturday or Sunday?</h2>
+            <p>
+              A contract or policy may simply say “30 calendar days” or give a
+              fixed date without any weekend extension. In that case, you
+              should not add Monday unless the source says to.
+            </p>
+          </article>
+
+          <article>
+            <h2>What about public holidays?</h2>
+            <p>
+              The same issue applies. Some rules move a final date that lands
+              on a recognized holiday; others do not. The applicable holiday
+              calendar also matters.
+            </p>
+          </article>
+
+          <article>
+            <h2>What if the wording is unclear?</h2>
+            <p>
+              Use the deadline calculator to compare the stated rule with a
+              next-business-day adjustment. If the deadline comes from a legal
+              or regulated source, check the source definition before acting.
+            </p>
+          </article>
+        </section>
+
+        <nav className="weekend-deadline-guide-related" aria-label="Related deadline guides">
+          <a
+            href="/deadline-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/deadline-calculator')
+            }}
+          >
+            Deadline calculator
+          </a>
+
+          <a
+            href="/do-weekends-count-as-business-days"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/do-weekends-count-as-business-days')
+            }}
+          >
+            Do weekends count as business days?
+          </a>
+
+          <a
+            href="/do-public-holidays-count-as-business-days"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/do-public-holidays-count-as-business-days')
+            }}
+          >
+            Do public holidays count?
+          </a>
+
+          <a
+            href="/does-the-start-date-count"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/does-the-start-date-count')
+            }}
+          >
+            Does the start date count?
+          </a>
+        </nav>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. The governing contract, policy, law, court rule, or other source controls whether a weekend or holiday deadline moves."
+      />
+
+      <style>{`
+        .weekend-deadline-guide-page {
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .weekend-deadline-guide-shell {
+          width: min(100% - 32px, 980px);
+          margin: 0 auto;
+          padding: 34px 0 64px;
+        }
+
+        .weekend-deadline-guide-intro {
+          text-align: center;
+        }
+
+        .weekend-deadline-guide-intro h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.35rem, 6vw, 4.4rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .weekend-deadline-guide-intro > p:last-child {
+          max-width: 720px;
+          margin: 12px auto 0;
+          color: #61788f;
+          font-size: 1rem;
+          line-height: 1.55;
+        }
+
+        .weekend-deadline-guide-bam {
+          max-width: 780px;
+          margin: 22px auto 0;
+          padding: 18px;
+          border: 1px solid rgba(183, 121, 31, 0.15);
+          border-radius: 14px;
+          background: #fffdf8;
+          text-align: center;
+        }
+
+        .weekend-deadline-guide-bam strong {
+          display: block;
+          color: #6c5220;
+          font-size: 1.12rem;
+          line-height: 1.35;
+        }
+
+        .weekend-deadline-guide-bam p {
+          margin: 8px 0 0;
+          color: #786b4d;
+          font-size: 0.96rem;
+          line-height: 1.55;
+        }
+
+        .weekend-deadline-guide-workspace {
+          display: grid;
+          grid-template-columns: 0.8fr 1.2fr;
+          gap: 14px;
+          margin-top: 18px;
+        }
+
+        .weekend-deadline-guide-workspace form,
+        .weekend-deadline-guide-result {
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 18px;
+          background: #fff;
+        }
+
+        .weekend-deadline-guide-workspace form {
+          display: grid;
+          gap: 14px;
+          align-content: center;
+        }
+
+        .weekend-deadline-guide-workspace label {
+          display: grid;
+          gap: 6px;
+          color: #526a82;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .weekend-deadline-guide-workspace input {
+          min-height: 48px;
+          width: 100%;
+          padding: 9px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 10px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .weekend-deadline-guide-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .weekend-deadline-guide-result > span {
+          color: #71869b;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .weekend-deadline-guide-result > strong {
+          margin-top: 8px;
+          color: #10213f;
+          font-size: clamp(2rem, 4.5vw, 3.25rem);
+          line-height: 1;
+          letter-spacing: -0.035em;
+        }
+
+        .weekend-deadline-guide-result > b {
+          margin-top: 6px;
+          color: #637a91;
+          font-size: 1rem;
+        }
+
+        .weekend-deadline-guide-result > p {
+          max-width: 640px;
+          margin: 12px auto 0;
+          color: #5f748a;
+          font-size: 0.94rem;
+          line-height: 1.55;
+        }
+
+        .weekend-deadline-guide-copy {
+          display: grid;
+          gap: 12px;
+          margin-top: 22px;
+        }
+
+        .weekend-deadline-guide-copy article {
+          padding: 18px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .weekend-deadline-guide-copy h2 {
+          margin: 0;
+          color: #29435e;
+          font-size: 1.12rem;
+        }
+
+        .weekend-deadline-guide-copy p {
+          margin: 8px 0 0;
+          color: #5f748a;
+          font-size: 0.97rem;
+          line-height: 1.6;
+        }
+
+        .weekend-deadline-guide-related {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 24px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .weekend-deadline-guide-related a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+          .weekend-deadline-guide-shell {
+            width: min(100% - 20px, 980px);
+            padding-top: 24px;
+          }
+
+          .weekend-deadline-guide-workspace {
+            grid-template-columns: 1fr;
+          }
+
+          .weekend-deadline-guide-workspace form,
+          .weekend-deadline-guide-result {
+            padding: 16px;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
     getInitialDateQueryParam('payday', todayInputValue()),
@@ -6088,6 +6481,22 @@ function resolveAskWhenQuery(
     }
   }
 
+  if (
+    query === 'what if a deadline falls on a weekend' ||
+    query === 'if a deadline falls on saturday is it due monday' ||
+    query === 'if a deadline falls on sunday is it due monday' ||
+    query === 'deadline falls on weekend' ||
+    query === 'deadline on weekend' ||
+    query === 'does a weekend deadline move to monday'
+  ) {
+    return {
+      label: 'What if a deadline falls on a weekend?',
+      description:
+        'See when a weekend deadline may move to the next business day and when it may not.',
+      path: '/what-if-a-deadline-falls-on-a-weekend',
+    }
+  }
+
   const deadlineInterpretation = interpretDeadlinePhrase(query, {
     today,
     holidayCalendar,
@@ -6747,6 +7156,7 @@ function HomepageQuestionMap({ onNavigate }: NavigationProps) {
     { label: '10 business days from today', path: '/10-business-days-from-today', weight: 'sm' },
     { label: 'Net 15 due date', path: '/net-15-due-date', weight: 'sm' },
     { label: 'Net 30 vs 30 days', path: '/net-30-vs-30-days', weight: 'sm' },
+    { label: 'Deadline falls on a weekend', path: '/what-if-a-deadline-falls-on-a-weekend', weight: 'sm' },
     { label: 'Net 45 due date', path: '/net-45-due-date', weight: 'sm' },
     { label: 'Net 60 due date', path: '/net-60-due-date', weight: 'sm' },
     { label: 'Return window deadline', path: '/return-window-calculator', weight: 'sm' },
@@ -6864,6 +7274,11 @@ function DeadlineCountingGuideLinks({
       path: '/what-does-within-days-mean',
       label: 'What does “within X days” mean?',
       description: 'Compare the possible before-versus-after interpretations.',
+    },
+    {
+      path: '/what-if-a-deadline-falls-on-a-weekend',
+      label: 'What if a deadline falls on a weekend?',
+      description: 'See when the final date may move to the next business day.',
     },
   ]
 
@@ -15560,6 +15975,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'net-30-vs-30-days-guide'
   }
 
+  if (pathname === '/what-if-a-deadline-falls-on-a-weekend') {
+    return 'deadline-weekend-extension-guide'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -15857,6 +16276,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Compare Net 30 with a simple 30-day duration and see when payment-term wording can change the result.',
       twitterDescription: 'Is Net 30 the same as 30 days? Compare the dates and understand why the payment-term wording matters.',
       path: '/net-30-vs-30-days',
+    }
+  }
+
+  if (route === 'deadline-weekend-extension-guide') {
+    return {
+      title: 'What If a Deadline Falls on a Weekend? | WhenIsDue',
+      description: 'See when a Saturday or Sunday deadline may move to the next business day, when it may stay put, and how holidays can affect the final date.',
+      openGraphDescription: 'Does a weekend deadline automatically move to Monday? See why the governing rule controls the final-day adjustment.',
+      twitterDescription: 'What happens when a deadline falls on a weekend? See when it may move to the next business day.',
+      path: '/what-if-a-deadline-falls-on-a-weekend',
     }
   }
 
@@ -16263,6 +16692,24 @@ function getRouteStructuredData(
         { '@type': 'Thing', name: 'Net 30 payment terms' },
         { '@type': 'Thing', name: 'Invoice due dates' },
         { '@type': 'Thing', name: 'Calendar-day counting' },
+      ],
+    }
+  }
+
+  if (route === 'deadline-weekend-extension-guide') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      name: 'What If a Deadline Falls on a Weekend?',
+      url: canonicalUrl,
+      description: metadata.description,
+      isPartOf: websiteReference,
+      publisher: organizationReference,
+      about: [
+        { '@type': 'Thing', name: 'Deadline adjustment' },
+        { '@type': 'Thing', name: 'Weekend deadlines' },
+        { '@type': 'Thing', name: 'Business-day counting' },
       ],
     }
   }
