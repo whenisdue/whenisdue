@@ -560,7 +560,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
               analyticsContext="deadline_rule_calculator"
               rows={[
                 {
-                  label: triggerEvent ? 'Clock starts' : 'Start date',
+                  label: direction === 'before' ? 'Reference event' : 'Clock starts',
                   value: triggerEvent
                     ? `${triggerEvent.label} — ${formatPlainDate(parsedTriggerDate)}`
                     : formatPlainDate(parsedTriggerDate),
