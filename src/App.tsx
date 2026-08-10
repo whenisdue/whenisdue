@@ -3,6 +3,7 @@ import './App.css'
 import './VaHomeCompact.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
 import { DeadlineFinalAdjustmentNotice } from './DeadlineFinalAdjustmentNotice.tsx'
+import { buildDeadlineExplanation } from './deadlineExplanation.ts'
 import VaTypingTrainerPage from './typing/VaTypingTrainerPage'
 import {
   type CalculatorMode,
@@ -550,17 +551,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             <small>{formatWeekday(result.answerDate)}</small>
 
             <p>
-              {parsedDuration} {unit === 'business-days' ? 'business' : 'calendar'}{' '}
-              {parsedDuration === 1 ? 'day' : 'days'} {direction}{' '}
-              {formatPlainDate(parsedTriggerDate)}.{' '}
-              {startDayConvention === 'exclude-trigger'
-                ? 'The start date does not count. '
-                : 'The start date counts if it qualifies. '}
-              {unit === 'business-days'
-                ? holidayCalendar === 'none'
-                  ? 'Weekends are skipped; public holidays still count.'
-                  : `Weekends and ${holidayOption.shortLabel.toLowerCase()} holidays are skipped.`
-                : 'Calendar days are counted continuously.'}
+              {result ? buildDeadlineExplanation(result, triggerKind) : null}
             </p>
 
             <DeadlineFinalAdjustmentNotice answer={result} />
