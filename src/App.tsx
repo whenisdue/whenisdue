@@ -95,6 +95,7 @@ type RouteName =
   | 'deadline-calculator'
   | 'start-date-count-guide'
   | 'weekends-business-days-guide'
+  | 'public-holidays-business-days-guide'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -179,6 +180,10 @@ function App() {
 
   if (route === 'weekends-business-days-guide') {
     return <WeekendsBusinessDaysGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'public-holidays-business-days-guide') {
+    return <PublicHolidaysBusinessDaysGuidePage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -1368,6 +1373,15 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
               Do weekends count as business days?
             </a>
             <a
+              href="/do-public-holidays-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-public-holidays-count-as-business-days')
+              }}
+            >
+              Do public holidays count as business days?
+            </a>
+            <a
               href="/business-days-calculator"
               onClick={(event) => {
                 event.preventDefault()
@@ -1821,6 +1835,15 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
           <nav>
             <a
+              href="/do-public-holidays-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-public-holidays-count-as-business-days')
+              }}
+            >
+              Do public holidays count as business days?
+            </a>
+            <a
               href="/does-the-start-date-count"
               onClick={(event) => {
                 event.preventDefault()
@@ -2097,6 +2120,499 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
           }
 
           .weekends-business-guide-related a {
+            justify-content: center;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
+function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
+  const friday = parsePlainDate('2026-09-04')!
+
+  const withoutHolidayCalendar = calculateDeadlineByRule({
+    triggerDate: friday,
+    duration: 1,
+    direction: 'after',
+    unit: 'business-days',
+    startDayConvention: 'exclude-trigger',
+    holidayCalendar: 'none',
+    endDayAdjustment: 'none',
+  })
+
+  const withUsFederalHolidays = calculateDeadlineByRule({
+    triggerDate: friday,
+    duration: 1,
+    direction: 'after',
+    unit: 'business-days',
+    startDayConvention: 'exclude-trigger',
+    holidayCalendar: 'us',
+    endDayAdjustment: 'none',
+  })
+
+  const calculatorPath =
+    '/deadline-calculator?date=2026-09-04&days=1&unit=business-days&direction=after&startday=exclude-trigger&calendar=us'
+
+  return (
+    <main className="page-shell public-holidays-business-guide-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <article className="public-holidays-business-guide-shell">
+        <header className="public-holidays-business-guide-hero">
+          <p className="friendly-eyebrow">Business-day guide</p>
+          <h1>Do public holidays count as business days?</h1>
+
+          <div className="public-holidays-business-guide-answer">
+            <strong>Sometimes — it depends on the rule and holiday calendar being used.</strong>
+            <p>
+              A weekday public holiday can either count or be skipped. If your
+              deadline says to exclude public holidays, use the applicable
+              holiday calendar. If it only says “business days” and does not
+              define holidays, check the source that created the deadline
+              instead of assuming.
+            </p>
+          </div>
+
+          <p className="public-holidays-business-guide-scope">
+            Holiday coverage varies by country, state, province, territory,
+            employer, and proclamation. The governing rule controls.
+          </p>
+        </header>
+
+        <section
+          className="public-holidays-business-guide-example"
+          aria-labelledby="public-holidays-business-guide-example-title"
+        >
+          <div className="public-holidays-business-guide-example-heading">
+            <span>Worked example</span>
+            <h2 id="public-holidays-business-guide-example-title">
+              Start Friday, September 4, 2026 + 1 business day
+            </h2>
+            <p>
+              Monday, September 7, 2026 is US Labor Day.
+            </p>
+          </div>
+
+          <div className="public-holidays-business-guide-results">
+            <div>
+              <span>Weekends only</span>
+              <strong>
+                {withoutHolidayCalendar
+                  ? formatPlainDate(withoutHolidayCalendar.answerDate)
+                  : '—'}
+              </strong>
+              <small>
+                {withoutHolidayCalendar
+                  ? formatWeekday(withoutHolidayCalendar.answerDate)
+                  : ''}
+              </small>
+              <p>
+                Monday is a weekday, so it counts when no public-holiday
+                exclusions are applied.
+              </p>
+            </div>
+
+            <div>
+              <span>US federal holidays excluded</span>
+              <strong>
+                {withUsFederalHolidays
+                  ? formatPlainDate(withUsFederalHolidays.answerDate)
+                  : '—'}
+              </strong>
+              <small>
+                {withUsFederalHolidays
+                  ? formatWeekday(withUsFederalHolidays.answerDate)
+                  : ''}
+              </small>
+              <p>
+                Labor Day is skipped, so the next qualifying business day is
+                Tuesday.
+              </p>
+            </div>
+          </div>
+
+          <a
+            className="public-holidays-business-guide-cta"
+            href={calculatorPath}
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('authority_guide_calculator_click', {
+                guide: 'public_holidays_business_days',
+              })
+              onNavigate(calculatorPath)
+            }}
+          >
+            Calculate with your holiday calendar →
+          </a>
+        </section>
+
+        <section className="public-holidays-business-guide-content">
+          <article>
+            <h2>Why “business day” is not always enough</h2>
+            <p>
+              Monday through Friday is only the working-week part of the rule.
+              Holidays are a separate question. A weekday can be Monday through
+              Friday and still be excluded because it is a recognized public
+              holiday under the applicable calendar.
+            </p>
+          </article>
+
+          <article>
+            <h2>Which holiday calendar should you use?</h2>
+            <p>
+              Use the calendar named by the contract, policy, law, employer, or
+              organization that created the deadline. Do not substitute a
+              different national or local calendar just because the date looks
+              like a holiday where you live.
+            </p>
+          </article>
+
+          <article>
+            <h2>What WhenIsDue supports</h2>
+            <p>
+              WhenIsDue can optionally exclude supported holidays for the US,
+              England &amp; Wales, Canada, Australia, and the Philippines.
+              Coverage is deliberately labeled because local, provincial,
+              state, territory, company-specific, and proclamation-based
+              closures can differ.
+            </p>
+          </article>
+
+          <article>
+            <h2>What if the final date itself is a holiday?</h2>
+            <p>
+              That is a separate final-day rule. Some instructions move the
+              deadline to the next business day, some move it to the previous
+              business day, and some do not move it at all. WhenIsDue keeps
+              that adjustment separate so the calculation does not silently
+              invent a policy.
+            </p>
+          </article>
+
+          <article>
+            <h2>Quick rule of thumb</h2>
+            <dl>
+              <div>
+                <dt>The rule explicitly excludes public holidays</dt>
+                <dd>
+                  Use the applicable holiday calendar and skip those dates.
+                </dd>
+              </div>
+              <div>
+                <dt>The rule says only “business days”</dt>
+                <dd>
+                  Check how that term is defined before assuming holidays are
+                  excluded.
+                </dd>
+              </div>
+            </dl>
+          </article>
+        </section>
+
+        <section
+          className="public-holidays-business-guide-related"
+          aria-label="Related deadline guides and tools"
+        >
+          <div>
+            <span>Related answers</span>
+            <h2>Make each counting rule explicit</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/do-weekends-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-weekends-count-as-business-days')
+              }}
+            >
+              Do weekends count as business days?
+            </a>
+            <a
+              href="/does-the-start-date-count"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/does-the-start-date-count')
+              }}
+            >
+              Does the start date count?
+            </a>
+            <a
+              href="/business-days-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/business-days-calculator')
+              }}
+            >
+              Business days calculator
+            </a>
+            <a
+              href="/deadline-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/deadline-calculator')
+              }}
+            >
+              Deadline calculator
+            </a>
+          </nav>
+        </section>
+      </article>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Check the holiday calendar and final-day rule that apply to your deadline."
+      />
+
+      <style>{`
+        .public-holidays-business-guide-page {
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .public-holidays-business-guide-shell {
+          width: min(100% - 32px, 920px);
+          margin: 0 auto;
+          padding: 36px 0 64px;
+        }
+
+        .public-holidays-business-guide-hero {
+          text-align: center;
+        }
+
+        .public-holidays-business-guide-hero h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.35rem, 7vw, 4.6rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .public-holidays-business-guide-answer {
+          max-width: 760px;
+          margin: 22px auto 0;
+          padding: 22px;
+          border: 1px solid rgba(22, 49, 78, 0.09);
+          border-radius: 18px;
+          background: #fff;
+          text-align: left;
+        }
+
+        .public-holidays-business-guide-answer > strong {
+          display: block;
+          color: #17304d;
+          font-size: clamp(1.35rem, 3vw, 1.9rem);
+          line-height: 1.2;
+        }
+
+        .public-holidays-business-guide-answer p {
+          margin: 10px 0 0;
+          color: #526a82;
+          font-size: 1.02rem;
+          line-height: 1.65;
+        }
+
+        .public-holidays-business-guide-scope {
+          max-width: 700px;
+          margin: 12px auto 0;
+          color: #718197;
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .public-holidays-business-guide-example {
+          margin-top: 28px;
+          padding: 20px;
+          border: 1px solid rgba(183, 121, 31, 0.16);
+          border-radius: 18px;
+          background: #fffdf8;
+        }
+
+        .public-holidays-business-guide-example-heading {
+          text-align: center;
+        }
+
+        .public-holidays-business-guide-example-heading > span,
+        .public-holidays-business-guide-related > div > span {
+          color: #8a6a2c;
+          font-size: 0.8rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .public-holidays-business-guide-example-heading h2,
+        .public-holidays-business-guide-related h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.25rem;
+        }
+
+        .public-holidays-business-guide-example-heading p {
+          margin: 6px 0 0;
+          color: #718197;
+          font-size: 0.94rem;
+        }
+
+        .public-holidays-business-guide-results {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .public-holidays-business-guide-results > div {
+          padding: 17px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 14px;
+          background: #fff;
+        }
+
+        .public-holidays-business-guide-results span {
+          display: block;
+          color: #526a82;
+          font-size: 0.92rem;
+          font-weight: 850;
+        }
+
+        .public-holidays-business-guide-results strong {
+          display: block;
+          margin-top: 7px;
+          color: #17304d;
+          font-size: clamp(1.55rem, 3vw, 2.15rem);
+          line-height: 1.1;
+        }
+
+        .public-holidays-business-guide-results small {
+          display: block;
+          margin-top: 4px;
+          color: #6d8196;
+          font-size: 0.94rem;
+        }
+
+        .public-holidays-business-guide-results p {
+          margin: 10px 0 0;
+          color: #667c92;
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .public-holidays-business-guide-cta {
+          min-height: 48px;
+          width: fit-content;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 18px auto 0;
+          padding: 9px 15px;
+          border-radius: 11px;
+          background: #173a63;
+          color: #fff;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        .public-holidays-business-guide-content {
+          display: grid;
+          gap: 14px;
+          margin-top: 24px;
+        }
+
+        .public-holidays-business-guide-content > article {
+          padding: 20px;
+          border: 1px solid rgba(22, 49, 78, 0.08);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .public-holidays-business-guide-content h2 {
+          margin: 0;
+          color: #29435e;
+          font-size: 1.2rem;
+        }
+
+        .public-holidays-business-guide-content p {
+          margin: 9px 0 0;
+          color: #5f748a;
+          font-size: 1rem;
+          line-height: 1.65;
+        }
+
+        .public-holidays-business-guide-content dl {
+          display: grid;
+          gap: 10px;
+          margin: 14px 0 0;
+        }
+
+        .public-holidays-business-guide-content dl > div {
+          padding: 13px 14px;
+          border: 1px solid rgba(22, 49, 78, 0.08);
+          border-radius: 12px;
+          background: #fff;
+        }
+
+        .public-holidays-business-guide-content dt {
+          color: #29435e;
+          font-weight: 900;
+        }
+
+        .public-holidays-business-guide-content dd {
+          margin: 5px 0 0;
+          color: #667c92;
+          line-height: 1.55;
+        }
+
+        .public-holidays-business-guide-related {
+          margin-top: 24px;
+          padding: 20px 0 0;
+          border-top: 1px solid rgba(22, 49, 78, 0.1);
+        }
+
+        .public-holidays-business-guide-related nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 13px;
+        }
+
+        .public-holidays-business-guide-related a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.88rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        @media (max-width: 720px) {
+          .public-holidays-business-guide-shell {
+            width: min(100% - 20px, 920px);
+            padding-top: 24px;
+          }
+
+          .public-holidays-business-guide-results {
+            grid-template-columns: 1fr;
+          }
+
+          .public-holidays-business-guide-answer,
+          .public-holidays-business-guide-example,
+          .public-holidays-business-guide-content > article {
+            padding: 16px;
+          }
+
+          .public-holidays-business-guide-related nav {
+            display: grid;
+            grid-template-columns: 1fr;
+          }
+
+          .public-holidays-business-guide-related a {
             justify-content: center;
           }
         }
@@ -5702,6 +6218,24 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             </a>{' '}
             for examples and the difference between weekends and public
             holidays.
+          </p>
+        </article>
+
+        <article>
+          <h2>Do public holidays count as business days?</h2>
+          <p>
+            It depends on the rule and holiday calendar being used. See the{' '}
+            <a
+              href="/do-public-holidays-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-public-holidays-count-as-business-days')
+              }}
+            >
+              public holidays and business days guide
+            </a>{' '}
+            for a worked example showing how one holiday can change the due
+            date.
           </p>
         </article>
       </section>
@@ -10981,6 +11515,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'weekends-business-days-guide'
   }
 
+  if (pathname === '/do-public-holidays-count-as-business-days') {
+    return 'public-holidays-business-days-guide'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -11208,6 +11746,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Learn how weekends are treated in standard business-day counting, with a clear Friday-to-Monday example.',
       twitterDescription: 'Do weekends count as business days? See the standard Monday–Friday rule and worked example.',
       path: '/do-weekends-count-as-business-days',
+    }
+  }
+
+  if (route === 'public-holidays-business-days-guide') {
+    return {
+      title: 'Do Public Holidays Count as Business Days? | WhenIsDue',
+      description: 'See when public holidays count as business days, when they are skipped, and how the selected holiday calendar can change a deadline.',
+      openGraphDescription: 'Learn how public holidays affect business-day deadlines with a clear US Labor Day example.',
+      twitterDescription: 'Do public holidays count as business days? See when they count, when they are skipped, and why the calendar matters.',
+      path: '/do-public-holidays-count-as-business-days',
     }
   }
 
@@ -11547,6 +12095,32 @@ function getRouteStructuredData(
         {
           '@type': 'Thing',
           name: 'Weekends',
+        },
+        {
+          '@type': 'Thing',
+          name: 'Deadline counting',
+        },
+      ],
+    }
+  }
+  if (route === 'public-holidays-business-days-guide') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      name: 'Do Public Holidays Count as Business Days?',
+      url: canonicalUrl,
+      description: metadata.description,
+      isPartOf: websiteReference,
+      publisher: organizationReference,
+      about: [
+        {
+          '@type': 'Thing',
+          name: 'Business days',
+        },
+        {
+          '@type': 'Thing',
+          name: 'Public holidays',
         },
         {
           '@type': 'Thing',
