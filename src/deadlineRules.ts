@@ -42,6 +42,13 @@ export type SkippedDeadlineDate = {
   name?: string
 }
 
+export type FinalDayAdjustmentResult = {
+  applied: boolean
+  candidateDate: PlainDate
+  adjustedDate: PlainDate
+  blockedDates: SkippedDeadlineDate[]
+}
+
 export type DeadlineAnswer = {
   answerDate: PlainDate
   triggerDate: PlainDate
@@ -54,6 +61,7 @@ export type DeadlineAnswer = {
   endDayAdjustment: EndDayAdjustment
   workingScheduleId: WorkingScheduleId
   skippedDates: SkippedDeadlineDate[]
+  finalDayAdjustment: FinalDayAdjustmentResult
   ruleVersion: 'deadline-rule-v1'
 }
 
@@ -124,30 +132,43 @@ function moveToBusinessDate(
 }
 
 function applyEndDayAdjustment(
-  date: PlainDate,
+  candidateDate: PlainDate,
   adjustment: EndDayAdjustment,
   holidayCalendar: HolidayCalendarId,
   workingScheduleId: WorkingScheduleId,
-  skippedDates: SkippedDeadlineDate[],
-) {
-  if (adjustment === 'none') return date
+): FinalDayAdjustmentResult {
+  const blockedDates: SkippedDeadlineDate[] = []
+
   if (
+    adjustment === 'none' ||
     isBusinessDate(
-      date,
+      candidateDate,
       holidayCalendar,
       workingScheduleId,
     )
   ) {
-    return date
+    return {
+      applied: false,
+      candidateDate,
+      adjustedDate: candidateDate,
+      blockedDates,
+    }
   }
 
-  return moveToBusinessDate(
-    date,
+  const adjustedDate = moveToBusinessDate(
+    candidateDate,
     adjustment === 'next-business-day' ? 'forward' : 'backward',
     holidayCalendar,
     workingScheduleId,
-    skippedDates,
+    blockedDates,
   )
+
+  return {
+    applied: toDateKey(adjustedDate) !== toDateKey(candidateDate),
+    candidateDate,
+    adjustedDate,
+    blockedDates,
+  }
 }
 
 export function calculateDeadlineByRule(
@@ -205,13 +226,13 @@ export function calculateDeadlineByRule(
     }
   }
 
-  const answerDate = applyEndDayAdjustment(
+  const finalDayAdjustment = applyEndDayAdjustment(
     cursor,
     input.endDayAdjustment,
     input.holidayCalendar,
     workingScheduleId,
-    skippedDates,
   )
+  const answerDate = finalDayAdjustment.adjustedDate
 
   return {
     answerDate,
@@ -225,6 +246,7 @@ export function calculateDeadlineByRule(
     endDayAdjustment: input.endDayAdjustment,
     workingScheduleId,
     skippedDates,
+    finalDayAdjustment,
     ruleVersion: 'deadline-rule-v1',
   }
 }

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import './VaHomeCompact.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
+import { DeadlineFinalAdjustmentNotice } from './DeadlineFinalAdjustmentNotice.tsx'
 import VaTypingTrainerPage from './typing/VaTypingTrainerPage'
 import {
   type CalculatorMode,
@@ -562,6 +563,8 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                 : 'Calendar days are counted continuously.'}
             </p>
 
+            <DeadlineFinalAdjustmentNotice answer={result} />
+
             <CalculationReceipt
               analyticsContext="deadline_rule_calculator"
               rows={[
@@ -604,9 +607,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                 {
                   label: 'Holiday calendar',
                   value:
-                    unit === 'business-days'
+                    unit === 'business-days' || endDayAdjustment !== 'none'
                       ? holidayOption.label
-                      : 'Not used for calendar-day counting',
+                      : 'Not used',
                 },
                 {
                   label: 'Final-day rule',
@@ -756,7 +759,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
               </select>
             </label>
 
-            {unit === 'business-days' ? (
+            {unit === 'business-days' || endDayAdjustment !== 'none' ? (
               <label>
                 <span>Public holidays</span>
                 <select
