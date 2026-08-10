@@ -2737,7 +2737,10 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
       <section className="shipping-range-shell">
         <header className="shipping-range-intro">
           <p className="friendly-eyebrow">Delivery estimate</p>
-          <h1>When will 3–5 business days arrive?</h1>
+          <h1>
+            When will {minimumDays || '3'}–{maximumDays || '5'}{' '}
+            {countMode === 'business' ? 'business' : 'calendar'} days arrive?
+          </h1>
           <p>
             Turn a shipping estimate into actual earliest and latest delivery
             dates.
@@ -4160,6 +4163,64 @@ function resolveAskWhenQuery(
 
   if (!query) return null
 
+  const shippingRangePatterns = [
+    /^(\d{1,3})\s*(?:-|–|to)\s*(\d{1,3})\s+(business|working|calendar)\s+days?\s+(?:shipping|delivery|arrival)$/,
+    /^(?:shipping|delivery|arrival)\s+(?:in\s+)?(\d{1,3})\s*(?:-|–|to)\s*(\d{1,3})\s+(business|working|calendar)\s+days?$/,
+    /^(?:arrives?|delivery|shipping)\s+in\s+(\d{1,3})\s*(?:-|–|to)\s*(\d{1,3})\s+(business|working|calendar)\s+days?$/,
+    /^when\s+will\s+(?:it|my\s+(?:order|package|delivery))\s+arrive\s+in\s+(\d{1,3})\s*(?:-|–|to)\s*(\d{1,3})\s+(business|working|calendar)\s+days?$/,
+  ]
+
+  for (const pattern of shippingRangePatterns) {
+    const match = query.match(pattern)
+    if (!match) continue
+
+    const minimumDays = Number(match[1])
+    const maximumDays = Number(match[2])
+    const unit = match[3]
+
+    if (
+      !Number.isFinite(minimumDays) ||
+      !Number.isFinite(maximumDays) ||
+      minimumDays < 0 ||
+      maximumDays < 0 ||
+      minimumDays > 365 ||
+      maximumDays > 365 ||
+      minimumDays > maximumDays
+    ) {
+      return null
+    }
+
+    const mode = unit === 'calendar' ? 'calendar' : 'business'
+    const params = new URLSearchParams({
+      min: String(minimumDays),
+      max: String(maximumDays),
+      mode,
+    })
+
+    if (mode === 'business') {
+      const calendarValue = holidayCalendarQueryValue(holidayCalendar)
+
+      if (calendarValue) {
+        params.set('calendar', calendarValue)
+      }
+    }
+
+    return {
+      label: `${minimumDays}–${maximumDays} ${
+        mode === 'business' ? 'business' : 'calendar'
+      } day delivery range`,
+      description:
+        mode === 'business'
+          ? holidayCalendar === 'none'
+            ? 'See the earliest and latest dates with weekends skipped.'
+            : `See the earliest and latest dates with weekends and ${
+                getHolidayCalendarOption(holidayCalendar).shortLabel
+              } holidays skipped.`
+          : 'See the earliest and latest dates with weekends included.',
+      path: `/shipping-delivery-range-calculator?${params.toString()}`,
+    }
+  }
+
   const deadlineInterpretation = interpretDeadlinePhrase(query, {
     today,
     holidayCalendar,
@@ -4358,6 +4419,22 @@ function resolveAskWhenQuery(
   }
 
   if (
+    query === 'shipping calculator' ||
+    query === 'shipping date calculator' ||
+    query === 'delivery calculator' ||
+    query === 'delivery date calculator' ||
+    query === 'delivery range calculator' ||
+    query === 'shipping delivery calculator'
+  ) {
+    return {
+      label: 'Shipping delivery date range',
+      description:
+        'Turn a shipping estimate into earliest and latest delivery dates.',
+      path: '/shipping-delivery-range-calculator',
+    }
+  }
+
+  if (
     query === 'next payday' ||
     query === 'next pay day' ||
     query === 'my next payday' ||
@@ -4474,6 +4551,7 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
   const examples = [
     'what is 3 business days from today',
     '5 business days after 2026-08-10',
+    '3-5 business days shipping',
     'Net 30 due date',
     '30 day return',
   ]
