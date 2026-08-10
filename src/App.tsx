@@ -99,6 +99,7 @@ type RouteName =
   | 'shipping-delivery-range'
   | 'two-ten-net-30'
   | 'notice-period'
+  | 'subscription-renewal'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -199,6 +200,10 @@ function App() {
 
   if (route === 'notice-period') {
     return <NoticePeriodCalculatorPage onNavigate={navigate} />
+  }
+
+  if (route === 'subscription-renewal') {
+    return <SubscriptionRenewalCalculatorPage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -309,6 +314,23 @@ function getInitialPaySchedule(): PaySchedule {
     : 'biweekly'
 }
 
+
+
+function addCalendarMonthsClamped(date: PlainDate, months: number) {
+  const monthIndex = date.month - 1 + months
+  const targetYear = date.year + Math.floor(monthIndex / 12)
+  const normalizedMonthIndex = ((monthIndex % 12) + 12) % 12
+  const daysInTargetMonth = new Date(
+    Date.UTC(targetYear, normalizedMonthIndex + 1, 0),
+  ).getUTCDate()
+  const targetDay = Math.min(date.day, daysInTargetMonth)
+
+  return parsePlainDate(
+    `${targetYear}-${String(normalizedMonthIndex + 1).padStart(2, '0')}-${String(
+      targetDay,
+    ).padStart(2, '0')}`,
+  )!
+}
 
 
 function subtractCalendarMonthsClamped(date: PlainDate, months: number) {
@@ -3927,6 +3949,643 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
 }
 
 
+type SubscriptionIntervalUnit = 'days' | 'weeks' | 'months' | 'years'
+
+function SubscriptionRenewalCalculatorPage({
+  onNavigate,
+}: NavigationProps) {
+  const [startDate, setStartDate] = useState(() =>
+    getInitialDateQueryParam('date', todayInputValue()),
+  )
+  const [intervalAmount, setIntervalAmount] = useState(() =>
+    getInitialPositiveIntegerQueryParam('amount', '1', 365),
+  )
+  const [intervalUnit, setIntervalUnit] = useState<SubscriptionIntervalUnit>(
+    () => {
+      const value = new URLSearchParams(window.location.search).get('unit')
+      return value === 'days' || value === 'weeks' || value === 'years'
+        ? value
+        : 'months'
+    },
+  )
+  const [noticeDays, setNoticeDays] = useState(() =>
+    getInitialPositiveIntegerQueryParam('notice', '0', 365),
+  )
+
+  const parsedStart = parsePlainDate(startDate)
+  const parsedIntervalAmount = parseInteger(intervalAmount)
+  const parsedNoticeDays = parseInteger(noticeDays)
+
+  const nextRenewal =
+    parsedStart &&
+    parsedIntervalAmount !== null &&
+    parsedIntervalAmount >= 1
+      ? intervalUnit === 'days'
+        ? addCalendarDays(parsedStart, parsedIntervalAmount)
+        : intervalUnit === 'weeks'
+          ? addCalendarDays(parsedStart, parsedIntervalAmount * 7)
+          : intervalUnit === 'years'
+            ? addCalendarMonthsClamped(parsedStart, parsedIntervalAmount * 12)
+            : addCalendarMonthsClamped(parsedStart, parsedIntervalAmount)
+      : null
+
+  const cancellationDeadline =
+    nextRenewal && parsedNoticeDays !== null && parsedNoticeDays > 0
+      ? addCalendarDays(nextRenewal, -parsedNoticeDays)
+      : null
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      date: startDate,
+      amount: intervalAmount,
+      unit: intervalUnit,
+      notice: noticeDays,
+    })
+  }, [startDate, intervalAmount, intervalUnit, noticeDays])
+
+  const intervalLabel =
+    intervalUnit === 'days'
+      ? parsedIntervalAmount === 1
+        ? 'day'
+        : 'days'
+      : intervalUnit === 'weeks'
+        ? parsedIntervalAmount === 1
+          ? 'week'
+          : 'weeks'
+        : intervalUnit === 'years'
+          ? parsedIntervalAmount === 1
+            ? 'year'
+            : 'years'
+          : parsedIntervalAmount === 1
+            ? 'month'
+            : 'months'
+
+  return (
+    <main className="page-shell subscription-renewal-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="subscription-renewal-shell">
+        <header className="subscription-renewal-intro">
+          <p className="friendly-eyebrow">Subscription timing</p>
+          <h1>Subscription renewal calculator</h1>
+          <p>
+            Find the next renewal date and, if your plan requires advance
+            notice, the last day to cancel.
+          </p>
+        </header>
+
+        <section
+          className="subscription-renewal-workspace"
+          aria-label="Subscription renewal calculator"
+        >
+          <form
+            className="subscription-renewal-form"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            <label>
+              <span>Start or last renewal date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+              />
+            </label>
+
+            <div className="subscription-renewal-interval-grid">
+              <label>
+                <span>Renews every</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="365"
+                  step="1"
+                  inputMode="numeric"
+                  value={intervalAmount}
+                  onChange={(event) => setIntervalAmount(event.target.value)}
+                />
+              </label>
+
+              <label>
+                <span>Interval</span>
+                <select
+                  value={intervalUnit}
+                  onChange={(event) =>
+                    setIntervalUnit(
+                      event.target.value as SubscriptionIntervalUnit,
+                    )
+                  }
+                >
+                  <option value="days">Days</option>
+                  <option value="weeks">Weeks</option>
+                  <option value="months">Months</option>
+                  <option value="years">Years</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              <span>Cancel this many days before renewal</span>
+              <input
+                type="number"
+                min="0"
+                max="365"
+                step="1"
+                inputMode="numeric"
+                value={noticeDays}
+                onChange={(event) => setNoticeDays(event.target.value)}
+              />
+              <small>Enter 0 if there is no advance-notice rule.</small>
+            </label>
+
+            <div
+              className="subscription-renewal-quick-picks"
+              aria-label="Common renewal intervals"
+            >
+              {[
+                ['Monthly', '1', 'months'],
+                ['Quarterly', '3', 'months'],
+                ['Every 6 months', '6', 'months'],
+                ['Yearly', '1', 'years'],
+              ].map(([label, amount, unit]) => (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={() => {
+                    setIntervalAmount(amount)
+                    setIntervalUnit(unit as SubscriptionIntervalUnit)
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </form>
+
+          <section className="subscription-renewal-result" aria-live="polite">
+            {nextRenewal &&
+            parsedStart &&
+            parsedIntervalAmount !== null &&
+            parsedIntervalAmount >= 1 ? (
+              <>
+                <span>Next renewal</span>
+                <strong>{formatPlainDate(nextRenewal)}</strong>
+                <b>{formatWeekday(nextRenewal)}</b>
+
+                <p>
+                  {parsedIntervalAmount} {intervalLabel} after{' '}
+                  {formatPlainDate(parsedStart)}.
+                </p>
+
+                {cancellationDeadline && parsedNoticeDays ? (
+                  <div className="subscription-renewal-cancel">
+                    <small>Last day to cancel</small>
+                    <strong>{formatPlainDate(cancellationDeadline)}</strong>
+                    <b>{formatWeekday(cancellationDeadline)}</b>
+                    <p>
+                      {parsedNoticeDays} calendar days before the renewal date.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="subscription-renewal-no-notice">
+                    No advance cancellation notice applied.
+                  </p>
+                )}
+
+                <CalculationReceipt
+                  analyticsContext="subscription_renewal"
+                  rows={[
+                    {
+                      label: 'Start / last renewal date',
+                      value: `${formatWeekday(
+                        parsedStart,
+                      )}, ${formatPlainDate(parsedStart)}`,
+                    },
+                    {
+                      label: 'Renewal interval',
+                      value: `${parsedIntervalAmount} ${intervalLabel}`,
+                    },
+                    {
+                      label: 'Next renewal',
+                      value: `${formatWeekday(
+                        nextRenewal,
+                      )}, ${formatPlainDate(nextRenewal)}`,
+                    },
+                    ...(cancellationDeadline && parsedNoticeDays
+                      ? [
+                          {
+                            label: 'Advance notice',
+                            value: `${parsedNoticeDays} calendar days`,
+                          },
+                          {
+                            label: 'Last day to cancel',
+                            value: `${formatWeekday(
+                              cancellationDeadline,
+                            )}, ${formatPlainDate(cancellationDeadline)}`,
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
+
+                <ResultActions
+                  title="Subscription renewal date"
+                  date={nextRenewal}
+                  details={
+                    cancellationDeadline
+                      ? `Last day to cancel: ${formatPlainDate(
+                          cancellationDeadline,
+                        )}`
+                      : `${parsedIntervalAmount} ${intervalLabel} after ${formatPlainDate(
+                          parsedStart,
+                        )}`
+                  }
+                />
+              </>
+            ) : (
+              <p className="subscription-renewal-error">
+                Enter a valid start date and renewal interval.
+              </p>
+            )}
+          </section>
+        </section>
+
+        <section className="subscription-renewal-content">
+          <article>
+            <h2>What does this calculator assume?</h2>
+            <p>
+              It treats the date you enter as the start of the next billing
+              cycle and moves forward by the renewal interval you choose.
+              Day- and week-based intervals use calendar days.
+            </p>
+          </article>
+
+          <article>
+            <h2>How are monthly renewals handled?</h2>
+            <p>
+              Monthly and yearly intervals try to keep the same day number. If
+              the target month does not contain that day, WhenIsDue uses the
+              last day of that month.
+            </p>
+          </article>
+
+          <article>
+            <h2>How is the cancellation deadline calculated?</h2>
+            <p>
+              If your plan requires advance notice, enter the number of
+              calendar days required before renewal. WhenIsDue counts backward
+              from the next renewal date.
+            </p>
+          </article>
+
+          <article>
+            <h2>Check the subscription terms</h2>
+            <p>
+              Billing providers may use time zones, billing cut-off times,
+              grace periods, trial-conversion rules, or other policies that
+              this simple calculator does not model. The subscription terms
+              control.
+            </p>
+          </article>
+        </section>
+
+        <section
+          className="subscription-renewal-related"
+          aria-label="Related date calculators"
+        >
+          <div>
+            <span>Related tools</span>
+            <h2>Need another deadline?</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/free-trial-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/free-trial-calculator')
+              }}
+            >
+              Free trial calculator
+            </a>
+            <a
+              href="/notice-period-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/notice-period-calculator')
+              }}
+            >
+              Notice period calculator
+            </a>
+            <a
+              href="/deadline-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/deadline-calculator')
+              }}
+            >
+              Deadline calculator
+            </a>
+          </nav>
+        </section>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Subscription providers can use different billing dates, time zones, cut-off times, trial rules, and cancellation policies."
+      />
+
+      <style>{`
+        .subscription-renewal-page {
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .subscription-renewal-shell {
+          width: min(100% - 32px, 980px);
+          margin: 0 auto;
+          padding: 34px 0 64px;
+        }
+
+        .subscription-renewal-intro {
+          text-align: center;
+        }
+
+        .subscription-renewal-intro h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.35rem, 6vw, 4.4rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .subscription-renewal-intro > p:last-child {
+          max-width: 680px;
+          margin: 12px auto 0;
+          color: #61788f;
+          font-size: 1rem;
+          line-height: 1.55;
+        }
+
+        .subscription-renewal-workspace {
+          display: grid;
+          grid-template-columns: minmax(300px, 0.9fr) minmax(400px, 1.1fr);
+          gap: 14px;
+          margin-top: 24px;
+        }
+
+        .subscription-renewal-form,
+        .subscription-renewal-result {
+          min-width: 0;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 18px;
+          background: #fff;
+        }
+
+        .subscription-renewal-form {
+          display: grid;
+          gap: 14px;
+          align-content: start;
+        }
+
+        .subscription-renewal-form label {
+          display: grid;
+          gap: 6px;
+        }
+
+        .subscription-renewal-form label > span {
+          color: #526a82;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .subscription-renewal-form label > small {
+          color: #6d8196;
+          font-size: 0.84rem;
+          line-height: 1.45;
+        }
+
+        .subscription-renewal-form input,
+        .subscription-renewal-form select {
+          min-height: 48px;
+          width: 100%;
+          padding: 9px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 10px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .subscription-renewal-interval-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .subscription-renewal-quick-picks {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .subscription-renewal-quick-picks button {
+          min-height: 40px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #f7f9fb;
+          color: #5e748b;
+          font: inherit;
+          font-size: 0.84rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .subscription-renewal-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .subscription-renewal-result > span {
+          color: #71869b;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .subscription-renewal-result > strong {
+          display: block;
+          margin-top: 8px;
+          color: #10213f;
+          font-size: clamp(2.2rem, 5vw, 3.6rem);
+          line-height: 1;
+          letter-spacing: -0.035em;
+        }
+
+        .subscription-renewal-result > b {
+          display: block;
+          margin-top: 7px;
+          color: #637a91;
+          font-size: 1.05rem;
+        }
+
+        .subscription-renewal-result > p {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #586f86;
+          font-size: 0.96rem;
+          line-height: 1.55;
+        }
+
+        .subscription-renewal-cancel {
+          margin-top: 16px;
+          padding: 16px;
+          border: 1px solid rgba(183, 121, 31, 0.16);
+          border-radius: 13px;
+          background: #fffdf8;
+        }
+
+        .subscription-renewal-cancel small {
+          display: block;
+          color: #81692e;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .subscription-renewal-cancel strong {
+          display: block;
+          margin-top: 6px;
+          color: #17304d;
+          font-size: clamp(1.5rem, 3vw, 2.1rem);
+          line-height: 1.1;
+        }
+
+        .subscription-renewal-cancel b {
+          display: block;
+          margin-top: 5px;
+          color: #667c92;
+          font-size: 0.92rem;
+        }
+
+        .subscription-renewal-cancel p {
+          margin: 8px 0 0;
+          color: #667c92;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
+        .subscription-renewal-no-notice {
+          margin-top: 14px !important;
+          color: #6e8194 !important;
+        }
+
+        .subscription-renewal-error {
+          margin: auto !important;
+          color: #73869a !important;
+        }
+
+        .subscription-renewal-content {
+          display: grid;
+          gap: 12px;
+          margin-top: 22px;
+        }
+
+        .subscription-renewal-content article {
+          padding: 18px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .subscription-renewal-content h2 {
+          margin: 0;
+          color: #29435e;
+          font-size: 1.12rem;
+        }
+
+        .subscription-renewal-content p {
+          margin: 8px 0 0;
+          color: #5f748a;
+          font-size: 0.97rem;
+          line-height: 1.6;
+        }
+
+        .subscription-renewal-related {
+          margin-top: 24px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .subscription-renewal-related > div > span {
+          color: #7a8da1;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .subscription-renewal-related h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.2rem;
+        }
+
+        .subscription-renewal-related nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .subscription-renewal-related a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+          .subscription-renewal-shell {
+            width: min(100% - 20px, 980px);
+            padding-top: 24px;
+          }
+
+          .subscription-renewal-workspace,
+          .subscription-renewal-interval-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .subscription-renewal-form,
+          .subscription-renewal-result {
+            padding: 16px;
+          }
+
+          .subscription-renewal-quick-picks button {
+            min-height: 44px;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
     getInitialDateQueryParam('payday', todayInputValue()),
@@ -4876,6 +5535,66 @@ function resolveAskWhenQuery(
       label: 'Notice period calculator',
       description: 'Find the last date to act before a renewal or event.',
       path: '/notice-period-calculator',
+    }
+  }
+
+  const subscriptionPatterns = [
+    /^(?:subscription|membership|plan)\s+(?:renews?|renewal)\s+every\s+(\d{1,3})\s+(days?|weeks?|months?|years?)\s+(?:from|after)\s+(\d{4}-\d{2}-\d{2})$/,
+    /^next\s+(?:subscription|membership|plan)\s+renewal\s+(\d{1,3})\s+(days?|weeks?|months?|years?)\s+(?:from|after)\s+(\d{4}-\d{2}-\d{2})$/,
+  ]
+
+  for (const pattern of subscriptionPatterns) {
+    const match = query.match(pattern)
+    if (!match) continue
+
+    const amount = Number(match[1])
+    const rawUnit = match[2]
+    const startDate = match[3]
+
+    if (
+      !Number.isFinite(amount) ||
+      amount < 1 ||
+      amount > 365 ||
+      !parsePlainDate(startDate)
+    ) {
+      return null
+    }
+
+    const unit =
+      rawUnit.startsWith('day')
+        ? 'days'
+        : rawUnit.startsWith('week')
+          ? 'weeks'
+          : rawUnit.startsWith('year')
+            ? 'years'
+            : 'months'
+
+    const params = new URLSearchParams({
+      date: startDate,
+      amount: String(amount),
+      unit,
+    })
+
+    return {
+      label: `Next renewal every ${amount} ${rawUnit}`,
+      description:
+        'Calculate the next renewal date and, if needed, the last day to cancel.',
+      path: `/subscription-renewal-calculator?${params.toString()}`,
+    }
+  }
+
+  if (
+    query === 'subscription renewal calculator' ||
+    query === 'renewal date calculator' ||
+    query === 'subscription cancellation calculator' ||
+    query === 'membership renewal calculator' ||
+    query === 'billing renewal calculator'
+  ) {
+    return {
+      label: 'Subscription renewal calculator',
+      description:
+        'Find the next renewal date and optional cancellation deadline.',
+      path: '/subscription-renewal-calculator',
     }
   }
 
@@ -7195,6 +7914,22 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
                 <p>Contracts & renewals</p>
                 <h2>Notice period</h2>
                 <span>Count backward to find the latest date to give notice.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/subscription-renewal-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/subscription-renewal-calculator' })
+                onNavigate('/subscription-renewal-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">↻</span>
+              <div>
+                <p>Subscriptions</p>
+                <h2>Renewal & cancellation</h2>
+                <span>Find the next renewal date and optional cancellation deadline.</span>
               </div>
             </a>
           </div>
@@ -9665,6 +10400,23 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
       `}</style>
 
       <section className="business-content" aria-label="Free trial help">
+        <article>
+          <h2>Already past the free trial?</h2>
+          <p>
+            Use the{' '}
+            <a
+              href="/subscription-renewal-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/subscription-renewal-calculator')
+              }}
+            >
+              subscription renewal calculator
+            </a>{' '}
+            to find the next billing date and an optional last day to cancel.
+          </p>
+        </article>
+
         <article>
           <h2>How this calculator works</h2>
           <p>
@@ -13852,6 +14604,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'notice-period'
   }
 
+  if (pathname === '/subscription-renewal-calculator') {
+    return 'subscription-renewal'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -14119,6 +14875,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Enter an event date and notice period to find the last date to give notice, with optional business-day and holiday rules.',
       twitterDescription: 'Calculate the last date to give notice before a renewal, cancellation, or other event.',
       path: '/notice-period-calculator',
+    }
+  }
+
+  if (route === 'subscription-renewal') {
+    return {
+      title: 'Subscription Renewal & Cancellation Calculator | WhenIsDue',
+      description: 'Find the next subscription renewal date and, if advance notice is required, the last day to cancel before renewal.',
+      openGraphDescription: 'Enter the last renewal or start date, billing interval, and optional cancellation notice period to see both dates.',
+      twitterDescription: 'Calculate your next subscription renewal date and optional last day to cancel.',
+      path: '/subscription-renewal-calculator',
     }
   }
 
@@ -14500,6 +15266,7 @@ function getRouteStructuredData(
     route === 'shipping-delivery-range' ||
     route === 'two-ten-net-30' ||
     route === 'notice-period' ||
+    route === 'subscription-renewal' ||
     route === 'next-payday' ||
     route === 'deadline-calculator' ||
     route === 'free-trial' ||
