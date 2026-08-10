@@ -4056,6 +4056,169 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
 }
 
 
+function DeadlineCountingGuideLinks({
+  onNavigate,
+  compact = false,
+}: NavigationProps & { compact?: boolean }) {
+  const guides = [
+    {
+      path: '/does-the-start-date-count',
+      label: 'Does the start date count?',
+      description: 'Compare day-zero and day-one deadline counting.',
+    },
+    {
+      path: '/do-weekends-count-as-business-days',
+      label: 'Do weekends count as business days?',
+      description: 'See how Saturdays and Sundays affect business-day deadlines.',
+    },
+    {
+      path: '/do-public-holidays-count-as-business-days',
+      label: 'Do public holidays count as business days?',
+      description: 'See when a weekday holiday is counted or skipped.',
+    },
+  ]
+
+  return (
+    <section
+      className={`deadline-guide-links ${compact ? 'is-compact' : ''}`}
+      aria-labelledby={`deadline-guide-links-title-${compact ? 'compact' : 'full'}`}
+    >
+      <div className="deadline-guide-links-heading">
+        <span>Deadline counting answers</span>
+        <h2 id={`deadline-guide-links-title-${compact ? 'compact' : 'full'}`}>
+          Small wording changes can change the due date.
+        </h2>
+        {!compact ? (
+          <p>
+            Check the counting rule before relying on a deadline.
+          </p>
+        ) : null}
+      </div>
+
+      <div className="deadline-guide-links-grid">
+        {guides.map((guide) => (
+          <a
+            key={guide.path}
+            href={guide.path}
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('deadline_guide_opened', {
+                path: guide.path,
+                context: compact ? 'calculator_hub' : 'homepage',
+              })
+              onNavigate(guide.path)
+            }}
+          >
+            <strong>{guide.label}</strong>
+            <span>{guide.description}</span>
+            <b aria-hidden="true">→</b>
+          </a>
+        ))}
+      </div>
+
+      <style>{`
+        .deadline-guide-links {
+          width: min(1080px, calc(100% - 32px));
+          margin: 24px auto 0;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .deadline-guide-links.is-compact {
+          width: min(1080px, calc(100% - 36px));
+          margin-top: 18px;
+        }
+
+        .deadline-guide-links-heading {
+          text-align: left;
+        }
+
+        .deadline-guide-links-heading > span {
+          color: #7a8da1;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .deadline-guide-links-heading h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.2rem;
+        }
+
+        .deadline-guide-links-heading p {
+          margin: 6px 0 0;
+          color: #6c8095;
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .deadline-guide-links-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 9px;
+          margin-top: 14px;
+        }
+
+        .deadline-guide-links-grid a {
+          position: relative;
+          min-height: 112px;
+          display: grid;
+          align-content: center;
+          gap: 5px;
+          padding: 15px 42px 15px 15px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 12px;
+          background: #fff;
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .deadline-guide-links-grid strong {
+          color: #25425f;
+          font-size: 0.98rem;
+          line-height: 1.3;
+        }
+
+        .deadline-guide-links-grid span {
+          color: #6b8095;
+          font-size: 0.88rem;
+          line-height: 1.45;
+        }
+
+        .deadline-guide-links-grid b {
+          position: absolute;
+          right: 14px;
+          top: 50%;
+          color: #607a95;
+          transform: translateY(-50%);
+        }
+
+        @media (max-width: 760px) {
+          .deadline-guide-links,
+          .deadline-guide-links.is-compact {
+            width: calc(100% - 20px);
+            padding: 14px;
+          }
+
+          .deadline-guide-links-grid {
+            grid-template-columns: 1fr;
+            gap: 6px;
+          }
+
+          .deadline-guide-links-grid a {
+            min-height: 88px;
+          }
+        }
+      `}</style>
+    </section>
+  )
+}
+
+
 function HomePage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
   const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
@@ -4251,6 +4414,8 @@ function HomePage({ onNavigate }: NavigationProps) {
         holidayCalendar={holidayCalendar}
         today={today}
       />
+
+      <DeadlineCountingGuideLinks onNavigate={onNavigate} />
 
       {(favoriteCalculations.length > 0 || recentOnlyCalculations.length > 0) ? (
         <section className="date-home-saved" aria-labelledby="date-home-saved-title">
@@ -5381,6 +5546,8 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           </div>
         </div>
       </section>
+
+      <DeadlineCountingGuideLinks onNavigate={onNavigate} compact />
 
       <details id="calculator" className="calculator-secondary-section">
         <summary className="friendly-section-heading">
