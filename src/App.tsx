@@ -101,6 +101,7 @@ type RouteName =
   | 'notice-period'
   | 'subscription-renewal'
   | 'within-days-guide'
+  | 'net-30-vs-30-days-guide'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -209,6 +210,10 @@ function App() {
 
   if (route === 'within-days-guide') {
     return <WithinDaysGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'net-30-vs-30-days-guide') {
+    return <NetThirtyVsThirtyDaysGuidePage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -4810,6 +4815,211 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 }
 
 
+function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
+  const [invoiceDate, setInvoiceDate] = useState(() =>
+    getInitialDateQueryParam('date', todayInputValue()),
+  )
+
+  const parsedInvoiceDate = parsePlainDate(invoiceDate)
+  const netThirtyDate = parsedInvoiceDate
+    ? getDueDateForMode('invoice', parsedInvoiceDate, 0, 'net30')
+    : null
+  const thirtyCalendarDaysDate = parsedInvoiceDate
+    ? addCalendarDays(parsedInvoiceDate, 30)
+    : null
+
+  useEffect(() => {
+    syncShareableQueryParams({ date: invoiceDate })
+  }, [invoiceDate])
+
+  return (
+    <main className="page-shell net-thirty-vs-days-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="net-thirty-vs-days-shell">
+        <header className="net-thirty-vs-days-intro">
+          <p className="friendly-eyebrow">Invoice wording</p>
+          <h1>Net 30 vs 30 days</h1>
+          <p>
+            They often produce the same date, but they are not always
+            interchangeable as payment terms.
+          </p>
+        </header>
+
+        <section className="net-thirty-vs-days-bam">
+          <strong>
+            Net 30 is a payment term. “30 days” is only a duration unless the
+            source defines more.
+          </strong>
+          <p>
+            In a simple invoice calculation, both may mean 30 calendar days
+            after the invoice date. But the trigger event, start-day rule,
+            weekend rule, holiday rule, or contract wording can change the
+            actual deadline.
+          </p>
+        </section>
+
+        <section className="net-thirty-vs-days-workspace">
+          <form onSubmit={(event) => event.preventDefault()}>
+            <label>
+              <span>Invoice date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={invoiceDate}
+                onChange={(event) => setInvoiceDate(event.target.value)}
+              />
+            </label>
+          </form>
+
+          <section className="net-thirty-vs-days-results" aria-live="polite">
+            {parsedInvoiceDate && netThirtyDate && thirtyCalendarDaysDate ? (
+              <>
+                <article>
+                  <small>Net 30</small>
+                  <strong>{formatPlainDate(netThirtyDate)}</strong>
+                  <b>{formatWeekday(netThirtyDate)}</b>
+                  <p>
+                    30 calendar days after the invoice date in WhenIsDue’s
+                    standard Net 30 calculation.
+                  </p>
+                </article>
+
+                <article>
+                  <small>30 calendar days</small>
+                  <strong>{formatPlainDate(thirtyCalendarDaysDate)}</strong>
+                  <b>{formatWeekday(thirtyCalendarDaysDate)}</b>
+                  <p>30 calendar days after the same reference date.</p>
+                </article>
+              </>
+            ) : (
+              <p>Enter a valid invoice date.</p>
+            )}
+          </section>
+        </section>
+
+        <section className="net-thirty-vs-days-copy">
+          <article>
+            <h2>When are they the same?</h2>
+            <p>
+              They match when “Net 30” means payment is due 30 calendar days
+              after the invoice date and no other rule adjusts the final date.
+            </p>
+          </article>
+
+          <article>
+            <h2>Why can they differ?</h2>
+            <p>
+              A payment term can use a different starting event, such as
+              receipt of the invoice, acceptance of goods, or completion of
+              work. It can also include weekend, holiday, or other
+              contract-specific rules.
+            </p>
+          </article>
+
+          <article>
+            <h2>Does the invoice date count as day one?</h2>
+            <p>
+              In WhenIsDue’s standard Net 30 calculation, the invoice date is
+              treated as day zero and the due date is 30 calendar days later.
+              If the governing wording uses a different convention, follow
+              that wording.
+            </p>
+          </article>
+
+          <article>
+            <h2>What should you rely on?</h2>
+            <p>
+              Use the written invoice, contract, purchase order, or payment
+              policy. The source that created the obligation controls the real
+              deadline.
+            </p>
+          </article>
+        </section>
+
+        <nav className="net-thirty-vs-days-related" aria-label="Related invoice tools">
+          <a
+            href="/net-30-due-date"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/net-30-due-date')
+            }}
+          >
+            Net 30 due date
+          </a>
+          <a
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            Invoice due date calculator
+          </a>
+          <a
+            href="/2-10-net-30-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/2-10-net-30-calculator')
+            }}
+          >
+            2/10 Net 30 calculator
+          </a>
+          <a
+            href="/does-the-start-date-count"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/does-the-start-date-count')
+            }}
+          >
+            Does the start date count?
+          </a>
+        </nav>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Payment terms can define a different trigger event, counting convention, weekend or holiday rule, or final-day adjustment."
+      />
+
+      <style>{`
+        .net-thirty-vs-days-page { min-height: 100vh; background: #fffaf2; }
+        .net-thirty-vs-days-shell { width: min(100% - 32px, 980px); margin: 0 auto; padding: 34px 0 64px; }
+        .net-thirty-vs-days-intro { text-align: center; }
+        .net-thirty-vs-days-intro h1 { margin: 6px 0 0; color: #152d48; font-size: clamp(2.35rem, 6vw, 4.4rem); line-height: 1; letter-spacing: -0.04em; }
+        .net-thirty-vs-days-intro > p:last-child { max-width: 700px; margin: 12px auto 0; color: #61788f; font-size: 1rem; line-height: 1.55; }
+        .net-thirty-vs-days-bam { max-width: 780px; margin: 22px auto 0; padding: 18px; border: 1px solid rgba(62,126,82,.14); border-radius: 14px; background: #f7fcf7; text-align: center; }
+        .net-thirty-vs-days-bam strong { display: block; color: #214b38; font-size: 1.12rem; line-height: 1.35; }
+        .net-thirty-vs-days-bam p { margin: 8px 0 0; color: #567162; font-size: .96rem; line-height: 1.55; }
+        .net-thirty-vs-days-workspace { display: grid; grid-template-columns: .7fr 1.3fr; gap: 14px; margin-top: 18px; }
+        .net-thirty-vs-days-workspace form, .net-thirty-vs-days-results { padding: 20px; border: 1px solid rgba(19,38,70,.09); border-radius: 18px; background: #fff; }
+        .net-thirty-vs-days-workspace form { align-self: stretch; display: flex; align-items: center; }
+        .net-thirty-vs-days-workspace label { width: 100%; display: grid; gap: 6px; color: #526a82; font-size: .9rem; font-weight: 850; }
+        .net-thirty-vs-days-workspace input { min-height: 48px; width: 100%; padding: 9px 11px; border: 1px solid rgba(19,38,70,.14); border-radius: 10px; background: #fff; color: #17304d; font: inherit; font-size: 1rem; }
+        .net-thirty-vs-days-results { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+        .net-thirty-vs-days-results article { padding: 17px; border: 1px solid rgba(19,38,70,.09); border-radius: 13px; background: #fffdf9; text-align: center; }
+        .net-thirty-vs-days-results small { display: block; color: #72869a; font-size: .78rem; font-weight: 900; letter-spacing: .035em; text-transform: uppercase; }
+        .net-thirty-vs-days-results strong { display: block; margin-top: 7px; color: #10213f; font-size: clamp(1.55rem,3.2vw,2.35rem); line-height: 1.05; }
+        .net-thirty-vs-days-results b { display: block; margin-top: 5px; color: #667c92; font-size: .92rem; }
+        .net-thirty-vs-days-results p { margin: 9px 0 0; color: #667c92; font-size: .9rem; line-height: 1.5; }
+        .net-thirty-vs-days-copy { display: grid; gap: 12px; margin-top: 22px; }
+        .net-thirty-vs-days-copy article { padding: 18px; border: 1px solid rgba(19,38,70,.08); border-radius: 14px; background: rgba(255,255,255,.72); }
+        .net-thirty-vs-days-copy h2 { margin: 0; color: #29435e; font-size: 1.12rem; }
+        .net-thirty-vs-days-copy p { margin: 8px 0 0; color: #5f748a; font-size: .97rem; line-height: 1.6; }
+        .net-thirty-vs-days-related { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(19,38,70,.1); }
+        .net-thirty-vs-days-related a { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 12px; border: 1px solid rgba(19,38,70,.1); border-radius: 999px; background: #fff; color: #4f6a85; font-size: .86rem; font-weight: 850; text-decoration: none; }
+        @media (max-width: 760px) {
+          .net-thirty-vs-days-shell { width: min(100% - 20px,980px); padding-top: 24px; }
+          .net-thirty-vs-days-workspace, .net-thirty-vs-days-results { grid-template-columns: 1fr; }
+          .net-thirty-vs-days-workspace form, .net-thirty-vs-days-results { padding: 16px; }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
     getInitialDateQueryParam('payday', todayInputValue()),
@@ -5863,6 +6073,21 @@ function resolveAskWhenQuery(
     }
   }
 
+  if (
+    query === 'net 30 vs 30 days' ||
+    query === 'net 30 versus 30 days' ||
+    query === 'is net 30 the same as 30 days' ||
+    query === 'does net 30 mean 30 days' ||
+    query === 'what is the difference between net 30 and 30 days'
+  ) {
+    return {
+      label: 'Net 30 vs 30 days',
+      description:
+        'See why the arithmetic can match while the payment-term meaning can still differ.',
+      path: '/net-30-vs-30-days',
+    }
+  }
+
   const deadlineInterpretation = interpretDeadlinePhrase(query, {
     today,
     holidayCalendar,
@@ -6521,6 +6746,7 @@ function HomepageQuestionMap({ onNavigate }: NavigationProps) {
     { label: '7 business days from today', path: '/7-business-days-from-today', weight: 'sm' },
     { label: '10 business days from today', path: '/10-business-days-from-today', weight: 'sm' },
     { label: 'Net 15 due date', path: '/net-15-due-date', weight: 'sm' },
+    { label: 'Net 30 vs 30 days', path: '/net-30-vs-30-days', weight: 'sm' },
     { label: 'Net 45 due date', path: '/net-45-due-date', weight: 'sm' },
     { label: 'Net 60 due date', path: '/net-60-due-date', weight: 'sm' },
     { label: 'Return window deadline', path: '/return-window-calculator', weight: 'sm' },
@@ -15330,6 +15556,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'within-days-guide'
   }
 
+  if (pathname === '/net-30-vs-30-days') {
+    return 'net-30-vs-30-days-guide'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -15617,6 +15847,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Understand “within X days” wording and compare both possible directions before relying on it as a deadline.',
       twitterDescription: 'What does “within X days” mean? Compare the common interpretations and calculate both dates.',
       path: '/what-does-within-days-mean',
+    }
+  }
+
+  if (route === 'net-30-vs-30-days-guide') {
+    return {
+      title: 'Net 30 vs 30 Days: Are They the Same? | WhenIsDue',
+      description: 'See when Net 30 and 30 calendar days produce the same due date, why the payment-term wording can still matter, and compare both dates.',
+      openGraphDescription: 'Compare Net 30 with a simple 30-day duration and see when payment-term wording can change the result.',
+      twitterDescription: 'Is Net 30 the same as 30 days? Compare the dates and understand why the payment-term wording matters.',
+      path: '/net-30-vs-30-days',
     }
   }
 
@@ -16005,6 +16245,24 @@ function getRouteStructuredData(
         { '@type': 'Thing', name: 'Deadline wording' },
         { '@type': 'Thing', name: 'Date calculation' },
         { '@type': 'Thing', name: 'Deadline counting' },
+      ],
+    }
+  }
+
+  if (route === 'net-30-vs-30-days-guide') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      name: 'Net 30 vs 30 Days',
+      url: canonicalUrl,
+      description: metadata.description,
+      isPartOf: websiteReference,
+      publisher: organizationReference,
+      about: [
+        { '@type': 'Thing', name: 'Net 30 payment terms' },
+        { '@type': 'Thing', name: 'Invoice due dates' },
+        { '@type': 'Thing', name: 'Calendar-day counting' },
       ],
     }
   }
