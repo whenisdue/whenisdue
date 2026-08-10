@@ -6498,6 +6498,9 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
 
 
 function HomepageQuestionMap({ onNavigate }: NavigationProps) {
+  const [isMobileQuestionMapExpanded, setIsMobileQuestionMapExpanded] =
+    useState(false)
+
   const questions = [
     { label: '3 business days from today', path: '/3-business-days-from-today', weight: 'xl' },
     { label: 'When is Net 30 due?', path: '/net-30-due-date', weight: 'lg' },
@@ -6565,23 +6568,42 @@ function HomepageQuestionMap({ onNavigate }: NavigationProps) {
       </div>
 
       <div className="homepage-question-cloud-mobile">
-        {questions.map((question) => (
-          <a
-            key={question.label}
-            className={`question-map-link question-map-${question.weight}`}
-            href={question.path}
-            onClick={(event) => {
-              event.preventDefault()
-              trackWhenIsDueEvent('homepage_question_map_opened', {
-                path: question.path,
-                label: question.label,
-              })
-              onNavigate(question.path)
-            }}
-          >
-            {question.label}
-          </a>
-        ))}
+        {(isMobileQuestionMapExpanded ? questions : questions.slice(0, 4)).map(
+          (question) => (
+            <a
+              key={question.label}
+              className={`question-map-link question-map-${question.weight}`}
+              href={question.path}
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('homepage_question_map_opened', {
+                  path: question.path,
+                  label: question.label,
+                })
+                onNavigate(question.path)
+              }}
+            >
+              {question.label}
+            </a>
+          ),
+        )}
+
+        <button
+          type="button"
+          className="homepage-question-map-toggle"
+          aria-expanded={isMobileQuestionMapExpanded}
+          onClick={() => {
+            const nextExpanded = !isMobileQuestionMapExpanded
+            setIsMobileQuestionMapExpanded(nextExpanded)
+            trackWhenIsDueEvent('homepage_question_map_toggled', {
+              expanded: nextExpanded,
+            })
+          }}
+        >
+          {isMobileQuestionMapExpanded
+            ? 'Show fewer ↑'
+            : 'Explore more answers ↓'}
+        </button>
       </div>
 
       <p className="homepage-question-map-note">
@@ -7743,6 +7765,29 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .homepage-question-cloud-mobile .question-map-sm {
             font-size: 0.9rem;
+          }
+
+          .homepage-question-map-toggle {
+            min-height: 46px;
+            margin: 8px 10px 6px;
+            padding: 9px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 850;
+            cursor: pointer;
+          }
+
+          .homepage-question-map-toggle:hover {
+            background: rgba(255, 255, 255, 0.13);
+          }
+
+          .homepage-question-map-toggle:focus-visible {
+            outline: 3px solid rgba(255, 255, 255, 0.34);
+            outline-offset: 2px;
           }
         }
 
