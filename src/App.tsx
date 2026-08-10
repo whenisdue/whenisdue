@@ -98,6 +98,7 @@ type RouteName =
   | 'public-holidays-business-days-guide'
   | 'shipping-delivery-range'
   | 'two-ten-net-30'
+  | 'notice-period'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -194,6 +195,10 @@ function App() {
 
   if (route === 'two-ten-net-30') {
     return <TwoTenNetThirtyPage onNavigate={navigate} />
+  }
+
+  if (route === 'notice-period') {
+    return <NoticePeriodCalculatorPage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -304,6 +309,23 @@ function getInitialPaySchedule(): PaySchedule {
     : 'biweekly'
 }
 
+
+
+function subtractCalendarMonthsClamped(date: PlainDate, months: number) {
+  const monthIndex = date.month - 1 - months
+  const targetYear = date.year + Math.floor(monthIndex / 12)
+  const normalizedMonthIndex = ((monthIndex % 12) + 12) % 12
+  const daysInTargetMonth = new Date(
+    Date.UTC(targetYear, normalizedMonthIndex + 1, 0),
+  ).getUTCDate()
+  const targetDay = Math.min(date.day, daysInTargetMonth)
+
+  return parsePlainDate(
+    `${targetYear}-${String(normalizedMonthIndex + 1).padStart(2, '0')}-${String(
+      targetDay,
+    ).padStart(2, '0')}`,
+  )!
+}
 
 
 function getLocalUtcOffsetLabel(date = new Date()) {
@@ -3336,6 +3358,575 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
 }
 
 
+type NoticePeriodUnit =
+  | 'calendar-days'
+  | 'business-days'
+  | 'weeks'
+  | 'months'
+
+function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
+  const [eventDate, setEventDate] = useState(() =>
+    getInitialDateQueryParam('date', toDateKey(addCalendarDays(getTodayPlainDate(new Date()), 30))),
+  )
+  const [noticeAmount, setNoticeAmount] = useState(() =>
+    getInitialPositiveIntegerQueryParam('amount', '30', 365),
+  )
+  const [noticeUnit, setNoticeUnit] = useState<NoticePeriodUnit>(() => {
+    const value = new URLSearchParams(window.location.search).get('unit')
+    return value === 'business-days' ||
+      value === 'weeks' ||
+      value === 'months'
+      ? value
+      : 'calendar-days'
+  })
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
+  const parsedEventDate = parsePlainDate(eventDate)
+  const parsedAmount = parseInteger(noticeAmount)
+
+  const noticeDeadline =
+    parsedEventDate && parsedAmount !== null && parsedAmount >= 0
+      ? noticeUnit === 'business-days'
+        ? calculateBusinessDaysWithCalendar(
+            parsedEventDate,
+            -parsedAmount,
+            holidayCalendar,
+          ).date
+        : noticeUnit === 'weeks'
+          ? addCalendarDays(parsedEventDate, -(parsedAmount * 7))
+          : noticeUnit === 'months'
+            ? subtractCalendarMonthsClamped(parsedEventDate, parsedAmount)
+            : addCalendarDays(parsedEventDate, -parsedAmount)
+      : null
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      date: eventDate,
+      amount: noticeAmount,
+      unit: noticeUnit,
+      calendar:
+        noticeUnit === 'business-days'
+          ? holidayCalendarQueryValue(holidayCalendar)
+          : null,
+    })
+  }, [eventDate, noticeAmount, noticeUnit, holidayCalendar])
+
+  const unitLabel =
+    noticeUnit === 'business-days'
+      ? 'business days'
+      : noticeUnit === 'weeks'
+        ? noticeAmount === '1'
+          ? 'week'
+          : 'weeks'
+        : noticeUnit === 'months'
+          ? noticeAmount === '1'
+            ? 'month'
+            : 'months'
+          : 'calendar days'
+
+  return (
+    <main className="page-shell notice-period-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="notice-period-shell">
+        <header className="notice-period-intro">
+          <p className="friendly-eyebrow">Notice deadline</p>
+          <h1>Notice period calculator</h1>
+          <p>
+            Enter the renewal, cancellation, resignation, or other event date
+            and the required notice period.
+          </p>
+        </header>
+
+        <section
+          className="notice-period-workspace"
+          aria-label="Notice period calculator"
+        >
+          <form
+            className="notice-period-form"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            <label>
+              <span>Event or renewal date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={eventDate}
+                onChange={(event) => setEventDate(event.target.value)}
+              />
+            </label>
+
+            <div className="notice-period-input-grid">
+              <label>
+                <span>Notice period</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="365"
+                  step="1"
+                  inputMode="numeric"
+                  value={noticeAmount}
+                  onChange={(event) => setNoticeAmount(event.target.value)}
+                />
+              </label>
+
+              <label>
+                <span>Count as</span>
+                <select
+                  value={noticeUnit}
+                  onChange={(event) =>
+                    setNoticeUnit(event.target.value as NoticePeriodUnit)
+                  }
+                >
+                  <option value="calendar-days">Calendar days</option>
+                  <option value="business-days">Business days</option>
+                  <option value="weeks">Weeks</option>
+                  <option value="months">Months</option>
+                </select>
+              </label>
+            </div>
+
+            {noticeUnit === 'business-days' ? (
+              <HolidayCalendarSelect
+                value={holidayCalendar}
+                onChange={(nextCalendar) => {
+                  setHolidayCalendar(nextCalendar)
+                  trackWhenIsDueEvent('holiday_calendar_changed', {
+                    context: 'notice_period',
+                    value: nextCalendar,
+                  })
+                }}
+                compact
+              />
+            ) : null}
+
+            <div className="notice-period-quick-picks">
+              {[
+                ['14 days', '14', 'calendar-days'],
+                ['30 days', '30', 'calendar-days'],
+                ['60 days', '60', 'calendar-days'],
+                ['3 months', '3', 'months'],
+              ].map(([label, amount, unit]) => (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={() => {
+                    setNoticeAmount(amount)
+                    setNoticeUnit(unit as NoticePeriodUnit)
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </form>
+
+          <section className="notice-period-result" aria-live="polite">
+            {noticeDeadline && parsedEventDate && parsedAmount !== null ? (
+              <>
+                <span>Give notice by</span>
+                <strong>{formatPlainDate(noticeDeadline)}</strong>
+                <b>{formatWeekday(noticeDeadline)}</b>
+
+                <p>
+                  {parsedAmount} {unitLabel} before{' '}
+                  {formatPlainDate(parsedEventDate)}.
+                  {noticeUnit === 'business-days'
+                    ? holidayCalendar === 'none'
+                      ? ' Weekends skipped; public holidays still count as weekdays.'
+                      : ` Weekends and ${
+                          getHolidayCalendarOption(holidayCalendar).shortLabel
+                        } holidays skipped.`
+                    : ''}
+                </p>
+
+                <CalculationReceipt
+                  analyticsContext="notice_period"
+                  rows={[
+                    {
+                      label: 'Event / renewal date',
+                      value: `${formatWeekday(
+                        parsedEventDate,
+                      )}, ${formatPlainDate(parsedEventDate)}`,
+                    },
+                    {
+                      label: 'Notice period',
+                      value: `${parsedAmount} ${unitLabel}`,
+                    },
+                    ...(noticeUnit === 'business-days'
+                      ? [
+                          {
+                            label: 'Holiday calendar',
+                            value:
+                              getHolidayCalendarOption(holidayCalendar).label,
+                          },
+                        ]
+                      : []),
+                    {
+                      label: 'Latest notice date',
+                      value: `${formatWeekday(
+                        noticeDeadline,
+                      )}, ${formatPlainDate(noticeDeadline)}`,
+                    },
+                  ]}
+                />
+
+                <ResultActions
+                  title="Notice deadline"
+                  date={noticeDeadline}
+                  details={`${parsedAmount} ${unitLabel} before ${formatPlainDate(
+                    parsedEventDate,
+                  )}`}
+                />
+              </>
+            ) : (
+              <p className="notice-period-error">
+                Enter a valid event date and notice period.
+              </p>
+            )}
+          </section>
+        </section>
+
+        <section className="notice-period-content">
+          <article>
+            <h2>What does a notice period calculator do?</h2>
+            <p>
+              It counts backward from an event such as a contract renewal,
+              cancellation date, lease date, or other deadline to find the
+              latest date to give the required notice.
+            </p>
+          </article>
+
+          <article>
+            <h2>Example: 30 days before renewal</h2>
+            <p>
+              If a contract renews on September 30 and requires 30 calendar
+              days’ notice, this calculator counts backward 30 days and shows
+              the corresponding notice deadline.
+            </p>
+          </article>
+
+          <article>
+            <h2>Calendar days or business days?</h2>
+            <p>
+              Use the wording in the contract, policy, law, or instruction.
+              Calendar days count every date. Business days use the selected
+              working-day and holiday rules.
+            </p>
+          </article>
+
+          <article>
+            <h2>Months can behave differently</h2>
+            <p>
+              Month-based notice is calculated by moving back the stated
+              number of calendar months. If the target month does not contain
+              the same day number, WhenIsDue uses that month’s last day.
+              Always compare the result with the wording that governs your
+              notice.
+            </p>
+          </article>
+
+          <article>
+            <h2>Important</h2>
+            <p>
+              This is a date-planning tool, not legal advice. Some notice rules
+              define service, receipt, mailing, working days, or the final day
+              differently. The source that created the notice requirement
+              controls.
+            </p>
+          </article>
+        </section>
+
+        <section className="notice-period-related" aria-label="Related deadline tools">
+          <div>
+            <span>Related tools</span>
+            <h2>Need a more specific counting rule?</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/deadline-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/deadline-calculator')
+              }}
+            >
+              Deadline calculator
+            </a>
+            <a
+              href="/business-days-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/business-days-calculator')
+              }}
+            >
+              Business days calculator
+            </a>
+            <a
+              href="/does-the-start-date-count"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/does-the-start-date-count')
+              }}
+            >
+              Does the start date count?
+            </a>
+          </nav>
+        </section>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Contracts, laws, policies, and notices can define counting, service, receipt, weekends, holidays, and final-day rules differently."
+      />
+
+      <style>{`
+        .notice-period-page {
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .notice-period-shell {
+          width: min(100% - 32px, 980px);
+          margin: 0 auto;
+          padding: 34px 0 64px;
+        }
+
+        .notice-period-intro {
+          text-align: center;
+        }
+
+        .notice-period-intro h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.35rem, 6vw, 4.4rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .notice-period-intro > p:last-child {
+          max-width: 680px;
+          margin: 12px auto 0;
+          color: #61788f;
+          font-size: 1rem;
+          line-height: 1.55;
+        }
+
+        .notice-period-workspace {
+          display: grid;
+          grid-template-columns: minmax(300px, 0.9fr) minmax(400px, 1.1fr);
+          gap: 14px;
+          margin-top: 24px;
+        }
+
+        .notice-period-form,
+        .notice-period-result {
+          min-width: 0;
+          padding: 20px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 18px;
+          background: #fff;
+        }
+
+        .notice-period-form {
+          display: grid;
+          gap: 14px;
+          align-content: start;
+        }
+
+        .notice-period-form label {
+          display: grid;
+          gap: 6px;
+        }
+
+        .notice-period-form label > span {
+          color: #526a82;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .notice-period-form input,
+        .notice-period-form select {
+          min-height: 48px;
+          width: 100%;
+          padding: 9px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.14);
+          border-radius: 10px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .notice-period-input-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .notice-period-quick-picks {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .notice-period-quick-picks button {
+          min-height: 40px;
+          padding: 7px 10px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #f7f9fb;
+          color: #5e748b;
+          font: inherit;
+          font-size: 0.84rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .notice-period-result {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .notice-period-result > span {
+          color: #71869b;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .notice-period-result > strong {
+          display: block;
+          margin-top: 8px;
+          color: #10213f;
+          font-size: clamp(2.2rem, 5vw, 3.6rem);
+          line-height: 1;
+          letter-spacing: -0.035em;
+        }
+
+        .notice-period-result > b {
+          display: block;
+          margin-top: 7px;
+          color: #637a91;
+          font-size: 1.05rem;
+        }
+
+        .notice-period-result > p {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #586f86;
+          font-size: 0.96rem;
+          line-height: 1.55;
+        }
+
+        .notice-period-error {
+          margin: auto !important;
+          color: #73869a !important;
+        }
+
+        .notice-period-content {
+          display: grid;
+          gap: 12px;
+          margin-top: 22px;
+        }
+
+        .notice-period-content article {
+          padding: 18px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .notice-period-content h2 {
+          margin: 0;
+          color: #29435e;
+          font-size: 1.12rem;
+        }
+
+        .notice-period-content p {
+          margin: 8px 0 0;
+          color: #5f748a;
+          font-size: 0.97rem;
+          line-height: 1.6;
+        }
+
+        .notice-period-related {
+          margin-top: 24px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(19, 38, 70, 0.1);
+        }
+
+        .notice-period-related > div > span {
+          color: #7a8da1;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .notice-period-related h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.2rem;
+        }
+
+        .notice-period-related nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .notice-period-related a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+          .notice-period-shell {
+            width: min(100% - 20px, 980px);
+            padding-top: 24px;
+          }
+
+          .notice-period-workspace,
+          .notice-period-input-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .notice-period-form,
+          .notice-period-result {
+            padding: 16px;
+          }
+
+          .notice-period-quick-picks button {
+            min-height: 44px;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
     getInitialDateQueryParam('payday', todayInputValue()),
@@ -4223,6 +4814,68 @@ function resolveAskWhenQuery(
               } holidays skipped.`
           : 'See the earliest and latest dates with weekends included.',
       path: `/shipping-delivery-range-calculator?${params.toString()}`,
+    }
+  }
+
+  const noticePeriodPatterns = [
+    /^(\d{1,3})\s+(calendar\s+days?|business\s+days?|working\s+days?|weeks?|months?)\s+(?:notice|notice period)\s+before\s+(\d{4}-\d{2}-\d{2})$/,
+    /^(?:notice|notice period)\s+(\d{1,3})\s+(calendar\s+days?|business\s+days?|working\s+days?|weeks?|months?)\s+before\s+(\d{4}-\d{2}-\d{2})$/,
+  ]
+
+  for (const pattern of noticePeriodPatterns) {
+    const match = query.match(pattern)
+    if (!match) continue
+
+    const amount = Number(match[1])
+    const rawUnit = match[2]
+    const eventDate = match[3]
+
+    if (
+      !Number.isFinite(amount) ||
+      amount < 0 ||
+      amount > 365 ||
+      !parsePlainDate(eventDate)
+    ) {
+      return null
+    }
+
+    const unit =
+      rawUnit.startsWith('business') || rawUnit.startsWith('working')
+        ? 'business-days'
+        : rawUnit.startsWith('week')
+          ? 'weeks'
+          : rawUnit.startsWith('month')
+            ? 'months'
+            : 'calendar-days'
+
+    const params = new URLSearchParams({
+      date: eventDate,
+      amount: String(amount),
+      unit,
+    })
+
+    if (unit === 'business-days') {
+      const calendarValue = holidayCalendarQueryValue(holidayCalendar)
+      if (calendarValue) params.set('calendar', calendarValue)
+    }
+
+    return {
+      label: `${amount} ${rawUnit} notice before ${eventDate}`,
+      description: 'Find the latest date to give notice.',
+      path: `/notice-period-calculator?${params.toString()}`,
+    }
+  }
+
+  if (
+    query === 'notice period calculator' ||
+    query === 'contract notice calculator' ||
+    query === 'cancellation notice calculator' ||
+    query === 'renewal notice calculator'
+  ) {
+    return {
+      label: 'Notice period calculator',
+      description: 'Find the last date to act before a renewal or event.',
+      path: '/notice-period-calculator',
     }
   }
 
@@ -6526,6 +7179,22 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
                 <p>Shipping</p>
                 <h2>Delivery date range</h2>
                 <span>Convert 3–5 business days into an earliest and latest date.</span>
+              </div>
+            </a>
+            <a
+              className="intent-proof-card proof-calculator"
+              href="/notice-period-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('calculator_directory_click', { path: '/notice-period-calculator' })
+                onNavigate('/notice-period-calculator')
+              }}
+            >
+              <span className="intent-proof-icon" aria-hidden="true">←</span>
+              <div>
+                <p>Contracts & renewals</p>
+                <h2>Notice period</h2>
+                <span>Count backward to find the latest date to give notice.</span>
               </div>
             </a>
           </div>
@@ -13179,6 +13848,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'two-ten-net-30'
   }
 
+  if (pathname === '/notice-period-calculator') {
+    return 'notice-period'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -13436,6 +14109,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Calculate both dates in 2/10 Net 30 payment terms: the 10-day discount deadline and the 30-day final due date.',
       twitterDescription: 'Calculate the 2/10 Net 30 discount deadline and final invoice due date.',
       path: '/2-10-net-30-calculator',
+    }
+  }
+
+  if (route === 'notice-period') {
+    return {
+      title: 'Notice Period Calculator - Find the Last Date to Give Notice | WhenIsDue',
+      description: 'Count backward from a renewal or event date to find the latest date to give notice in calendar days, business days, weeks, or months.',
+      openGraphDescription: 'Enter an event date and notice period to find the last date to give notice, with optional business-day and holiday rules.',
+      twitterDescription: 'Calculate the last date to give notice before a renewal, cancellation, or other event.',
+      path: '/notice-period-calculator',
     }
   }
 
@@ -13816,6 +14499,7 @@ function getRouteStructuredData(
     route === 'business-hours-deadline' ||
     route === 'shipping-delivery-range' ||
     route === 'two-ten-net-30' ||
+    route === 'notice-period' ||
     route === 'next-payday' ||
     route === 'deadline-calculator' ||
     route === 'free-trial' ||
