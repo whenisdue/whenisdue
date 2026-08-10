@@ -4400,8 +4400,8 @@ function HomePage({ onNavigate }: NavigationProps) {
           />
           <p>
             {holidayCalendar === 'none'
-              ? 'Choose a calendar once and WhenIsDue will remember it on this device.'
-              : `${getHolidayCalendarOption(holidayCalendar).shortLabel} is remembered on this device.`}
+              ? 'Choose a holiday calendar if your deadline excludes public holidays.'
+              : 'Saved on this device.'}
           </p>
         </div>
 
@@ -4412,9 +4412,10 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-calendar-preference > p {
-            margin: 6px 0 0;
-            color: #7a8999;
-            font-size: 0.72rem;
+            margin: 7px 0 0;
+            color: #687c91;
+            font-size: 0.84rem;
+            line-height: 1.45;
             text-align: center;
           }
 
@@ -4895,16 +4896,10 @@ function HomePage({ onNavigate }: NavigationProps) {
           display: inline-flex;
           align-items: center;
           gap: 7px;
-          min-height: 36px;
           margin: 14px 0 0;
-          padding: 7px 11px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.72);
           color: #607993;
           font-size: 0.94rem;
-          line-height: 1;
-          box-shadow: 0 6px 18px rgba(19, 38, 70, 0.035);
+          line-height: 1.25;
         }
 
         .date-home-timezone span {
@@ -4970,8 +4965,9 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-business-answer {
+          position: relative;
           min-height: 112px;
-          padding: 14px;
+          padding: 14px 42px 14px 14px;
           border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 10px;
           background: #fff;
@@ -4979,6 +4975,34 @@ function HomePage({ onNavigate }: NavigationProps) {
           flex-direction: column;
           justify-content: center;
           text-decoration: none;
+          transition:
+            transform 120ms ease,
+            border-color 120ms ease,
+            background 120ms ease,
+            box-shadow 120ms ease;
+        }
+
+        .date-home-business-answer::after {
+          content: '→';
+          position: absolute;
+          right: 15px;
+          top: 50%;
+          color: #6c8299;
+          font-size: 1.05rem;
+          font-weight: 900;
+          transform: translateY(-50%);
+        }
+
+        .date-home-business-answer:hover {
+          transform: translateY(-1px);
+          border-color: rgba(23, 58, 99, 0.22);
+          background: #fffdfa;
+          box-shadow: 0 8px 22px rgba(19, 38, 70, 0.05);
+        }
+
+        .date-home-business-answer:focus-visible {
+          outline: 3px solid rgba(29, 79, 130, 0.2);
+          outline-offset: 2px;
         }
 
         .date-home-business-answer span {
@@ -5000,9 +5024,10 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-rule {
-          margin: 8px 2px 0;
-          color: #8491a1;
-          font-size: 0.72rem;
+          margin: 9px 2px 0;
+          color: #667b91;
+          font-size: 0.84rem;
+          line-height: 1.45;
         }
 
         .date-home-tools {
@@ -5020,8 +5045,9 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-tool-grid a {
+          position: relative;
           min-height: 132px;
-          padding: 18px;
+          padding: 18px 48px 18px 18px;
           border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 10px;
           background: rgba(255, 255, 255, 0.72);
@@ -5029,6 +5055,34 @@ function HomePage({ onNavigate }: NavigationProps) {
           flex-direction: column;
           justify-content: center;
           text-decoration: none;
+          transition:
+            transform 120ms ease,
+            border-color 120ms ease,
+            background 120ms ease,
+            box-shadow 120ms ease;
+        }
+
+        .date-home-tool-grid a::after {
+          content: '→';
+          position: absolute;
+          right: 18px;
+          top: 50%;
+          color: #667f98;
+          font-size: 1.1rem;
+          font-weight: 900;
+          transform: translateY(-50%);
+        }
+
+        .date-home-tool-grid a:hover {
+          transform: translateY(-1px);
+          border-color: rgba(23, 58, 99, 0.22);
+          background: #fff;
+          box-shadow: 0 8px 22px rgba(19, 38, 70, 0.05);
+        }
+
+        .date-home-tool-grid a:focus-visible {
+          outline: 3px solid rgba(29, 79, 130, 0.2);
+          outline-offset: 2px;
         }
 
         .date-home-tool-grid span {
@@ -5079,11 +5133,35 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-secondary a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.74);
           color: #536b87;
-          font-size: 0.8rem;
-          font-weight: 800;
+          font-size: 0.84rem;
+          font-weight: 850;
           text-decoration: none;
           white-space: nowrap;
+        }
+
+        .date-home-secondary a::after {
+          content: '→';
+          margin-left: 7px;
+          font-weight: 900;
+        }
+
+        .date-home-secondary a:hover {
+          border-color: rgba(23, 58, 99, 0.2);
+          background: #fff;
+        }
+
+        .date-home-secondary a:focus-visible {
+          outline: 3px solid rgba(29, 79, 130, 0.2);
+          outline-offset: 2px;
         }
 
         @media (max-width: 760px) {
@@ -5128,9 +5206,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-timezone {
-            min-height: 34px;
             margin-top: 12px;
-            padding: 7px 10px;
             font-size: 0.88rem;
           }
 
@@ -5159,13 +5235,17 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .date-home-business-answer {
             min-height: 58px;
-            padding: 8px 11px;
+            padding: 8px 38px 8px 11px;
             display: grid;
             grid-template-columns: 1fr auto;
             grid-template-areas:
               "label date"
               "label weekday";
             align-items: center;
+          }
+
+          .date-home-business-answer::after {
+            right: 12px;
           }
 
           .date-home-business-answer span {
