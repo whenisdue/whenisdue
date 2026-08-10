@@ -1,33 +1,6 @@
-import {
-  type DeadlineAnswer,
-} from './deadlineRules.ts'
-import {
-  getWorkingSchedule,
-} from './workingSchedules.ts'
-
-function holidayRulesLabel(answer: DeadlineAnswer) {
-  if (answer.holidayCalendar === 'none') {
-    return 'No public-holiday exclusions'
-  }
-
-  if (answer.holidayCalendar === 'us') {
-    return 'US federal holidays'
-  }
-
-  if (answer.holidayCalendar === 'uk') {
-    return 'England & Wales bank holidays'
-  }
-
-  if (answer.holidayCalendar === 'ca') {
-    return 'Canada federal holidays'
-  }
-
-  if (answer.holidayCalendar === 'au') {
-    return 'Australia nationwide holidays'
-  }
-
-  return 'Philippines predictable regular holidays'
-}
+import { type DeadlineAnswer } from './deadlineRules.ts'
+import { getWorkingSchedule } from './workingSchedules.ts'
+import { getHolidayCalendarDisplayLabel } from './deadlineDisplayLabels.ts'
 
 export type DeadlineProvenanceRow = {
   label: string
@@ -39,8 +12,8 @@ export function buildDeadlineProvenanceRows(
 ): DeadlineProvenanceRow[] {
   const rows: DeadlineProvenanceRow[] = [
     {
-      label: 'Deadline rules',
-      value: answer.ruleVersion,
+      label: 'Calculation method',
+      value: 'Deadline counting rules',
     },
   ]
 
@@ -51,22 +24,20 @@ export function buildDeadlineProvenanceRows(
     })
 
     rows.push({
-      label: 'Holiday rules',
-      value: `${holidayRulesLabel(answer)} · ${answer.holidayCalendarVersion}`,
+      label: 'Holiday calendar',
+      value: getHolidayCalendarDisplayLabel(answer.holidayCalendar),
     })
   } else if (answer.endDayAdjustment !== 'none') {
     rows.push({
-      label: 'Holiday rules',
-      value: `${holidayRulesLabel(answer)} · ${answer.holidayCalendarVersion}`,
+      label: 'Holiday calendar',
+      value: getHolidayCalendarDisplayLabel(answer.holidayCalendar),
     })
   }
 
   return rows
 }
 
-export function summarizeDeadlineProvenance(
-  answer: DeadlineAnswer,
-) {
+export function summarizeDeadlineProvenance(answer: DeadlineAnswer) {
   return {
     deadlineRuleVersion: answer.ruleVersion,
     workingScheduleId: answer.workingScheduleId,

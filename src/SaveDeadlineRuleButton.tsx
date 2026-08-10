@@ -8,8 +8,10 @@ import {
 } from './deadlineRules.ts'
 import {
   type DeadlineTriggerKind,
-  getDeadlineTriggerEvent,
 } from './deadlineTrigger.ts'
+import {
+  getTriggerDisplayLabel,
+} from './deadlineDisplayLabels.ts'
 import {
   type HolidayCalendarId,
 } from './holidayCalendars.ts'
@@ -40,9 +42,7 @@ function buildSuggestedName({
   SaveDeadlineRuleButtonProps,
   'triggerKind' | 'duration' | 'direction' | 'unit'
 >) {
-  const triggerLabel = triggerKind
-    ? getDeadlineTriggerEvent(triggerKind).label.toLowerCase()
-    : 'start date'
+  const triggerLabel = getTriggerDisplayLabel(triggerKind)
 
   const unitLabel =
     unit === 'business-days'
@@ -53,7 +53,7 @@ function buildSuggestedName({
         ? 'calendar day'
         : 'calendar days'
 
-  return `${duration} ${unitLabel} ${direction} ${triggerLabel}`
+  return `${triggerLabel} — ${duration} ${unitLabel} ${direction}`
 }
 
 export function SaveDeadlineRuleButton(
