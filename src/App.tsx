@@ -296,6 +296,19 @@ function getInitialPaySchedule(): PaySchedule {
 
 
 
+function getLocalUtcOffsetLabel(date = new Date()) {
+  const offsetMinutes = -date.getTimezoneOffset()
+  const sign = offsetMinutes >= 0 ? '+' : '-'
+  const absoluteMinutes = Math.abs(offsetMinutes)
+  const hours = Math.floor(absoluteMinutes / 60)
+  const minutes = absoluteMinutes % 60
+
+  return minutes === 0
+    ? `UTC${sign}${hours}`
+    : `UTC${sign}${hours}:${String(minutes).padStart(2, '0')}`
+}
+
+
 function getDeadlineCalculatorQueryParam(name: string) {
   if (typeof window === 'undefined') return null
   return new URLSearchParams(window.location.search).get(name)
@@ -4315,7 +4328,11 @@ function HomePage({ onNavigate }: NavigationProps) {
             {formatPlainDate(today)}
           </h1>
           <p className="date-home-weekday">{formatWeekday(today)}</p>
-          <p className="date-home-timezone">{getLocalTimeZoneName()}</p>
+          <p className="date-home-timezone">
+            <span>{getLocalTimeZoneName()}</span>
+            <b aria-hidden="true">·</b>
+            <strong>{getLocalUtcOffsetLabel(currentTime)}</strong>
+          </p>
         </div>
       </section>
 
@@ -4800,14 +4817,14 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .date-home-hero {
           width: min(100% - 32px, 1240px);
-          min-height: 72vh;
+          min-height: 68vh;
           margin: 0 auto;
           display: flex;
           flex-direction: column;
         }
 
         .date-home-header {
-          min-height: 64px;
+          min-height: 68px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -4816,10 +4833,10 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-brand {
-          color: #536c89;
-          font-size: 0.9rem;
+          color: #4c6887;
+          font-size: 1rem;
           font-weight: 900;
-          letter-spacing: 0.09em;
+          letter-spacing: 0.085em;
           text-decoration: none;
         }
 
@@ -4830,9 +4847,12 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-nav a {
-          color: #687c94;
-          font-size: 0.82rem;
-          font-weight: 700;
+          min-height: 40px;
+          display: inline-flex;
+          align-items: center;
+          color: #617992;
+          font-size: 0.9rem;
+          font-weight: 800;
           text-decoration: none;
         }
 
@@ -4843,14 +4863,15 @@ function HomePage({ onNavigate }: NavigationProps) {
           justify-content: center;
           align-items: center;
           text-align: center;
-          padding: 34px 12px 54px;
+          padding: 28px 12px 38px;
         }
 
         .date-home-kicker {
           margin: 0 0 10px;
-          color: #607793;
-          font-size: clamp(1.1rem, 2vw, 1.65rem);
-          font-weight: 800;
+          color: #536f8c;
+          font-size: clamp(1.15rem, 2vw, 1.7rem);
+          font-weight: 900;
+          letter-spacing: -0.01em;
         }
 
         .date-home-date {
@@ -4871,9 +4892,34 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-timezone {
-          margin: 12px 0 0;
-          color: #8290a1;
-          font-size: 0.82rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          min-height: 36px;
+          margin: 14px 0 0;
+          padding: 7px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.72);
+          color: #607993;
+          font-size: 0.94rem;
+          line-height: 1;
+          box-shadow: 0 6px 18px rgba(19, 38, 70, 0.035);
+        }
+
+        .date-home-timezone span {
+          font-weight: 800;
+        }
+
+        .date-home-timezone b {
+          color: #9aa8b5;
+          font-weight: 700;
+        }
+
+        .date-home-timezone strong {
+          color: #425e7b;
+          font-size: 0.9rem;
+          font-weight: 900;
         }
 
         .date-home-business,
@@ -4884,7 +4930,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-business {
-          padding: 42px 0 54px;
+          padding: 36px 0 50px;
           border-top: 1px solid rgba(19, 38, 70, 0.1);
         }
 
@@ -4904,9 +4950,16 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-section-heading a {
-          color: #657b95;
-          font-size: 0.78rem;
-          font-weight: 700;
+          min-height: 40px;
+          display: inline-flex;
+          align-items: center;
+          padding: 7px 11px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.72);
+          color: #536f8b;
+          font-size: 0.84rem;
+          font-weight: 850;
           text-decoration: none;
         }
 
@@ -5040,23 +5093,28 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-header {
-            min-height: 52px;
+            min-height: 56px;
+          }
+
+          .date-home-brand {
+            font-size: 0.92rem;
           }
 
           .date-home-nav {
-            gap: 12px;
+            gap: 10px;
           }
 
           .date-home-nav a {
-            font-size: 0.72rem;
+            min-height: 40px;
+            font-size: 0.78rem;
           }
 
           .date-home-answer {
-            padding: 28px 0 38px;
+            padding: 24px 0 30px;
           }
 
           .date-home-kicker {
-            font-size: 1rem;
+            font-size: 1.05rem;
           }
 
           .date-home-date {
@@ -5067,6 +5125,17 @@ function HomePage({ onNavigate }: NavigationProps) {
           .date-home-weekday {
             margin-top: 12px;
             font-size: 1.7rem;
+          }
+
+          .date-home-timezone {
+            min-height: 34px;
+            margin-top: 12px;
+            padding: 7px 10px;
+            font-size: 0.88rem;
+          }
+
+          .date-home-timezone strong {
+            font-size: 0.84rem;
           }
 
           .date-home-business,
