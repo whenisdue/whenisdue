@@ -1081,7 +1081,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         .deadline-rule-answer > span {
           color: #71869b;
-          font-size: 0.82rem;
+          font-size: 0.78rem;
           font-weight: 900;
           letter-spacing: 0.06em;
           text-transform: uppercase;
@@ -6499,86 +6499,30 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
 
 function HomepageQuestionMap({ onNavigate }: NavigationProps) {
   const questions = [
-    {
-      label: '3 business days from today',
-      path: '/3-business-days-from-today',
-      weight: 'xl',
-    },
-    {
-      label: 'When is Net 30 due?',
-      path: '/net-30-due-date',
-      weight: 'lg',
-    },
-    {
-      label: '3–5 business days shipping',
-      path: '/shipping-delivery-range-calculator',
-      weight: 'lg',
-    },
-    {
-      label: 'What does “within 5 days” mean?',
-      path: '/what-does-within-days-mean',
-      weight: 'md',
-    },
-    {
-      label: 'Does the start date count?',
-      path: '/does-the-start-date-count',
-      weight: 'md',
-    },
-    {
-      label: 'When should I cancel before renewal?',
-      path: '/subscription-renewal-calculator',
-      weight: 'lg',
-    },
-    {
-      label: '30 days notice before renewal',
-      path: '/notice-period-calculator',
-      weight: 'md',
-    },
-    {
-      label: 'Do holidays count as business days?',
-      path: '/do-public-holidays-count-as-business-days',
-      weight: 'md',
-    },
-    {
-      label: '2/10 Net 30',
-      path: '/2-10-net-30-calculator',
-      weight: 'sm',
-    },
-    {
-      label: '5 business days from today',
-      path: '/5-business-days-from-today',
-      weight: 'md',
-    },
-    {
-      label: 'Business days between two dates',
-      path: '/business-days-between-dates',
-      weight: 'sm',
-    },
-    {
-      label: 'When does my free trial end?',
-      path: '/free-trial-calculator',
-      weight: 'md',
-    },
-    {
-      label: 'Do weekends count as business days?',
-      path: '/do-weekends-count-as-business-days',
-      weight: 'sm',
-    },
-    {
-      label: 'When is my next payday?',
-      path: '/next-payday-calculator',
-      weight: 'md',
-    },
-    {
-      label: 'When is this SLA due?',
-      path: '/business-hours-deadline-calculator',
-      weight: 'sm',
-    },
-    {
-      label: '30 business days from today',
-      path: '/30-business-days-from-today',
-      weight: 'md',
-    },
+    { label: '3 business days from today', path: '/3-business-days-from-today', weight: 'xl' },
+    { label: 'When is Net 30 due?', path: '/net-30-due-date', weight: 'lg' },
+    { label: '3–5 business days shipping', path: '/shipping-delivery-range-calculator', weight: 'lg' },
+    { label: 'What does “within 5 days” mean?', path: '/what-does-within-days-mean', weight: 'md' },
+    { label: 'Does the start date count?', path: '/does-the-start-date-count', weight: 'md' },
+    { label: 'When should I cancel before renewal?', path: '/subscription-renewal-calculator', weight: 'lg' },
+    { label: '30 days notice before renewal', path: '/notice-period-calculator', weight: 'md' },
+    { label: 'Do holidays count as business days?', path: '/do-public-holidays-count-as-business-days', weight: 'md' },
+    { label: '2/10 Net 30', path: '/2-10-net-30-calculator', weight: 'sm' },
+    { label: '5 business days from today', path: '/5-business-days-from-today', weight: 'sm' },
+    { label: 'Business days between two dates', path: '/business-days-between-dates', weight: 'sm' },
+    { label: 'When does my free trial end?', path: '/free-trial-calculator', weight: 'md' },
+    { label: 'Do weekends count as business days?', path: '/do-weekends-count-as-business-days', weight: 'sm' },
+    { label: 'When is my next payday?', path: '/next-payday-calculator', weight: 'md' },
+    { label: 'When is this SLA due?', path: '/business-hours-deadline-calculator', weight: 'sm' },
+    { label: '30 business days from today', path: '/30-business-days-from-today', weight: 'sm' },
+    { label: '7 business days from today', path: '/7-business-days-from-today', weight: 'sm' },
+    { label: '10 business days from today', path: '/10-business-days-from-today', weight: 'sm' },
+    { label: 'Net 15 due date', path: '/net-15-due-date', weight: 'sm' },
+    { label: 'Net 45 due date', path: '/net-45-due-date', weight: 'sm' },
+    { label: 'Net 60 due date', path: '/net-60-due-date', weight: 'sm' },
+    { label: 'Return window deadline', path: '/return-window-calculator', weight: 'sm' },
+    { label: 'Invoice due date', path: '/invoice-due-date-calculator', weight: 'sm' },
+    { label: '20 business days from today', path: '/20-business-days-from-today', weight: 'sm' },
   ] as const
 
   return (
@@ -7555,7 +7499,7 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .homepage-question-cloud {
           margin-top: 20px;
-          padding: 22px 22px 20px;
+          padding: 20px 20px 18px;
           border-radius: 14px;
           background: #17304d;
           overflow: hidden;
@@ -7572,7 +7516,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           justify-content: center;
           width: fit-content;
           max-width: 100%;
-          min-height: 34px;
+          min-height: 30px;
           padding: 4px 6px;
           border-radius: 7px;
           color: rgba(255, 255, 255, 0.9);
@@ -7637,10 +7581,10 @@ function HomePage({ onNavigate }: NavigationProps) {
            dense center-weighted typography with smaller questions around it. */
         .homepage-question-cloud-desktop {
           display: grid;
-          grid-template-columns: repeat(12, minmax(0, 1fr));
-          grid-template-rows: repeat(7, minmax(42px, auto));
-          column-gap: 8px;
-          row-gap: 4px;
+          grid-template-columns: repeat(14, minmax(0, 1fr));
+          grid-template-rows: repeat(8, minmax(34px, auto));
+          column-gap: 6px;
+          row-gap: 2px;
           align-items: center;
         }
 
@@ -7648,22 +7592,30 @@ function HomePage({ onNavigate }: NavigationProps) {
           transform: translateY(-1px) scale(1.018);
         }
 
-        .question-map-pos-1  { grid-column: 4 / 10; grid-row: 4; justify-self: center; }
-        .question-map-pos-2  { grid-column: 8 / 12; grid-row: 2; justify-self: start; }
-        .question-map-pos-3  { grid-column: 2 / 7; grid-row: 2; justify-self: center; }
-        .question-map-pos-4  { grid-column: 5 / 9; grid-row: 1; justify-self: center; }
-        .question-map-pos-5  { grid-column: 1 / 5; grid-row: 4; justify-self: end; }
-        .question-map-pos-6  { grid-column: 4 / 10; grid-row: 5; justify-self: center; }
-        .question-map-pos-7  { grid-column: 9 / 13; grid-row: 4; justify-self: start; }
-        .question-map-pos-8  { grid-column: 2 / 6; grid-row: 5; justify-self: center; }
-        .question-map-pos-9  { grid-column: 10 / 13; grid-row: 6; justify-self: center; }
+        .question-map-pos-1  { grid-column: 5 / 11; grid-row: 4; justify-self: center; }
+        .question-map-pos-2  { grid-column: 9 / 13; grid-row: 2; justify-self: center; }
+        .question-map-pos-3  { grid-column: 3 / 8; grid-row: 2; justify-self: center; }
+        .question-map-pos-4  { grid-column: 6 / 10; grid-row: 1; justify-self: center; }
+        .question-map-pos-5  { grid-column: 2 / 5; grid-row: 4; justify-self: center; }
+        .question-map-pos-6  { grid-column: 6 / 10; grid-row: 6; justify-self: center; }
+        .question-map-pos-7  { grid-column: 11 / 14; grid-row: 4; justify-self: center; }
+        .question-map-pos-8  { grid-column: 3 / 6; grid-row: 6; justify-self: center; }
+        .question-map-pos-9  { grid-column: 12 / 14; grid-row: 7; justify-self: center; }
         .question-map-pos-10 { grid-column: 1 / 4; grid-row: 1; justify-self: center; }
-        .question-map-pos-11 { grid-column: 1 / 5; grid-row: 7; justify-self: center; }
-        .question-map-pos-12 { grid-column: 8 / 12; grid-row: 7; justify-self: center; }
-        .question-map-pos-13 { grid-column: 10 / 13; grid-row: 1; justify-self: center; }
-        .question-map-pos-14 { grid-column: 4 / 8; grid-row: 7; justify-self: center; }
-        .question-map-pos-15 { grid-column: 10 / 13; grid-row: 3; justify-self: center; }
-        .question-map-pos-16 { grid-column: 1 / 4; grid-row: 6; justify-self: center; }
+        .question-map-pos-11 { grid-column: 2 / 5; grid-row: 8; justify-self: center; }
+        .question-map-pos-12 { grid-column: 10 / 13; grid-row: 8; justify-self: center; }
+        .question-map-pos-13 { grid-column: 12 / 15; grid-row: 1; justify-self: center; }
+        .question-map-pos-14 { grid-column: 6 / 9; grid-row: 8; justify-self: center; }
+        .question-map-pos-15 { grid-column: 12 / 15; grid-row: 3; justify-self: center; }
+        .question-map-pos-16 { grid-column: 1 / 4; grid-row: 7; justify-self: center; }
+        .question-map-pos-17 { grid-column: 1 / 3; grid-row: 2; justify-self: center; }
+        .question-map-pos-18 { grid-column: 1 / 3; grid-row: 5; justify-self: center; }
+        .question-map-pos-19 { grid-column: 4 / 6; grid-row: 3; justify-self: center; }
+        .question-map-pos-20 { grid-column: 10 / 12; grid-row: 3; justify-self: center; }
+        .question-map-pos-21 { grid-column: 13 / 15; grid-row: 5; justify-self: center; }
+        .question-map-pos-22 { grid-column: 4 / 6; grid-row: 7; justify-self: center; }
+        .question-map-pos-23 { grid-column: 9 / 11; grid-row: 7; justify-self: center; }
+        .question-map-pos-24 { grid-column: 2 / 4; grid-row: 3; justify-self: center; }
 
         .question-map-pos-1 { max-width: 520px; }
         .question-map-pos-2,
@@ -7673,41 +7625,49 @@ function HomePage({ onNavigate }: NavigationProps) {
         .question-map-pos-5,
         .question-map-pos-7,
         .question-map-pos-8,
-        .question-map-pos-10,
         .question-map-pos-12,
-        .question-map-pos-14,
-        .question-map-pos-16 { max-width: 290px; }
+        .question-map-pos-14 { max-width: 300px; }
         .question-map-pos-9,
+        .question-map-pos-10,
         .question-map-pos-11,
         .question-map-pos-13,
-        .question-map-pos-15 { max-width: 215px; }
+        .question-map-pos-15,
+        .question-map-pos-16,
+        .question-map-pos-17,
+        .question-map-pos-18,
+        .question-map-pos-19,
+        .question-map-pos-20,
+        .question-map-pos-21,
+        .question-map-pos-22,
+        .question-map-pos-23,
+        .question-map-pos-24 { max-width: 190px; }
 
         @media (max-width: 900px) {
           .homepage-question-cloud {
-            padding: 20px 16px 18px;
+            padding: 18px 14px 16px;
           }
 
           .homepage-question-cloud-desktop {
             grid-template-columns: repeat(10, minmax(0, 1fr));
-            grid-template-rows: repeat(7, minmax(44px, auto));
+            grid-template-rows: repeat(8, minmax(40px, auto));
             column-gap: 6px;
-            row-gap: 5px;
+            row-gap: 4px;
           }
 
           .question-map-xl {
-            font-size: 1.65rem;
+            font-size: 1.58rem;
           }
 
           .question-map-lg {
-            font-size: 1.18rem;
+            font-size: 1.12rem;
           }
 
           .question-map-md {
-            font-size: 0.96rem;
+            font-size: 0.95rem;
           }
 
           .question-map-sm {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
           }
 
           .question-map-pos-1  { grid-column: 3 / 9; grid-row: 4; }
@@ -7715,17 +7675,25 @@ function HomePage({ onNavigate }: NavigationProps) {
           .question-map-pos-3  { grid-column: 1 / 6; grid-row: 2; }
           .question-map-pos-4  { grid-column: 4 / 8; grid-row: 1; }
           .question-map-pos-5  { grid-column: 1 / 4; grid-row: 4; }
-          .question-map-pos-6  { grid-column: 3 / 9; grid-row: 5; }
+          .question-map-pos-6  { grid-column: 4 / 8; grid-row: 6; }
           .question-map-pos-7  { grid-column: 8 / 11; grid-row: 4; }
-          .question-map-pos-8  { grid-column: 1 / 5; grid-row: 5; }
-          .question-map-pos-9  { grid-column: 8 / 11; grid-row: 6; }
+          .question-map-pos-8  { grid-column: 1 / 4; grid-row: 6; }
+          .question-map-pos-9  { grid-column: 8 / 11; grid-row: 7; }
           .question-map-pos-10 { grid-column: 1 / 4; grid-row: 1; }
-          .question-map-pos-11 { grid-column: 1 / 5; grid-row: 7; }
-          .question-map-pos-12 { grid-column: 7 / 11; grid-row: 7; }
+          .question-map-pos-11 { grid-column: 1 / 4; grid-row: 8; }
+          .question-map-pos-12 { grid-column: 7 / 11; grid-row: 8; }
           .question-map-pos-13 { grid-column: 8 / 11; grid-row: 1; }
-          .question-map-pos-14 { grid-column: 4 / 7; grid-row: 7; }
+          .question-map-pos-14 { grid-column: 4 / 7; grid-row: 8; }
           .question-map-pos-15 { grid-column: 8 / 11; grid-row: 3; }
-          .question-map-pos-16 { grid-column: 1 / 4; grid-row: 6; }
+          .question-map-pos-16 { grid-column: 1 / 4; grid-row: 7; }
+          .question-map-pos-17 { grid-column: 1 / 3; grid-row: 3; }
+          .question-map-pos-18 { grid-column: 1 / 3; grid-row: 5; }
+          .question-map-pos-19 { grid-column: 3 / 5; grid-row: 3; }
+          .question-map-pos-20 { grid-column: 7 / 9; grid-row: 3; }
+          .question-map-pos-21 { grid-column: 9 / 11; grid-row: 5; }
+          .question-map-pos-22 { grid-column: 3 / 5; grid-row: 7; }
+          .question-map-pos-23 { grid-column: 6 / 8; grid-row: 7; }
+          .question-map-pos-24 { grid-column: 2 / 4; grid-row: 5; }
         }
 
         @media (max-width: 760px) {
