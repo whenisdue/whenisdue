@@ -7555,7 +7555,7 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .homepage-question-cloud {
           position: relative;
-          min-height: 390px;
+          min-height: 430px;
           margin-top: 20px;
           border-radius: 14px;
           background: #17304d;
@@ -7572,12 +7572,14 @@ function HomePage({ onNavigate }: NavigationProps) {
           align-items: center;
           justify-content: center;
           min-height: 38px;
+          max-width: 30%;
           padding: 5px 8px;
           border-radius: 8px;
           color: rgba(255, 255, 255, 0.88);
           line-height: 1.08;
           text-align: center;
           text-decoration: none;
+          text-wrap: balance;
           transition:
             transform 120ms ease,
             background 120ms ease,
@@ -7596,10 +7598,11 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .question-map-xl {
-          padding-inline: 12px;
+          max-width: 46%;
+          padding-inline: 14px;
           background: #fff;
           color: #12223a;
-          font-size: clamp(1.55rem, 3vw, 2.2rem);
+          font-size: clamp(1.45rem, 2.4vw, 2rem);
           font-weight: 950;
           letter-spacing: -0.035em;
           z-index: 3;
@@ -7611,19 +7614,22 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .question-map-lg {
-          font-size: clamp(1.2rem, 2vw, 1.55rem);
+          max-width: 30%;
+          font-size: clamp(1.15rem, 1.7vw, 1.45rem);
           font-weight: 900;
           z-index: 2;
         }
 
         .question-map-md {
-          font-size: clamp(1rem, 1.6vw, 1.2rem);
+          max-width: 24%;
+          font-size: clamp(0.98rem, 1.35vw, 1.1rem);
           font-weight: 800;
           z-index: 2;
         }
 
         .question-map-sm {
-          font-size: 0.92rem;
+          max-width: 18%;
+          font-size: 0.84rem;
           font-weight: 750;
           color: rgba(255, 255, 255, 0.72);
           z-index: 1;
@@ -7631,22 +7637,38 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         /* Desktop "organized chaos": larger anchors live near the center,
            smaller questions orbit them without overlapping. */
-        .question-map-pos-1  { left: 50%; top: 44%; transform: translate(-50%, -50%); }
-        .question-map-pos-2  { left: 66%; top: 28%; transform: translate(-50%, -50%); }
-        .question-map-pos-3  { left: 31%; top: 27%; transform: translate(-50%, -50%); }
-        .question-map-pos-4  { left: 51%; top: 18%; transform: translate(-50%, -50%); }
-        .question-map-pos-5  { left: 20%; top: 45%; transform: translate(-50%, -50%); }
-        .question-map-pos-6  { left: 51%; top: 67%; transform: translate(-50%, -50%); }
-        .question-map-pos-7  { left: 76%; top: 51%; transform: translate(-50%, -50%); }
-        .question-map-pos-8  { left: 27%; top: 69%; transform: translate(-50%, -50%); }
-        .question-map-pos-9  { left: 83%; top: 69%; transform: translate(-50%, -50%); }
-        .question-map-pos-10 { left: 16%; top: 17%; transform: translate(-50%, -50%); }
-        .question-map-pos-11 { left: 18%; top: 84%; transform: translate(-50%, -50%); }
-        .question-map-pos-12 { left: 76%; top: 84%; transform: translate(-50%, -50%); }
-        .question-map-pos-13 { left: 84%; top: 19%; transform: translate(-50%, -50%); }
-        .question-map-pos-14 { left: 42%; top: 84%; transform: translate(-50%, -50%); }
-        .question-map-pos-15 { left: 88%; top: 39%; transform: translate(-50%, -50%); }
-        .question-map-pos-16 { left: 10%; top: 63%; transform: translate(-50%, -50%); }
+        .question-map-pos-1  { left: 50%; top: 45%; transform: translate(-50%, -50%); }
+        .question-map-pos-2  { left: 67%; top: 28%; transform: translate(-50%, -50%); }
+        .question-map-pos-3  { left: 27%; top: 30%; transform: translate(-50%, -50%); }
+        .question-map-pos-4  { left: 50%; top: 18%; transform: translate(-50%, -50%); }
+        .question-map-pos-5  { left: 19%; top: 49%; transform: translate(-50%, -50%); }
+        .question-map-pos-6  { left: 50%; top: 67%; transform: translate(-50%, -50%); }
+        .question-map-pos-7  { left: 76%; top: 50%; transform: translate(-50%, -50%); }
+        .question-map-pos-8  { left: 27%; top: 63%; transform: translate(-50%, -50%); }
+        .question-map-pos-9  { left: 79%; top: 79%; transform: translate(-50%, -50%); }
+        .question-map-pos-10 { left: 15%; top: 17%; transform: translate(-50%, -50%); }
+        .question-map-pos-11 { left: 17%; top: 79%; transform: translate(-50%, -50%); }
+        .question-map-pos-12 { left: 62%; top: 80%; transform: translate(-50%, -50%); }
+        .question-map-pos-13 { left: 86%; top: 18%; transform: translate(-50%, -50%); }
+        .question-map-pos-14 { left: 42%; top: 80%; transform: translate(-50%, -50%); }
+        .question-map-pos-15 { left: 88%; top: 40%; transform: translate(-50%, -50%); }
+        .question-map-pos-16 { left: 9%; top: 58%; transform: translate(-50%, -50%); }
+        .question-map-pos-1  { max-width: 470px; }
+        .question-map-pos-2  { max-width: 340px; }
+        .question-map-pos-3  { max-width: 360px; }
+        .question-map-pos-4  { max-width: 330px; }
+        .question-map-pos-5  { max-width: 260px; }
+        .question-map-pos-6  { max-width: 520px; }
+        .question-map-pos-7  { max-width: 290px; }
+        .question-map-pos-8  { max-width: 320px; }
+        .question-map-pos-9  { max-width: 300px; }
+        .question-map-pos-10 { max-width: 260px; }
+        .question-map-pos-11 { max-width: 210px; }
+        .question-map-pos-12 { max-width: 260px; }
+        .question-map-pos-13 { max-width: 200px; }
+        .question-map-pos-14 { max-width: 230px; }
+        .question-map-pos-15 { max-width: 170px; }
+        .question-map-pos-16 { max-width: 240px; }
 
         .homepage-question-cloud-desktop .question-map-link:hover {
           transform: translate(-50%, -50%) scale(1.025);
@@ -7654,25 +7676,47 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         @media (max-width: 900px) {
           .homepage-question-cloud {
-            min-height: 430px;
+            min-height: 470px;
           }
 
-          .question-map-pos-1  { left: 50%; top: 42%; }
-          .question-map-pos-2  { left: 68%; top: 25%; }
-          .question-map-pos-3  { left: 29%; top: 25%; }
-          .question-map-pos-4  { left: 49%; top: 14%; }
-          .question-map-pos-5  { left: 18%; top: 47%; }
-          .question-map-pos-6  { left: 50%; top: 66%; }
-          .question-map-pos-7  { left: 76%; top: 48%; }
-          .question-map-pos-8  { left: 28%; top: 72%; }
-          .question-map-pos-9  { left: 82%; top: 69%; }
-          .question-map-pos-10 { left: 13%; top: 12%; }
-          .question-map-pos-11 { left: 17%; top: 86%; }
-          .question-map-pos-12 { left: 74%; top: 86%; }
-          .question-map-pos-13 { left: 84%; top: 12%; }
-          .question-map-pos-14 { left: 44%; top: 87%; }
-          .question-map-pos-15 { left: 88%; top: 36%; }
-          .question-map-pos-16 { left: 9%; top: 66%; }
+          .question-map-link {
+            max-width: 36%;
+          }
+
+          .question-map-xl {
+            max-width: 52%;
+            font-size: 1.7rem;
+          }
+
+          .question-map-lg {
+            max-width: 34%;
+            font-size: 1.25rem;
+          }
+
+          .question-map-md {
+            max-width: 28%;
+          }
+
+          .question-map-sm {
+            max-width: 22%;
+          }
+
+          .question-map-pos-1  { left: 50%; top: 44%; }
+          .question-map-pos-2  { left: 67%; top: 28%; }
+          .question-map-pos-3  { left: 28%; top: 31%; }
+          .question-map-pos-4  { left: 50%; top: 16%; }
+          .question-map-pos-5  { left: 18%; top: 49%; }
+          .question-map-pos-6  { left: 50%; top: 67%; }
+          .question-map-pos-7  { left: 76%; top: 50%; }
+          .question-map-pos-8  { left: 28%; top: 64%; }
+          .question-map-pos-9  { left: 77%; top: 80%; }
+          .question-map-pos-10 { left: 15%; top: 16%; }
+          .question-map-pos-11 { left: 18%; top: 81%; }
+          .question-map-pos-12 { left: 61%; top: 81%; }
+          .question-map-pos-13 { left: 86%; top: 18%; }
+          .question-map-pos-14 { left: 42%; top: 81%; }
+          .question-map-pos-15 { left: 88%; top: 39%; }
+          .question-map-pos-16 { left: 10%; top: 58%; }
         }
 
         @media (max-width: 760px) {
