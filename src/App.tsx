@@ -11907,9 +11907,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
     <main className="page-shell return-window-page">
       <section className="intro return-answer-intro" aria-labelledby="return-window-title">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <h1 id="return-window-title">Return deadline</h1>
+        <h1 id="return-window-title">Return Window Calculator</h1>
         <p className="return-answer-context">
-          Enter the date your store says the return window begins. The start date counts as day 1.
+          Calculate the last day of a 30-day return policy or any custom return window. Enter the purchase or delivery date your store says the return window begins. The start date counts as day 1.
         </p>
       </section>
 
@@ -16330,10 +16330,10 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
 
   if (route === 'return-window') {
     return {
-      title: 'Return Window Calculator - What Is My Last Day to Return an Item? | WhenIsDue',
-      description: 'Enter the purchase or delivery date and return window to see the last day to return an item. Supports common 7, 14, 30, 60 and 90-day windows.',
-      openGraphDescription: 'Enter a purchase or delivery date and instantly see the last day of the return window.',
-      twitterDescription: 'Find the last day to return an item from the purchase or delivery date.',
+      title: '30 Day Return Policy Calculator & Return Window Calculator | WhenIsDue',
+      description: 'Calculate the last day of a 30-day return policy or any custom return window from the purchase or delivery date. Supports 7, 14, 30, 60 and 90-day windows.',
+      openGraphDescription: 'Calculate the last day of a 30-day return policy or any custom return window from the purchase or delivery date.',
+      twitterDescription: 'Calculate the last day of a 30-day return policy or custom return window.',
       path: '/return-window-calculator',
     }
   }
