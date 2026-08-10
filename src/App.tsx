@@ -6497,6 +6497,137 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
 }
 
 
+function HomepageQuestionMap({ onNavigate }: NavigationProps) {
+  const questions = [
+    {
+      label: '3 business days from today',
+      path: '/3-business-days-from-today',
+      weight: 'xl',
+    },
+    {
+      label: 'When is Net 30 due?',
+      path: '/net-30-due-date',
+      weight: 'lg',
+    },
+    {
+      label: '3–5 business days shipping',
+      path: '/shipping-delivery-range-calculator',
+      weight: 'lg',
+    },
+    {
+      label: 'What does “within 5 days” mean?',
+      path: '/what-does-within-days-mean',
+      weight: 'md',
+    },
+    {
+      label: 'Does the start date count?',
+      path: '/does-the-start-date-count',
+      weight: 'md',
+    },
+    {
+      label: 'When should I cancel before renewal?',
+      path: '/subscription-renewal-calculator',
+      weight: 'lg',
+    },
+    {
+      label: '30 days notice before renewal',
+      path: '/notice-period-calculator',
+      weight: 'md',
+    },
+    {
+      label: 'Do holidays count as business days?',
+      path: '/do-public-holidays-count-as-business-days',
+      weight: 'md',
+    },
+    {
+      label: '2/10 Net 30',
+      path: '/2-10-net-30-calculator',
+      weight: 'sm',
+    },
+    {
+      label: '5 business days from today',
+      path: '/5-business-days-from-today',
+      weight: 'md',
+    },
+    {
+      label: 'Business days between two dates',
+      path: '/business-days-between-dates',
+      weight: 'sm',
+    },
+    {
+      label: 'When does my free trial end?',
+      path: '/free-trial-calculator',
+      weight: 'md',
+    },
+    {
+      label: 'Do weekends count as business days?',
+      path: '/do-weekends-count-as-business-days',
+      weight: 'sm',
+    },
+    {
+      label: 'When is my next payday?',
+      path: '/next-payday-calculator',
+      weight: 'md',
+    },
+    {
+      label: 'When is this SLA due?',
+      path: '/business-hours-deadline-calculator',
+      weight: 'sm',
+    },
+    {
+      label: '30 business days from today',
+      path: '/30-business-days-from-today',
+      weight: 'md',
+    },
+  ] as const
+
+  return (
+    <section className="homepage-question-map" aria-labelledby="homepage-question-map-title">
+      <div className="homepage-question-map-head">
+        <div>
+          <p className="friendly-eyebrow">Explore answers</p>
+          <h2 id="homepage-question-map-title">What can WhenIsDue answer?</h2>
+        </div>
+
+        <a
+          href="/calculators"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/calculators')
+          }}
+        >
+          View all calculators
+        </a>
+      </div>
+
+      <div className="homepage-question-cloud">
+        {questions.map((question) => (
+          <a
+            key={question.label}
+            className={`question-map-link question-map-${question.weight}`}
+            href={question.path}
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('homepage_question_map_opened', {
+                path: question.path,
+                label: question.label,
+              })
+              onNavigate(question.path)
+            }}
+          >
+            {question.label}
+          </a>
+        ))}
+      </div>
+
+      <p className="homepage-question-map-note">
+        Pick a question and jump straight to the answer or calculator.
+      </p>
+    </section>
+  )
+}
+
+
 function DeadlineCountingGuideLinks({
   onNavigate,
   compact = false,
@@ -6865,6 +6996,8 @@ function HomePage({ onNavigate }: NavigationProps) {
         holidayCalendar={holidayCalendar}
         today={today}
       />
+
+      <HomepageQuestionMap onNavigate={onNavigate} />
 
       <DeadlineCountingGuideLinks onNavigate={onNavigate} />
 
@@ -7364,6 +7497,160 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .date-home-business,
         .date-home-tools,
+
+        .homepage-question-map {
+          width: min(100% - 32px, 1120px);
+          margin: 20px auto 0;
+          padding: 24px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.66);
+        }
+
+        .homepage-question-map-head {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 16px;
+        }
+
+        .homepage-question-map-head h2 {
+          margin: 4px 0 0;
+          color: #17304d;
+          font-size: clamp(1.55rem, 3vw, 2.2rem);
+          line-height: 1.05;
+          letter-spacing: -0.025em;
+        }
+
+        .homepage-question-map-head > a {
+          min-height: 40px;
+          display: inline-flex;
+          align-items: center;
+          color: #5e748b;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .homepage-question-cloud {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          justify-content: center;
+          gap: 10px 14px;
+          margin-top: 20px;
+          padding: 22px 12px 18px;
+          border-radius: 14px;
+          background: #17304d;
+        }
+
+        .question-map-link {
+          display: inline-flex;
+          align-items: center;
+          min-height: 38px;
+          padding: 5px 8px;
+          border-radius: 8px;
+          color: rgba(255, 255, 255, 0.88);
+          line-height: 1.08;
+          text-align: center;
+          text-decoration: none;
+          transition:
+            transform 120ms ease,
+            background 120ms ease,
+            color 120ms ease;
+        }
+
+        .question-map-link:hover {
+          transform: translateY(-1px);
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+        }
+
+        .question-map-link:focus-visible {
+          outline: 3px solid rgba(255, 255, 255, 0.34);
+          outline-offset: 2px;
+        }
+
+        .question-map-xl {
+          padding-inline: 12px;
+          background: #fff;
+          color: #12223a;
+          font-size: clamp(1.55rem, 3vw, 2.2rem);
+          font-weight: 950;
+          letter-spacing: -0.035em;
+        }
+
+        .question-map-xl:hover {
+          background: #fff;
+          color: #12223a;
+        }
+
+        .question-map-lg {
+          font-size: clamp(1.2rem, 2vw, 1.55rem);
+          font-weight: 900;
+        }
+
+        .question-map-md {
+          font-size: clamp(1rem, 1.6vw, 1.2rem);
+          font-weight: 800;
+        }
+
+        .question-map-sm {
+          font-size: 0.92rem;
+          font-weight: 750;
+          color: rgba(255, 255, 255, 0.72);
+        }
+
+        .homepage-question-map-note {
+          margin: 12px 0 0;
+          color: #6c8094;
+          font-size: 0.88rem;
+          line-height: 1.45;
+          text-align: center;
+        }
+
+        @media (max-width: 760px) {
+          .homepage-question-map {
+            width: min(100% - 20px, 1120px);
+            padding: 18px 14px;
+          }
+
+          .homepage-question-map-head {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 6px;
+          }
+
+          .homepage-question-cloud {
+            justify-content: flex-start;
+            gap: 8px 10px;
+            margin-top: 15px;
+            padding: 16px 10px;
+          }
+
+          .question-map-link {
+            min-height: 44px;
+            text-align: left;
+          }
+
+          .question-map-xl {
+            font-size: 1.45rem;
+          }
+
+          .question-map-lg {
+            font-size: 1.15rem;
+          }
+
+          .question-map-md {
+            font-size: 1rem;
+          }
+
+          .question-map-sm {
+            font-size: 0.9rem;
+          }
+        }
+
         .date-home-secondary {
           width: min(100% - 32px, 1080px);
           margin: 0 auto;
