@@ -100,6 +100,7 @@ type RouteName =
   | 'two-ten-net-30'
   | 'notice-period'
   | 'subscription-renewal'
+  | 'within-days-guide'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -204,6 +205,10 @@ function App() {
 
   if (route === 'subscription-renewal') {
     return <SubscriptionRenewalCalculatorPage onNavigate={navigate} />
+  }
+
+  if (route === 'within-days-guide') {
+    return <WithinDaysGuidePage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -4586,6 +4591,225 @@ function SubscriptionRenewalCalculatorPage({
 }
 
 
+function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
+  const [amount, setAmount] = useState(() =>
+    getInitialPositiveIntegerQueryParam('amount', '5', 365),
+  )
+  const [referenceDate, setReferenceDate] = useState(() =>
+    getInitialDateQueryParam(
+      'date',
+      toDateKey(addCalendarDays(getTodayPlainDate(new Date()), 10)),
+    ),
+  )
+  const [countMode, setCountMode] = useState<'calendar' | 'business'>(() =>
+    new URLSearchParams(window.location.search).get('unit') === 'business'
+      ? 'business'
+      : 'calendar',
+  )
+  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
+    getInitialHolidayCalendarQueryParam,
+  )
+
+  const parsedAmount = parseInteger(amount)
+  const parsedDate = parsePlainDate(referenceDate)
+
+  const beforeDate =
+    parsedAmount !== null && parsedDate
+      ? countMode === 'business'
+        ? calculateBusinessDaysWithCalendar(
+            parsedDate,
+            -parsedAmount,
+            holidayCalendar,
+          ).date
+        : addCalendarDays(parsedDate, -parsedAmount)
+      : null
+
+  const afterDate =
+    parsedAmount !== null && parsedDate
+      ? countMode === 'business'
+        ? calculateBusinessDaysWithCalendar(
+            parsedDate,
+            parsedAmount,
+            holidayCalendar,
+          ).date
+        : addCalendarDays(parsedDate, parsedAmount)
+      : null
+
+  useEffect(() => {
+    saveHolidayCalendar(holidayCalendar)
+  }, [holidayCalendar])
+
+  useEffect(() => {
+    syncShareableQueryParams({
+      amount,
+      date: referenceDate,
+      unit: countMode,
+      calendar:
+        countMode === 'business'
+          ? holidayCalendarQueryValue(holidayCalendar)
+          : null,
+    })
+  }, [amount, referenceDate, countMode, holidayCalendar])
+
+  return (
+    <main className="page-shell within-guide">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <section className="within-guide-shell">
+        <header>
+          <p className="friendly-eyebrow">Deadline wording</p>
+          <h1>What does “within X days” mean?</h1>
+          <p>
+            “Within” can be ambiguous by itself. The surrounding wording must
+            tell you whether to count before, after, or inside a stated window.
+          </p>
+        </header>
+
+        <section className="within-guide-bam">
+          <strong>Do not assume a direction from the word “within” alone.</strong>
+          <span>
+            “Within 5 days after receipt” counts forward. “5 days before
+            renewal” counts backward. “Within 5 days of July 1” may need
+            clarification.
+          </span>
+        </section>
+
+        <section className="within-guide-tool">
+          <form onSubmit={(event) => event.preventDefault()}>
+            <label>
+              <span>Number of days</span>
+              <input
+                type="number"
+                min="0"
+                max="365"
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+              />
+            </label>
+            <label>
+              <span>Reference date</span>
+              <input
+                type="date"
+                value={referenceDate}
+                onChange={(event) => setReferenceDate(event.target.value)}
+              />
+            </label>
+            <label>
+              <span>Count as</span>
+              <select
+                value={countMode}
+                onChange={(event) =>
+                  setCountMode(event.target.value as 'calendar' | 'business')
+                }
+              >
+                <option value="calendar">Calendar days</option>
+                <option value="business">Business days</option>
+              </select>
+            </label>
+
+            {countMode === 'business' ? (
+              <HolidayCalendarSelect
+                value={holidayCalendar}
+                onChange={setHolidayCalendar}
+                compact
+              />
+            ) : null}
+          </form>
+
+          <div className="within-guide-results" aria-live="polite">
+            {beforeDate && afterDate && parsedDate && parsedAmount !== null ? (
+              <>
+                <article>
+                  <small>If it means before</small>
+                  <strong>{formatPlainDate(beforeDate)}</strong>
+                  <b>{formatWeekday(beforeDate)}</b>
+                </article>
+                <article>
+                  <small>If it means after</small>
+                  <strong>{formatPlainDate(afterDate)}</strong>
+                  <b>{formatWeekday(afterDate)}</b>
+                </article>
+              </>
+            ) : (
+              <p>Enter a valid date and number of days.</p>
+            )}
+          </div>
+        </section>
+
+        <section className="within-guide-copy">
+          <article>
+            <h2>Does the starting day count?</h2>
+            <p>
+              That is a separate question. Some rules use day zero; others
+              include the triggering day. “Within” alone does not answer it.
+            </p>
+          </article>
+          <article>
+            <h2>Do weekends and holidays count?</h2>
+            <p>
+              Calendar days count them. Business or working days use the
+              applicable workweek and holiday rules.
+            </p>
+          </article>
+          <article>
+            <h2>When should you check the source?</h2>
+            <p>
+              Always when the wording comes from a contract, policy, law,
+              court rule, regulated notice, or another source that defines its
+              own counting method.
+            </p>
+          </article>
+        </section>
+
+        <nav className="within-guide-related">
+          <a href="/deadline-calculator" onClick={(e) => { e.preventDefault(); onNavigate('/deadline-calculator') }}>Deadline calculator</a>
+          <a href="/does-the-start-date-count" onClick={(e) => { e.preventDefault(); onNavigate('/does-the-start-date-count') }}>Does the start date count?</a>
+          <a href="/do-weekends-count-as-business-days" onClick={(e) => { e.preventDefault(); onNavigate('/do-weekends-count-as-business-days') }}>Do weekends count?</a>
+        </nav>
+      </section>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. The governing wording controls direction, start-day counting, weekends, holidays, service, receipt, and final-day rules."
+      />
+
+      <style>{`
+        .within-guide { min-height:100vh; background:#fffaf2; }
+        .within-guide-shell { width:min(100% - 32px,980px); margin:0 auto; padding:34px 0 64px; }
+        .within-guide-shell > header { text-align:center; }
+        .within-guide-shell h1 { margin:6px 0 0; color:#152d48; font-size:clamp(2.35rem,6vw,4.4rem); line-height:1; letter-spacing:-.04em; }
+        .within-guide-shell > header > p:last-child { max-width:700px; margin:12px auto 0; color:#61788f; line-height:1.55; }
+        .within-guide-bam { max-width:760px; margin:22px auto 0; padding:18px; border:1px solid rgba(62,126,82,.14); border-radius:14px; background:#f7fcf7; text-align:center; }
+        .within-guide-bam strong,.within-guide-bam span { display:block; }
+        .within-guide-bam strong { color:#214b38; font-size:1.1rem; }
+        .within-guide-bam span { margin-top:8px; color:#567162; line-height:1.55; }
+        .within-guide-tool { display:grid; grid-template-columns:.85fr 1.15fr; gap:14px; margin-top:18px; }
+        .within-guide-tool form,.within-guide-results { padding:20px; border:1px solid rgba(19,38,70,.09); border-radius:18px; background:#fff; }
+        .within-guide-tool form { display:grid; gap:12px; align-content:start; }
+        .within-guide-tool label { display:grid; gap:6px; color:#526a82; font-size:.9rem; font-weight:850; }
+        .within-guide-tool input,.within-guide-tool select { min-height:48px; width:100%; padding:9px 11px; border:1px solid rgba(19,38,70,.14); border-radius:10px; background:#fff; color:#17304d; font:inherit; }
+        .within-guide-results { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .within-guide-results article { display:flex; flex-direction:column; justify-content:center; padding:16px; border:1px solid rgba(19,38,70,.09); border-radius:13px; background:#fffdf9; text-align:center; }
+        .within-guide-results small { color:#72869a; font-size:.78rem; font-weight:900; text-transform:uppercase; }
+        .within-guide-results strong { margin-top:7px; color:#10213f; font-size:clamp(1.55rem,3.2vw,2.35rem); line-height:1.05; }
+        .within-guide-results b { margin-top:5px; color:#667c92; font-size:.92rem; }
+        .within-guide-copy { display:grid; gap:12px; margin-top:22px; }
+        .within-guide-copy article { padding:18px; border:1px solid rgba(19,38,70,.08); border-radius:14px; background:rgba(255,255,255,.72); }
+        .within-guide-copy h2 { margin:0; color:#29435e; font-size:1.12rem; }
+        .within-guide-copy p { margin:8px 0 0; color:#5f748a; line-height:1.6; }
+        .within-guide-related { display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; padding-top:18px; border-top:1px solid rgba(19,38,70,.1); }
+        .within-guide-related a { min-height:44px; display:inline-flex; align-items:center; padding:8px 12px; border:1px solid rgba(19,38,70,.1); border-radius:999px; background:#fff; color:#4f6a85; font-size:.86rem; font-weight:850; text-decoration:none; }
+        @media (max-width:760px) {
+          .within-guide-shell { width:min(100% - 20px,980px); padding-top:24px; }
+          .within-guide-tool,.within-guide-results { grid-template-columns:1fr; }
+          .within-guide-tool form,.within-guide-results { padding:16px; }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
     getInitialDateQueryParam('payday', todayInputValue()),
@@ -5598,6 +5822,47 @@ function resolveAskWhenQuery(
     }
   }
 
+  const withinMatch = query.match(
+    /^(?:what\s+does\s+)?within\s+(\d{1,3})\s+(business|working|calendar)?\s*days?(?:\s+(?:of|from)\s+(\d{4}-\d{2}-\d{2}))?(?:\s+mean)?$/,
+  )
+
+  if (withinMatch) {
+    const amount = Number(withinMatch[1])
+    const rawUnit = withinMatch[2]
+    const date = withinMatch[3]
+
+    if (Number.isFinite(amount) && amount >= 0 && amount <= 365) {
+      const params = new URLSearchParams({
+        amount: String(amount),
+        unit:
+          rawUnit === 'business' || rawUnit === 'working'
+            ? 'business'
+            : 'calendar',
+      })
+      if (date && parsePlainDate(date)) params.set('date', date)
+
+      return {
+        label: `What does “within ${amount} days” mean?`,
+        description:
+          'Compare the possible before-versus-after interpretations.',
+        path: `/what-does-within-days-mean?${params.toString()}`,
+      }
+    }
+  }
+
+  if (
+    query === 'within x days meaning' ||
+    query === 'within days meaning' ||
+    query === 'what does within days mean'
+  ) {
+    return {
+      label: 'What does “within X days” mean?',
+      description:
+        'See why the wording can be ambiguous and compare both directions.',
+      path: '/what-does-within-days-mean',
+    }
+  }
+
   const deadlineInterpretation = interpretDeadlinePhrase(query, {
     today,
     holidayCalendar,
@@ -6251,6 +6516,11 @@ function DeadlineCountingGuideLinks({
       path: '/do-public-holidays-count-as-business-days',
       label: 'Do public holidays count as business days?',
       description: 'See when a weekday holiday is counted or skipped.',
+    },
+    {
+      path: '/what-does-within-days-mean',
+      label: 'What does “within X days” mean?',
+      description: 'Compare the possible before-versus-after interpretations.',
     },
   ]
 
@@ -14608,6 +14878,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'subscription-renewal'
   }
 
+  if (pathname === '/what-does-within-days-mean') {
+    return 'within-days-guide'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -14885,6 +15159,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Enter the last renewal or start date, billing interval, and optional cancellation notice period to see both dates.',
       twitterDescription: 'Calculate your next subscription renewal date and optional last day to cancel.',
       path: '/subscription-renewal-calculator',
+    }
+  }
+
+  if (route === 'within-days-guide') {
+    return {
+      title: 'What Does “Within X Days” Mean? | WhenIsDue',
+      description: 'See why “within X days” can be ambiguous, compare before-versus-after interpretations, and calculate both possible dates.',
+      openGraphDescription: 'Understand “within X days” wording and compare both possible directions before relying on it as a deadline.',
+      twitterDescription: 'What does “within X days” mean? Compare the common interpretations and calculate both dates.',
+      path: '/what-does-within-days-mean',
     }
   }
 
@@ -15255,6 +15539,24 @@ function getRouteStructuredData(
           '@type': 'Thing',
           name: 'Deadline counting',
         },
+      ],
+    }
+  }
+
+  if (route === 'within-days-guide') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      name: 'What Does “Within X Days” Mean?',
+      url: canonicalUrl,
+      description: metadata.description,
+      isPartOf: websiteReference,
+      publisher: organizationReference,
+      about: [
+        { '@type': 'Thing', name: 'Deadline wording' },
+        { '@type': 'Thing', name: 'Date calculation' },
+        { '@type': 'Thing', name: 'Deadline counting' },
       ],
     }
   }
