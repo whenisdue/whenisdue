@@ -93,6 +93,7 @@ type RouteName =
   | 'saved-calculations'
   | 'next-payday'
   | 'deadline-calculator'
+  | 'start-date-count-guide'
   | 'three-business-days'
   | 'four-business-days'
   | 'five-business-days'
@@ -169,6 +170,10 @@ function App() {
 
   if (route === 'deadline-calculator') {
     return <DeadlineCalculatorPage onNavigate={navigate} />
+  }
+
+  if (route === 'start-date-count-guide') {
+    return <StartDateCountGuidePage onNavigate={navigate} />
   }
 
   if (route === 'next-payday') {
@@ -883,7 +888,16 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         <p className="deadline-rule-caveat">
           Use the rule in the contract, policy, law, or message that created the
-          deadline. WhenIsDue shows the result for the rules you select.
+          deadline. WhenIsDue shows the result for the rules you select.{' '}
+          <a
+            href="/does-the-start-date-count"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/does-the-start-date-count')
+            }}
+          >
+            Does the start date count?
+          </a>
         </p>
       </section>
 
@@ -1156,6 +1170,459 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
           .deadline-rule-answer {
             padding: 20px 14px;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
+function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
+  const exampleStart = parsePlainDate('2026-08-10')!
+  const excluded = calculateDeadlineByRule({
+    triggerDate: exampleStart,
+    duration: 5,
+    direction: 'after',
+    unit: 'business-days',
+    startDayConvention: 'exclude-trigger',
+    holidayCalendar: 'none',
+    endDayAdjustment: 'none',
+  })
+  const included = calculateDeadlineByRule({
+    triggerDate: exampleStart,
+    duration: 5,
+    direction: 'after',
+    unit: 'business-days',
+    startDayConvention: 'include-if-qualifying',
+    holidayCalendar: 'none',
+    endDayAdjustment: 'none',
+  })
+
+  const calculatorPath =
+    '/deadline-calculator?date=2026-08-10&days=5&unit=business-days&direction=after&startday=unspecified'
+
+  return (
+    <main className="page-shell start-date-guide-page">
+      <IdentityRow onNavigate={onNavigate} showHomeLink />
+
+      <article className="start-date-guide-shell">
+        <header className="start-date-guide-hero">
+          <p className="friendly-eyebrow">Deadline counting guide</p>
+          <h1>Does the start date count?</h1>
+
+          <div className="start-date-guide-answer">
+            <strong>It depends on the wording of the rule.</strong>
+            <p>
+              If a deadline says <b>“5 business days after August 10”</b>,
+              August 10 is normally treated as the reference date and counting
+              starts after it. If the rule says <b>“count August 10 as day
+              one”</b>, the start date counts when it is a qualifying day.
+              Wording such as <b>“within 5 business days of August 10”</b> may
+              not tell you which convention to use.
+            </p>
+          </div>
+
+          <p className="start-date-guide-scope">
+            General counting guidance only. The contract, policy, law, or
+            instruction that created the deadline controls.
+          </p>
+        </header>
+
+        <section
+          className="start-date-guide-example"
+          aria-labelledby="start-date-guide-example-title"
+        >
+          <div className="start-date-guide-example-heading">
+            <span>Worked example</span>
+            <h2 id="start-date-guide-example-title">
+              August 10, 2026 + 5 business days
+            </h2>
+            <p>Monday–Friday only. Public holidays are not excluded.</p>
+          </div>
+
+          <div className="start-date-guide-results">
+            <div>
+              <span>Start date does not count</span>
+              <strong>
+                {excluded ? formatPlainDate(excluded.answerDate) : '—'}
+              </strong>
+              <small>
+                {excluded ? formatWeekday(excluded.answerDate) : ''}
+              </small>
+              <p>Counting begins with the next qualifying business day.</p>
+            </div>
+
+            <div>
+              <span>Start date counts as day 1</span>
+              <strong>
+                {included ? formatPlainDate(included.answerDate) : '—'}
+              </strong>
+              <small>
+                {included ? formatWeekday(included.answerDate) : ''}
+              </small>
+              <p>August 10 is day 1 because it is a Monday.</p>
+            </div>
+          </div>
+
+          <a
+            className="start-date-guide-cta"
+            href={calculatorPath}
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('authority_guide_calculator_click', {
+                guide: 'start_date_count',
+              })
+              onNavigate(calculatorPath)
+            }}
+          >
+            Check your exact deadline →
+          </a>
+        </section>
+
+        <section className="start-date-guide-content">
+          <article>
+            <h2>When the wording is clear</h2>
+            <dl>
+              <div>
+                <dt>“5 business days after receipt”</dt>
+                <dd>
+                  The receipt date is the reference event. Counting starts
+                  after that date unless the governing rule says otherwise.
+                </dd>
+              </div>
+              <div>
+                <dt>“Count the date received as day one”</dt>
+                <dd>
+                  The instruction explicitly tells you to include the start
+                  date when it qualifies.
+                </dd>
+              </div>
+            </dl>
+          </article>
+
+          <article>
+            <h2>When the wording is not clear</h2>
+            <p>
+              Phrases such as “within 5 business days of,” “5 business days
+              from,” or similar wording can leave the start-day convention
+              unstated. In that situation, a calculator should not silently
+              turn one interpretation into an authoritative deadline.
+            </p>
+            <p>
+              WhenIsDue can show both possible dates so you can compare them
+              against the original instruction before choosing a rule.
+            </p>
+          </article>
+
+          <article>
+            <h2>Why one day can change the answer</h2>
+            <p>
+              With calendar days, including the start date can shift the result
+              by one calendar day. With business days, weekends and selected
+              public holidays can make the difference look larger on the
+              calendar.
+            </p>
+          </article>
+
+          <article>
+            <h2>What should you do if the rule is silent?</h2>
+            <p>
+              Do not guess when the deadline matters. Check the original
+              contract, policy, notice, statute, court rule, or other source
+              that created the deadline. If the source still does not resolve
+              the convention, ask the responsible person or qualified adviser
+              before relying on one date.
+            </p>
+          </article>
+        </section>
+
+        <section className="start-date-guide-related" aria-label="Related tools">
+          <div>
+            <span>Related tools</span>
+            <h2>Calculate the date with the rule made explicit</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/deadline-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/deadline-calculator')
+              }}
+            >
+              Deadline calculator
+            </a>
+            <a
+              href="/business-days-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/business-days-calculator')
+              }}
+            >
+              Business days calculator
+            </a>
+          </nav>
+        </section>
+      </article>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. The original rule controls how a deadline should be counted."
+      />
+
+      <style>{`
+        .start-date-guide-page {
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .start-date-guide-shell {
+          width: min(100% - 32px, 920px);
+          margin: 0 auto;
+          padding: 36px 0 64px;
+        }
+
+        .start-date-guide-hero {
+          text-align: center;
+        }
+
+        .start-date-guide-hero h1 {
+          margin: 6px 0 0;
+          color: #152d48;
+          font-size: clamp(2.35rem, 7vw, 4.6rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .start-date-guide-answer {
+          max-width: 760px;
+          margin: 22px auto 0;
+          padding: 22px;
+          border: 1px solid rgba(22, 49, 78, 0.09);
+          border-radius: 18px;
+          background: #fff;
+          text-align: left;
+        }
+
+        .start-date-guide-answer > strong {
+          display: block;
+          color: #17304d;
+          font-size: clamp(1.4rem, 3vw, 2rem);
+          line-height: 1.2;
+        }
+
+        .start-date-guide-answer p {
+          margin: 10px 0 0;
+          color: #526a82;
+          font-size: 1.02rem;
+          line-height: 1.65;
+        }
+
+        .start-date-guide-answer b {
+          color: #29435e;
+        }
+
+        .start-date-guide-scope {
+          max-width: 700px;
+          margin: 12px auto 0;
+          color: #718197;
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .start-date-guide-example {
+          margin-top: 28px;
+          padding: 20px;
+          border: 1px solid rgba(183, 121, 31, 0.16);
+          border-radius: 18px;
+          background: #fffdf8;
+        }
+
+        .start-date-guide-example-heading {
+          text-align: center;
+        }
+
+        .start-date-guide-example-heading > span,
+        .start-date-guide-related > div > span {
+          color: #8a6a2c;
+          font-size: 0.8rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .start-date-guide-example-heading h2,
+        .start-date-guide-related h2 {
+          margin: 5px 0 0;
+          color: #29435e;
+          font-size: 1.25rem;
+        }
+
+        .start-date-guide-example-heading p {
+          margin: 6px 0 0;
+          color: #718197;
+          font-size: 0.94rem;
+        }
+
+        .start-date-guide-results {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .start-date-guide-results > div {
+          padding: 17px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 14px;
+          background: #fff;
+        }
+
+        .start-date-guide-results span {
+          display: block;
+          color: #526a82;
+          font-size: 0.92rem;
+          font-weight: 850;
+        }
+
+        .start-date-guide-results strong {
+          display: block;
+          margin-top: 7px;
+          color: #17304d;
+          font-size: clamp(1.55rem, 3vw, 2.15rem);
+          line-height: 1.1;
+        }
+
+        .start-date-guide-results small {
+          display: block;
+          margin-top: 4px;
+          color: #6d8196;
+          font-size: 0.94rem;
+        }
+
+        .start-date-guide-results p {
+          margin: 10px 0 0;
+          color: #667c92;
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .start-date-guide-cta {
+          min-height: 48px;
+          width: fit-content;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 18px auto 0;
+          padding: 9px 15px;
+          border-radius: 11px;
+          background: #173a63;
+          color: #fff;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        .start-date-guide-content {
+          display: grid;
+          gap: 14px;
+          margin-top: 24px;
+        }
+
+        .start-date-guide-content > article {
+          padding: 20px;
+          border: 1px solid rgba(22, 49, 78, 0.08);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .start-date-guide-content h2 {
+          margin: 0;
+          color: #29435e;
+          font-size: 1.2rem;
+        }
+
+        .start-date-guide-content p {
+          margin: 9px 0 0;
+          color: #5f748a;
+          font-size: 1rem;
+          line-height: 1.65;
+        }
+
+        .start-date-guide-content dl {
+          display: grid;
+          gap: 10px;
+          margin: 14px 0 0;
+        }
+
+        .start-date-guide-content dl > div {
+          padding: 13px 14px;
+          border: 1px solid rgba(22, 49, 78, 0.08);
+          border-radius: 12px;
+          background: #fff;
+        }
+
+        .start-date-guide-content dt {
+          color: #29435e;
+          font-weight: 900;
+        }
+
+        .start-date-guide-content dd {
+          margin: 5px 0 0;
+          color: #667c92;
+          line-height: 1.55;
+        }
+
+        .start-date-guide-related {
+          margin-top: 24px;
+          padding: 20px 0 0;
+          border-top: 1px solid rgba(22, 49, 78, 0.1);
+        }
+
+        .start-date-guide-related nav {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 13px;
+        }
+
+        .start-date-guide-related a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 999px;
+          background: #fff;
+          color: #4f6a85;
+          font-size: 0.88rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        @media (max-width: 720px) {
+          .start-date-guide-shell {
+            width: min(100% - 20px, 920px);
+            padding-top: 24px;
+          }
+
+          .start-date-guide-results {
+            grid-template-columns: 1fr;
+          }
+
+          .start-date-guide-answer,
+          .start-date-guide-example,
+          .start-date-guide-content > article {
+            padding: 16px;
+          }
+
+          .start-date-guide-related nav {
+            display: grid;
+            grid-template-columns: 1fr;
+          }
+
+          .start-date-guide-related a {
+            justify-content: center;
           }
         }
       `}</style>
@@ -4725,6 +5192,23 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           <h2>Business days vs calendar days</h2>
           <p>
             Calendar days include every day of the week. Business days usually mean Monday through Friday, so a deadline that is 7 or 10 business days away will often be farther away on the calendar because weekends are skipped.
+          </p>
+        </article>
+
+        <article>
+          <h2>Does the start date count?</h2>
+          <p>
+            That depends on the wording of the rule. See the{' '}
+            <a
+              href="/does-the-start-date-count"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/does-the-start-date-count')
+              }}
+            >
+              start-date counting guide
+            </a>{' '}
+            to compare day-zero and day-one interpretations.
           </p>
         </article>
       </section>
@@ -9996,6 +10480,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'deadline-calculator'
   }
 
+  if (pathname === '/does-the-start-date-count') {
+    return 'start-date-count-guide'
+  }
+
   if (pathname === '/3-business-days-from-today') {
     return 'three-business-days'
   }
@@ -10203,6 +10691,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Choose how a deadline should be counted and see the exact date plus the assumptions used.',
       twitterDescription: 'Calculate a deadline with clear business-day, holiday, and counting rules.',
       path: '/deadline-calculator',
+    }
+  }
+
+  if (route === 'start-date-count-guide') {
+    return {
+      title: 'Does the Start Date Count? Day 0 vs Day 1 Explained | WhenIsDue',
+      description: 'Learn when a deadline start date counts as day 1, when counting starts after it, and how ambiguous wording can produce two different due dates.',
+      openGraphDescription: 'See how day-zero and day-one deadline counting can produce different dates, with a clear worked example.',
+      twitterDescription: 'Does the start date count? Compare day-zero and day-one deadline counting.',
+      path: '/does-the-start-date-count',
     }
   }
 
@@ -10499,6 +10997,29 @@ function getRouteStructuredData(
       description: metadata.description,
       isPartOf: websiteReference,
       publisher: organizationReference,
+    }
+  }
+
+  if (route === 'start-date-count-guide') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      name: 'Does the Start Date Count?',
+      url: canonicalUrl,
+      description: metadata.description,
+      isPartOf: websiteReference,
+      publisher: organizationReference,
+      about: [
+        {
+          '@type': 'Thing',
+          name: 'Deadline counting',
+        },
+        {
+          '@type': 'Thing',
+          name: 'Business days',
+        },
+      ],
     }
   }
 
