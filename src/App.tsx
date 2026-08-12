@@ -7493,12 +7493,13 @@ function HomePage({ onNavigate }: NavigationProps) {
           <a
             className="date-home-brand"
             href="/"
+            aria-label="WhenIsDue home"
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/')
             }}
           >
-            WhenIsDue
+            <img src="/whenisdue-logo.png" alt="WhenIsDue" />
           </a>
 
           <nav className="date-home-nav" aria-label="Main navigation">
@@ -8058,11 +8059,18 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-brand {
-          color: #4c6887;
-          font-size: 1rem;
-          font-weight: 900;
-          letter-spacing: 0.085em;
+          display: inline-flex;
+          align-items: center;
+          min-height: 44px;
           text-decoration: none;
+        }
+
+        .date-home-brand img {
+          display: block;
+          width: clamp(138px, 12vw, 168px);
+          height: auto;
+          max-height: 38px;
+          object-fit: contain;
         }
 
         .date-home-nav {
@@ -8820,8 +8828,9 @@ function HomePage({ onNavigate }: NavigationProps) {
             min-height: 56px;
           }
 
-          .date-home-brand {
-            font-size: 0.92rem;
+          .date-home-brand img {
+            width: 122px;
+            max-height: 32px;
           }
 
           .date-home-nav {
