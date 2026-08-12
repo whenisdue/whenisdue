@@ -7528,7 +7528,6 @@ function HomePage({ onNavigate }: NavigationProps) {
           <div className="date-home-editorial-copy">
             <p className="date-home-editorial-today">
               <span>Today</span>
-              <strong>{formatPlainDate(today)}</strong>
               <b aria-hidden="true">·</b>
               <span>{formatWeekday(today)}</span>
               <b aria-hidden="true">·</b>
@@ -7551,9 +7550,10 @@ function HomePage({ onNavigate }: NavigationProps) {
               decoding="async"
               fetchPriority="high"
             />
-            <figcaption>
-              <span>The things waiting</span>
-              <strong>Everyday things quietly become questions of when.</strong>
+            <figcaption className="date-home-today-card" aria-hidden="true">
+              <span>Today</span>
+              <strong>{formatPlainDate(today)}</strong>
+              <small>{formatWeekday(today)}</small>
             </figcaption>
           </figure>
         </div>
@@ -7715,39 +7715,50 @@ function HomePage({ onNavigate }: NavigationProps) {
           object-position: 50% center;
         }
 
-        .date-home-editorial-art figcaption {
+        .date-home-editorial-art .date-home-today-card {
           position: absolute;
-          right: 26px;
-          bottom: 26px;
-          width: min(46%, 300px);
-          padding: 15px 17px 17px;
+          left: 50%;
+          top: 52%;
+          width: min(72%, 430px);
+          padding: 20px 24px 22px;
           border: 1px solid rgba(19, 38, 70, 0.08);
-          border-radius: 15px;
-          background: rgba(255, 250, 242, 0.54);
-          box-shadow: 0 16px 38px rgba(19, 38, 70, 0.12);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          border-radius: 18px;
+          background: rgba(255, 250, 242, 0.56);
+          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.14);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          text-align: center;
+          transform: translate(-50%, -50%);
         }
 
-        .date-home-editorial-art figcaption span,
-        .date-home-editorial-art figcaption strong {
+        .date-home-editorial-art .date-home-today-card span,
+        .date-home-editorial-art .date-home-today-card strong,
+        .date-home-editorial-art .date-home-today-card small {
           display: block;
         }
 
-        .date-home-editorial-art figcaption span {
+        .date-home-editorial-art .date-home-today-card span {
           color: #246b52;
-          font-size: 0.66rem;
+          font-size: 0.7rem;
           font-weight: 950;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.11em;
           text-transform: uppercase;
         }
 
-        .date-home-editorial-art figcaption strong {
-          margin-top: 6px;
+        .date-home-editorial-art .date-home-today-card strong {
+          margin-top: 7px;
           color: #10213f;
-          font-size: 1.16rem;
-          line-height: 1.15;
-          letter-spacing: -0.02em;
+          font-size: clamp(2rem, 3.6vw, 3.35rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .date-home-editorial-art .date-home-today-card small {
+          margin-top: 7px;
+          color: #60758d;
+          font-size: 0.9rem;
+          font-weight: 850;
         }
 
         @media (max-width: 760px) {
@@ -7840,22 +7851,26 @@ function HomePage({ onNavigate }: NavigationProps) {
             object-position: 44% center;
           }
 
-          .date-home-editorial-art figcaption {
-            left: 14px;
-            right: auto;
-            bottom: 12px;
-            width: min(74%, 250px);
-            padding: 10px 12px 11px;
-            border-radius: 12px;
+          .date-home-editorial-art .date-home-today-card {
+            left: 50%;
+            top: 50%;
+            width: min(84%, 320px);
+            padding: 13px 15px 15px;
+            border-radius: 14px;
           }
 
-          .date-home-editorial-art figcaption span {
-            font-size: 0.58rem;
+          .date-home-editorial-art .date-home-today-card span {
+            font-size: 0.6rem;
           }
 
-          .date-home-editorial-art figcaption strong {
-            margin-top: 4px;
-            font-size: 0.94rem;
+          .date-home-editorial-art .date-home-today-card strong {
+            margin-top: 5px;
+            font-size: clamp(1.5rem, 7.6vw, 2rem);
+          }
+
+          .date-home-editorial-art .date-home-today-card small {
+            margin-top: 5px;
+            font-size: 0.76rem;
           }
         }
       `}</style>
