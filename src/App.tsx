@@ -9938,7 +9938,8 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                     trackWhenIsDueEvent('quick_pick', { context: 'business_days', value: quickPick })
                   }}
                 >
-                  {quickPick}
+                  <span>{quickPick}</span>
+                  {quickPick === 30 ? <small>Common</small> : null}
                 </button>
               ))}
             </span>
@@ -11927,6 +11928,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 trackWhenIsDueEvent('date_changed', { context: 'return_window', value: event.target.value })
               }}
             />
+            <small className="return-start-helper">
+              Purchase date or delivery date? Use whichever one the retailer says starts the return period.
+            </small>
           </label>
 
           <label className="field value-field">
@@ -12023,6 +12027,16 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         </section>
       </section>
 
+      <section className="return-holiday-callout" aria-label="Holiday return reminder">
+        <div>
+          <span>Holiday gift return?</span>
+          <strong>Use the holiday return period stated by the retailer.</strong>
+        </div>
+        <p>
+          Holiday purchases may have an extended return window. Enter the purchase or delivery date the retailer uses, then enter the number of days in that holiday return period.
+        </p>
+      </section>
+
       <style>{`
         .return-citation-explanation {
           max-width: 680px;
@@ -12101,9 +12115,68 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           justify-content: center;
         }
 
+        .return-start-helper {
+          display: block;
+          margin-top: 7px;
+          color: #667d94;
+          font-size: 0.84rem;
+          line-height: 1.45;
+        }
+
         .return-window-page .quick-picks button {
-          min-width: 44px;
-          min-height: 44px;
+          min-width: 50px;
+          min-height: 48px;
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1px;
+          padding-inline: 10px;
+        }
+
+        .return-window-page .quick-picks button small {
+          font-size: 0.62rem;
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: 0.035em;
+          text-transform: uppercase;
+          opacity: 0.72;
+        }
+
+        .return-holiday-callout {
+          width: min(100% - 32px, 1130px);
+          margin: 16px auto 0;
+          padding: 15px 17px;
+          border: 1px solid rgba(161, 111, 28, 0.16);
+          border-radius: 14px;
+          background: #fffaf0;
+        }
+
+        .return-holiday-callout > div {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px 10px;
+          align-items: baseline;
+        }
+
+        .return-holiday-callout span {
+          color: #8a6322;
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.045em;
+          text-transform: uppercase;
+        }
+
+        .return-holiday-callout strong {
+          color: #47381f;
+          font-size: 1rem;
+        }
+
+        .return-holiday-callout p {
+          margin: 7px 0 0;
+          color: #6d6049;
+          font-size: 0.9rem;
+          line-height: 1.5;
         }
 
         .return-window-page input,
@@ -12130,7 +12203,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
       <section className="return-today-answers return-secondary-answers" aria-labelledby="return-today-title">
         <div className="return-today-heading">
-          <h2 id="return-today-title">If your return window starts today</h2>
+          <h2 id="return-today-title">Common return windows starting today</h2>
           <p className="return-today-date">
             Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
             <span aria-hidden="true"> · </span>
@@ -12139,20 +12212,37 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         </div>
 
         <div className="return-today-grid">
-          {[7, 14, 30, 60].map((dayCount) => {
+          {[7, 14, 30, 60, 90].map((dayCount) => {
             const answerDate = addCalendarDays(today, Math.max(dayCount - 1, 0))
 
             return (
-              <article className="return-today-card" key={dayCount}>
+              <button
+                className={`return-today-card${dayCount === 30 ? ' is-common' : ''}`}
+                key={dayCount}
+                type="button"
+                onClick={() => {
+                  setPurchaseDate(todayInputValue())
+                  setReturnWindow(String(dayCount))
+                  trackWhenIsDueEvent('return_window_common_window_selected', {
+                    days: dayCount,
+                    source: 'today_answers',
+                  })
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+              >
                 <div className="return-today-card-top">
                   <span>{dayCount}-day window</span>
+                  {dayCount === 30 ? <b>Common</b> : null}
                 </div>
                 <strong>{formatPlainDate(answerDate)}</strong>
                 <small>{formatWeekday(answerDate)}</small>
-              </article>
+              </button>
             )
           })}
         </div>
+        <p className="return-today-note">
+          Tap a window to load it into the calculator. For an actual purchase, replace today with the retailer’s stated start date.
+        </p>
       </section>
 
       <section className="business-content" aria-label="Return window help">
@@ -12200,7 +12290,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             <dt>Should I use the order date or delivery date?</dt>
             <dd>Use whichever starting date the official return policy specifies. For online purchases, that is often the delivery date, but policies vary.</dd>
             <dt>What if the last day falls on a weekend or holiday?</dt>
-            <dd>This calculator does not move the deadline. Check whether the store is open or whether an online or shipped return can be started that day.</dd>
+            <dd>This calculator does not automatically move the deadline. Check whether the retailer allows an online return to be started that day or gives a next-business-day extension.</dd>
+            <dt>Do holiday return policies give you extra time?</dt>
+            <dd>Some retailers publish extended holiday return periods. Use the retailer’s stated holiday window rather than assuming the normal return period applies.</dd>
             <dt>Does starting an online return meet the deadline?</dt>
             <dd>Some retailers require only that the return be initiated by the deadline; others require shipment or receipt. Check the exact wording of the policy.</dd>
           </dl>
@@ -12325,8 +12417,8 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         .return-today-grid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 12px;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 10px;
           margin-top: 16px;
         }
 
@@ -12339,6 +12431,25 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          color: inherit;
+          font: inherit;
+          text-align: left;
+          cursor: pointer;
+          transition:
+            transform 120ms ease,
+            border-color 120ms ease,
+            box-shadow 120ms ease;
+        }
+
+        .return-today-card:hover {
+          transform: translateY(-1px);
+          border-color: rgba(19, 38, 70, 0.22);
+          box-shadow: 0 8px 20px rgba(19, 38, 70, 0.06);
+        }
+
+        .return-today-card:focus-visible {
+          outline: 3px solid rgba(53, 101, 154, 0.24);
+          outline-offset: 2px;
         }
 
         .return-today-card.is-common {
@@ -12429,12 +12540,21 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             padding: 14px;
           }
 
+          .return-holiday-callout {
+            width: min(100% - 24px, 1130px);
+            padding: 14px;
+          }
+
           .return-today-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
           .return-today-card {
             min-height: 96px;
+          }
+
+          .return-today-card:last-child {
+            grid-column: 1 / -1;
           }
         }
       `}</style>
