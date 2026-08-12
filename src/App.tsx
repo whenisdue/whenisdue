@@ -7524,12 +7524,13 @@ function HomePage({ onNavigate }: NavigationProps) {
         </header>
 
         <div className="date-home-answer">
-          <p className="date-home-kicker">Today is</p>
+          <p className="date-home-kicker">Today</p>
           <h1 id="date-home-title" className="date-home-date">
             {formatPlainDate(today)}
           </h1>
-          <p className="date-home-weekday">{formatWeekday(today)}</p>
-          <p className="date-home-timezone">
+          <p className="date-home-context">
+            <span>{formatWeekday(today)}</span>
+            <b aria-hidden="true">·</b>
             <span>{getLocalTimeZoneName()}</span>
             <b aria-hidden="true">·</b>
             <strong>{getLocalUtcOffsetLabel(currentTime)}</strong>
@@ -8081,73 +8082,54 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-answer {
-          display: grid;
-          grid-template-columns: auto auto;
-          grid-template-areas:
-            "kicker date"
-            "weekday timezone";
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           justify-content: center;
-          align-items: baseline;
-          column-gap: 10px;
-          row-gap: 4px;
           text-align: center;
-          padding: 22px 12px 16px;
+          padding: 22px 12px 18px;
         }
 
         .date-home-kicker {
-          grid-area: kicker;
-          margin: 0;
-          color: #6b7f93;
-          font-size: 0.9rem;
-          font-weight: 850;
-          letter-spacing: 0.01em;
+          margin: 0 0 4px;
+          color: #246b52;
+          font-size: 0.72rem;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
         }
 
         .date-home-date {
-          grid-area: date;
           margin: 0;
           max-width: 100%;
           color: #17304d;
-          font-size: clamp(1.55rem, 3vw, 2.45rem);
+          font-size: clamp(2rem, 4.1vw, 3.15rem);
           font-weight: 900;
-          line-height: 1.05;
-          letter-spacing: -0.035em;
+          line-height: 1;
+          letter-spacing: -0.045em;
           text-wrap: balance;
         }
 
-        .date-home-weekday {
-          grid-area: weekday;
-          margin: 0;
-          justify-self: end;
-          color: #60758a;
-          font-size: 0.88rem;
-          font-weight: 800;
-        }
-
-        .date-home-timezone {
-          grid-area: timezone;
+        .date-home-context {
           display: inline-flex;
+          flex-wrap: wrap;
           align-items: center;
-          gap: 7px;
-          margin: 0;
-          justify-self: start;
-          color: #607993;
+          justify-content: center;
+          gap: 6px;
+          margin: 7px 0 0;
+          color: #60758a;
           font-size: 0.84rem;
-          line-height: 1.25;
-        }
-
-        .date-home-timezone span {
+          line-height: 1.3;
           font-weight: 800;
         }
 
-        .date-home-timezone b {
+        .date-home-context b {
           color: #9aa8b5;
           font-weight: 700;
         }
 
-        .date-home-timezone strong {
+        .date-home-context strong {
           color: #425e7b;
-          font-size: 0.9rem;
           font-weight: 900;
         }
 
@@ -8805,33 +8787,23 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-answer {
-            grid-template-columns: auto auto;
-            column-gap: 7px;
-            row-gap: 3px;
-            padding: 14px 0 10px;
+            padding: 14px 0 12px;
           }
 
           .date-home-kicker {
-            font-size: 0.78rem;
+            margin-bottom: 3px;
+            font-size: 0.66rem;
           }
 
           .date-home-date {
-            font-size: 1.45rem;
-            line-height: 1.05;
+            font-size: clamp(1.75rem, 8.2vw, 2.25rem);
+            line-height: 1;
           }
 
-          .date-home-weekday {
-            margin: 0;
-            font-size: 0.78rem;
-          }
-
-          .date-home-timezone {
-            margin: 0;
+          .date-home-context {
+            gap: 5px;
+            margin-top: 6px;
             font-size: 0.76rem;
-          }
-
-          .date-home-timezone strong {
-            font-size: 0.84rem;
           }
 
           .date-home-business,
