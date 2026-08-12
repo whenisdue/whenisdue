@@ -12251,65 +12251,121 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         @media (max-width: 760px) {
           .return-window-page .return-answer-intro {
-            padding-bottom: 4px;
+            padding-bottom: 0;
           }
 
-          .return-window-page .return-answer-eyebrow {
-            margin-bottom: 5px;
-            font-size: 0.72rem;
-          }
-
-          .return-window-page .return-answer-intro h1 {
-            max-width: 330px;
-            font-size: clamp(2rem, 10.5vw, 3rem);
-            line-height: 0.98;
-          }
-
-          .return-window-page .return-primary-workspace {
-            gap: 8px;
-          }
-
-          .return-window-page .business-calculator {
-            padding: 12px 14px;
-          }
-
-          .return-window-page .business-calculator .field {
+          .return-window-page .identity-row {
             margin-bottom: 8px;
           }
 
+          .return-window-page .return-answer-eyebrow {
+            margin-bottom: 3px;
+            font-size: 0.68rem;
+          }
+
+          .return-window-page .return-answer-intro h1 {
+            max-width: 320px;
+            font-size: clamp(1.72rem, 8.8vw, 2.35rem);
+            line-height: 0.96;
+          }
+
+          .return-window-page .return-primary-workspace {
+            gap: 6px;
+            margin-top: 10px;
+          }
+
+          .return-window-page .business-calculator {
+            padding: 10px 12px;
+          }
+
+          .return-window-page .business-calculator .field {
+            margin-bottom: 6px;
+          }
+
           .return-window-page .business-calculator .field > span:first-child {
-            font-size: 0.94rem;
+            margin-bottom: 3px;
+            font-size: 0.86rem;
+          }
+
+          .return-window-page .business-calculator input[type='date'],
+          .return-window-page .business-calculator input[type='number'],
+          .return-window-page .business-calculator input[type='text'] {
+            min-height: 44px;
           }
 
           .return-window-page .quick-picks {
-            gap: 6px;
+            gap: 5px;
+            flex-wrap: nowrap;
           }
 
           .return-window-page .quick-picks button {
-            min-width: 52px;
-            min-height: 48px;
+            min-width: 0;
+            flex: 1 1 0;
+            min-height: 44px;
+            padding-inline: 5px;
+          }
+
+          .return-window-page .quick-picks button > span {
+            font-size: 0.92rem;
+          }
+
+          .return-window-page .quick-picks button small {
+            font-size: 0.54rem;
+          }
+
+          .return-input-help {
+            margin-top: 0;
+          }
+
+          .return-input-help summary {
+            min-height: 34px;
+            font-size: 0.78rem;
+          }
+
+          .return-input-help p {
+            font-size: 0.8rem;
           }
 
           .return-window-page .return-window-result {
-            padding-top: 15px;
-            padding-bottom: 15px;
-          }
-
-          .return-window-page .return-window-result .due-date {
-            font-size: clamp(3rem, 14.5vw, 4.8rem);
+            padding: 10px 12px 12px;
+            min-height: 0;
           }
 
           .return-window-page .return-window-result .result-label {
-            margin-bottom: 2px;
+            margin-bottom: 0;
+            font-size: 0.72rem;
+          }
+
+          .return-window-page .return-window-result .due-date {
+            max-width: 100%;
+            margin-top: 2px;
+            font-size: clamp(2.55rem, 12vw, 3.85rem);
+            line-height: 0.9;
+            text-wrap: balance;
+          }
+
+          .return-result-weekday {
+            margin-top: 4px;
+            font-size: 0.9rem;
           }
 
           .return-window-page .return-window-result .status-badge {
+            margin-top: 6px;
+            font-size: 0.76rem;
+          }
+
+          .return-window-page .return-window-result .result-actions {
             margin-top: 8px;
           }
 
-          .return-input-help summary,
-          .return-why-details summary {
+          .return-window-page .return-window-result .result-actions button,
+          .return-window-page .return-window-result .result-actions a {
             min-height: 42px;
+          }
+
+          .return-why-details summary {
+            min-height: 36px;
+            font-size: 0.8rem;
           }
         }
       `}</style>
@@ -12647,11 +12703,11 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           }
 
           .return-answer-intro h1 {
-            font-size: 2rem;
+            font-size: 1.72rem;
           }
 
           .return-answer-eyebrow {
-            font-size: 0.7rem;
+            font-size: 0.66rem;
           }
 
           .return-primary-workspace {
