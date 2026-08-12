@@ -12150,10 +12150,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell return-window-page">
-      <section className="intro return-answer-intro" aria-label="WhenIsDue navigation">
-        <IdentityRow onNavigate={onNavigate} showHomeLink />
-      </section>
-
       <section className="return-landing-stage" aria-labelledby="return-window-title">
         <div className="return-landing-task">
           <p className="return-answer-eyebrow">Return Window Calculator</p>
@@ -12320,34 +12316,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       </section>
 
       <style>{`
-        .return-window-page .return-answer-intro {
-          padding-bottom: 0;
-        }
-
-        .return-window-page .return-answer-intro .site-header {
-          border-bottom: 0;
-          padding-bottom: 0;
-        }
-
-        .return-window-page .return-answer-intro .identity-row {
-          justify-content: flex-start;
-        }
-
-        .return-window-page .return-answer-intro .friendly-top-nav {
-          display: none;
-        }
-
-        .return-window-page .return-answer-intro .site-mark {
-          gap: 0;
-        }
-
-        .return-window-page .return-answer-intro .site-mark > span:last-child {
-          display: none;
-        }
-
         .return-landing-stage {
           width: min(100% - 32px, 1130px);
-          margin: 10px auto 0;
+          margin: 18px auto 0;
           display: grid;
           grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
           min-height: 610px;
@@ -12789,7 +12760,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         @media (max-width: 760px) {
           .return-landing-stage {
             width: calc(100% - 20px);
-            margin-top: 8px;
+            margin-top: 10px;
             grid-template-columns: 1fr;
             min-height: 0;
             border-radius: 20px;
@@ -12844,27 +12815,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           .return-window-page .return-primary-workspace {
             width: calc(100% - 20px);
             margin-top: 10px;
-          }
-
-          .return-window-page .return-answer-intro {
-            padding-bottom: 0;
-          }
-
-          .return-window-page .return-answer-intro .site-header {
-            border-bottom: 0;
-            padding-bottom: 0;
-          }
-
-          .return-window-page .return-answer-intro .friendly-top-nav {
-            display: none;
-          }
-
-          .return-window-page .return-answer-intro .site-mark {
-            gap: 0;
-          }
-
-          .return-window-page .return-answer-intro .site-mark > span:last-child {
-            display: none;
           }
 
           .return-window-page .identity-row {
