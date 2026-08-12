@@ -9295,8 +9295,6 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
         </div>
       </section>
 
-      <DeadlineCountingGuideLinks onNavigate={onNavigate} compact />
-
       <details id="calculator" className="calculator-secondary-section">
         <summary className="friendly-section-heading">
           <span className="step-number">+</span>
@@ -9490,6 +9488,8 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
         </section>
       </details>
 
+      <DeadlineCountingGuideLinks onNavigate={onNavigate} compact />
+
       <section id="saved-dates" className="saved-dates-section" aria-labelledby="saved-title">
         <div className="saved-dates-heading">
           <div>
@@ -9638,76 +9638,6 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           <article><span>1</span><h3>Add your clients</h3><p>Keep each client’s active work and follow-ups together.</p></article>
           <article><span>2</span><h3>Capture the next action</h3><p>Separate the action date, actual due date, and follow-up date.</p></article>
           <article><span>3</span><h3>Work from Today</h3><p>Open one view and see what needs attention first.</p></article>
-        </div>
-      </section>
-
-      <section id="more-tools" className="popular-calculators friendly-tools" aria-labelledby="popular-calculators-title">
-        <div className="section-heading">
-          <p className="friendly-eyebrow muted-eyebrow">More quick tools</p>
-          <h2 id="popular-calculators-title" tabIndex={-1}>Common deadline calculators</h2>
-          <p>Open a focused calculator when you need a little more guidance.</p>
-        </div>
-        <div className="popular-calculators-grid">
-          <a
-            className="calculator-link-card"
-            href="/business-days-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/business-days-calculator')
-            }}
-          >
-            <span className="tool-card-icon" aria-hidden="true">M–F</span>
-            <span>
-              <strong>Business days</strong>
-              <small>Skip Saturdays and Sundays</small>
-            </span>
-            <b aria-hidden="true">→</b>
-          </a>
-          <a
-            className="calculator-link-card"
-            href="/free-trial-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/free-trial-calculator')
-            }}
-          >
-            <span className="tool-card-icon" aria-hidden="true">★</span>
-            <span>
-              <strong>Free trial</strong>
-              <small>Set a one-day-before reminder</small>
-            </span>
-            <b aria-hidden="true">→</b>
-          </a>
-          <a
-            className="calculator-link-card"
-            href="/return-window-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/return-window-calculator')
-            }}
-          >
-            <span className="tool-card-icon" aria-hidden="true">↩</span>
-            <span>
-              <strong>Return window</strong>
-              <small>Find the last day to return</small>
-            </span>
-            <b aria-hidden="true">→</b>
-          </a>
-          <a
-            className="calculator-link-card"
-            href="/invoice-due-date-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/invoice-due-date-calculator')
-            }}
-          >
-            <span className="tool-card-icon" aria-hidden="true">$</span>
-            <span>
-              <strong>Invoice due date</strong>
-              <small>Calculate payment terms</small>
-            </span>
-            <b aria-hidden="true">→</b>
-          </a>
         </div>
       </section>
 
