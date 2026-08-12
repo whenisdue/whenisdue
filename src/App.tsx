@@ -7545,7 +7545,10 @@ function HomePage({ onNavigate }: NavigationProps) {
 
       <section className="date-home-business" aria-labelledby="date-home-business-title">
         <div className="date-home-section-heading">
-          <h2 id="date-home-business-title">Business days from today</h2>
+          <div className="date-home-chapter-title">
+            <span className="date-home-chapter-label">Quick answers</span>
+            <h2 id="date-home-business-title">Business days from today</h2>
+          </div>
           <a
             href={`/business-days-calculator${
               holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
@@ -7635,7 +7638,11 @@ function HomePage({ onNavigate }: NavigationProps) {
       </section>
 
       <section className="date-home-tools" aria-labelledby="date-home-tools-title">
-        <h2 id="date-home-tools-title">What do you need to know?</h2>
+        <div className="date-home-tools-heading">
+          <span className="date-home-chapter-label">Choose by task</span>
+          <h2 id="date-home-tools-title">What do you need to know?</h2>
+          <p>Pick the question closest to what you are trying to figure out.</p>
+        </div>
 
         <div className="date-home-tool-grid">
           <a
@@ -8489,15 +8496,44 @@ function HomePage({ onNavigate }: NavigationProps) {
           display: flex;
           justify-content: space-between;
           gap: 16px;
-          align-items: baseline;
+          align-items: flex-end;
           margin-bottom: 16px;
+        }
+
+        .date-home-chapter-title,
+        .date-home-tools-heading {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .date-home-chapter-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          margin-bottom: 6px;
+          color: #246b52;
+          font-size: 0.73rem;
+          font-weight: 950;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+        }
+
+        .date-home-chapter-label::before {
+          content: '';
+          width: 18px;
+          height: 3px;
+          border-radius: 999px;
+          background: #246b52;
         }
 
         .date-home-section-heading h2,
         .date-home-tools h2 {
           margin: 0;
           color: #18304c;
-          font-size: 1.35rem;
+          font-size: clamp(1.45rem, 2.5vw, 1.9rem);
+          line-height: 1.1;
+          letter-spacing: -0.025em;
         }
 
         .date-home-section-heading a {
@@ -8543,16 +8579,16 @@ function HomePage({ onNavigate }: NavigationProps) {
           position: absolute;
           right: 15px;
           top: 50%;
-          color: #6c8299;
+          color: #246b52;
           font-size: 1.05rem;
-          font-weight: 900;
+          font-weight: 950;
           transform: translateY(-50%);
         }
 
         .date-home-business-answer:hover {
           transform: translateY(-1px);
-          border-color: rgba(23, 58, 99, 0.22);
-          background: #fffdfa;
+          border-color: rgba(36, 107, 82, 0.24);
+          background: #f9fcfa;
           box-shadow: 0 8px 22px rgba(19, 38, 70, 0.05);
         }
 
@@ -8587,11 +8623,20 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-tools {
-          padding: 28px 0 56px;
+          padding: 34px 0 56px;
+          border-top: 1px solid rgba(19, 38, 70, 0.08);
         }
 
-        .date-home-tools h2 {
-          margin-bottom: 16px;
+        .date-home-tools-heading {
+          margin-bottom: 18px;
+        }
+
+        .date-home-tools-heading p {
+          max-width: 600px;
+          margin: 7px 0 0;
+          color: #667b91;
+          font-size: 0.92rem;
+          line-height: 1.45;
         }
 
         .date-home-tool-grid {
@@ -8621,19 +8666,35 @@ function HomePage({ onNavigate }: NavigationProps) {
         .date-home-tool-grid a::after {
           content: '→';
           position: absolute;
-          right: 18px;
+          right: 16px;
           top: 50%;
-          color: #667f98;
-          font-size: 1.1rem;
-          font-weight: 900;
+          width: 30px;
+          height: 30px;
+          border-radius: 9px;
+          display: grid;
+          place-items: center;
+          background: #eaf5ef;
+          color: #246b52;
+          font-size: 1rem;
+          font-weight: 950;
           transform: translateY(-50%);
+          transition:
+            background 120ms ease,
+            color 120ms ease,
+            transform 120ms ease;
         }
 
         .date-home-tool-grid a:hover {
           transform: translateY(-1px);
-          border-color: rgba(23, 58, 99, 0.22);
+          border-color: rgba(36, 107, 82, 0.28);
           background: #fff;
-          box-shadow: 0 8px 22px rgba(19, 38, 70, 0.05);
+          box-shadow: 0 10px 24px rgba(19, 38, 70, 0.06);
+        }
+
+        .date-home-tool-grid a:hover::after {
+          background: #246b52;
+          color: #fff;
+          transform: translateY(-50%) translateX(2px);
         }
 
         .date-home-tool-grid a:focus-visible {
