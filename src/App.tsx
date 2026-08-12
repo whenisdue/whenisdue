@@ -7488,7 +7488,7 @@ function HomePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell date-home-page">
-      <section className="date-home-hero" aria-labelledby="date-home-title">
+      <section className="date-home-hero date-home-editorial-shell" aria-labelledby="ask-when-title">
         <header className="date-home-header">
           <a
             className="date-home-brand"
@@ -7524,26 +7524,341 @@ function HomePage({ onNavigate }: NavigationProps) {
           </nav>
         </header>
 
-        <div className="date-home-answer">
-          <p className="date-home-kicker">Today</p>
-          <h1 id="date-home-title" className="date-home-date">
-            {formatPlainDate(today)}
-          </h1>
-          <p className="date-home-context">
-            <span>{formatWeekday(today)}</span>
-            <b aria-hidden="true">·</b>
-            <span>{getLocalTimeZoneName()}</span>
-            <b aria-hidden="true">·</b>
-            <strong>{getLocalUtcOffsetLabel(currentTime)}</strong>
-          </p>
+        <div className="date-home-editorial-hero">
+          <div className="date-home-editorial-copy">
+            <p className="date-home-editorial-today">
+              <span>Today</span>
+              <strong>{formatPlainDate(today)}</strong>
+              <b aria-hidden="true">·</b>
+              <span>{formatWeekday(today)}</span>
+              <b aria-hidden="true">·</b>
+              <span>{getLocalTimeZoneName()}</span>
+              <b aria-hidden="true">·</b>
+              <span>{getLocalUtcOffsetLabel(currentTime)}</span>
+            </p>
+
+            <AskWhenBox
+              onNavigate={onNavigate}
+              holidayCalendar={holidayCalendar}
+              today={today}
+            />
+          </div>
+
+          <figure className="date-home-editorial-art">
+            <img
+              src="/homepage-editorial.webp"
+              alt="A parcel, envelope, folded document, and paper slip arranged on a warm stone surface."
+              decoding="async"
+              fetchPriority="high"
+            />
+            <figcaption>
+              <span>The things waiting</span>
+              <strong>Everyday things quietly become questions of when.</strong>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
-      <AskWhenBox
-        onNavigate={onNavigate}
-        holidayCalendar={holidayCalendar}
-        today={today}
-      />
+      <style>{`
+        .date-home-editorial-shell {
+          width: min(100% - 32px, 1240px);
+          margin: 0 auto;
+        }
+
+        .date-home-editorial-shell .date-home-header {
+          width: 100%;
+        }
+
+        .date-home-editorial-hero {
+          display: grid;
+          grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+          min-height: 590px;
+          margin-top: 22px;
+          overflow: hidden;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 26px;
+          background: #17304d;
+          box-shadow: 0 24px 64px rgba(19, 38, 70, 0.1);
+        }
+
+        .date-home-editorial-copy {
+          display: flex;
+          min-width: 0;
+          flex-direction: column;
+          justify-content: center;
+          padding: clamp(34px, 4.4vw, 58px);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0)),
+            #17304d;
+        }
+
+        .date-home-editorial-today {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 6px;
+          margin: 0 0 18px;
+          color: rgba(255, 250, 242, 0.72);
+          font-size: 0.82rem;
+          font-weight: 750;
+        }
+
+        .date-home-editorial-today > span:first-child {
+          color: #9bc8b2;
+          font-size: 0.7rem;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .date-home-editorial-today strong {
+          color: #fffaf2;
+          font-weight: 900;
+        }
+
+        .date-home-editorial-today b {
+          color: rgba(255, 250, 242, 0.3);
+        }
+
+        .date-home-editorial-hero .ask-when-box {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
+          text-align: left;
+        }
+
+        .date-home-editorial-hero .ask-when-heading > span {
+          margin-bottom: 8px;
+          color: #9bc8b2;
+        }
+
+        .date-home-editorial-hero .ask-when-heading h2 {
+          max-width: 520px;
+          color: #fffaf2;
+          font-size: clamp(3.25rem, 5vw, 5rem);
+          line-height: 0.93;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .date-home-editorial-hero .ask-when-heading p {
+          max-width: 520px;
+          margin: 12px 0 0;
+          color: rgba(255, 250, 242, 0.7);
+          font-size: 1rem;
+        }
+
+        .date-home-editorial-hero .ask-when-form {
+          max-width: none;
+          margin: 22px 0 0;
+        }
+
+        .date-home-editorial-hero .ask-when-form input {
+          min-height: 60px;
+          border: 0;
+          background: #fffdf8;
+          box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+        }
+
+        .date-home-editorial-hero .ask-when-form input:focus {
+          outline: 3px solid rgba(155, 200, 178, 0.42);
+          outline-offset: 3px;
+          border-color: transparent;
+        }
+
+        .date-home-editorial-hero .ask-when-preview {
+          max-width: none;
+          margin-left: 0;
+          margin-right: 0;
+          background: rgba(255, 250, 242, 0.96);
+        }
+
+        .date-home-editorial-hero .ask-when-preview.has-match {
+          background: rgba(234, 245, 239, 0.98);
+        }
+
+        .date-home-editorial-hero .ask-when-examples {
+          justify-content: flex-start;
+          margin-top: 14px;
+        }
+
+        .date-home-editorial-hero .ask-when-examples button {
+          border-color: rgba(255, 255, 255, 0.16);
+          background: rgba(255, 255, 255, 0.08);
+          color: rgba(255, 250, 242, 0.82);
+        }
+
+        .date-home-editorial-hero .ask-when-examples button:hover {
+          background: rgba(255, 255, 255, 0.14);
+          color: #fffaf2;
+        }
+
+        .date-home-editorial-art {
+          position: relative;
+          min-width: 0;
+          min-height: 590px;
+          margin: 0;
+          overflow: hidden;
+          background: #d9c6aa;
+        }
+
+        .date-home-editorial-art img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          min-height: 590px;
+          object-fit: cover;
+          object-position: 50% center;
+        }
+
+        .date-home-editorial-art figcaption {
+          position: absolute;
+          right: 26px;
+          bottom: 26px;
+          width: min(46%, 300px);
+          padding: 15px 17px 17px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 15px;
+          background: rgba(255, 250, 242, 0.54);
+          box-shadow: 0 16px 38px rgba(19, 38, 70, 0.12);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+
+        .date-home-editorial-art figcaption span,
+        .date-home-editorial-art figcaption strong {
+          display: block;
+        }
+
+        .date-home-editorial-art figcaption span {
+          color: #246b52;
+          font-size: 0.66rem;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .date-home-editorial-art figcaption strong {
+          margin-top: 6px;
+          color: #10213f;
+          font-size: 1.16rem;
+          line-height: 1.15;
+          letter-spacing: -0.02em;
+        }
+
+        @media (max-width: 760px) {
+          .date-home-editorial-shell {
+            width: calc(100% - 18px);
+          }
+
+          .date-home-editorial-shell .date-home-header {
+            min-height: 52px;
+          }
+
+          .date-home-editorial-shell .date-home-brand img {
+            width: 118px;
+            max-height: 30px;
+          }
+
+          .date-home-editorial-shell .date-home-nav {
+            gap: 8px;
+          }
+
+          .date-home-editorial-shell .date-home-nav a {
+            min-height: 38px;
+            font-size: 0.75rem;
+          }
+
+          .date-home-editorial-hero {
+            grid-template-columns: 1fr;
+            min-height: 0;
+            margin-top: 10px;
+            border-radius: 20px;
+          }
+
+          .date-home-editorial-copy {
+            padding: 20px 15px 16px;
+          }
+
+          .date-home-editorial-today {
+            margin-bottom: 12px;
+            font-size: 0.73rem;
+          }
+
+          .date-home-editorial-hero .ask-when-heading > span {
+            margin-bottom: 5px;
+            font-size: 0.68rem;
+          }
+
+          .date-home-editorial-hero .ask-when-heading h2 {
+            max-width: 330px;
+            font-size: clamp(2.25rem, 10.5vw, 3rem);
+            line-height: 0.94;
+          }
+
+          .date-home-editorial-hero .ask-when-heading p {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            line-height: 1.42;
+          }
+
+          .date-home-editorial-hero .ask-when-form {
+            margin-top: 14px;
+          }
+
+          .date-home-editorial-hero .ask-when-form input {
+            min-height: 52px;
+            font-size: 0.98rem;
+          }
+
+          .date-home-editorial-hero .ask-when-examples {
+            gap: 6px;
+            margin-top: 10px;
+          }
+
+          .date-home-editorial-hero .ask-when-examples button {
+            min-height: 38px;
+            padding: 6px 9px;
+            font-size: 0.75rem;
+          }
+
+          .date-home-editorial-hero .ask-when-examples button:nth-child(n + 4) {
+            display: none;
+          }
+
+          .date-home-editorial-art {
+            min-height: 0;
+          }
+
+          .date-home-editorial-art img {
+            min-height: 0;
+            height: 190px;
+            object-position: 44% center;
+          }
+
+          .date-home-editorial-art figcaption {
+            left: 14px;
+            right: auto;
+            bottom: 12px;
+            width: min(74%, 250px);
+            padding: 10px 12px 11px;
+            border-radius: 12px;
+          }
+
+          .date-home-editorial-art figcaption span {
+            font-size: 0.58rem;
+          }
+
+          .date-home-editorial-art figcaption strong {
+            margin-top: 4px;
+            font-size: 0.94rem;
+          }
+        }
+      `}</style>
 
       <section className="date-home-business" aria-labelledby="date-home-business-title">
         <div className="date-home-section-heading">
