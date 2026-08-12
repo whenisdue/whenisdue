@@ -12288,6 +12288,24 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         </section>
       </section>
 
+      <section className="return-editorial-gallery" aria-label="Return window editorial">
+        <figure>
+          <img
+            src="/return-window-editorial.webp"
+            alt="A brown leather shoe resting partly outside an open shoebox with folded tissue paper."
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>
+            <span>Return window</span>
+            <strong>Not put away yet.</strong>
+            <p>
+              A return window is the time between bringing something home and deciding it stays.
+            </p>
+          </figcaption>
+        </figure>
+      </section>
+
       <section className="return-holiday-callout" aria-label="Holiday return reminder">
         <div>
           <span>Holiday purchase?</span>
@@ -12538,6 +12556,104 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         @media (prefers-reduced-motion: reduce) {
           .return-window-page .quick-picks button {
             transition: none;
+          }
+        }
+
+        .return-editorial-gallery {
+          width: min(100% - 32px, 1130px);
+          margin: 26px auto 0;
+        }
+
+        .return-editorial-gallery figure {
+          position: relative;
+          margin: 0;
+          overflow: hidden;
+          border-radius: 22px;
+          background: #d8cbbb;
+          box-shadow: 0 18px 50px rgba(19, 38, 70, 0.08);
+        }
+
+        .return-editorial-gallery img {
+          display: block;
+          width: 100%;
+          height: clamp(360px, 42vw, 620px);
+          object-fit: cover;
+          object-position: center;
+        }
+
+        .return-editorial-gallery figcaption {
+          position: absolute;
+          top: 50%;
+          right: clamp(22px, 4vw, 52px);
+          width: min(31%, 320px);
+          padding: 22px 22px 24px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 16px;
+          background: rgba(255, 250, 242, 0.92);
+          box-shadow: 0 14px 38px rgba(19, 38, 70, 0.12);
+          backdrop-filter: blur(8px);
+          transform: translateY(-50%);
+        }
+
+        .return-editorial-gallery figcaption > span {
+          display: block;
+          color: #246b52;
+          font-size: 0.72rem;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .return-editorial-gallery figcaption > strong {
+          display: block;
+          margin-top: 6px;
+          color: #17304d;
+          font-size: clamp(1.55rem, 2.5vw, 2.35rem);
+          line-height: 1;
+          letter-spacing: -0.035em;
+        }
+
+        .return-editorial-gallery figcaption > p {
+          margin: 10px 0 0;
+          color: #536b85;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        @media (max-width: 760px) {
+          .return-editorial-gallery {
+            width: calc(100% - 20px);
+            margin-top: 20px;
+          }
+
+          .return-editorial-gallery figure {
+            border-radius: 18px;
+          }
+
+          .return-editorial-gallery img {
+            height: min(118vw, 500px);
+            object-position: 48% center;
+          }
+
+          .return-editorial-gallery figcaption {
+            position: static;
+            width: auto;
+            padding: 18px 16px 20px;
+            border: 0;
+            border-top: 1px solid rgba(19, 38, 70, 0.08);
+            border-radius: 0;
+            background: #fffaf2;
+            box-shadow: none;
+            backdrop-filter: none;
+            transform: none;
+          }
+
+          .return-editorial-gallery figcaption > strong {
+            font-size: 1.55rem;
+          }
+
+          .return-editorial-gallery figcaption > p {
+            font-size: 0.86rem;
           }
         }
 
