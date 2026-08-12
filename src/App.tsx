@@ -12229,6 +12229,13 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             decoding="async"
             fetchPriority="high"
           />
+          {returnDeadline && parsedReturnWindow !== null ? (
+            <div className="return-answer-overlay" aria-hidden="true">
+              <span>Last day to return</span>
+              <strong>{formatPlainDate(returnDeadline)}</strong>
+              <small>{formatWeekday(returnDeadline)}</small>
+            </div>
+          ) : null}
         </figure>
       </section>
 
@@ -12416,6 +12423,51 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           min-height: 610px;
           object-fit: cover;
           object-position: 56% center;
+        }
+
+        .return-answer-overlay {
+          position: absolute;
+          left: 50%;
+          top: 52%;
+          width: min(78%, 430px);
+          padding: 18px 22px 20px;
+          border: 1px solid rgba(19, 38, 70, 0.12);
+          border-radius: 16px;
+          background: rgba(255, 250, 242, 0.92);
+          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.16);
+          backdrop-filter: blur(10px);
+          text-align: center;
+          transform: translate(-50%, -50%);
+        }
+
+        .return-answer-overlay span,
+        .return-answer-overlay strong,
+        .return-answer-overlay small {
+          display: block;
+        }
+
+        .return-answer-overlay span {
+          color: #246b52;
+          font-size: 0.69rem;
+          font-weight: 950;
+          letter-spacing: 0.11em;
+          text-transform: uppercase;
+        }
+
+        .return-answer-overlay strong {
+          margin-top: 7px;
+          color: #10213f;
+          font-size: clamp(2rem, 3.8vw, 3.45rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .return-answer-overlay small {
+          margin-top: 7px;
+          color: #60758d;
+          font-size: 0.82rem;
+          font-weight: 850;
         }
 
         .return-window-page .return-primary-workspace {
@@ -12744,6 +12796,27 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             min-height: 0;
             height: min(92vw, 430px);
             object-position: 52% center;
+          }
+
+          .return-answer-overlay {
+            top: 54%;
+            width: min(82%, 330px);
+            padding: 14px 16px 16px;
+            border-radius: 14px;
+          }
+
+          .return-answer-overlay span {
+            font-size: 0.62rem;
+          }
+
+          .return-answer-overlay strong {
+            margin-top: 5px;
+            font-size: clamp(1.65rem, 8.7vw, 2.35rem);
+          }
+
+          .return-answer-overlay small {
+            margin-top: 5px;
+            font-size: 0.74rem;
           }
 
           .return-window-page .return-primary-workspace {
