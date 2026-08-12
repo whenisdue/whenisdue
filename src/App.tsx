@@ -12150,75 +12150,93 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell return-window-page">
-      <section className="intro return-answer-intro" aria-labelledby="return-window-title">
+      <section className="intro return-answer-intro" aria-label="WhenIsDue navigation">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <p className="return-answer-eyebrow">Return Window Calculator</p>
-        <h1 id="return-window-title">Find your last day to return an item</h1>
       </section>
 
-      <section className="business-workspace return-primary-workspace" aria-label="Return deadline calculator">
-        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
-          <label className="field start-field">
-            <span>When did the return period start?</span>
-            <input
-              type="date"
-              min="1900-01-01"
-              max="2100-12-31"
-              value={purchaseDate}
-              onChange={(event) => {
-                setPurchaseDate(event.target.value)
-                trackWhenIsDueEvent('date_changed', { context: 'return_window', value: event.target.value })
-              }}
-            />
-          </label>
+      <section className="return-landing-stage" aria-labelledby="return-window-title">
+        <div className="return-landing-task">
+          <p className="return-answer-eyebrow">Return Window Calculator</p>
+          <h1 id="return-window-title">Find your last day to return an item</h1>
 
-          <label className="field value-field">
-            <span>How many days do you have?</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="1"
-              max={getAmountLimit('return')}
-              value={returnWindow}
-              onChange={(event) => {
-                setReturnWindow(event.target.value)
-                trackWhenIsDueEvent('number_changed', { context: 'return_window', value: event.target.value })
-              }}
-            />
-            <span className="quick-picks" aria-label="Common return windows">
-              {returnWindowQuickPicks.map((quickPick) => (
-                <button
-                  className={returnWindow === String(quickPick) ? 'is-selected' : ''}
-                  key={quickPick}
-                  type="button"
-                  onClick={() => {
-                    setReturnWindow(String(quickPick))
-                    trackWhenIsDueEvent('quick_pick', { context: 'return_window', value: quickPick })
-                  }}
-                >
-                  <span className="quick-pick-value">
-                    {returnWindow === String(quickPick) ? (
-                      <b className="quick-pick-check" aria-hidden="true">✓</b>
-                    ) : null}
-                    {quickPick}
-                  </span>
-                  {quickPick === 30 ? <small>Common</small> : null}
-                </button>
-              ))}
-            </span>
-          </label>
+          <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
+            <label className="field start-field">
+              <span>When did the return period start?</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={purchaseDate}
+                onChange={(event) => {
+                  setPurchaseDate(event.target.value)
+                  trackWhenIsDueEvent('date_changed', { context: 'return_window', value: event.target.value })
+                }}
+              />
+            </label>
 
-          <details className="return-input-help">
-            <summary>Purchase date or delivery date?</summary>
-            <p>
-              Use whichever date the retailer says starts the return period. For shipped orders,
-              that may be the delivery date.
-            </p>
-          </details>
+            <label className="field value-field">
+              <span>How many days do you have?</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max={getAmountLimit('return')}
+                value={returnWindow}
+                onChange={(event) => {
+                  setReturnWindow(event.target.value)
+                  trackWhenIsDueEvent('number_changed', { context: 'return_window', value: event.target.value })
+                }}
+              />
+              <span className="quick-picks" aria-label="Common return windows">
+                {returnWindowQuickPicks.map((quickPick) => (
+                  <button
+                    className={returnWindow === String(quickPick) ? 'is-selected' : ''}
+                    key={quickPick}
+                    type="button"
+                    onClick={() => {
+                      setReturnWindow(String(quickPick))
+                      trackWhenIsDueEvent('quick_pick', { context: 'return_window', value: quickPick })
+                    }}
+                  >
+                    <span className="quick-pick-value">
+                      {returnWindow === String(quickPick) ? (
+                        <b className="quick-pick-check" aria-hidden="true">✓</b>
+                      ) : null}
+                      {quickPick}
+                    </span>
+                    {quickPick === 30 ? <small>Common</small> : null}
+                  </button>
+                ))}
+              </span>
+            </label>
 
-          {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
-        </form>
+            <details className="return-input-help">
+              <summary>Purchase date or delivery date?</summary>
+              <p>
+                Use whichever date the retailer says starts the return period. For shipped orders,
+                that may be the delivery date.
+              </p>
+            </details>
 
+            {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
+          </form>
+        </div>
+
+        <figure className="return-landing-art">
+          <img
+            src="/return-window-editorial.webp"
+            alt="A tagged garment draped over a wooden chair beside its shopping bag and open box."
+            decoding="async"
+            fetchPriority="high"
+          />
+          <figcaption>
+            <span>Return window</span>
+            <strong>Not put away yet.</strong>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section className="return-primary-workspace" aria-label="Return deadline result">
         <section className="result-panel return-window-result">
           <p className="result-label">Last day to return</p>
           {returnDeadline && parsedReturnWindow !== null ? (
@@ -12288,24 +12306,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         </section>
       </section>
 
-      <section className="return-editorial-gallery" aria-label="Return window editorial">
-        <figure>
-          <img
-            src="/return-window-editorial.webp"
-            alt="A brown leather shoe resting partly outside an open shoebox with folded tissue paper."
-            loading="lazy"
-            decoding="async"
-          />
-          <figcaption>
-            <span>Return window</span>
-            <strong>Not put away yet.</strong>
-            <p>
-              A return window is the time between bringing something home and deciding it stays.
-            </p>
-          </figcaption>
-        </figure>
-      </section>
-
       <section className="return-holiday-callout" aria-label="Holiday return reminder">
         <div>
           <span>Holiday purchase?</span>
@@ -12317,6 +12317,109 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       </section>
 
       <style>{`
+        .return-window-page .return-answer-intro {
+          padding-bottom: 0;
+        }
+
+        .return-landing-stage {
+          width: min(100% - 32px, 1130px);
+          margin: 10px auto 0;
+          display: grid;
+          grid-template-columns: minmax(360px, 0.82fr) minmax(0, 1.18fr);
+          gap: 28px;
+          align-items: stretch;
+        }
+
+        .return-landing-task {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          min-width: 0;
+        }
+
+        .return-landing-task .return-answer-eyebrow {
+          margin: 0 0 8px;
+          color: #607b98;
+          font-size: 0.78rem;
+          font-weight: 950;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+        }
+
+        .return-landing-task h1 {
+          max-width: 650px;
+          margin: 0;
+          color: #0b1830;
+          font-size: clamp(3.2rem, 5.2vw, 5.6rem);
+          line-height: 0.94;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .return-landing-task .business-calculator {
+          width: 100%;
+          margin-top: 26px;
+        }
+
+        .return-landing-art {
+          position: relative;
+          min-height: 520px;
+          margin: 0;
+          overflow: hidden;
+          border-radius: 22px;
+          background: #d8cbbb;
+          box-shadow: 0 18px 48px rgba(19, 38, 70, 0.08);
+        }
+
+        .return-landing-art img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          min-height: 520px;
+          object-fit: cover;
+          object-position: 56% center;
+        }
+
+        .return-landing-art figcaption {
+          position: absolute;
+          left: 24px;
+          bottom: 24px;
+          padding: 13px 16px 14px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 12px;
+          background: rgba(255, 250, 242, 0.91);
+          box-shadow: 0 10px 28px rgba(19, 38, 70, 0.12);
+          backdrop-filter: blur(8px);
+        }
+
+        .return-landing-art figcaption span {
+          display: block;
+          color: #246b52;
+          font-size: 0.67rem;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .return-landing-art figcaption strong {
+          display: block;
+          margin-top: 4px;
+          color: #17304d;
+          font-size: 1.25rem;
+          line-height: 1;
+          letter-spacing: -0.025em;
+        }
+
+        .return-window-page .return-primary-workspace {
+          width: min(100% - 32px, 1130px);
+          margin: 18px auto 0;
+          display: block;
+        }
+
+        .return-window-page .return-window-result {
+          width: 100%;
+        }
+
         .return-citation-explanation {
           max-width: 680px;
           margin: 10px auto 0;
@@ -12559,104 +12662,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           }
         }
 
-        .return-editorial-gallery {
-          width: min(100% - 32px, 1130px);
-          margin: 26px auto 0;
-        }
-
-        .return-editorial-gallery figure {
-          position: relative;
-          margin: 0;
-          overflow: hidden;
-          border-radius: 22px;
-          background: #d8cbbb;
-          box-shadow: 0 18px 50px rgba(19, 38, 70, 0.08);
-        }
-
-        .return-editorial-gallery img {
-          display: block;
-          width: 100%;
-          height: clamp(360px, 42vw, 620px);
-          object-fit: cover;
-          object-position: center;
-        }
-
-        .return-editorial-gallery figcaption {
-          position: absolute;
-          top: 50%;
-          right: clamp(22px, 4vw, 52px);
-          width: min(31%, 320px);
-          padding: 22px 22px 24px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 16px;
-          background: rgba(255, 250, 242, 0.92);
-          box-shadow: 0 14px 38px rgba(19, 38, 70, 0.12);
-          backdrop-filter: blur(8px);
-          transform: translateY(-50%);
-        }
-
-        .return-editorial-gallery figcaption > span {
-          display: block;
-          color: #246b52;
-          font-size: 0.72rem;
-          font-weight: 950;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-        }
-
-        .return-editorial-gallery figcaption > strong {
-          display: block;
-          margin-top: 6px;
-          color: #17304d;
-          font-size: clamp(1.55rem, 2.5vw, 2.35rem);
-          line-height: 1;
-          letter-spacing: -0.035em;
-        }
-
-        .return-editorial-gallery figcaption > p {
-          margin: 10px 0 0;
-          color: #536b85;
-          font-size: 0.92rem;
-          line-height: 1.5;
-        }
-
-        @media (max-width: 760px) {
-          .return-editorial-gallery {
-            width: calc(100% - 20px);
-            margin-top: 20px;
-          }
-
-          .return-editorial-gallery figure {
-            border-radius: 18px;
-          }
-
-          .return-editorial-gallery img {
-            height: min(118vw, 500px);
-            object-position: 48% center;
-          }
-
-          .return-editorial-gallery figcaption {
-            position: static;
-            width: auto;
-            padding: 18px 16px 20px;
-            border: 0;
-            border-top: 1px solid rgba(19, 38, 70, 0.08);
-            border-radius: 0;
-            background: #fffaf2;
-            box-shadow: none;
-            backdrop-filter: none;
-            transform: none;
-          }
-
-          .return-editorial-gallery figcaption > strong {
-            font-size: 1.55rem;
-          }
-
-          .return-editorial-gallery figcaption > p {
-            font-size: 0.86rem;
-          }
-        }
-
         .return-holiday-callout {
           width: min(100% - 32px, 1130px);
           margin: 16px auto 0;
@@ -12700,6 +12705,50 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 760px) {
+          .return-landing-stage {
+            width: calc(100% - 20px);
+            margin-top: 8px;
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .return-landing-task h1 {
+            max-width: 340px;
+            font-size: clamp(2.2rem, 11vw, 3.2rem);
+            line-height: 0.95;
+          }
+
+          .return-landing-task .business-calculator {
+            margin-top: 16px;
+          }
+
+          .return-landing-art {
+            order: 3;
+            min-height: 0;
+            border-radius: 18px;
+          }
+
+          .return-landing-art img {
+            min-height: 0;
+            height: min(95vw, 430px);
+            object-position: 52% center;
+          }
+
+          .return-landing-art figcaption {
+            left: 14px;
+            bottom: 14px;
+            padding: 10px 12px 11px;
+          }
+
+          .return-landing-art figcaption strong {
+            font-size: 1.05rem;
+          }
+
+          .return-window-page .return-primary-workspace {
+            width: calc(100% - 20px);
+            margin-top: 10px;
+          }
+
           .return-window-page .return-answer-intro {
             padding-bottom: 0;
           }
