@@ -10927,9 +10927,16 @@ type ResultActionsProps = {
   date: PlainDate
   details?: string
   time?: string
+  variant?: 'default' | 'return-window'
 }
 
-function ResultActions({ title, date, details, time }: ResultActionsProps) {
+function ResultActions({
+  title,
+  date,
+  details,
+  time,
+  variant = 'default',
+}: ResultActionsProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(() =>
     isFavoriteCalculation(
@@ -10955,6 +10962,18 @@ function ResultActions({ title, date, details, time }: ResultActionsProps) {
       window.removeEventListener(SAVED_CALCULATIONS_EVENT, refreshFavoriteState)
     }
   }, [title])
+
+  useEffect(() => {
+    if (message !== 'Copied.') {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage(null)
+    }, 1800)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [message])
 
   async function copyExactLink() {
     try {
@@ -11075,23 +11094,75 @@ function ResultActions({ title, date, details, time }: ResultActionsProps) {
     )
   }
 
+  const isReturnWindowVariant = variant === 'return-window'
+
   return (
     <>
-      <div className="result-actions" aria-label="Result actions">
-        <button
-          type="button"
-          className={isFavorite ? 'is-favorite' : ''}
-          onClick={toggleFavorite}
-          aria-pressed={isFavorite}
-        >
-          {isFavorite ? 'Favorited' : 'Favorite'}
-        </button>
-        <button type="button" onClick={copyAnswer}>Copy result</button>
-        <button type="button" onClick={copyExactLink}>Copy link</button>
-        <button type="button" onClick={shareAnswer}>Share</button>
-        <button type="button" onClick={addToCalendar}>Add to calendar</button>
-        {message ? <span aria-live="polite">{message}</span> : null}
+      <div
+        className={`result-actions${isReturnWindowVariant ? ' result-actions-return-window' : ''}`}
+        aria-label="Result actions"
+      >
+        {isReturnWindowVariant ? (
+          <>
+            <div className="result-actions-primary-row">
+              <button
+                type="button"
+                className="result-action-primary"
+                onClick={copyAnswer}
+              >
+                {message === 'Copied.' ? 'Copied ✓' : 'Copy result'}
+              </button>
+              <button
+                type="button"
+                className="result-action-secondary"
+                onClick={addToCalendar}
+              >
+                Add to calendar
+              </button>
+            </div>
+
+            <details className="result-actions-more">
+              <summary>More options</summary>
+              <div className="result-actions-more-row">
+                <button
+                  type="button"
+                  className={isFavorite ? 'is-favorite' : ''}
+                  onClick={toggleFavorite}
+                  aria-pressed={isFavorite}
+                >
+                  {isFavorite ? 'Favorited ✓' : 'Favorite'}
+                </button>
+                <button type="button" onClick={copyExactLink}>Copy link</button>
+                <button type="button" onClick={shareAnswer}>Share</button>
+              </div>
+            </details>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              className={isFavorite ? 'is-favorite' : ''}
+              onClick={toggleFavorite}
+              aria-pressed={isFavorite}
+            >
+              {isFavorite ? 'Favorited' : 'Favorite'}
+            </button>
+            <button type="button" onClick={copyAnswer}>Copy result</button>
+            <button type="button" onClick={copyExactLink}>Copy link</button>
+            <button type="button" onClick={shareAnswer}>Share</button>
+            <button type="button" onClick={addToCalendar}>Add to calendar</button>
+          </>
+        )}
+
+        {message && message !== 'Copied.' ? (
+          <span aria-live="polite">{message}</span>
+        ) : (
+          <span className="sr-only" aria-live="polite">
+            {message === 'Copied.' ? 'Result copied.' : ''}
+          </span>
+        )}
       </div>
+
       <style>{`
         .result-actions {
           display: flex;
@@ -11113,21 +11184,136 @@ function ResultActions({ title, date, details, time }: ResultActionsProps) {
           font-size: 0.75rem;
           font-weight: 800;
           cursor: pointer;
+          transition:
+            background 140ms ease,
+            border-color 140ms ease,
+            color 140ms ease,
+            transform 140ms ease,
+            box-shadow 140ms ease;
         }
 
         .result-actions button:hover {
           border-color: rgba(19, 38, 70, 0.28);
         }
 
+        .result-actions button:active {
+          transform: translateY(1px);
+        }
+
+        .result-actions button:focus-visible,
+        .result-actions summary:focus-visible {
+          outline: 3px solid rgba(29, 79, 130, 0.28);
+          outline-offset: 2px;
+        }
+
         .result-actions button.is-favorite {
-          border-color: rgba(19, 38, 70, 0.26);
-          background: #f4f7fa;
-          color: #243e5c;
+          border-color: rgba(36, 107, 82, 0.34);
+          background: #eaf5ef;
+          color: #1f5e48;
         }
 
         .result-actions span {
           color: #75879b;
           font-size: 0.72rem;
+        }
+
+        .result-actions-return-window {
+          width: min(100%, 620px);
+          margin-inline: auto;
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .result-actions-primary-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+          gap: 8px;
+        }
+
+        .result-actions-return-window .result-action-primary {
+          border-color: #246b52;
+          background: #246b52;
+          color: #fff;
+          font-size: 0.84rem;
+          box-shadow: 0 6px 16px rgba(36, 107, 82, 0.14);
+        }
+
+        .result-actions-return-window .result-action-primary:hover {
+          border-color: #1b543f;
+          background: #1b543f;
+        }
+
+        .result-actions-return-window .result-action-secondary {
+          border-color: rgba(36, 107, 82, 0.42);
+          color: #246b52;
+          font-size: 0.82rem;
+        }
+
+        .result-actions-return-window .result-action-secondary:hover {
+          border-color: #246b52;
+          background: #f3faf6;
+        }
+
+        .result-actions-more {
+          width: 100%;
+          text-align: center;
+        }
+
+        .result-actions-more summary {
+          min-height: 36px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px 8px;
+          color: #64798f;
+          font-size: 0.76rem;
+          font-weight: 850;
+          cursor: pointer;
+          list-style-position: inside;
+        }
+
+        .result-actions-more[open] summary {
+          color: #29435e;
+        }
+
+        .result-actions-more-row {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 7px;
+          margin-top: 3px;
+        }
+
+        .result-actions-more-row button {
+          min-height: 40px;
+          background: rgba(255, 255, 255, 0.82);
+        }
+
+        @media (max-width: 560px) {
+          .result-actions-primary-row {
+            grid-template-columns: 1fr;
+          }
+
+          .result-actions-return-window .result-action-primary,
+          .result-actions-return-window .result-action-secondary {
+            min-height: 44px;
+          }
+
+          .result-actions-more-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+
+          .result-actions-more-row button {
+            min-width: 0;
+            padding-inline: 6px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .result-actions button {
+            transition: none;
+          }
         }
       `}</style>
     </>
@@ -11968,7 +12154,12 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                     trackWhenIsDueEvent('quick_pick', { context: 'return_window', value: quickPick })
                   }}
                 >
-                  <span>{quickPick}</span>
+                  <span className="quick-pick-value">
+                    {returnWindow === String(quickPick) ? (
+                      <b className="quick-pick-check" aria-hidden="true">✓</b>
+                    ) : null}
+                    {quickPick}
+                  </span>
                   {quickPick === 30 ? <small>Common</small> : null}
                 </button>
               ))}
@@ -11998,10 +12189,16 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 </span>
               </div>
 
+              <aside className="return-result-caveat" aria-label="Return policy reminder">
+                <strong>Check the retailer&apos;s rule</strong>
+                <span>Some return periods start from purchase; others start from delivery.</span>
+              </aside>
+
               <ResultActions
                 title="Return deadline"
                 date={returnDeadline}
                 details={`${parsedReturnWindow}-day return window`}
+                variant="return-window"
               />
 
               <details className="return-why-details">
@@ -12221,6 +12418,85 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           letter-spacing: 0.035em;
           text-transform: uppercase;
           opacity: 0.72;
+        }
+
+        .return-window-page .quick-picks button {
+          position: relative;
+          transition:
+            background 140ms ease,
+            border-color 140ms ease,
+            color 140ms ease,
+            transform 140ms ease,
+            box-shadow 140ms ease;
+        }
+
+        .return-window-page .quick-picks button:hover {
+          border-color: rgba(36, 107, 82, 0.36);
+          background: #f7fbf8;
+        }
+
+        .return-window-page .quick-picks button:active {
+          transform: translateY(1px);
+        }
+
+        .return-window-page .quick-picks button:focus-visible {
+          outline: 3px solid rgba(29, 79, 130, 0.26);
+          outline-offset: 2px;
+        }
+
+        .return-window-page .quick-picks button.is-selected {
+          border: 2px solid #246b52;
+          background: #eaf5ef;
+          color: #17304d;
+          box-shadow: 0 0 0 2px rgba(36, 107, 82, 0.07);
+        }
+
+        .return-window-page .quick-pick-value {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+        }
+
+        .return-window-page .quick-pick-check {
+          color: #246b52;
+          font-size: 0.76rem;
+          line-height: 1;
+        }
+
+        .return-result-caveat {
+          width: min(100%, 620px);
+          margin: 12px auto 0;
+          padding: 10px 12px;
+          border: 1px solid rgba(217, 164, 65, 0.42);
+          border-left: 4px solid #d9a441;
+          border-radius: 10px;
+          background: #fff6df;
+          text-align: left;
+        }
+
+        .return-result-caveat strong,
+        .return-result-caveat span {
+          display: block;
+        }
+
+        .return-result-caveat strong {
+          color: #7a5314;
+          font-size: 0.78rem;
+          font-weight: 950;
+        }
+
+        .return-result-caveat span {
+          margin-top: 2px;
+          color: #6d6049;
+          font-size: 0.76rem;
+          line-height: 1.4;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .return-window-page .quick-picks button {
+            transition: none;
+          }
         }
 
         .return-holiday-callout {
