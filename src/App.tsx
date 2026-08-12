@@ -6885,9 +6885,9 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
   return (
     <section className="ask-when-box" aria-labelledby="ask-when-title">
       <div className="ask-when-heading">
-        <span>Quick answer finder</span>
-        <h2 id="ask-when-title">Ask WhenIsDue</h2>
-        <p>Type a common date question. Your answer appears as soon as WhenIsDue recognizes the pattern.</p>
+        <span>Ask WhenIsDue</span>
+        <h2 id="ask-when-title">What date do you need?</h2>
+        <p>Type a date or deadline question in plain English.</p>
       </div>
 
       <form
@@ -6973,31 +6973,33 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
 
       <style>{`
         .ask-when-box {
-          width: min(920px, calc(100% - 36px));
-          margin: 24px auto 0;
-          padding: 22px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
+          width: min(980px, calc(100% - 36px));
+          margin: 12px auto 0;
+          padding: 28px;
+          border: 1px solid rgba(36, 107, 82, 0.18);
           border-radius: 22px;
-          background: #fff;
-          box-shadow: 0 14px 44px rgba(19, 38, 70, 0.06);
+          background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
+          box-shadow: 0 18px 48px rgba(19, 38, 70, 0.07);
           text-align: center;
         }
 
         .ask-when-heading > span {
           display: block;
-          margin-bottom: 4px;
-          color: #78899b;
-          font-size: 1rem;
+          margin-bottom: 5px;
+          color: #246b52;
+          font-size: 0.78rem;
           line-height: 1.35;
-          font-weight: 900;
-          letter-spacing: 0.07em;
+          font-weight: 950;
+          letter-spacing: 0.09em;
           text-transform: uppercase;
         }
 
         .ask-when-heading h2 {
           margin: 0;
           color: #10213b;
-          font-size: clamp(1.45rem, 3vw, 2.1rem);
+          font-size: clamp(2rem, 4.2vw, 3.15rem);
+          line-height: 1;
+          letter-spacing: -0.035em;
         }
 
         .ask-when-heading p {
@@ -7016,13 +7018,21 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
 
         .ask-when-form input {
           min-width: 0;
-          min-height: 56px;
-          padding: 12px 16px;
-          border: 1px solid rgba(19, 38, 70, 0.16);
-          border-radius: 11px;
+          min-height: 60px;
+          padding: 13px 17px;
+          border: 2px solid rgba(36, 107, 82, 0.34);
+          border-radius: 12px;
+          background: #fff;
           color: #18314e;
           font: inherit;
           font-size: 1.08rem;
+          box-shadow: 0 0 0 4px rgba(36, 107, 82, 0.05);
+        }
+
+        .ask-when-form input:focus {
+          outline: 3px solid rgba(36, 107, 82, 0.18);
+          outline-offset: 2px;
+          border-color: #246b52;
         }
 
         .ask-when-preview {
@@ -7527,6 +7537,12 @@ function HomePage({ onNavigate }: NavigationProps) {
         </div>
       </section>
 
+      <AskWhenBox
+        onNavigate={onNavigate}
+        holidayCalendar={holidayCalendar}
+        today={today}
+      />
+
       <section className="date-home-business" aria-labelledby="date-home-business-title">
         <div className="date-home-section-heading">
           <h2 id="date-home-business-title">Business days from today</h2>
@@ -7618,11 +7634,138 @@ function HomePage({ onNavigate }: NavigationProps) {
         `}</style>
       </section>
 
-      <AskWhenBox
-        onNavigate={onNavigate}
-        holidayCalendar={holidayCalendar}
-        today={today}
-      />
+      <section className="date-home-tools" aria-labelledby="date-home-tools-title">
+        <h2 id="date-home-tools-title">What do you need to know?</h2>
+
+        <div className="date-home-tool-grid">
+          <a
+            href={`/business-days-calculator${
+              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+            }`}
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate(
+                `/business-days-calculator${
+                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                }`,
+              )
+            }}
+          >
+            <span>Business days</span>
+            <strong>When is it due?</strong>
+            <small>Skip weekends and find the exact date.</small>
+          </a>
+
+          <a
+            href="/return-window-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/return-window-calculator')
+            }}
+          >
+            <span>Returns</span>
+            <strong>Last day to return</strong>
+            <small>Calculate from the purchase or delivery date.</small>
+          </a>
+
+          <a
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            <span>Invoices</span>
+            <strong>Invoice due date</strong>
+            <small>Net 7, Net 15, Net 30, Net 45, and more.</small>
+          </a>
+
+          <a
+            href="/free-trial-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/free-trial-calculator')
+            }}
+          >
+            <span>Subscriptions</span>
+            <strong>When does my trial end?</strong>
+            <small>Find the end date before renewal.</small>
+          </a>
+
+          <a
+            href="/next-payday-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/next-payday-calculator')
+            }}
+          >
+            <span>Pay schedule</span>
+            <strong>When is my next payday?</strong>
+            <small>Weekly, biweekly, semimonthly, or monthly.</small>
+          </a>
+
+          <a
+            href={`/business-hours-deadline-calculator${
+              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+            }`}
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate(
+                `/business-hours-deadline-calculator${
+                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                }`,
+              )
+            }}
+          >
+            <span>SLA / response time</span>
+            <strong>Add business hours</strong>
+            <small>Calculate a deadline inside a workday schedule.</small>
+          </a>
+
+          <a
+            href={`/business-days-between-dates${
+              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+            }`}
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate(
+                `/business-days-between-dates${
+                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                }`,
+              )
+            }}
+          >
+            <span>Date difference</span>
+            <strong>Business days between dates</strong>
+            <small>Count weekdays between two dates instantly.</small>
+          </a>
+
+          <a
+            href="/net-30-due-date"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/net-30-due-date')
+            }}
+          >
+            <span>Invoices</span>
+            <strong>Net 30 due date</strong>
+            <small>Enter an invoice date and get the due date immediately.</small>
+          </a>
+
+          <a
+            href="/shipping-delivery-range-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/shipping-delivery-range-calculator')
+            }}
+          >
+            <span>Shipping</span>
+            <strong>Delivery date range</strong>
+            <small>Turn 3–5 business days into earliest and latest dates.</small>
+          </a>
+        </div>
+      </section>
+
 
       <HomepageQuestionMap onNavigate={onNavigate} />
 
@@ -7866,138 +8009,6 @@ function HomePage({ onNavigate }: NavigationProps) {
         </section>
       ) : null}
 
-      <section className="date-home-tools" aria-labelledby="date-home-tools-title">
-        <h2 id="date-home-tools-title">What do you need to know?</h2>
-
-        <div className="date-home-tool-grid">
-          <a
-            href={`/business-days-calculator${
-              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-            }`}
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate(
-                `/business-days-calculator${
-                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-                }`,
-              )
-            }}
-          >
-            <span>Business days</span>
-            <strong>When is it due?</strong>
-            <small>Skip weekends and find the exact date.</small>
-          </a>
-
-          <a
-            href="/return-window-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/return-window-calculator')
-            }}
-          >
-            <span>Returns</span>
-            <strong>Last day to return</strong>
-            <small>Calculate from the purchase or delivery date.</small>
-          </a>
-
-          <a
-            href="/invoice-due-date-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/invoice-due-date-calculator')
-            }}
-          >
-            <span>Invoices</span>
-            <strong>Invoice due date</strong>
-            <small>Net 7, Net 15, Net 30, Net 45, and more.</small>
-          </a>
-
-          <a
-            href="/free-trial-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/free-trial-calculator')
-            }}
-          >
-            <span>Subscriptions</span>
-            <strong>When does my trial end?</strong>
-            <small>Find the end date before renewal.</small>
-          </a>
-
-          <a
-            href="/next-payday-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/next-payday-calculator')
-            }}
-          >
-            <span>Pay schedule</span>
-            <strong>When is my next payday?</strong>
-            <small>Weekly, biweekly, semimonthly, or monthly.</small>
-          </a>
-
-          <a
-            href={`/business-hours-deadline-calculator${
-              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-            }`}
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate(
-                `/business-hours-deadline-calculator${
-                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-                }`,
-              )
-            }}
-          >
-            <span>SLA / response time</span>
-            <strong>Add business hours</strong>
-            <small>Calculate a deadline inside a workday schedule.</small>
-          </a>
-
-          <a
-            href={`/business-days-between-dates${
-              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-            }`}
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate(
-                `/business-days-between-dates${
-                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-                }`,
-              )
-            }}
-          >
-            <span>Date difference</span>
-            <strong>Business days between dates</strong>
-            <small>Count weekdays between two dates instantly.</small>
-          </a>
-
-          <a
-            href="/net-30-due-date"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/net-30-due-date')
-            }}
-          >
-            <span>Invoices</span>
-            <strong>Net 30 due date</strong>
-            <small>Enter an invoice date and get the due date immediately.</small>
-          </a>
-
-          <a
-            href="/shipping-delivery-range-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/shipping-delivery-range-calculator')
-            }}
-          >
-            <span>Shipping</span>
-            <strong>Delivery date range</strong>
-            <small>Turn 3–5 business days into earliest and latest dates.</small>
-          </a>
-        </div>
-      </section>
-
       <section className="date-home-secondary" aria-label="WhenIsDue workspace">
         <div>
           <span>Need to keep track of deadlines?</span>
@@ -8023,7 +8034,7 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .date-home-hero {
           width: min(100% - 32px, 1240px);
-          min-height: 68vh;
+          min-height: 0;
           margin: 0 auto;
           display: flex;
           flex-direction: column;
@@ -8063,47 +8074,58 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-answer {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
+          display: grid;
+          grid-template-columns: auto auto;
+          grid-template-areas:
+            "kicker date"
+            "weekday timezone";
           justify-content: center;
-          align-items: center;
+          align-items: baseline;
+          column-gap: 10px;
+          row-gap: 4px;
           text-align: center;
-          padding: 28px 12px 38px;
+          padding: 22px 12px 16px;
         }
 
         .date-home-kicker {
-          margin: 0 0 10px;
-          color: #536f8c;
-          font-size: clamp(1.15rem, 2vw, 1.7rem);
-          font-weight: 900;
-          letter-spacing: -0.01em;
+          grid-area: kicker;
+          margin: 0;
+          color: #6b7f93;
+          font-size: 0.9rem;
+          font-weight: 850;
+          letter-spacing: 0.01em;
         }
 
         .date-home-date {
+          grid-area: date;
           margin: 0;
           max-width: 100%;
-          color: #0b1830;
-          font-size: clamp(4.7rem, 10.5vw, 9.5rem);
+          color: #17304d;
+          font-size: clamp(1.55rem, 3vw, 2.45rem);
           font-weight: 900;
-          line-height: 0.95;
-          letter-spacing: -0.055em;
+          line-height: 1.05;
+          letter-spacing: -0.035em;
           text-wrap: balance;
         }
 
         .date-home-weekday {
-          margin: 18px 0 0;
-          color: #536981;
-          font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+          grid-area: weekday;
+          margin: 0;
+          justify-self: end;
+          color: #60758a;
+          font-size: 0.88rem;
+          font-weight: 800;
         }
 
         .date-home-timezone {
+          grid-area: timezone;
           display: inline-flex;
           align-items: center;
           gap: 7px;
-          margin: 14px 0 0;
+          margin: 0;
+          justify-self: start;
           color: #607993;
-          font-size: 0.94rem;
+          font-size: 0.84rem;
           line-height: 1.25;
         }
 
@@ -8701,7 +8723,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         @media (max-width: 760px) {
           .date-home-hero {
             width: min(100% - 24px, 1240px);
-            min-height: 68vh;
+            min-height: 0;
           }
 
           .date-home-header {
@@ -8722,26 +8744,29 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-answer {
-            padding: 24px 0 30px;
+            grid-template-columns: auto auto;
+            column-gap: 7px;
+            row-gap: 3px;
+            padding: 14px 0 10px;
           }
 
           .date-home-kicker {
-            font-size: 1.05rem;
+            font-size: 0.78rem;
           }
 
           .date-home-date {
-            font-size: clamp(3.7rem, 17vw, 5.8rem);
-            line-height: 0.98;
+            font-size: 1.45rem;
+            line-height: 1.05;
           }
 
           .date-home-weekday {
-            margin-top: 12px;
-            font-size: 1.7rem;
+            margin: 0;
+            font-size: 0.78rem;
           }
 
           .date-home-timezone {
-            margin-top: 12px;
-            font-size: 0.88rem;
+            margin: 0;
+            font-size: 0.76rem;
           }
 
           .date-home-timezone strong {
