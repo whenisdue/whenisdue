@@ -12776,26 +12776,31 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         @media (max-width: 760px) {
           .return-landing-stage {
-            width: calc(100% - 20px);
-            margin-top: 10px;
+            width: calc(100% - 18px);
+            margin-top: 6px;
             grid-template-columns: 1fr;
             min-height: 0;
             border-radius: 20px;
           }
 
           .return-landing-task {
-            padding: 24px 16px 18px;
+            padding: 18px 14px 10px;
+          }
+
+          .return-landing-task .return-answer-eyebrow {
+            margin-bottom: 8px;
           }
 
           .return-landing-task h1 {
-            max-width: 340px;
-            font-size: clamp(2.35rem, 11vw, 3.25rem);
-            line-height: 0.95;
+            max-width: 320px;
+            font-size: clamp(2.05rem, 9.2vw, 2.8rem);
+            line-height: 0.93;
           }
 
           .return-landing-task .business-calculator {
-            margin-top: 18px;
-            padding: 14px;
+            margin-top: 14px;
+            padding: 12px;
+            gap: 12px;
           }
 
           .return-landing-art {
@@ -12804,34 +12809,34 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
           .return-landing-art img {
             min-height: 0;
-            height: min(92vw, 430px);
+            height: min(54vw, 220px);
             object-position: 52% center;
           }
 
           .return-answer-overlay {
-            top: 54%;
-            width: min(82%, 330px);
-            padding: 14px 16px 16px;
+            top: 24%;
+            width: min(84%, 330px);
+            padding: 12px 14px 14px;
             border-radius: 14px;
           }
 
           .return-answer-overlay span {
-            font-size: 0.62rem;
+            font-size: 0.6rem;
           }
 
           .return-answer-overlay strong {
-            margin-top: 5px;
-            font-size: clamp(1.65rem, 8.7vw, 2.35rem);
+            margin-top: 4px;
+            font-size: clamp(1.42rem, 7.2vw, 1.95rem);
           }
 
           .return-answer-overlay small {
-            margin-top: 5px;
-            font-size: 0.74rem;
+            margin-top: 4px;
+            font-size: 0.72rem;
           }
 
           .return-window-page .return-primary-workspace {
-            width: calc(100% - 20px);
-            margin-top: 10px;
+            width: calc(100% - 18px);
+            margin-top: 8px;
           }
 
           .return-window-page .identity-row {
