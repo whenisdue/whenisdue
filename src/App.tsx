@@ -8133,16 +8133,20 @@ function HomePage({ onNavigate }: NavigationProps) {
           font-weight: 900;
         }
 
-        .date-home-business,
-        .date-home-tools,
-
         .homepage-question-map {
           width: min(100% - 32px, 1120px);
-          margin: 20px auto 0;
+          margin: 28px auto 0;
           padding: 24px;
           border: 1px solid rgba(19, 38, 70, 0.08);
           border-radius: 18px;
           background: rgba(255, 255, 255, 0.66);
+        }
+
+        .date-home-business,
+        .date-home-tools {
+          width: min(100% - 32px, 1120px);
+          margin-left: auto;
+          margin-right: auto;
         }
 
         .homepage-question-map-head {
@@ -8469,9 +8473,49 @@ function HomePage({ onNavigate }: NavigationProps) {
           margin: 0 auto;
         }
 
+        .date-home-page .deadline-guide-links:not(.is-compact) {
+          width: min(100% - 32px, 1120px);
+          margin-top: 42px;
+          padding: 28px;
+          border-color: rgba(217, 164, 65, 0.26);
+          border-radius: 22px;
+          background: #fff8e8;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-heading > span {
+          color: #8a6218;
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-heading h2 {
+          color: #43351d;
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-heading p {
+          color: #75654a;
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-grid a {
+          border-color: rgba(138, 98, 24, 0.13);
+          background: rgba(255, 255, 255, 0.84);
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-grid b {
+          color: #8a6218;
+        }
+
         .date-home-business {
-          padding: 36px 0 50px;
-          border-top: 1px solid rgba(19, 38, 70, 0.1);
+          margin-top: 30px;
+          padding: 30px 28px 32px;
+          border: 1px solid rgba(29, 79, 130, 0.1);
+          border-radius: 22px;
+          background: #f3f7fb;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
         }
 
         .date-home-section-heading {
@@ -8542,9 +8586,9 @@ function HomePage({ onNavigate }: NavigationProps) {
           position: relative;
           min-height: 112px;
           padding: 14px 42px 14px 14px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 10px;
-          background: #fff;
+          border: 1px solid rgba(29, 79, 130, 0.12);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.9);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -8605,8 +8649,11 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-tools {
-          padding: 34px 0 56px;
-          border-top: 1px solid rgba(19, 38, 70, 0.08);
+          margin-top: 42px;
+          padding: 10px 0 18px;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
         }
 
         .date-home-tools-heading {
@@ -8632,8 +8679,8 @@ function HomePage({ onNavigate }: NavigationProps) {
           min-height: 132px;
           padding: 18px 48px 18px 18px;
           border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 10px;
-          background: rgba(255, 255, 255, 0.72);
+          border-radius: 14px;
+          background: #fffdf9;
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -8813,7 +8860,21 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-business {
-            padding: 30px 0 40px;
+            margin-top: 22px;
+            padding: 20px 14px 22px;
+            border-radius: 18px;
+          }
+
+          .date-home-tools {
+            margin-top: 30px;
+            padding-top: 4px;
+          }
+
+          .date-home-page .deadline-guide-links:not(.is-compact) {
+            width: calc(100% - 24px);
+            margin-top: 30px;
+            padding: 20px 14px;
+            border-radius: 18px;
           }
 
           .date-home-section-heading {
