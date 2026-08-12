@@ -10006,7 +10006,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
               ) : null}
 
               <details className="result-save-details">
-                <summary>Save this date</summary>
+                <summary>More options</summary>
                 <div className="business-save">
                   <label className="field title-field">
                     <span>Title</span>
@@ -11910,14 +11910,14 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         <IdentityRow onNavigate={onNavigate} showHomeLink />
         <h1 id="return-window-title">Return Window Calculator</h1>
         <p className="return-answer-context">
-          Calculate the last day of a 30-day return policy or any custom return window. Enter the purchase or delivery date your store says the return window begins. The start date counts as day 1.
+          Find your last day to return an item.
         </p>
       </section>
 
       <section className="business-workspace return-primary-workspace" aria-label="Return deadline calculator">
         <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
           <label className="field start-field">
-            <span>Return window start date</span>
+            <span>When did the return period start?</span>
             <input
               type="date"
               min="1900-01-01"
@@ -11928,13 +11928,10 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 trackWhenIsDueEvent('date_changed', { context: 'return_window', value: event.target.value })
               }}
             />
-            <small className="return-start-helper">
-              Purchase date or delivery date? Use whichever one the retailer says starts the return period.
-            </small>
           </label>
 
           <label className="field value-field">
-            <span>Return window in days</span>
+            <span>How many days do you have?</span>
             <input
               type="number"
               inputMode="numeric"
@@ -11946,7 +11943,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 trackWhenIsDueEvent('number_changed', { context: 'return_window', value: event.target.value })
               }}
             />
-            <span className="quick-picks" aria-label="Quick return window values">
+            <span className="quick-picks" aria-label="Common return windows">
               {returnWindowQuickPicks.map((quickPick) => (
                 <button
                   className={returnWindow === String(quickPick) ? 'is-selected' : ''}
@@ -11957,36 +11954,52 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                     trackWhenIsDueEvent('quick_pick', { context: 'return_window', value: quickPick })
                   }}
                 >
-                  {quickPick}
+                  <span>{quickPick}</span>
+                  {quickPick === 30 ? <small>Common</small> : null}
                 </button>
               ))}
             </span>
           </label>
 
+          <details className="return-input-help">
+            <summary>Purchase date or delivery date?</summary>
+            <p>
+              Use whichever date the retailer says starts the return period. For shipped orders,
+              that may be the delivery date.
+            </p>
+          </details>
+
           {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
         </form>
 
         <section className="result-panel return-window-result">
-          <p className="result-label">Return deadline</p>
+          <p className="result-label">Last day to return</p>
           {returnDeadline && parsedReturnWindow !== null ? (
             <>
               <p className="due-date">{formatPlainDate(returnDeadline)}</p>
+              <p className="return-result-weekday">{formatWeekday(returnDeadline)}</p>
               <div className="result-meta result-meta-stack">
-                <span className="return-result-label">Last day to return</span>
                 <span className="status-badge status-comfortable">
-                  {parsedReturnWindow}-day return window · Start date counts as day 1
+                  {parsedReturnWindow}-day window · Start date = Day 1
                 </span>
               </div>
-              <p className="result-note">
-                Use the purchase or delivery date named in the store's policy.
-              </p>
-              <p className="return-citation-explanation">
-                {formatReturnWindowExplanation(
-                  parsedPurchaseDate!,
-                  parsedReturnWindow!,
-                  returnDeadline,
-                )}
-              </p>
+
+              <ResultActions
+                title="Return deadline"
+                date={returnDeadline}
+                details={`${parsedReturnWindow}-day return window`}
+              />
+
+              <details className="return-why-details">
+                <summary>Why this date?</summary>
+                <p className="return-citation-explanation">
+                  {formatReturnWindowExplanation(
+                    parsedPurchaseDate!,
+                    parsedReturnWindow!,
+                    returnDeadline,
+                  )}
+                </p>
+              </details>
 
               <CalculationReceipt
                 analyticsContext="return_window"
@@ -11996,11 +12009,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                   { label: 'Counting rule', value: 'Start date counts as day 1' },
                   { label: 'Last day to return', value: `${formatWeekday(returnDeadline)}, ${formatPlainDate(returnDeadline)}` },
                 ]}
-              />
-              <ResultActions
-                title="Return deadline"
-                date={returnDeadline}
-                details={`${parsedReturnWindow}-day return window`}
               />
               <details className="result-save-details">
                 <summary>Save this date</summary>
@@ -12029,21 +12037,61 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
       <section className="return-holiday-callout" aria-label="Holiday return reminder">
         <div>
-          <span>Holiday gift return?</span>
-          <strong>Use the holiday return period stated by the retailer.</strong>
+          <span>Holiday purchase?</span>
+          <strong>Your retailer may give you extra time.</strong>
         </div>
         <p>
-          Holiday purchases may have an extended return window. Enter the purchase or delivery date the retailer uses, then enter the number of days in that holiday return period.
+          Check the holiday return period on the receipt or retailer policy, then enter that number of days above.
         </p>
       </section>
 
       <style>{`
         .return-citation-explanation {
           max-width: 680px;
-          margin: 14px auto 0;
+          margin: 10px auto 0;
           color: #536b85;
+          font-size: 0.94rem;
+          line-height: 1.5;
+          text-align: center;
+        }
+
+        .return-input-help,
+        .return-why-details {
+          width: 100%;
+        }
+
+        .return-input-help {
+          margin-top: -2px;
+        }
+
+        .return-input-help summary,
+        .return-why-details summary {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          color: #52708d;
+          font-size: 0.86rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .return-input-help p {
+          margin: 2px 0 0;
+          color: #667d94;
+          font-size: 0.86rem;
+          line-height: 1.5;
+        }
+
+        .return-why-details {
+          margin-top: 4px;
+          text-align: center;
+        }
+
+        .return-result-weekday {
+          margin: 6px 0 0;
+          color: #60738d;
           font-size: 1rem;
-          line-height: 1.55;
+          font-weight: 800;
           text-align: center;
         }
 
@@ -12100,7 +12148,12 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-window-page .business-calculator {
-          padding-top: 16px;
+          padding-top: 14px;
+          padding-bottom: 14px;
+        }
+
+        .return-window-page .business-calculator .field {
+          margin-bottom: 10px;
         }
 
         .return-window-page .return-window-result .due-date {
@@ -12115,6 +12168,14 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           justify-content: center;
         }
 
+        .return-window-page .return-window-result .result-actions {
+          margin-top: 12px;
+        }
+
+        .return-window-page .return-window-result .calculation-receipt {
+          margin-top: 8px;
+        }
+
         .return-start-helper {
           display: block;
           margin-top: 7px;
@@ -12124,14 +12185,19 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-window-page .quick-picks button {
-          min-width: 50px;
-          min-height: 48px;
+          min-width: 54px;
+          min-height: 50px;
           display: inline-flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 1px;
+          gap: 2px;
           padding-inline: 10px;
+        }
+
+        .return-window-page .quick-picks button > span {
+          font-size: 1rem;
+          font-weight: 900;
         }
 
         .return-window-page .quick-picks button small {
@@ -12186,24 +12252,68 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 760px) {
+          .return-window-page .return-answer-intro {
+            padding-bottom: 4px;
+          }
+
+          .return-window-page .return-answer-context {
+            max-width: 310px;
+            margin-inline: auto;
+            font-size: 0.92rem;
+          }
+
           .return-window-page .return-primary-workspace {
-            gap: 10px;
+            gap: 8px;
           }
 
           .return-window-page .business-calculator {
-            padding-top: 12px;
-            padding-bottom: 12px;
+            padding: 12px 14px;
+          }
+
+          .return-window-page .business-calculator .field {
+            margin-bottom: 8px;
+          }
+
+          .return-window-page .business-calculator .field > span:first-child {
+            font-size: 0.94rem;
+          }
+
+          .return-window-page .quick-picks {
+            gap: 6px;
+          }
+
+          .return-window-page .quick-picks button {
+            min-width: 52px;
+            min-height: 48px;
+          }
+
+          .return-window-page .return-window-result {
+            padding-top: 15px;
+            padding-bottom: 15px;
           }
 
           .return-window-page .return-window-result .due-date {
-            font-size: clamp(3.25rem, 15.5vw, 5.2rem);
+            font-size: clamp(3rem, 14.5vw, 4.8rem);
+          }
+
+          .return-window-page .return-window-result .result-label {
+            margin-bottom: 2px;
+          }
+
+          .return-window-page .return-window-result .status-badge {
+            margin-top: 8px;
+          }
+
+          .return-input-help summary,
+          .return-why-details summary {
+            min-height: 42px;
           }
         }
       `}</style>
 
       <section className="return-today-answers return-secondary-answers" aria-labelledby="return-today-title">
         <div className="return-today-heading">
-          <h2 id="return-today-title">Common return windows starting today</h2>
+          <h2 id="return-today-title">Quick answers for common return windows</h2>
           <p className="return-today-date">
             Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
             <span aria-hidden="true"> · </span>
@@ -12247,9 +12357,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
       <section className="business-content" aria-label="Return window help">
         <article>
-          <h2>How this calculator works</h2>
+          <h2>Which date should I enter?</h2>
           <p>
-            Enter the purchase date and the number of days in the return window. The calculator shows the last calendar day to return the item. Some stores count from delivery date instead of purchase date, so always check the official return policy.
+            Use the date the retailer says starts the return period. That may be the purchase date, delivery date, or another date named in the policy.
           </p>
         </article>
 
@@ -12362,7 +12472,8 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         .return-answer-context {
           margin: 0;
           color: #5a6f89;
-          font-size: 0.95rem;
+          font-size: 0.98rem;
+          line-height: 1.45;
         }
 
         .return-primary-workspace {
