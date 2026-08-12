@@ -12225,25 +12225,27 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             decoding="async"
             fetchPriority="high"
           />
-          <div className="return-editorial-overlay" aria-hidden="true">
-            <span>Return window</span>
-            <strong>Not put away yet.</strong>
-            <p>The item is here. The decision isn&apos;t final.</p>
-          </div>
+          {returnDeadline && parsedReturnWindow !== null ? (
+            <div className="return-answer-overlay" aria-hidden="true">
+              <span>Last day to return</span>
+              <strong>{formatPlainDate(returnDeadline)}</strong>
+              <small>{formatWeekday(returnDeadline)}</small>
+            </div>
+          ) : null}
         </figure>
       </section>
 
       <section className="return-primary-workspace" aria-label="Return deadline result">
         <section className="result-panel return-window-result">
-          <p className="result-label">Last day to return</p>
           {returnDeadline && parsedReturnWindow !== null ? (
             <>
-              <p className="due-date">{formatPlainDate(returnDeadline)}</p>
-              <p className="return-result-weekday">{formatWeekday(returnDeadline)}</p>
-              <div className="result-meta result-meta-stack">
-                <span className="status-badge status-comfortable">
-                  {parsedReturnWindow}-day window · Start date = Day 1
-                </span>
+              <div className="return-result-support">
+                <p className="return-result-kicker">Use this deadline</p>
+                <div className="result-meta result-meta-stack">
+                  <span className="status-badge status-comfortable">
+                    {parsedReturnWindow}-day window · Start date = Day 1
+                  </span>
+                </div>
               </div>
 
               <aside className="return-result-caveat" aria-label="Return policy reminder">
@@ -12415,49 +12417,50 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           object-position: 56% center;
         }
 
-        .return-editorial-overlay {
+        .return-answer-overlay {
           position: absolute;
-          left: 28px;
-          bottom: 28px;
-          width: min(42%, 300px);
-          padding: 16px 18px 17px;
-          border: 1px solid rgba(19, 38, 70, 0.08);
+          left: 50%;
+          top: 52%;
+          width: min(78%, 430px);
+          padding: 18px 22px 20px;
+          border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 16px;
-          background: rgba(255, 250, 242, 0.58);
-          box-shadow: 0 16px 36px rgba(19, 38, 70, 0.12);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          text-align: left;
+          background: rgba(255, 250, 242, 0.44);
+          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.14);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          text-align: center;
+          transform: translate(-50%, -50%);
         }
 
-        .return-editorial-overlay span,
-        .return-editorial-overlay strong,
-        .return-editorial-overlay p {
+        .return-answer-overlay span,
+        .return-answer-overlay strong,
+        .return-answer-overlay small {
           display: block;
         }
 
-        .return-editorial-overlay span {
+        .return-answer-overlay span {
           color: #246b52;
-          font-size: 0.68rem;
+          font-size: 0.69rem;
           font-weight: 950;
           letter-spacing: 0.11em;
           text-transform: uppercase;
         }
 
-        .return-editorial-overlay strong {
+        .return-answer-overlay strong {
           margin-top: 7px;
           color: #10213f;
-          font-size: clamp(1.35rem, 2.1vw, 1.9rem);
-          line-height: 1.02;
-          letter-spacing: -0.03em;
+          font-size: clamp(2rem, 3.8vw, 3.45rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
           text-wrap: balance;
         }
 
-        .return-editorial-overlay p {
-          margin: 8px 0 0;
-          color: #5f748c;
-          font-size: 0.88rem;
-          line-height: 1.45;
+        .return-answer-overlay small {
+          margin-top: 7px;
+          color: #60758d;
+          font-size: 0.82rem;
+          font-weight: 850;
         }
 
         .return-window-page .return-primary-workspace {
@@ -12477,6 +12480,22 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           font-size: 0.94rem;
           line-height: 1.5;
           text-align: center;
+        }
+
+        .return-result-support {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+          margin-bottom: 4px;
+        }
+
+        .return-result-kicker {
+          margin: 0;
+          color: #28435f;
+          font-size: 0.95rem;
+          font-weight: 900;
+          letter-spacing: 0.02em;
         }
 
         .return-input-help,
@@ -12589,7 +12608,8 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         .return-window-page .return-window-result {
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          justify-content: flex-start;
+          align-items: stretch;
         }
 
         .return-window-page .return-window-result .result-actions {
@@ -12788,29 +12808,25 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             object-position: 52% center;
           }
 
-          .return-editorial-overlay {
-            left: 14px;
-            right: 14px;
-            bottom: 14px;
-            width: auto;
-            max-width: 260px;
-            padding: 13px 14px 14px;
+          .return-answer-overlay {
+            top: 54%;
+            width: min(82%, 330px);
+            padding: 14px 16px 16px;
             border-radius: 14px;
           }
 
-          .return-editorial-overlay span {
-            font-size: 0.6rem;
+          .return-answer-overlay span {
+            font-size: 0.62rem;
           }
 
-          .return-editorial-overlay strong {
+          .return-answer-overlay strong {
             margin-top: 5px;
-            font-size: 1.22rem;
+            font-size: clamp(1.65rem, 8.7vw, 2.35rem);
           }
 
-          .return-editorial-overlay p {
-            margin-top: 6px;
-            font-size: 0.78rem;
-            line-height: 1.4;
+          .return-answer-overlay small {
+            margin-top: 5px;
+            font-size: 0.74rem;
           }
 
           .return-window-page .return-primary-workspace {
@@ -12895,26 +12911,12 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             min-height: 0;
           }
 
-          .return-window-page .return-window-result .result-label {
-            margin-bottom: 0;
-            font-size: 0.72rem;
-          }
-
-          .return-window-page .return-window-result .due-date {
-            max-width: 100%;
-            margin-top: 2px;
-            font-size: clamp(2.55rem, 12vw, 3.85rem);
-            line-height: 0.9;
-            text-wrap: balance;
-          }
-
-          .return-result-weekday {
-            margin-top: 4px;
-            font-size: 0.9rem;
+          .return-result-kicker {
+            font-size: 0.86rem;
           }
 
           .return-window-page .return-window-result .status-badge {
-            margin-top: 6px;
+            margin-top: 0;
             font-size: 0.76rem;
           }
 
