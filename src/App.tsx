@@ -12324,6 +12324,27 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           padding-bottom: 0;
         }
 
+        .return-window-page .return-answer-intro .site-header {
+          border-bottom: 0;
+          padding-bottom: 0;
+        }
+
+        .return-window-page .return-answer-intro .identity-row {
+          justify-content: flex-start;
+        }
+
+        .return-window-page .return-answer-intro .friendly-top-nav {
+          display: none;
+        }
+
+        .return-window-page .return-answer-intro .site-mark {
+          gap: 0;
+        }
+
+        .return-window-page .return-answer-intro .site-mark > span:last-child {
+          display: none;
+        }
+
         .return-landing-stage {
           width: min(100% - 32px, 1130px);
           margin: 10px auto 0;
@@ -12431,11 +12452,12 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           top: 52%;
           width: min(78%, 430px);
           padding: 18px 22px 20px;
-          border: 1px solid rgba(19, 38, 70, 0.12);
+          border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 16px;
-          background: rgba(255, 250, 242, 0.92);
-          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.16);
-          backdrop-filter: blur(10px);
+          background: rgba(255, 250, 242, 0.64);
+          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.14);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
           text-align: center;
           transform: translate(-50%, -50%);
         }
@@ -12826,6 +12848,23 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
           .return-window-page .return-answer-intro {
             padding-bottom: 0;
+          }
+
+          .return-window-page .return-answer-intro .site-header {
+            border-bottom: 0;
+            padding-bottom: 0;
+          }
+
+          .return-window-page .return-answer-intro .friendly-top-nav {
+            display: none;
+          }
+
+          .return-window-page .return-answer-intro .site-mark {
+            gap: 0;
+          }
+
+          .return-window-page .return-answer-intro .site-mark > span:last-child {
+            display: none;
           }
 
           .return-window-page .identity-row {
