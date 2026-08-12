@@ -12225,13 +12225,11 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             decoding="async"
             fetchPriority="high"
           />
-          {returnDeadline && parsedReturnWindow !== null ? (
-            <div className="return-answer-overlay" aria-hidden="true">
-              <span>Last day to return</span>
-              <strong>{formatPlainDate(returnDeadline)}</strong>
-              <small>{formatWeekday(returnDeadline)}</small>
-            </div>
-          ) : null}
+          <div className="return-editorial-overlay" aria-hidden="true">
+            <span>Return window</span>
+            <strong>Not put away yet.</strong>
+            <p>The item is here. The decision isn&apos;t final.</p>
+          </div>
         </figure>
       </section>
 
@@ -12417,50 +12415,49 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           object-position: 56% center;
         }
 
-        .return-answer-overlay {
+        .return-editorial-overlay {
           position: absolute;
-          left: 50%;
-          top: 52%;
-          width: min(78%, 430px);
-          padding: 18px 22px 20px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
+          left: 28px;
+          bottom: 28px;
+          width: min(42%, 300px);
+          padding: 16px 18px 17px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
           border-radius: 16px;
-          background: rgba(255, 250, 242, 0.64);
-          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.14);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          text-align: center;
-          transform: translate(-50%, -50%);
+          background: rgba(255, 250, 242, 0.58);
+          box-shadow: 0 16px 36px rgba(19, 38, 70, 0.12);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          text-align: left;
         }
 
-        .return-answer-overlay span,
-        .return-answer-overlay strong,
-        .return-answer-overlay small {
+        .return-editorial-overlay span,
+        .return-editorial-overlay strong,
+        .return-editorial-overlay p {
           display: block;
         }
 
-        .return-answer-overlay span {
+        .return-editorial-overlay span {
           color: #246b52;
-          font-size: 0.69rem;
+          font-size: 0.68rem;
           font-weight: 950;
           letter-spacing: 0.11em;
           text-transform: uppercase;
         }
 
-        .return-answer-overlay strong {
+        .return-editorial-overlay strong {
           margin-top: 7px;
           color: #10213f;
-          font-size: clamp(2rem, 3.8vw, 3.45rem);
-          line-height: 0.98;
-          letter-spacing: -0.05em;
+          font-size: clamp(1.35rem, 2.1vw, 1.9rem);
+          line-height: 1.02;
+          letter-spacing: -0.03em;
           text-wrap: balance;
         }
 
-        .return-answer-overlay small {
-          margin-top: 7px;
-          color: #60758d;
-          font-size: 0.82rem;
-          font-weight: 850;
+        .return-editorial-overlay p {
+          margin: 8px 0 0;
+          color: #5f748c;
+          font-size: 0.88rem;
+          line-height: 1.45;
         }
 
         .return-window-page .return-primary-workspace {
@@ -12791,25 +12788,29 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             object-position: 52% center;
           }
 
-          .return-answer-overlay {
-            top: 54%;
-            width: min(82%, 330px);
-            padding: 14px 16px 16px;
+          .return-editorial-overlay {
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            width: auto;
+            max-width: 260px;
+            padding: 13px 14px 14px;
             border-radius: 14px;
           }
 
-          .return-answer-overlay span {
-            font-size: 0.62rem;
+          .return-editorial-overlay span {
+            font-size: 0.6rem;
           }
 
-          .return-answer-overlay strong {
+          .return-editorial-overlay strong {
             margin-top: 5px;
-            font-size: clamp(1.65rem, 8.7vw, 2.35rem);
+            font-size: 1.22rem;
           }
 
-          .return-answer-overlay small {
-            margin-top: 5px;
-            font-size: 0.74rem;
+          .return-editorial-overlay p {
+            margin-top: 6px;
+            font-size: 0.78rem;
+            line-height: 1.4;
           }
 
           .return-window-page .return-primary-workspace {
