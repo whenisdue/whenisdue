@@ -12229,10 +12229,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             decoding="async"
             fetchPriority="high"
           />
-          <figcaption>
-            <span>Return window</span>
-            <strong>Not put away yet.</strong>
-          </figcaption>
         </figure>
       </section>
 
@@ -12325,9 +12321,13 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           width: min(100% - 32px, 1130px);
           margin: 10px auto 0;
           display: grid;
-          grid-template-columns: minmax(360px, 0.82fr) minmax(0, 1.18fr);
-          gap: 28px;
-          align-items: stretch;
+          grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+          min-height: 610px;
+          overflow: hidden;
+          border: 1px solid rgba(19, 38, 70, 0.1);
+          border-radius: 26px;
+          background: #315447;
+          box-shadow: 0 22px 58px rgba(19, 38, 70, 0.1);
         }
 
         .return-landing-task {
@@ -12335,79 +12335,87 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           flex-direction: column;
           justify-content: center;
           min-width: 0;
+          padding: clamp(34px, 4.5vw, 58px);
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
+            #315447;
         }
 
         .return-landing-task .return-answer-eyebrow {
-          margin: 0 0 8px;
-          color: #607b98;
-          font-size: 0.78rem;
+          margin: 0 0 10px;
+          color: #d5eadf;
+          font-size: 0.76rem;
           font-weight: 950;
-          letter-spacing: 0.09em;
+          letter-spacing: 0.11em;
           text-transform: uppercase;
         }
 
         .return-landing-task h1 {
-          max-width: 650px;
+          max-width: 520px;
           margin: 0;
-          color: #0b1830;
-          font-size: clamp(3.2rem, 5.2vw, 5.6rem);
-          line-height: 0.94;
-          letter-spacing: -0.055em;
+          color: #fffaf2;
+          font-size: clamp(3rem, 4.35vw, 4.7rem);
+          line-height: 0.95;
+          letter-spacing: -0.05em;
           text-wrap: balance;
         }
 
         .return-landing-task .business-calculator {
           width: 100%;
-          margin-top: 26px;
+          margin-top: 30px;
+          padding: 18px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          border-radius: 16px;
+          background: rgba(255, 250, 242, 0.97);
+          box-shadow: none;
+        }
+
+        .return-landing-task .business-calculator {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 14px;
+        }
+
+        .return-landing-task .business-calculator .field {
+          width: 100%;
+          margin: 0;
+        }
+
+        .return-landing-task .business-calculator .field > span:first-child {
+          margin-bottom: 6px;
+          color: #29435e;
+          font-size: 0.82rem;
+          font-weight: 900;
+        }
+
+        .return-landing-task .business-calculator input {
+          width: 100%;
+        }
+
+        .return-landing-task .return-input-help {
+          margin-top: -2px;
+        }
+
+        .return-landing-task .return-input-help summary {
+          color: #526f8c;
         }
 
         .return-landing-art {
           position: relative;
-          min-height: 520px;
+          min-width: 0;
+          min-height: 610px;
           margin: 0;
           overflow: hidden;
-          border-radius: 22px;
           background: #d8cbbb;
-          box-shadow: 0 18px 48px rgba(19, 38, 70, 0.08);
         }
 
         .return-landing-art img {
           display: block;
           width: 100%;
           height: 100%;
-          min-height: 520px;
+          min-height: 610px;
           object-fit: cover;
           object-position: 56% center;
-        }
-
-        .return-landing-art figcaption {
-          position: absolute;
-          left: 24px;
-          bottom: 24px;
-          padding: 13px 16px 14px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 12px;
-          background: rgba(255, 250, 242, 0.91);
-          box-shadow: 0 10px 28px rgba(19, 38, 70, 0.12);
-          backdrop-filter: blur(8px);
-        }
-
-        .return-landing-art figcaption span {
-          display: block;
-          color: #246b52;
-          font-size: 0.67rem;
-          font-weight: 950;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-        }
-
-        .return-landing-art figcaption strong {
-          display: block;
-          margin-top: 4px;
-          color: #17304d;
-          font-size: 1.25rem;
-          line-height: 1;
-          letter-spacing: -0.025em;
         }
 
         .return-window-page .return-primary-workspace {
@@ -12709,39 +12717,33 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             width: calc(100% - 20px);
             margin-top: 8px;
             grid-template-columns: 1fr;
-            gap: 10px;
+            min-height: 0;
+            border-radius: 20px;
+          }
+
+          .return-landing-task {
+            padding: 24px 16px 18px;
           }
 
           .return-landing-task h1 {
             max-width: 340px;
-            font-size: clamp(2.2rem, 11vw, 3.2rem);
+            font-size: clamp(2.35rem, 11vw, 3.25rem);
             line-height: 0.95;
           }
 
           .return-landing-task .business-calculator {
-            margin-top: 16px;
+            margin-top: 18px;
+            padding: 14px;
           }
 
           .return-landing-art {
-            order: 3;
             min-height: 0;
-            border-radius: 18px;
           }
 
           .return-landing-art img {
             min-height: 0;
-            height: min(95vw, 430px);
+            height: min(92vw, 430px);
             object-position: 52% center;
-          }
-
-          .return-landing-art figcaption {
-            left: 14px;
-            bottom: 14px;
-            padding: 10px 12px 11px;
-          }
-
-          .return-landing-art figcaption strong {
-            font-size: 1.05rem;
           }
 
           .return-window-page .return-primary-workspace {
