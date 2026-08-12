@@ -11908,10 +11908,8 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
     <main className="page-shell return-window-page">
       <section className="intro return-answer-intro" aria-labelledby="return-window-title">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <h1 id="return-window-title">Return Window Calculator</h1>
-        <p className="return-answer-context">
-          Find your last day to return an item.
-        </p>
+        <p className="return-answer-eyebrow">Return Window Calculator</p>
+        <h1 id="return-window-title">Find your last day to return an item</h1>
       </section>
 
       <section className="business-workspace return-primary-workspace" aria-label="Return deadline calculator">
@@ -12256,10 +12254,15 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             padding-bottom: 4px;
           }
 
-          .return-window-page .return-answer-context {
-            max-width: 310px;
-            margin-inline: auto;
-            font-size: 0.92rem;
+          .return-window-page .return-answer-eyebrow {
+            margin-bottom: 5px;
+            font-size: 0.72rem;
+          }
+
+          .return-window-page .return-answer-intro h1 {
+            max-width: 330px;
+            font-size: clamp(2rem, 10.5vw, 3rem);
+            line-height: 0.98;
           }
 
           .return-window-page .return-primary-workspace {
@@ -12469,11 +12472,24 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           font-size: clamp(2rem, 4vw, 3.2rem);
         }
 
-        .return-answer-context {
+        .return-answer-eyebrow {
+          margin: 0 0 6px;
+          color: #627b94;
+          font-size: 0.78rem;
+          font-weight: 950;
+          line-height: 1.2;
+          letter-spacing: 0.085em;
+          text-transform: uppercase;
+        }
+
+        .return-answer-intro h1 {
+          max-width: 760px;
           margin: 0;
-          color: #5a6f89;
-          font-size: 0.98rem;
-          line-height: 1.45;
+          color: #10213f;
+          font-size: clamp(2.25rem, 5vw, 4rem);
+          line-height: 0.98;
+          letter-spacing: -0.045em;
+          text-wrap: balance;
         }
 
         .return-primary-workspace {
@@ -12634,8 +12650,8 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             font-size: 2rem;
           }
 
-          .return-answer-context {
-            font-size: 0.88rem;
+          .return-answer-eyebrow {
+            font-size: 0.7rem;
           }
 
           .return-primary-workspace {
