@@ -7214,7 +7214,7 @@ function HomepageQuestionMap({ onNavigate }: NavigationProps) {
       </div>
 
       <div className="homepage-question-cloud-mobile">
-        {(isMobileQuestionMapExpanded ? questions : questions.slice(0, 4)).map(
+        {(isMobileQuestionMapExpanded ? questions : questions.slice(0, 3)).map(
           (question) => (
             <a
               key={question.label}
@@ -7264,6 +7264,7 @@ function DeadlineCountingGuideLinks({
   onNavigate,
   compact = false,
 }: NavigationProps & { compact?: boolean }) {
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false)
   const guides = [
     {
       path: '/does-the-start-date-count',
@@ -7310,9 +7311,14 @@ function DeadlineCountingGuideLinks({
       </div>
 
       <div className="deadline-guide-links-grid">
-        {guides.map((guide) => (
+        {guides.map((guide, index) => (
           <a
             key={guide.path}
+            className={
+              !compact && index >= 3
+                ? `deadline-guide-mobile-extra ${isMobileExpanded ? 'is-expanded' : ''}`
+                : undefined
+            }
             href={guide.path}
             onClick={(event) => {
               event.preventDefault()
@@ -7330,7 +7336,28 @@ function DeadlineCountingGuideLinks({
         ))}
       </div>
 
+      {!compact ? (
+        <button
+          type="button"
+          className="deadline-guide-mobile-toggle"
+          aria-expanded={isMobileExpanded}
+          onClick={() => {
+            const nextExpanded = !isMobileExpanded
+            setIsMobileExpanded(nextExpanded)
+            trackWhenIsDueEvent('homepage_deadline_guides_toggled', {
+              expanded: nextExpanded,
+            })
+          }}
+        >
+          {isMobileExpanded ? 'Show fewer ↑' : 'More counting questions ↓'}
+        </button>
+      ) : null}
+
       <style>{`
+        .deadline-guide-mobile-toggle {
+          display: none;
+        }
+
         .deadline-guide-links {
           width: min(1080px, calc(100% - 32px));
           margin: 24px auto 0;
@@ -7448,6 +7475,32 @@ function DeadlineCountingGuideLinks({
           .deadline-guide-links-grid a {
             min-height: 88px;
           }
+
+          .deadline-guide-mobile-extra {
+            display: none !important;
+          }
+
+          .deadline-guide-mobile-extra.is-expanded {
+            display: grid !important;
+          }
+
+          .deadline-guide-mobile-toggle {
+            min-height: 46px;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            padding: 9px 14px;
+            border: 1px solid rgba(138, 98, 24, 0.18);
+            border-radius: 999px;
+            background: rgba(255, 253, 248, 0.78);
+            color: #72511a;
+            font: inherit;
+            font-size: 0.88rem;
+            font-weight: 900;
+            cursor: pointer;
+          }
         }
       `}</style>
     </section>
@@ -7467,6 +7520,7 @@ function HomePage({ onNavigate }: NavigationProps) {
   const [favoriteCalculations, setFavoriteCalculations] = useState<SavedCalculation[]>(() =>
     readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
   )
+  const [isMobileTaskListExpanded, setIsMobileTaskListExpanded] = useState(false)
 
   const recentOnlyCalculations = useMemo(
     () => {
@@ -7950,7 +8004,7 @@ function HomePage({ onNavigate }: NavigationProps) {
             : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
         </p>
 
-        <div className="date-home-calendar-preference">
+        <div className="date-home-calendar-preference date-home-calendar-preference-desktop">
           <HolidayCalendarSelect
             value={holidayCalendar}
             onChange={(nextCalendar) => {
@@ -7969,10 +8023,36 @@ function HomePage({ onNavigate }: NavigationProps) {
           </p>
         </div>
 
+        <details className="date-home-calendar-details">
+          <summary>Counting settings</summary>
+          <div className="date-home-calendar-preference">
+            <HolidayCalendarSelect
+              value={holidayCalendar}
+              onChange={(nextCalendar) => {
+                setHolidayCalendar(nextCalendar)
+                trackWhenIsDueEvent('holiday_calendar_changed', {
+                  context: 'homepage_mobile_settings',
+                  value: nextCalendar,
+                })
+              }}
+              compact
+            />
+            <p>
+              {holidayCalendar === 'none'
+                ? 'Weekends are skipped. Choose a calendar only when public holidays should also be skipped.'
+                : 'This holiday calendar is saved on this device.'}
+            </p>
+          </div>
+        </details>
+
         <style>{`
           .date-home-calendar-preference {
             width: min(100%, 560px);
             margin: 12px auto 0;
+          }
+
+          .date-home-calendar-details {
+            display: none;
           }
 
           .date-home-calendar-preference > p {
@@ -7984,6 +8064,46 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           @media (max-width: 560px) {
+            .date-home-calendar-preference-desktop {
+              display: none;
+            }
+
+            .date-home-calendar-details {
+              display: block;
+              margin-top: 12px;
+              border-top: 1px solid rgba(29, 79, 130, 0.08);
+            }
+
+            .date-home-calendar-details summary {
+              min-height: 46px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #536f8b;
+              font-size: 0.86rem;
+              font-weight: 900;
+              cursor: pointer;
+              list-style: none;
+            }
+
+            .date-home-calendar-details summary::-webkit-details-marker {
+              display: none;
+            }
+
+            .date-home-calendar-details summary::after {
+              content: '↓';
+              margin-left: 7px;
+            }
+
+            .date-home-calendar-details[open] summary::after {
+              content: '↑';
+            }
+
+            .date-home-calendar-details .date-home-calendar-preference {
+              margin-top: 0;
+              padding: 4px 0 2px;
+            }
+
             .date-home-calendar-preference > p {
               text-align: left;
             }
@@ -8054,6 +8174,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </a>
 
           <a
+            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href="/next-payday-calculator"
             onClick={(event) => {
               event.preventDefault()
@@ -8066,6 +8187,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </a>
 
           <a
+            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href={`/business-hours-deadline-calculator${
               holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
             }`}
@@ -8084,6 +8206,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </a>
 
           <a
+            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href={`/business-days-between-dates${
               holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
             }`}
@@ -8102,6 +8225,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </a>
 
           <a
+            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href="/net-30-due-date"
             onClick={(event) => {
               event.preventDefault()
@@ -8114,6 +8238,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           </a>
 
           <a
+            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href="/shipping-delivery-range-calculator"
             onClick={(event) => {
               event.preventDefault()
@@ -8125,6 +8250,21 @@ function HomePage({ onNavigate }: NavigationProps) {
             <small>Turn 3–5 business days into earliest and latest dates.</small>
           </a>
         </div>
+
+        <button
+          type="button"
+          className="date-home-tool-toggle"
+          aria-expanded={isMobileTaskListExpanded}
+          onClick={() => {
+            const nextExpanded = !isMobileTaskListExpanded
+            setIsMobileTaskListExpanded(nextExpanded)
+            trackWhenIsDueEvent('homepage_task_list_toggled', {
+              expanded: nextExpanded,
+            })
+          }}
+        >
+          {isMobileTaskListExpanded ? 'Show fewer tasks ↑' : 'Show more tasks ↓'}
+        </button>
       </section>
 
 
@@ -8826,6 +8966,10 @@ function HomePage({ onNavigate }: NavigationProps) {
             flex-direction: column;
             gap: 6px;
           }
+
+          .homepage-question-map-note {
+            display: none;
+          }
         }
 
         .date-home-secondary {
@@ -9110,6 +9254,10 @@ function HomePage({ onNavigate }: NavigationProps) {
           gap: 10px;
         }
 
+        .date-home-tool-toggle {
+          display: none;
+        }
+
         .date-home-tool-grid a {
           position: relative;
           min-height: 132px;
@@ -9351,6 +9499,16 @@ function HomePage({ onNavigate }: NavigationProps) {
             padding-bottom: 12px;
           }
 
+          .date-home-page .deadline-guide-links:not(.is-compact)
+            .deadline-guide-links-grid span {
+            display: none;
+          }
+
+          .date-home-page .deadline-guide-links:not(.is-compact)
+            .deadline-guide-links-grid a {
+            min-height: 70px;
+          }
+
           .date-home-section-heading {
             align-items: flex-start;
           }
@@ -9401,9 +9559,60 @@ function HomePage({ onNavigate }: NavigationProps) {
             min-height: 104px;
           }
 
+          .date-home-tool-grid .date-home-tool-secondary {
+            display: none;
+          }
+
+          .date-home-tool-grid .date-home-tool-secondary.is-expanded {
+            display: flex;
+          }
+
+          .date-home-tool-toggle {
+            min-height: 48px;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            padding: 9px 14px;
+            border: 1px solid rgba(36, 107, 82, 0.16);
+            border-radius: 999px;
+            background: rgba(255, 253, 249, 0.84);
+            color: #246b52;
+            font: inherit;
+            font-size: 0.88rem;
+            font-weight: 900;
+            cursor: pointer;
+          }
+
           .date-home-secondary {
-            align-items: flex-start;
-            flex-direction: column;
+            min-height: 58px;
+            align-items: center;
+            flex-direction: row;
+            margin-bottom: 24px;
+            padding: 12px 14px;
+          }
+
+          .date-home-secondary span {
+            display: none;
+          }
+
+          .date-home-secondary strong {
+            font-size: 0.88rem;
+          }
+
+          .date-home-secondary a {
+            min-height: 42px;
+            margin-left: auto;
+          }
+
+          .date-home-page .site-footer > p:first-of-type {
+            display: none;
+          }
+
+          .date-home-page .site-footer > p:last-of-type {
+            max-width: 34rem;
+            margin-top: 12px;
           }
         }
       `}</style>
