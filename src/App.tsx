@@ -9005,7 +9005,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           background:
             url('/choose-by-task-background.webp')
             center center / cover no-repeat;
-          opacity: 0.11;
+          opacity: 0.22;
           pointer-events: none;
         }
 
@@ -9014,7 +9014,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           position: absolute;
           inset: 0;
           z-index: -1;
-          background: rgba(255, 250, 242, 0.72);
+          background: rgba(255, 250, 242, 0.58);
           pointer-events: none;
         }
 
@@ -9048,9 +9048,9 @@ function HomePage({ onNavigate }: NavigationProps) {
           padding: 18px 48px 18px 18px;
           border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 14px;
-          background: rgba(255, 253, 249, 0.91);
-          backdrop-filter: blur(2px);
-          -webkit-backdrop-filter: blur(2px);
+          background: rgba(255, 253, 249, 0.94);
+          backdrop-filter: blur(1px);
+          -webkit-backdrop-filter: blur(1px);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -9244,11 +9244,11 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .date-home-tools::before {
             background-position: 52% center;
-            opacity: 0.1;
+            opacity: 0.18;
           }
 
           .date-home-tools::after {
-            background: rgba(255, 250, 242, 0.76);
+            background: rgba(255, 250, 242, 0.64);
           }
 
           .date-home-page .deadline-guide-links:not(.is-compact) {
