@@ -7868,12 +7868,12 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-editorial-copy {
-            padding: 20px 15px 16px;
+            padding: 16px 15px 14px;
           }
 
           .date-home-editorial-today {
-            margin-bottom: 12px;
-            font-size: 0.73rem;
+            margin-bottom: 9px;
+            font-size: 0.72rem;
           }
 
           .date-home-editorial-hero .ask-when-heading > span {
@@ -7883,34 +7883,34 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .date-home-editorial-hero .ask-when-heading h2 {
             max-width: 330px;
-            font-size: clamp(2.25rem, 10.5vw, 3rem);
+            font-size: clamp(2.18rem, 10vw, 2.9rem);
             line-height: 0.94;
           }
 
           .date-home-editorial-hero .ask-when-heading p {
-            margin-top: 8px;
-            font-size: 0.9rem;
-            line-height: 1.42;
+            margin-top: 6px;
+            font-size: 0.88rem;
+            line-height: 1.38;
           }
 
           .date-home-editorial-hero .ask-when-form {
-            margin-top: 14px;
+            margin-top: 11px;
           }
 
           .date-home-editorial-hero .ask-when-form input {
-            min-height: 52px;
-            font-size: 0.98rem;
+            min-height: 48px;
+            font-size: 0.96rem;
           }
 
           .date-home-editorial-hero .ask-when-examples {
-            gap: 6px;
-            margin-top: 10px;
+            gap: 5px;
+            margin-top: 8px;
           }
 
           .date-home-editorial-hero .ask-when-examples button {
-            min-height: 38px;
-            padding: 6px 9px;
-            font-size: 0.75rem;
+            min-height: 36px;
+            padding: 5px 9px;
+            font-size: 0.74rem;
           }
 
           .date-home-editorial-hero .ask-when-examples button:nth-child(n + 4) {
@@ -7923,15 +7923,15 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .date-home-editorial-art img {
             min-height: 0;
-            height: 190px;
+            height: 172px;
             object-position: 44% center;
           }
 
           .date-home-editorial-art .date-home-today-card {
             left: 50%;
-            top: 50%;
-            width: min(84%, 320px);
-            padding: 13px 15px 15px;
+            top: 49%;
+            width: min(82%, 310px);
+            padding: 11px 14px 13px;
             border-radius: 14px;
           }
 
@@ -9580,9 +9580,9 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-tool-grid p {
-            margin-top: 4px;
+            margin-top: 2px;
             font-size: 0.82rem;
-            line-height: 1.32;
+            line-height: 1.18;
           }
 
           .date-home-tool-grid a::after {
