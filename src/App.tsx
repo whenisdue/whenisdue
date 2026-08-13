@@ -7379,16 +7379,28 @@ function DeadlineCountingGuideLinks({
 
         .deadline-guide-links-grid a {
           position: relative;
-          min-height: 112px;
+          min-height: 102px;
           display: grid;
           align-content: center;
           gap: 5px;
-          padding: 15px 42px 15px 15px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 12px;
-          background: #fff;
+          padding: 15px 54px 15px 15px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.9);
           color: inherit;
           text-decoration: none;
+          transition:
+            transform 140ms ease,
+            border-color 140ms ease,
+            background 140ms ease;
+        }
+
+        .deadline-guide-links-grid a:hover {
+          transform: translateY(-1px);
+        }
+
+        .deadline-guide-links-grid a:active {
+          transform: translateY(0);
         }
 
         .deadline-guide-links-grid strong {
@@ -7407,8 +7419,18 @@ function DeadlineCountingGuideLinks({
           position: absolute;
           right: 14px;
           top: 50%;
+          width: 30px;
+          height: 30px;
+          display: grid;
+          place-items: center;
+          border-radius: 9px;
+          background: rgba(138, 98, 24, 0.08);
           color: #607a95;
+          font-size: 1rem;
           transform: translateY(-50%);
+          transition:
+            background 140ms ease,
+            color 140ms ease;
         }
 
         @media (max-width: 760px) {
@@ -8812,39 +8834,84 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-page .deadline-guide-links:not(.is-compact) {
+          position: relative;
           width: min(100% - 32px, 1120px);
           margin-top: 42px;
-          padding: 28px;
-          border-color: rgba(217, 164, 65, 0.26);
+          padding: 32px 28px 30px;
+          overflow: hidden;
+          border-color: rgba(217, 164, 65, 0.34);
           border-radius: 22px;
-          background: #fff8e8;
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+          background: #fff4dc;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 28px;
+          width: 74px;
+          height: 4px;
+          border-radius: 0 0 999px 999px;
+          background: #d9a441;
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-heading {
+          max-width: 720px;
         }
 
         .date-home-page .deadline-guide-links:not(.is-compact)
           .deadline-guide-links-heading > span {
           color: #8a6218;
+          letter-spacing: 0.09em;
         }
 
         .date-home-page .deadline-guide-links:not(.is-compact)
           .deadline-guide-links-heading h2 {
-          color: #43351d;
+          margin-top: 7px;
+          color: #3f3118;
+          font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+          letter-spacing: -0.025em;
         }
 
         .date-home-page .deadline-guide-links:not(.is-compact)
           .deadline-guide-links-heading p {
+          max-width: 560px;
+          margin-top: 7px;
           color: #75654a;
         }
 
         .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-grid {
+          gap: 10px;
+          margin-top: 20px;
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
           .deadline-guide-links-grid a {
-          border-color: rgba(138, 98, 24, 0.13);
-          background: rgba(255, 255, 255, 0.84);
+          min-height: 96px;
+          border-color: rgba(138, 98, 24, 0.12);
+          background: rgba(255, 253, 248, 0.9);
+          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-grid a:hover {
+          border-color: rgba(138, 98, 24, 0.24);
+          background: rgba(255, 255, 255, 0.97);
         }
 
         .date-home-page .deadline-guide-links:not(.is-compact)
           .deadline-guide-links-grid b {
+          background: #fff0c8;
           color: #8a6218;
+        }
+
+        .date-home-page .deadline-guide-links:not(.is-compact)
+          .deadline-guide-links-grid a:hover b {
+          background: #f6dfaa;
+          color: #6d490f;
         }
 
         .date-home-business {
@@ -9256,8 +9323,32 @@ function HomePage({ onNavigate }: NavigationProps) {
           .date-home-page .deadline-guide-links:not(.is-compact) {
             width: calc(100% - 24px);
             margin-top: 30px;
-            padding: 20px 14px;
+            padding: 24px 14px 18px;
             border-radius: 18px;
+          }
+
+          .date-home-page .deadline-guide-links:not(.is-compact)::before {
+            left: 14px;
+            width: 58px;
+            height: 3px;
+          }
+
+          .date-home-page .deadline-guide-links:not(.is-compact)
+            .deadline-guide-links-heading h2 {
+            font-size: 1.28rem;
+          }
+
+          .date-home-page .deadline-guide-links:not(.is-compact)
+            .deadline-guide-links-grid {
+            gap: 7px;
+            margin-top: 16px;
+          }
+
+          .date-home-page .deadline-guide-links:not(.is-compact)
+            .deadline-guide-links-grid a {
+            min-height: 82px;
+            padding-top: 12px;
+            padding-bottom: 12px;
           }
 
           .date-home-section-heading {
