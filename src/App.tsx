@@ -9447,14 +9447,14 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-business {
-            margin-top: 22px;
-            padding: 20px 14px 22px;
+            margin-top: 20px;
+            padding: 16px 12px 18px;
             border-radius: 18px;
           }
 
           .date-home-tools {
-            margin-top: 30px;
-            padding: 22px 12px 24px;
+            margin-top: 26px;
+            padding: 18px 10px 20px;
             border-radius: 18px;
           }
 
@@ -9515,12 +9515,12 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .date-home-business-grid {
             grid-template-columns: 1fr;
-            gap: 5px;
+            gap: 4px;
           }
 
           .date-home-business-answer {
-            min-height: 58px;
-            padding: 8px 38px 8px 11px;
+            min-height: 52px;
+            padding: 6px 38px 6px 10px;
             display: grid;
             grid-template-columns: 1fr auto;
             grid-template-areas:
@@ -9541,22 +9541,54 @@ function HomePage({ onNavigate }: NavigationProps) {
             grid-area: date;
             margin: 0;
             text-align: right;
-            font-size: 1.12rem;
+            font-size: 1.08rem;
+            line-height: 1.02;
           }
 
           .date-home-business-answer small {
             grid-area: weekday;
-            margin: 0;
+            margin: 1px 0 0;
             text-align: right;
+            line-height: 1.1;
+          }
+
+          .date-home-rule {
+            margin-top: 7px;
+            font-size: 0.8rem;
+            line-height: 1.35;
           }
 
           .date-home-tool-grid {
             grid-template-columns: 1fr;
-            gap: 7px;
+            gap: 6px;
           }
 
           .date-home-tool-grid a {
-            min-height: 104px;
+            min-height: 86px;
+            padding: 12px 46px 12px 14px;
+            border-radius: 12px;
+          }
+
+          .date-home-tool-grid span {
+            font-size: 0.68rem;
+          }
+
+          .date-home-tool-grid strong {
+            margin-top: 3px;
+            font-size: 1.05rem;
+            line-height: 1.12;
+          }
+
+          .date-home-tool-grid p {
+            margin-top: 4px;
+            font-size: 0.82rem;
+            line-height: 1.32;
+          }
+
+          .date-home-tool-grid a::after {
+            right: 12px;
+            width: 30px;
+            height: 30px;
           }
 
           .date-home-tool-grid .date-home-tool-secondary {
@@ -9568,13 +9600,13 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-tool-toggle {
-            min-height: 48px;
+            min-height: 46px;
             width: 100%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-top: 10px;
-            padding: 9px 14px;
+            margin-top: 8px;
+            padding: 8px 14px;
             border: 1px solid rgba(36, 107, 82, 0.16);
             border-radius: 999px;
             background: rgba(255, 253, 249, 0.84);
