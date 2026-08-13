@@ -8987,11 +8987,41 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-tools {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
           margin-top: 42px;
-          padding: 10px 0 18px;
-          border: 0;
-          border-radius: 0;
-          background: transparent;
+          padding: 32px 28px 34px;
+          border: 1px solid rgba(19, 38, 70, 0.08);
+          border-radius: 24px;
+          background: #fbf6ee;
+        }
+
+        .date-home-tools::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -2;
+          background:
+            url('/choose-by-task-background.webp')
+            center center / cover no-repeat;
+          opacity: 0.11;
+          pointer-events: none;
+        }
+
+        .date-home-tools::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          background: rgba(255, 250, 242, 0.72);
+          pointer-events: none;
+        }
+
+        .date-home-tools-heading,
+        .date-home-tool-grid {
+          position: relative;
+          z-index: 1;
         }
 
         .date-home-tools-heading {
@@ -9018,7 +9048,9 @@ function HomePage({ onNavigate }: NavigationProps) {
           padding: 18px 48px 18px 18px;
           border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 14px;
-          background: #fffdf9;
+          background: rgba(255, 253, 249, 0.91);
+          backdrop-filter: blur(2px);
+          -webkit-backdrop-filter: blur(2px);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -9206,7 +9238,17 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .date-home-tools {
             margin-top: 30px;
-            padding-top: 4px;
+            padding: 22px 12px 24px;
+            border-radius: 18px;
+          }
+
+          .date-home-tools::before {
+            background-position: 52% center;
+            opacity: 0.1;
+          }
+
+          .date-home-tools::after {
+            background: rgba(255, 250, 242, 0.76);
           }
 
           .date-home-page .deadline-guide-links:not(.is-compact) {
