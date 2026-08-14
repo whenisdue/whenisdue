@@ -10644,7 +10644,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             type="button"
             onClick={() => document.getElementById('custom-business-days')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            Different date or number ↓
+            Change date / days ↓
           </button>
         </div>
 
@@ -11511,12 +11511,12 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-editorial-image-wrap {
-            min-height: 430px;
+            min-height: 398px;
             border-radius: 24px;
           }
 
           .business-editorial-image {
-            min-height: 430px;
+            min-height: 398px;
             object-position: 54% center;
           }
 
@@ -11525,28 +11525,28 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-editorial-answer {
-            left: 14px;
-            right: 14px;
+            left: 12px;
+            right: 12px;
             top: auto;
-            bottom: 14px;
+            bottom: 12px;
             width: auto;
             transform: none;
-            padding: 18px;
-            border-radius: 20px;
+            padding: 15px;
+            border-radius: 19px;
             background: rgba(251, 246, 236, 0.91);
           }
 
           .business-editorial-answer h1 {
-            margin: 6px 0 12px;
-            font-size: clamp(2rem, 9vw, 2.7rem);
+            margin: 5px 0 10px;
+            font-size: clamp(1.86rem, 8.4vw, 2.45rem);
           }
 
           .business-editorial-primary-answer {
-            padding-top: 12px;
+            padding-top: 10px;
           }
 
           .business-editorial-primary-answer strong {
-            font-size: clamp(2rem, 9.2vw, 2.8rem);
+            font-size: clamp(1.9rem, 8.5vw, 2.55rem);
           }
 
           .business-editorial-context,
@@ -11565,14 +11565,17 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-quick-heading h2 {
-            font-size: 1.7rem;
+            max-width: 220px;
+            font-size: 1.48rem;
+            line-height: 1.02;
           }
 
           .business-jump-button {
-            max-width: 145px;
-            min-height: 42px;
-            padding: 7px 10px;
-            font-size: 0.78rem;
+            max-width: 132px;
+            min-height: 38px;
+            padding: 6px 9px;
+            font-size: 0.72rem;
+            line-height: 1.15;
           }
 
           .business-bam-list {
@@ -11581,8 +11584,8 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-bam-row {
-            min-height: 58px;
-            padding: 8px 44px 8px 12px;
+            min-height: 54px;
+            padding: 7px 42px 7px 12px;
             display: grid;
             grid-template-columns: 1fr auto;
             grid-template-areas:
@@ -11652,28 +11655,71 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-editorial-workspace .business-calculator {
-            padding: 16px;
+            padding: 15px;
+          }
+
+          .business-page .quick-picks {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 7px;
+          }
+
+          .business-page .quick-picks button {
+            min-width: 0;
+            width: 100%;
+            min-height: 42px;
+            padding-inline: 4px;
           }
 
           .business-editorial-result {
-            padding: 20px 16px;
+            padding: 18px 16px;
           }
 
           .business-editorial-result .due-date {
-            font-size: clamp(2.35rem, 11vw, 3.2rem);
+            font-family: inherit;
+            font-weight: 850;
+            font-size: clamp(2.25rem, 10vw, 3rem);
+            line-height: 0.98;
+          }
+
+          .business-editorial-result .business-citation-explanation {
+            margin-top: 12px;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            text-align: left;
           }
 
           .business-editorial-content {
             grid-template-columns: 1fr;
+            gap: 0;
+          }
+
+          .business-content-heading {
+            padding-bottom: 4px;
           }
 
           .business-content-heading h2 {
-            font-size: 1.85rem;
+            font-size: 1.72rem;
           }
 
           .business-editorial-content article {
-            padding: 18px;
-            border-radius: 17px;
+            padding: 17px 2px;
+            border: 0;
+            border-top: 1px solid rgba(17, 44, 77, 0.09);
+            border-radius: 0;
+            background: transparent;
+          }
+
+          .business-editorial-content article h2 {
+            margin-bottom: 7px;
+            font-size: 1.05rem;
+          }
+
+          .business-editorial-content article p,
+          .business-editorial-content article li,
+          .business-editorial-content article dd {
+            font-size: 0.92rem;
+            line-height: 1.48;
           }
         }
       `}</style>
