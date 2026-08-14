@@ -10560,9 +10560,49 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell business-page business-editorial-page">
-      <section className="business-editorial-header" aria-label="WhenIsDue navigation">
-        <IdentityRow onNavigate={onNavigate} showHomeLink />
-      </section>
+      <header className="business-editorial-header" aria-label="WhenIsDue navigation">
+        <a
+          className="business-editorial-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+          aria-label="WhenIsDue home"
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+        <nav className="business-editorial-nav" aria-label="Main navigation">
+          <a
+            className="business-editorial-home-link"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            Home
+          </a>
+          <a
+            href="/calculators"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/calculators')
+            }}
+          >
+            Calculators
+          </a>
+          <a
+            href="/workspace"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/workspace')
+            }}
+          >
+            VA Workspace
+          </a>
+        </nav>
+      </header>
 
       <section className="business-editorial-hero" aria-labelledby="business-days-title">
         <div className="business-editorial-image-wrap">
@@ -10972,12 +11012,46 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
         .business-editorial-header {
           width: min(100% - 32px, 1130px);
-          margin: 0 auto;
-          padding-top: 8px;
+          min-height: 70px;
+          margin: 0 auto 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          border-bottom: 1px solid rgba(17, 44, 77, 0.12);
         }
 
-        .business-editorial-header .friendly-site-header {
-          margin-bottom: 14px;
+        .business-editorial-brand {
+          display: inline-flex;
+          align-items: center;
+          flex: 0 0 auto;
+          text-decoration: none;
+        }
+
+        .business-editorial-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .business-editorial-nav {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 18px;
+          min-width: 0;
+        }
+
+        .business-editorial-nav a {
+          color: #5e728a;
+          font-size: 0.88rem;
+          font-weight: 800;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .business-editorial-nav a:hover {
+          color: var(--business-deep);
         }
 
         .business-editorial-hero {
@@ -11396,11 +11470,44 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-editorial-header {
-            padding-top: 4px;
+            min-height: 66px;
+            margin-bottom: 10px;
+            gap: 12px;
           }
 
-          .business-editorial-header .friendly-site-header {
-            margin-bottom: 10px;
+          .business-editorial-brand img {
+            width: 158px;
+          }
+
+          .business-editorial-nav {
+            gap: 12px;
+          }
+
+          .business-editorial-nav a {
+            font-size: 0.82rem;
+          }
+
+          .business-editorial-home-link {
+            display: none;
+          }
+
+          @media (max-width: 430px) {
+            .business-editorial-header {
+              min-height: 60px;
+              gap: 8px;
+            }
+
+            .business-editorial-brand img {
+              width: 140px;
+            }
+
+            .business-editorial-nav {
+              gap: 9px;
+            }
+
+            .business-editorial-nav a {
+              font-size: 0.76rem;
+            }
           }
 
           .business-editorial-image-wrap {
