@@ -10559,31 +10559,61 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   }
 
   return (
-    <main className="page-shell business-page">
-      <section className="intro business-intro business-answer-intro" aria-labelledby="business-days-title">
+    <main className="page-shell business-page business-editorial-page">
+      <section className="business-editorial-header" aria-label="WhenIsDue navigation">
         <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <h1 id="business-days-title">Business days from today</h1>
-        <p className="business-answer-context">
-          Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
-          <span aria-hidden="true"> · </span>
-          {getLocalTimeZoneName()}
-        </p>
       </section>
 
-      <section className="business-today-answers business-bam-answers" aria-label="Business day answers from today">
+      <section className="business-editorial-hero" aria-labelledby="business-days-title">
+        <div className="business-editorial-image-wrap">
+          <img
+            className="business-editorial-image"
+            src="/business-days-light-gap.webp"
+            alt="Repeating bands of daylight interrupted by one wider shadow interval in a quiet architectural interior"
+          />
+          <div className="business-editorial-answer">
+            <p className="business-editorial-eyebrow">Business days calculator</p>
+            <h1 id="business-days-title">Business days from today</h1>
+            <div className="business-editorial-primary-answer">
+              <span>3 business days</span>
+              <strong>{formatPlainDate(calculateBusinessDaysWithCalendar(today, 3, holidayCalendar).date)}</strong>
+              <small>{formatWeekday(calculateBusinessDaysWithCalendar(today, 3, holidayCalendar).date)}</small>
+            </div>
+            <p className="business-editorial-context">
+              From {formatWeekday(today)}, {formatPlainDate(today)}
+              <span aria-hidden="true"> · </span>
+              {getLocalTimeZoneName()}
+            </p>
+            <p className="business-editorial-rule">
+              {holidayCalendar === 'none'
+                ? 'Weekends skipped. Public holidays still count as weekdays.'
+                : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="business-today-answers business-bam-answers" aria-label="Common business day answers from today">
+        <div className="business-quick-heading">
+          <div>
+            <p className="business-section-eyebrow">Quick answers</p>
+            <h2>Common business-day counts</h2>
+          </div>
+          <button
+            className="business-jump-button"
+            type="button"
+            onClick={() => document.getElementById('custom-business-days')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            Different date or number ↓
+          </button>
+        </div>
+
         <div className="business-bam-list">
           {[3, 5, 7, 10].map((dayCount) => {
-            const answerDate = calculateBusinessDaysWithCalendar(
-              today,
-              dayCount,
-              holidayCalendar,
-            ).date
-
+            const answerDate = calculateBusinessDaysWithCalendar(today, dayCount, holidayCalendar).date
             const exactPath = `/${dayCount}-business-days-from-today`
             const calendarQuery = holidayCalendarQueryValue(holidayCalendar)
-            const exactHref = calendarQuery
-              ? `${exactPath}?calendar=${calendarQuery}`
-              : exactPath
+            const exactHref = calendarQuery ? `${exactPath}?calendar=${calendarQuery}` : exactPath
 
             return (
               <a
@@ -10603,67 +10633,70 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                 <span>{dayCount} business days</span>
                 <strong>{formatPlainDate(answerDate)}</strong>
                 <small>{formatWeekday(answerDate)}</small>
+                <b aria-hidden="true">→</b>
               </a>
             )
           })}
         </div>
-        <p className="business-bam-rule">
-          {holidayCalendar === 'none'
-            ? 'Weekends skipped. Public holidays still count as weekdays.'
-            : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
-        </p>
 
-        <HolidayCalendarSelect
-          value={holidayCalendar}
-          onChange={(nextCalendar) => {
-            setHolidayCalendar(nextCalendar)
-            trackWhenIsDueEvent('holiday_calendar_changed', {
-              context: 'business_days',
-              value: nextCalendar,
-            })
-          }}
-          compact
-        />
-
-        <nav className="business-exact-links" aria-label="More business days from today answers">
-          <span>More exact answers</span>
+        <div className="business-counting-settings">
           <div>
-            {[4, 8, 20, 30].map((dayCount) => {
-              const path = `/${dayCount}-business-days-from-today`
-              const calendarQuery = holidayCalendarQueryValue(holidayCalendar)
-              const href = calendarQuery ? `${path}?calendar=${calendarQuery}` : path
-
-              return (
-                <a
-                  href={href}
-                  key={dayCount}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    trackWhenIsDueEvent('related_bam_click', {
-                      context: 'business_days_calculator_more',
-                      day_count: dayCount,
-                    })
-                    onNavigate(href)
-                  }}
-                >
-                  {dayCount} business days
-                </a>
-              )
-            })}
+            <p className="business-bam-rule">
+              {holidayCalendar === 'none'
+                ? 'Weekends skipped. Public holidays still count as weekdays.'
+                : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
+            </p>
+            <HolidayCalendarSelect
+              value={holidayCalendar}
+              onChange={(nextCalendar) => {
+                setHolidayCalendar(nextCalendar)
+                trackWhenIsDueEvent('holiday_calendar_changed', {
+                  context: 'business_days',
+                  value: nextCalendar,
+                })
+              }}
+              compact
+            />
           </div>
-        </nav>
+
+          <nav className="business-exact-links" aria-label="More business days from today answers">
+            <span>More exact answers</span>
+            <div>
+              {[4, 8, 20, 30].map((dayCount) => {
+                const path = `/${dayCount}-business-days-from-today`
+                const calendarQuery = holidayCalendarQueryValue(holidayCalendar)
+                const href = calendarQuery ? `${path}?calendar=${calendarQuery}` : path
+
+                return (
+                  <a
+                    href={href}
+                    key={dayCount}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      trackWhenIsDueEvent('related_bam_click', {
+                        context: 'business_days_calculator_more',
+                        day_count: dayCount,
+                      })
+                      onNavigate(href)
+                    }}
+                  >
+                    {dayCount} business days
+                  </a>
+                )
+              })}
+            </div>
+          </nav>
+        </div>
       </section>
 
-      <section className="business-workspace" aria-label="Custom business days calculator">
+      <section className="business-workspace business-editorial-workspace" id="custom-business-days" aria-label="Custom business days calculator">
         <div className="business-custom-heading">
-          <h2>Different date or number?</h2>
+          <p className="business-section-eyebrow">Your calculation</p>
+          <h2>Use a different date or number</h2>
+          <p>Enter a start date and the number of business days to add.</p>
         </div>
-        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
-          <div className="card-heading">
-            <h2>Add business days</h2>
-            <p>Enter a start date and a whole number of business days.</p>
-          </div>
 
+        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
           <label className="field start-field">
             <span>Start date</span>
             <input
@@ -10712,7 +10745,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
         </form>
 
-        <section className={`result-panel business-result ${daysRemaining < 0 ? 'is-overdue' : ''}`}>
+        <section className={`result-panel business-result business-editorial-result ${daysRemaining < 0 ? 'is-overdue' : ''}`} aria-live="polite">
           <p className="result-label">Due date</p>
           {dueDate && parsedBusinessDays !== null ? (
             <>
@@ -10742,30 +10775,30 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                   </p>
 
                   <CalculationReceipt
-                  analyticsContext="business_days"
-                  rows={[
-                    {
-                      label: 'Start date',
-                      value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}`,
-                    },
-                    {
-                      label: 'Business days added',
-                      value: String(parsedBusinessDays),
-                    },
-                    {
-                      label: 'Holiday calendar',
-                      value: getHolidayCalendarOption(holidayCalendar).label,
-                    },
-                    {
-                      label: 'Skipped holidays',
-                      value: formatSkippedHolidaySummary(businessCalculation.skippedHolidays),
-                    },
-                    {
-                      label: 'Result',
-                      value: `${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}`,
-                    },
-                  ]}
-                />
+                    analyticsContext="business_days"
+                    rows={[
+                      {
+                        label: 'Start date',
+                        value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}`,
+                      },
+                      {
+                        label: 'Business days added',
+                        value: String(parsedBusinessDays),
+                      },
+                      {
+                        label: 'Holiday calendar',
+                        value: getHolidayCalendarOption(holidayCalendar).label,
+                      },
+                      {
+                        label: 'Skipped holidays',
+                        value: formatSkippedHolidaySummary(businessCalculation.skippedHolidays),
+                      },
+                      {
+                        label: 'Result',
+                        value: `${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}`,
+                      },
+                    ]}
+                  />
                 </>
               ) : null}
 
@@ -10793,7 +10826,12 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         </section>
       </section>
 
-      <section className="business-content" aria-label="Business days help">
+      <section className="business-content business-editorial-content" aria-label="Business days help">
+        <div className="business-content-heading">
+          <p className="business-section-eyebrow">Business-day rules</p>
+          <h2>What counts — and what gets skipped</h2>
+        </div>
+
         <article>
           <h2>How long is 3 business days?</h2>
           <p>
@@ -10896,8 +10934,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             >
               weekends and business days guide
             </a>{' '}
-            for examples and the difference between weekends and public
-            holidays.
+            for examples and the difference between weekends and public holidays.
           </p>
         </article>
 
@@ -10914,8 +10951,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             >
               public holidays and business days guide
             </a>{' '}
-            for a worked example showing how one holiday can change the due
-            date.
+            for a worked example showing how one holiday can change the due date.
           </p>
         </article>
       </section>
@@ -10926,175 +10962,256 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .business-answer-intro {
-          padding-bottom: 10px;
+        .business-editorial-page {
+          --business-navy: #17385f;
+          --business-deep: #112c4d;
+          --business-green: #2d7c67;
+          --business-ivory: #fbf6ec;
+          --business-blue-wash: #edf4f7;
         }
 
-        .business-answer-intro .friendly-site-header {
-          margin-bottom: 8px;
+        .business-editorial-header {
+          width: min(100% - 32px, 1130px);
+          margin: 0 auto;
+          padding-top: 8px;
         }
 
-        .business-answer-intro h1 {
-          margin-bottom: 4px;
-          font-size: clamp(1.85rem, 3.4vw, 2.8rem);
+        .business-editorial-header .friendly-site-header {
+          margin-bottom: 14px;
         }
 
-        .business-answer-context {
+        .business-editorial-hero {
+          width: min(100% - 32px, 1130px);
+          margin: 0 auto 22px;
+        }
+
+        .business-editorial-image-wrap {
+          position: relative;
+          min-height: 470px;
+          overflow: hidden;
+          border: 1px solid rgba(17, 44, 77, 0.13);
+          border-radius: 30px;
+          background: #d9c6a8;
+          box-shadow: 0 24px 60px rgba(29, 45, 62, 0.09);
+        }
+
+        .business-editorial-image {
+          width: 100%;
+          height: 100%;
+          min-height: 470px;
+          position: absolute;
+          inset: 0;
+          object-fit: cover;
+          object-position: center;
+          display: block;
+        }
+
+        .business-editorial-image-wrap::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: linear-gradient(90deg, rgba(13, 34, 59, 0.16) 0%, rgba(13, 34, 59, 0.03) 43%, transparent 72%);
+        }
+
+        .business-editorial-answer {
+          position: absolute;
+          z-index: 2;
+          left: clamp(22px, 4vw, 52px);
+          top: 50%;
+          width: min(42%, 430px);
+          transform: translateY(-50%);
+          padding: clamp(22px, 3vw, 34px);
+          border: 1px solid rgba(255, 255, 255, 0.46);
+          border-radius: 24px;
+          background: rgba(251, 246, 236, 0.9);
+          box-shadow: 0 20px 50px rgba(18, 37, 58, 0.17);
+          backdrop-filter: blur(10px);
+        }
+
+        .business-editorial-eyebrow,
+        .business-section-eyebrow {
           margin: 0;
-          color: #5a6f89;
-          font-size: 0.9rem;
-          line-height: 1.35;
+          color: var(--business-green);
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .business-editorial-answer h1 {
+          margin: 8px 0 20px;
+          color: var(--business-deep);
+          font-size: clamp(2.2rem, 4vw, 4rem);
+          line-height: 0.98;
+          letter-spacing: -0.045em;
+        }
+
+        .business-editorial-primary-answer {
+          padding-top: 18px;
+          border-top: 1px solid rgba(17, 44, 77, 0.12);
+        }
+
+        .business-editorial-primary-answer span {
+          display: block;
+          color: #667a8e;
+          font-size: 0.92rem;
+          font-weight: 800;
+        }
+
+        .business-editorial-primary-answer strong {
+          display: block;
+          margin-top: 4px;
+          color: var(--business-deep);
+          font-size: clamp(2rem, 3.3vw, 3.25rem);
+          line-height: 1;
+          letter-spacing: -0.035em;
+        }
+
+        .business-editorial-primary-answer small {
+          display: block;
+          margin-top: 6px;
+          color: #5d738b;
+          font-size: 1.05rem;
+          font-weight: 750;
+        }
+
+        .business-editorial-context,
+        .business-editorial-rule {
+          margin: 12px 0 0;
+          color: #63768a;
+          font-size: 0.82rem;
+          line-height: 1.45;
+        }
+
+        .business-editorial-rule {
+          margin-top: 4px;
         }
 
         .business-today-answers {
           width: min(100% - 32px, 1130px);
-          margin: 0 auto 18px;
-          padding: 0;
-          border: 0;
-          background: transparent;
+          margin: 0 auto 22px;
+          padding: clamp(22px, 3vw, 32px);
+          border: 1px solid rgba(17, 44, 77, 0.09);
+          border-radius: 26px;
+          background: var(--business-blue-wash);
+        }
+
+        .business-quick-heading {
+          display: flex;
+          align-items: end;
+          justify-content: space-between;
+          gap: 20px;
+          margin-bottom: 18px;
+        }
+
+        .business-quick-heading h2,
+        .business-custom-heading h2,
+        .business-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--business-deep);
+          font-size: clamp(1.75rem, 3vw, 2.7rem);
+          line-height: 1.03;
+          letter-spacing: -0.035em;
+        }
+
+        .business-jump-button {
+          min-height: 46px;
+          padding: 9px 15px;
+          border: 1px solid rgba(17, 44, 77, 0.12);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.8);
+          color: #526d87;
+          font: inherit;
+          font-size: 0.86rem;
+          font-weight: 850;
+          cursor: pointer;
         }
 
         .business-bam-list {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 12px;
+          gap: 10px;
         }
 
         .business-bam-row {
+          position: relative;
+          min-height: 132px;
+          padding: 16px 18px;
+          border: 1px solid rgba(17, 44, 77, 0.1);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.9);
           color: inherit;
           text-decoration: none;
-          transition: border-color 120ms ease, transform 120ms ease;
-          min-height: 138px;
-          padding: 14px 18px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 10px;
-          background: #fff;
           display: flex;
           flex-direction: column;
           justify-content: center;
+          transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
         }
 
         .business-bam-row span {
+          color: #61778d;
           font-size: 0.82rem;
-          font-weight: 800;
-          color: #55708f;
+          font-weight: 850;
         }
 
         .business-bam-row strong {
-          margin-top: 6px;
-          font-size: clamp(1.7rem, 2.8vw, 2.65rem);
-          line-height: 1.02;
-          color: #10213f;
+          margin-top: 7px;
+          color: var(--business-deep);
+          font-size: clamp(1.45rem, 2.35vw, 2.25rem);
+          line-height: 1.03;
+          letter-spacing: -0.025em;
         }
 
         .business-bam-row small {
-          margin-top: 4px;
-          font-size: 0.9rem;
-          color: #60738d;
+          margin-top: 5px;
+          color: #73869a;
+          font-size: 0.84rem;
         }
 
-        .business-bam-rule {
-          margin: 8px 2px 0;
-          font-size: 0.78rem;
-          color: #718197;
-        }
-
-        .result-save-details {
-          margin-top: 16px;
-          border-top: 1px solid rgba(19, 38, 70, 0.1);
-          padding-top: 12px;
-        }
-
-        .result-save-details summary {
-          width: fit-content;
-          cursor: pointer;
-          font-weight: 700;
-          color: #4f6682;
-        }
-
-        .business-today-heading h2,
-        .business-custom-heading h2 {
-          margin: 4px 0 6px;
-        }
-
-        .business-today-heading p,
-        .business-custom-heading p,
-        .business-today-note {
-          margin: 0;
-        }
-
-        .business-today-date {
-          margin: 8px 0 3px !important;
-          font-size: 1rem;
-          color: #10213f;
-        }
-
-        .business-today-timezone {
-          margin: 0 0 8px !important;
-          font-size: 0.92rem;
-          color: #60738d;
-        }
-
-        .business-today-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 12px;
-          margin-top: 16px;
-        }
-
-        .business-today-card {
-          min-height: 124px;
-          padding: 16px;
-          border: 1px solid rgba(19, 38, 70, 0.12);
-          border-radius: 12px;
-          background: #fff;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-
-        .business-today-card span {
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: #55708f;
-        }
-
-        .business-today-card strong {
-          margin-top: 8px;
-          font-size: clamp(1.05rem, 1.7vw, 1.35rem);
-          line-height: 1.2;
-          color: #10213f;
-        }
-
-        .business-today-card small {
-          margin-top: 4px;
-          color: #60738d;
-        }
-
-        .business-today-note {
-          margin-top: 14px;
-          color: #516783;
+        .business-bam-row b {
+          position: absolute;
+          right: 16px;
+          bottom: 15px;
+          color: var(--business-green);
+          font-size: 1.2rem;
         }
 
         .business-bam-row:hover,
         .business-bam-row:focus-visible {
-          border-color: rgba(23, 58, 99, 0.22);
-          transform: translateY(-1px);
+          transform: translateY(-2px);
+          border-color: rgba(45, 124, 103, 0.28);
+          box-shadow: 0 10px 26px rgba(20, 48, 75, 0.07);
           outline: none;
         }
 
+        .business-counting-settings {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 24px;
+          align-items: end;
+          margin-top: 18px;
+          padding-top: 17px;
+          border-top: 1px solid rgba(17, 44, 77, 0.08);
+        }
+
+        .business-bam-rule {
+          margin: 0 0 9px;
+          color: #677b8f;
+          font-size: 0.8rem;
+        }
+
         .business-exact-links {
-          width: 100%;
-          margin-top: 14px;
-          padding-top: 12px;
-          border-top: 1px solid rgba(19, 38, 70, 0.08);
+          margin: 0;
+          padding: 0;
+          border: 0;
         }
 
         .business-exact-links > span {
           display: block;
-          margin-bottom: 7px;
-          color: #6d8196;
-          font-size: 0.82rem;
+          margin-bottom: 8px;
+          color: #667b90;
+          font-size: 0.8rem;
           font-weight: 850;
         }
 
@@ -11108,23 +11225,26 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           min-height: 40px;
           display: inline-flex;
           align-items: center;
-          padding: 7px 10px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
+          padding: 7px 11px;
+          border: 1px solid rgba(17, 44, 77, 0.1);
           border-radius: 999px;
-          background: #fff;
-          color: #4e6985;
-          font-size: 0.82rem;
+          background: rgba(255, 255, 255, 0.86);
+          color: #52708b;
+          font-size: 0.8rem;
           font-weight: 800;
           text-decoration: none;
         }
 
-        .business-citation-explanation {
-          max-width: 680px;
-          margin: 14px auto 0;
-          color: #536b85;
-          font-size: 1rem;
-          line-height: 1.55;
-          text-align: center;
+        .business-editorial-workspace {
+          width: min(100% - 32px, 1130px);
+          margin: 0 auto 24px;
+          padding: clamp(22px, 3vw, 34px);
+          display: grid;
+          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+          gap: 14px;
+          border: 1px solid rgba(17, 44, 77, 0.09);
+          border-radius: 28px;
+          background: #fffdf8;
         }
 
         .business-custom-heading {
@@ -11132,70 +11252,321 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           margin-bottom: 4px;
         }
 
+        .business-custom-heading > p:last-child {
+          margin: 8px 0 4px;
+          color: #6b7e91;
+        }
+
+        .business-editorial-workspace .business-calculator,
+        .business-editorial-workspace .business-editorial-result {
+          margin: 0;
+          border-radius: 22px;
+        }
+
+        .business-editorial-workspace .business-calculator {
+          align-self: start;
+          padding: clamp(18px, 2.3vw, 28px);
+          border: 1px solid rgba(17, 44, 77, 0.1);
+          background: #f7f2e9;
+        }
+
+        .business-editorial-workspace .business-calculator .field > span:first-child {
+          color: #566f88;
+          font-weight: 850;
+        }
+
+        .business-editorial-workspace .business-calculator input[type='date'],
+        .business-editorial-workspace .business-calculator input[type='number'],
+        .business-editorial-workspace .business-calculator input[type='text'] {
+          min-height: 50px;
+          border-radius: 12px;
+          background: #fff;
+        }
+
         .business-page .quick-picks button {
           min-width: 44px;
           min-height: 44px;
         }
 
+        .business-editorial-result {
+          padding: clamp(22px, 3vw, 34px);
+          border: 1px solid rgba(17, 44, 77, 0.12);
+          background: var(--business-deep);
+          color: #f7f2e9;
+        }
+
+        .business-editorial-result .result-label,
+        .business-editorial-result .due-date,
+        .business-editorial-result .result-meta,
+        .business-editorial-result .result-note,
+        .business-editorial-result .business-citation-explanation {
+          color: inherit;
+        }
+
+        .business-editorial-result .result-label {
+          color: #9ec7b7;
+          font-weight: 900;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .business-editorial-result .due-date {
+          margin-top: 8px;
+          font-size: clamp(2.6rem, 5vw, 4.7rem);
+          line-height: 0.96;
+          letter-spacing: -0.045em;
+        }
+
+        .business-editorial-result .result-meta-stack {
+          color: #d7e1e8;
+        }
+
+        .business-editorial-result .result-note {
+          color: #bac9d5;
+        }
+
+        .business-editorial-result .business-citation-explanation {
+          max-width: 680px;
+          margin: 14px auto 0;
+          color: #d3dee7;
+          font-size: 0.96rem;
+          line-height: 1.52;
+          text-align: center;
+        }
+
+        .business-editorial-result .result-save-details {
+          margin-top: 16px;
+          padding-top: 12px;
+          border-top: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .business-editorial-result .result-save-details summary {
+          width: fit-content;
+          cursor: pointer;
+          color: #d9e4eb;
+          font-weight: 800;
+        }
+
+        .business-editorial-content {
+          width: min(100% - 32px, 1130px);
+          margin: 0 auto 26px;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .business-content-heading {
+          grid-column: 1 / -1;
+          padding: 8px 0 10px;
+        }
+
+        .business-editorial-content article {
+          padding: 22px;
+          border: 1px solid rgba(17, 44, 77, 0.09);
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.66);
+        }
+
+        .business-editorial-content article h2 {
+          margin-top: 0;
+          color: var(--business-deep);
+          font-size: 1.18rem;
+          line-height: 1.15;
+        }
+
+        .business-editorial-content article p,
+        .business-editorial-content article li,
+        .business-editorial-content article dd {
+          color: #61758a;
+          line-height: 1.58;
+        }
+
+        .business-editorial-content article a {
+          color: #286d5d;
+          font-weight: 800;
+        }
+
         @media (max-width: 760px) {
-          .business-answer-intro {
-            padding-top: 10px;
+          .business-editorial-header,
+          .business-editorial-hero,
+          .business-today-answers,
+          .business-editorial-workspace,
+          .business-editorial-content {
+            width: min(100% - 24px, 1130px);
           }
 
-          .business-answer-intro .friendly-top-nav {
-            gap: 10px;
+          .business-editorial-header {
+            padding-top: 4px;
           }
 
-          .business-answer-intro h1 {
-            font-size: 1.85rem;
+          .business-editorial-header .friendly-site-header {
+            margin-bottom: 10px;
           }
 
-          .business-answer-context {
-            font-size: 0.82rem;
+          .business-editorial-image-wrap {
+            min-height: 430px;
+            border-radius: 24px;
+          }
+
+          .business-editorial-image {
+            min-height: 430px;
+            object-position: 54% center;
+          }
+
+          .business-editorial-image-wrap::after {
+            background: linear-gradient(180deg, transparent 0%, rgba(14, 34, 58, 0.08) 40%, rgba(14, 34, 58, 0.14) 100%);
+          }
+
+          .business-editorial-answer {
+            left: 14px;
+            right: 14px;
+            top: auto;
+            bottom: 14px;
+            width: auto;
+            transform: none;
+            padding: 18px;
+            border-radius: 20px;
+            background: rgba(251, 246, 236, 0.91);
+          }
+
+          .business-editorial-answer h1 {
+            margin: 6px 0 12px;
+            font-size: clamp(2rem, 9vw, 2.7rem);
+          }
+
+          .business-editorial-primary-answer {
+            padding-top: 12px;
+          }
+
+          .business-editorial-primary-answer strong {
+            font-size: clamp(2rem, 9.2vw, 2.8rem);
+          }
+
+          .business-editorial-context,
+          .business-editorial-rule {
+            font-size: 0.75rem;
           }
 
           .business-today-answers {
-            width: min(100% - 24px, 1130px);
+            padding: 18px 16px;
+            border-radius: 22px;
+          }
+
+          .business-quick-heading {
+            align-items: start;
+            gap: 10px;
+          }
+
+          .business-quick-heading h2 {
+            font-size: 1.7rem;
+          }
+
+          .business-jump-button {
+            max-width: 145px;
+            min-height: 42px;
+            padding: 7px 10px;
+            font-size: 0.78rem;
           }
 
           .business-bam-list {
             grid-template-columns: 1fr;
-            gap: 4px;
+            gap: 5px;
           }
 
           .business-bam-row {
-            min-height: 52px;
-            padding: 7px 10px;
+            min-height: 58px;
+            padding: 8px 44px 8px 12px;
             display: grid;
             grid-template-columns: 1fr auto;
             grid-template-areas:
-              "label date"
-              "label weekday";
+              'label date'
+              'label weekday';
             align-items: center;
+            border-radius: 14px;
           }
 
           .business-bam-row span {
             grid-area: label;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
           }
 
           .business-bam-row strong {
             grid-area: date;
             margin: 0;
             text-align: right;
-            font-size: 1.18rem;
+            font-size: 1.14rem;
           }
 
           .business-bam-row small {
             grid-area: weekday;
             margin: 0;
             text-align: right;
+            font-size: 0.74rem;
+          }
+
+          .business-bam-row b {
+            right: 13px;
+            bottom: 19px;
+          }
+
+          .business-counting-settings {
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-top: 14px;
+            padding-top: 14px;
+          }
+
+          .business-exact-links > div {
+            gap: 6px;
+          }
+
+          .business-exact-links a {
+            min-height: 38px;
             font-size: 0.76rem;
           }
 
-          .business-bam-rule {
-            margin-top: 6px;
-            font-size: 0.72rem;
+          .business-editorial-workspace {
+            grid-template-columns: 1fr;
+            padding: 18px 16px;
+            border-radius: 22px;
+          }
+
+          .business-custom-heading h2 {
+            font-size: 1.8rem;
+          }
+
+          .business-custom-heading > p:last-child {
+            font-size: 0.88rem;
+          }
+
+          .business-editorial-workspace .business-calculator,
+          .business-editorial-workspace .business-editorial-result {
+            border-radius: 18px;
+          }
+
+          .business-editorial-workspace .business-calculator {
+            padding: 16px;
+          }
+
+          .business-editorial-result {
+            padding: 20px 16px;
+          }
+
+          .business-editorial-result .due-date {
+            font-size: clamp(2.35rem, 11vw, 3.2rem);
+          }
+
+          .business-editorial-content {
+            grid-template-columns: 1fr;
+          }
+
+          .business-content-heading h2 {
+            font-size: 1.85rem;
+          }
+
+          .business-editorial-content article {
+            padding: 18px;
+            border-radius: 17px;
           }
         }
       `}</style>
