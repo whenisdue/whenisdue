@@ -13490,195 +13490,244 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
   }
 
   return (
-    <main className="page-shell free-trial-page">
-      <section className="intro free-trial-bam-intro" aria-labelledby="free-trial-title">
-        <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <h1 id="free-trial-title">When does my free trial end?</h1>
-        <p className="subtitle">Enter the start date and trial length. The answer updates immediately.</p>
+    <main className="page-shell free-trial-page trial-editorial-page">
+      <header className="trial-editorial-header" aria-label="WhenIsDue navigation">
+        <a
+          className="trial-editorial-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+          aria-label="WhenIsDue home"
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+
+        <nav className="trial-editorial-nav" aria-label="Main navigation">
+          <a
+            className="trial-editorial-home-link"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            Home
+          </a>
+          <a
+            href="/calculators"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/calculators')
+            }}
+          >
+            Calculators
+          </a>
+          <a
+            href="/workspace"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/workspace')
+            }}
+          >
+            VA Workspace
+          </a>
+        </nav>
+      </header>
+
+      <section className="trial-editorial-hero" aria-labelledby="free-trial-title">
+        <div className="trial-editorial-image-wrap">
+          <img
+            className="trial-editorial-image"
+            src="/homepage-editorial.webp"
+            alt="Warm editorial still life with papers and small packages arranged in a quiet architectural setting"
+          />
+
+          <div className="trial-editorial-answer">
+            <p className="trial-editorial-eyebrow">Free trial calculator</p>
+            <h1 id="free-trial-title">When does my free trial end?</h1>
+
+            {trialEndDate && cancelByDate && parsedTrialLength !== null ? (
+              <>
+                <div className="trial-editorial-primary-answer">
+                  <span>{parsedTrialLength}-day trial</span>
+                  <strong>{formatPlainDate(trialEndDate)}</strong>
+                  <small>{formatWeekday(trialEndDate)}</small>
+                </div>
+
+                <div className="trial-editorial-reminder">
+                  <span>Suggested reminder</span>
+                  <b>{formatPlainDate(cancelByDate)}</b>
+                </div>
+              </>
+            ) : (
+              <p className="trial-editorial-error">{validationMessage ?? 'Enter a valid trial date.'}</p>
+            )}
+          </div>
+        </div>
       </section>
 
-      <section className="business-workspace" aria-label="Free trial calculator">
-        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
-          <label className="field start-field">
-            <span>Trial start date</span>
-            <input
-              type="date"
-              min="1900-01-01"
-              max="2100-12-31"
-              value={startDate}
-              onChange={(event) => {
-                setStartDate(event.target.value)
-                trackWhenIsDueEvent('date_changed', { context: 'free_trial', value: event.target.value })
-              }}
-            />
-          </label>
+      <section className="trial-editorial-workspace" aria-label="Free trial calculator">
+        <div className="trial-editorial-heading">
+          <p className="trial-section-eyebrow">Your calculation</p>
+          <h2>Set the trial start date and length</h2>
+          <p>The answer updates immediately.</p>
+        </div>
 
-          <label className="field value-field">
-            <span>Trial length in days</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="1"
-              max={getAmountLimit('trial')}
-              value={trialLength}
-              onChange={(event) => {
-                setTrialLength(event.target.value)
-                trackWhenIsDueEvent('number_changed', { context: 'free_trial', value: event.target.value })
-              }}
-            />
-            <span className="quick-picks" aria-label="Quick trial length values">
+        <div className="trial-editorial-calculation-grid">
+          <form className="trial-editorial-form" onSubmit={(event) => event.preventDefault()}>
+            <label className="field">
+              <span>Trial start date</span>
+              <input
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={startDate}
+                onChange={(event) => {
+                  setStartDate(event.target.value)
+                  trackWhenIsDueEvent('date_changed', { context: 'free_trial', value: event.target.value })
+                }}
+              />
+            </label>
+
+            <label className="field">
+              <span>Trial length in days</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max={getAmountLimit('trial')}
+                value={trialLength}
+                onChange={(event) => {
+                  setTrialLength(event.target.value)
+                  trackWhenIsDueEvent('number_changed', { context: 'free_trial', value: event.target.value })
+                }}
+              />
+            </label>
+
+            <div className="trial-editorial-quick-picks" aria-label="Quick trial length values">
               {trialLengthQuickPicks.map((quickPick) => (
                 <button
-                  className={trialLength === String(quickPick) ? 'is-selected' : ''}
+                  className={trialLength === String(quickPick) ? 'is-active' : ''}
                   key={quickPick}
                   type="button"
+                  aria-pressed={trialLength === String(quickPick)}
                   onClick={() => {
                     setTrialLength(String(quickPick))
                     trackWhenIsDueEvent('quick_pick', { context: 'free_trial', value: quickPick })
                   }}
                 >
-                  {quickPick}
+                  {quickPick} days
                 </button>
               ))}
-            </span>
-          </label>
+            </div>
 
-          {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
-        </form>
+            {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
+          </form>
 
-        <section className="result-panel free-trial-result">
-          <p className="result-label">Trial dates</p>
-          {trialEndDate && cancelByDate && parsedTrialLength !== null ? (
-            <>
-              <p className="due-date">{formatPlainDate(trialEndDate)}</p>
-              <div className="result-meta result-meta-stack">
-                <span>Trial ends on {formatPlainDate(trialEndDate)}</span>
-                <span>Suggested reminder: {formatPlainDate(cancelByDate)}</span>
-                <span className="status-badge status-comfortable">
-                  {calendarDaysFromStart} {calendarDaysFromStart === 1 ? 'calendar day' : 'calendar days'} from the start date
-                </span>
-              </div>
-              <p className="result-note">Always check the service terms for exact renewal timing.</p>
-              <p className="trial-citation-explanation">
-                {formatFreeTrialExplanation(
-                  parsedStartDate!,
-                  parsedTrialLength!,
-                  trialEndDate,
-                )}
-              </p>
+          <section className="trial-editorial-result" aria-live="polite">
+            <p className="trial-result-kicker">Trial ends</p>
 
-              <CalculationReceipt
-                analyticsContext="free_trial"
-                rows={[
-                  { label: 'Trial starts', value: `${formatWeekday(parsedStartDate!)}, ${formatPlainDate(parsedStartDate!)}` },
-                  { label: 'Trial length', value: `${parsedTrialLength} ${parsedTrialLength === 1 ? 'day' : 'days'}` },
-                  { label: 'Counting rule', value: 'Full trial length added to the start date' },
-                  { label: 'Trial ends', value: `${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}` },
-                  { label: 'Suggested reminder', value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}` },
-                ]}
-              />
-              <ResultActions
-                title="Free trial ends"
-                date={trialEndDate}
-                details={`Suggested reminder: ${formatPlainDate(cancelByDate)}`}
-              />
-              <details className="result-save-details">
-                <summary>Save this date</summary>
-                <div className="business-save">
-                  <label className="field title-field">
-                    <span>Title</span>
-                    <input
-                      maxLength={titleMaxLength}
-                      value={title}
-                      onChange={(event) => setTitle(event.target.value)}
-                    />
-                    {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-                  </label>
-                  <button className="primary-button" type="button" disabled={!canSave} onClick={saveTrialDeadline}>
-                    Save to My due dates
-                  </button>
-                  {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+            {trialEndDate && cancelByDate && parsedTrialLength !== null ? (
+              <>
+                <p className="trial-result-date">{formatPlainDate(trialEndDate)}</p>
+                <p className="trial-result-weekday">{formatWeekday(trialEndDate)}</p>
+
+                <div className="trial-result-summary">
+                  <span>{parsedTrialLength}-day trial</span>
+                  <small>{calendarDaysFromStart} calendar days from start date</small>
                 </div>
-              </details>
-            </>
-          ) : (
-            <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
-          )}
-        </section>
+
+                <div className="trial-reminder-card">
+                  <small>Suggested reminder</small>
+                  <strong>{formatPlainDate(cancelByDate)}</strong>
+                </div>
+
+                <p className="trial-result-note">
+                  {formatFreeTrialExplanation(
+                    parsedStartDate!,
+                    parsedTrialLength!,
+                    trialEndDate,
+                  )}
+                </p>
+
+                <CalculationReceipt
+                  analyticsContext="free_trial"
+                  rows={[
+                    { label: 'Trial starts', value: `${formatWeekday(parsedStartDate!)}, ${formatPlainDate(parsedStartDate!)}` },
+                    { label: 'Trial length', value: `${parsedTrialLength} ${parsedTrialLength === 1 ? 'day' : 'days'}` },
+                    { label: 'Counting rule', value: 'Full trial length added to the start date' },
+                    { label: 'Trial ends', value: `${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}` },
+                    { label: 'Suggested reminder', value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}` },
+                  ]}
+                />
+
+                <ResultActions
+                  title="Free trial ends"
+                  date={trialEndDate}
+                  details={`Suggested reminder: ${formatPlainDate(cancelByDate)}`}
+                />
+
+                <details className="trial-save-details">
+                  <summary>More options</summary>
+                  <div className="business-save">
+                    <label className="field title-field">
+                      <span>Title</span>
+                      <input
+                        maxLength={titleMaxLength}
+                        value={title}
+                        onChange={(event) => setTitle(event.target.value)}
+                      />
+                      {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+                    </label>
+                    <button className="primary-button" type="button" disabled={!canSave} onClick={saveTrialDeadline}>
+                      Save to My due dates
+                    </button>
+                    {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+                  </div>
+                </details>
+              </>
+            ) : (
+              <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
+            )}
+          </section>
+        </div>
       </section>
 
-      <style>{`
-        .trial-citation-explanation {
-          max-width: 680px;
-          margin: 14px auto 0;
-          color: #536b85;
-          font-size: 1rem;
-          line-height: 1.55;
-          text-align: center;
-        }
+      <section className="trial-editorial-related" aria-label="Related trial and renewal tools">
+        <div>
+          <p className="trial-section-eyebrow">Next step</p>
+          <h2>What happens after the trial?</h2>
+        </div>
 
-        .free-trial-bam-intro {
-          padding-bottom: 8px;
-        }
+        <nav>
+          <a
+            href="/subscription-renewal-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/subscription-renewal-calculator')
+            }}
+          >
+            Subscription renewal calculator <span aria-hidden="true">→</span>
+          </a>
+          <a
+            href="/return-window-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/return-window-calculator')
+            }}
+          >
+            Return window calculator <span aria-hidden="true">→</span>
+          </a>
+        </nav>
+      </section>
 
-        .free-trial-page .business-workspace {
-          align-items: stretch;
-        }
-
-        .free-trial-page .business-calculator {
-          padding-top: 16px;
-        }
-
-        .free-trial-page .free-trial-result .due-date {
-          font-size: clamp(3.6rem, 8vw, 7rem);
-          line-height: 0.96;
-          letter-spacing: -0.045em;
-        }
-
-        .free-trial-page .free-trial-result {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-
-        .free-trial-page .quick-picks button {
-          min-width: 44px;
-          min-height: 44px;
-        }
-
-        @media (max-width: 760px) {
-          .free-trial-page .business-workspace {
-            gap: 10px;
-          }
-
-          .free-trial-page .business-calculator {
-            padding-top: 12px;
-            padding-bottom: 12px;
-          }
-
-          .free-trial-page .free-trial-result .due-date {
-            font-size: clamp(3.2rem, 15vw, 5rem);
-          }
-        }
-      `}</style>
-
-      <section className="business-content" aria-label="Free trial help">
-        <article>
-          <h2>Already past the free trial?</h2>
-          <p>
-            Use the{' '}
-            <a
-              href="/subscription-renewal-calculator"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/subscription-renewal-calculator')
-              }}
-            >
-              subscription renewal calculator
-            </a>{' '}
-            to find the next billing date and an optional last day to cancel.
-          </p>
-        </article>
+      <section className="trial-editorial-content" aria-label="Free trial help">
+        <div className="trial-content-heading">
+          <p className="trial-section-eyebrow">Trial timing rules</p>
+          <h2>Start, trial, renewal</h2>
+        </div>
 
         <article>
           <h2>How this calculator works</h2>
@@ -13727,29 +13776,654 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
             <dd>Yes. Some services use a particular time or time zone. This calculator works with calendar dates only.</dd>
           </dl>
         </article>
-
-        <article>
-          <h2>Related deadline tool</h2>
-          <p>
-            Bought something with a limited return period? Use the{' '}
-            <a
-              href="/return-window-calculator"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/return-window-calculator')
-              }}
-            >
-              Return Window Calculator
-            </a>
-            .
-          </p>
-        </article>
       </section>
 
-      <SiteFooter onNavigate={onNavigate} />
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Always confirm the renewal date, cancellation deadline, and time zone shown by the service."
+      />
+
+      <style>{`
+        .trial-editorial-page {
+          --trial-deep: #17385f;
+          --trial-navy: #112f53;
+          --trial-green: #2d7c67;
+          --trial-blue: #eef5f8;
+          --trial-warm: #f2ede4;
+        }
+
+        .trial-editorial-header {
+          width: min(100% - 32px, 1130px);
+          min-height: 70px;
+          margin: 0 auto 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+        }
+
+        .trial-editorial-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+        }
+
+        .trial-editorial-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .trial-editorial-nav {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+        }
+
+        .trial-editorial-nav a {
+          color: #5a728d;
+          font-size: 0.9rem;
+          font-weight: 850;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .trial-editorial-hero,
+        .trial-editorial-workspace,
+        .trial-editorial-related,
+        .trial-editorial-content {
+          width: min(100% - 32px, 1130px);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .trial-editorial-image-wrap {
+          position: relative;
+          min-height: 470px;
+          overflow: hidden;
+          border: 1px solid rgba(17, 47, 83, 0.12);
+          border-radius: 28px;
+          background: #d8c8b3;
+        }
+
+        .trial-editorial-image {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+
+        .trial-editorial-image-wrap::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, rgba(11,24,39,0.12), rgba(11,24,39,0.01) 58%, rgba(11,24,39,0));
+          pointer-events: none;
+        }
+
+        .trial-editorial-answer {
+          position: relative;
+          z-index: 1;
+          width: min(475px, calc(100% - 64px));
+          margin: 32px;
+          padding: 32px 34px 28px;
+          border: 1px solid rgba(255,255,255,0.45);
+          border-radius: 24px;
+          background: rgba(250,247,239,0.94);
+          box-shadow: 0 18px 52px rgba(11,24,39,0.15);
+          backdrop-filter: blur(10px);
+        }
+
+        .trial-editorial-eyebrow,
+        .trial-section-eyebrow {
+          margin: 0;
+          color: var(--trial-green);
+          font-size: 0.78rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .trial-editorial-answer h1 {
+          margin: 10px 0 0;
+          color: var(--trial-navy);
+          font-size: clamp(2.65rem, 5vw, 4.5rem);
+          line-height: 0.97;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .trial-editorial-primary-answer {
+          display: grid;
+          gap: 4px;
+          margin-top: 22px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(17,47,83,0.11);
+        }
+
+        .trial-editorial-primary-answer span {
+          color: #687e91;
+          font-size: 0.95rem;
+          font-weight: 850;
+        }
+
+        .trial-editorial-primary-answer strong {
+          color: var(--trial-navy);
+          font-size: clamp(2.15rem, 4vw, 3.4rem);
+          line-height: 1;
+          letter-spacing: -0.045em;
+        }
+
+        .trial-editorial-primary-answer small {
+          color: #5e7489;
+          font-size: 1rem;
+          font-weight: 800;
+        }
+
+        .trial-editorial-reminder {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          margin-top: 18px;
+          padding: 13px 14px;
+          border-radius: 14px;
+          background: rgba(238,245,248,0.92);
+        }
+
+        .trial-editorial-reminder span {
+          color: #667e91;
+          font-size: 0.78rem;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .trial-editorial-reminder b {
+          color: #24435f;
+          font-size: 0.95rem;
+        }
+
+        .trial-editorial-workspace {
+          margin-top: 22px;
+          padding: 30px;
+          border: 1px solid rgba(17,47,83,0.1);
+          border-radius: 26px;
+          background: #fffdf9;
+        }
+
+        .trial-editorial-heading h2,
+        .trial-editorial-related h2,
+        .trial-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--trial-navy);
+          font-size: clamp(2rem, 3.7vw, 3.15rem);
+          line-height: 1;
+          letter-spacing: -0.04em;
+          text-wrap: balance;
+        }
+
+        .trial-editorial-heading > p:last-child {
+          margin: 8px 0 0;
+          color: #6b7f92;
+        }
+
+        .trial-editorial-calculation-grid {
+          display: grid;
+          grid-template-columns: minmax(290px, 0.72fr) minmax(0, 1.28fr);
+          gap: 16px;
+          margin-top: 22px;
+        }
+
+        .trial-editorial-form {
+          display: grid;
+          gap: 15px;
+          align-content: start;
+          padding: 22px;
+          border: 1px solid rgba(17,47,83,0.1);
+          border-radius: 18px;
+          background: var(--trial-warm);
+        }
+
+        .trial-editorial-form .field {
+          display: grid;
+          gap: 7px;
+        }
+
+        .trial-editorial-form .field > span {
+          color: #566f87;
+          font-size: 0.88rem;
+          font-weight: 900;
+        }
+
+        .trial-editorial-form input {
+          width: 100%;
+          min-height: 50px;
+          padding: 10px 12px;
+          border: 1px solid rgba(17,47,83,0.16);
+          border-radius: 11px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .trial-editorial-quick-picks {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 7px;
+        }
+
+        .trial-editorial-quick-picks button {
+          min-height: 44px;
+          border: 1px solid rgba(17,47,83,0.13);
+          border-radius: 10px;
+          background: rgba(255,255,255,0.78);
+          color: #4f6780;
+          font: inherit;
+          font-size: 0.82rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .trial-editorial-quick-picks button.is-active {
+          border-color: rgba(45,124,103,0.6);
+          background: #e8f4ef;
+          color: #1f6656;
+          box-shadow: inset 0 0 0 1px rgba(45,124,103,0.18);
+        }
+
+        .trial-editorial-result {
+          min-width: 0;
+          padding: 30px 34px;
+          border-radius: 20px;
+          background: var(--trial-navy);
+          color: #f8f1e6;
+        }
+
+        .trial-result-kicker {
+          margin: 0;
+          color: #9fc6b4;
+          font-size: 0.76rem;
+          font-weight: 950;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+        }
+
+        .trial-result-date {
+          margin: 10px 0 0;
+          color: #fff8ec;
+          font-size: clamp(3.5rem, 7vw, 6.2rem);
+          font-weight: 850;
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .trial-result-weekday {
+          margin: 10px 0 0;
+          color: #d5dfea;
+          font-size: 1.1rem;
+          font-weight: 800;
+        }
+
+        .trial-result-summary {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px 12px;
+          margin-top: 16px;
+        }
+
+        .trial-result-summary span {
+          display: inline-flex;
+          align-items: center;
+          min-height: 30px;
+          padding: 5px 10px;
+          border: 1px solid rgba(223,189,122,0.55);
+          border-radius: 999px;
+          background: #fff7e8;
+          color: #7b4f26;
+          font-size: 0.82rem;
+          font-weight: 900;
+        }
+
+        .trial-result-summary small {
+          color: #c8d4df;
+          font-size: 0.88rem;
+        }
+
+        .trial-reminder-card {
+          display: grid;
+          gap: 3px;
+          margin-top: 18px;
+          padding: 14px 16px;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.08);
+        }
+
+        .trial-reminder-card small {
+          color: #9fc6b4;
+          font-size: 0.75rem;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .trial-reminder-card strong {
+          color: #fff8ec;
+          font-size: 1.15rem;
+        }
+
+        .trial-result-note {
+          max-width: 720px;
+          margin: 18px 0 0;
+          color: #ced8e2;
+          font-size: 0.95rem;
+          line-height: 1.52;
+        }
+
+        .trial-editorial-result .calculation-receipt {
+          margin-top: 18px;
+        }
+
+        .trial-editorial-result .result-actions {
+          margin-top: 14px;
+        }
+
+        .trial-save-details {
+          margin-top: 16px;
+          padding-top: 14px;
+          border-top: 1px solid rgba(255,255,255,0.16);
+          color: #e7edf3;
+        }
+
+        .trial-save-details summary {
+          cursor: pointer;
+          font-weight: 850;
+        }
+
+        .trial-editorial-related {
+          margin-top: 22px;
+          padding: 24px 28px;
+          border: 1px solid rgba(17,47,83,0.1);
+          border-radius: 24px;
+          background: var(--trial-blue);
+        }
+
+        .trial-editorial-related nav {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 16px;
+        }
+
+        .trial-editorial-related a {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          min-height: 58px;
+          padding: 12px 14px;
+          border: 1px solid rgba(17,47,83,0.12);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.82);
+          color: #24425e;
+          font-size: 0.88rem;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        .trial-editorial-related a span {
+          color: var(--trial-green);
+          font-size: 1.05rem;
+        }
+
+        .trial-editorial-content {
+          margin-top: 38px;
+        }
+
+        .trial-content-heading {
+          margin-bottom: 16px;
+        }
+
+        .trial-editorial-content {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .trial-content-heading {
+          grid-column: 1 / -1;
+        }
+
+        .trial-editorial-content article {
+          padding: 22px;
+          border: 1px solid rgba(17,47,83,0.09);
+          border-radius: 18px;
+          background: rgba(255,255,255,0.72);
+        }
+
+        .trial-editorial-content article h2 {
+          margin: 0;
+          color: var(--trial-navy);
+          font-size: 1.08rem;
+        }
+
+        .trial-editorial-content article p,
+        .trial-editorial-content article li,
+        .trial-editorial-content article dd {
+          color: #65798d;
+          line-height: 1.55;
+        }
+
+        @media (max-width: 760px) {
+          .trial-editorial-header {
+            width: min(100% - 24px, 680px);
+            min-height: 58px;
+            margin-bottom: 12px;
+            gap: 12px;
+          }
+
+          .trial-editorial-brand img {
+            width: 154px;
+          }
+
+          .trial-editorial-nav {
+            gap: 12px;
+          }
+
+          .trial-editorial-nav a {
+            font-size: 0.8rem;
+          }
+
+          .trial-editorial-home-link {
+            display: none;
+          }
+
+          .trial-editorial-hero,
+          .trial-editorial-workspace,
+          .trial-editorial-related,
+          .trial-editorial-content {
+            width: min(100% - 24px, 680px);
+          }
+
+          .trial-editorial-image-wrap {
+            min-height: 465px;
+            border-radius: 24px;
+          }
+
+          .trial-editorial-image {
+            object-position: 58% center;
+          }
+
+          .trial-editorial-answer {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            width: auto;
+            margin: 0;
+            padding: 18px;
+            border-radius: 18px;
+          }
+
+          .trial-editorial-answer h1 {
+            font-size: clamp(2.05rem, 9.3vw, 2.85rem);
+          }
+
+          .trial-editorial-primary-answer {
+            margin-top: 14px;
+            padding-top: 12px;
+          }
+
+          .trial-editorial-primary-answer strong {
+            font-size: clamp(1.95rem, 8.8vw, 2.6rem);
+          }
+
+          .trial-editorial-reminder {
+            margin-top: 13px;
+            padding: 11px 12px;
+          }
+
+          .trial-editorial-workspace {
+            margin-top: 14px;
+            padding: 22px 18px;
+            border-radius: 22px;
+          }
+
+          .trial-editorial-heading h2,
+          .trial-editorial-related h2,
+          .trial-content-heading h2 {
+            font-size: clamp(1.9rem, 8.5vw, 2.55rem);
+          }
+
+          .trial-editorial-calculation-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 18px;
+          }
+
+          .trial-editorial-form {
+            padding: 18px;
+          }
+
+          .trial-editorial-result {
+            padding: 22px 18px 18px;
+          }
+
+          .trial-result-date {
+            font-size: clamp(2.9rem, 11.5vw, 4.2rem);
+          }
+
+          .trial-result-note {
+            font-size: 0.92rem;
+            line-height: 1.48;
+          }
+
+          .trial-editorial-result .result-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+          }
+
+          .trial-editorial-result .result-actions button,
+          .trial-editorial-result .result-actions a {
+            width: 100%;
+            min-height: 46px;
+            padding: 9px 10px;
+            font-size: 0.82rem;
+          }
+
+          .trial-editorial-result .result-actions > :last-child {
+            grid-column: 1 / -1;
+          }
+
+          .trial-editorial-related {
+            margin-top: 14px;
+            padding: 20px 18px;
+            border-radius: 22px;
+          }
+
+          .trial-editorial-related nav {
+            grid-template-columns: 1fr;
+            gap: 7px;
+          }
+
+          .trial-editorial-content {
+            display: block;
+            margin-top: 28px;
+          }
+
+          .trial-content-heading {
+            margin-bottom: 8px;
+          }
+
+          .trial-editorial-content article {
+            padding: 20px 2px;
+            border: 0;
+            border-top: 1px solid rgba(17,47,83,0.1);
+            border-radius: 0;
+            background: transparent;
+          }
+
+          .trial-editorial-content article h2 {
+            font-size: 1.08rem;
+            line-height: 1.3;
+          }
+
+          .trial-editorial-content article p,
+          .trial-editorial-content article li,
+          .trial-editorial-content article dd {
+            font-size: 0.94rem;
+            line-height: 1.52;
+          }
+        }
+
+        @media (max-width: 430px) {
+          .trial-editorial-brand img {
+            width: 142px;
+          }
+
+          .trial-editorial-nav {
+            gap: 10px;
+          }
+
+          .trial-editorial-nav a {
+            font-size: 0.76rem;
+          }
+
+          .trial-editorial-image-wrap {
+            min-height: 440px;
+          }
+
+          .trial-editorial-answer {
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            padding: 16px;
+          }
+
+          .trial-editorial-eyebrow {
+            font-size: 0.7rem;
+          }
+
+          .trial-editorial-reminder span {
+            font-size: 0.68rem;
+          }
+
+          .trial-editorial-reminder b {
+            font-size: 0.84rem;
+          }
+        }
+      `}</style>
     </main>
   )
 }
+
 
 function ReturnWindowPage({ onNavigate }: NavigationProps) {
   const currentTime = useCurrentMinute()
