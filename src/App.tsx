@@ -6868,7 +6868,40 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell next-payday-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+      <header className="next-payday-brand-header">
+        <a
+          className="next-payday-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+
+        <nav className="next-payday-brand-nav" aria-label="Main navigation">
+          <a
+            href="/calculators"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/calculators')
+            }}
+          >
+            Calculators
+          </a>
+          <a
+            href="/workspace"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/workspace')
+            }}
+          >
+            VA Workspace
+          </a>
+        </nav>
+      </header>
 
       <section className="next-payday-editorial-hero" aria-label="Next payday answer">
         <div className="next-payday-editorial-card">
@@ -7126,9 +7159,45 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           background: #fffaf2;
         }
 
+        .next-payday-brand-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 24px;
+          width: min(1080px, calc(100% - 36px));
+          margin: 0 auto;
+          padding: 22px 0 16px;
+          border-bottom: 1px solid rgba(19, 38, 70, 0.12);
+        }
+
+        .next-payday-brand {
+          display: inline-flex;
+          align-items: center;
+          flex: 0 0 auto;
+        }
+
+        .next-payday-brand img {
+          display: block;
+          width: auto;
+          height: 42px;
+        }
+
+        .next-payday-brand-nav {
+          display: flex;
+          align-items: center;
+          gap: 22px;
+        }
+
+        .next-payday-brand-nav a {
+          color: #58708a;
+          font-size: 0.94rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
         .next-payday-editorial-hero {
           position: relative;
-          min-height: 510px;
+          min-height: 560px;
           width: min(1080px, calc(100% - 36px));
           margin: 14px auto 0;
           overflow: hidden;
@@ -7144,7 +7213,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           top: 32px;
           left: 32px;
           width: min(475px, calc(100% - 64px));
-          padding: 34px;
+          padding: 30px 32px;
           border: 1px solid rgba(19, 38, 70, 0.08);
           border-radius: 24px;
           background: rgba(255, 252, 245, 0.94);
@@ -7156,7 +7225,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           margin: 12px 0 0;
           max-width: 420px;
           color: #12355d;
-          font-size: clamp(3rem, 5.6vw, 5rem);
+          font-size: clamp(2.9rem, 5vw, 4.55rem);
           font-weight: 950;
           line-height: 0.94;
           letter-spacing: -0.06em;
@@ -7180,7 +7249,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           display: block;
           margin-top: 6px;
           color: #12355d;
-          font-size: clamp(2.45rem, 4.5vw, 4rem);
+          font-size: clamp(2.35rem, 4vw, 3.6rem);
           line-height: 0.98;
           letter-spacing: -0.045em;
         }
@@ -7522,6 +7591,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 760px) {
+          .next-payday-brand-header,
           .next-payday-editorial-hero,
           .next-payday-calculation-shell,
           .next-payday-related,
@@ -7529,32 +7599,66 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
             width: calc(100% - 20px);
           }
 
+          .next-payday-brand-header {
+            gap: 14px;
+            padding: 18px 0 12px;
+          }
+
+          .next-payday-brand img {
+            height: 34px;
+          }
+
+          .next-payday-brand-nav {
+            gap: 14px;
+          }
+
+          .next-payday-brand-nav a {
+            font-size: 0.8rem;
+            white-space: nowrap;
+          }
+
           .next-payday-editorial-hero {
-            min-height: 780px;
+            min-height: 570px;
             margin-top: 12px;
             border-radius: 24px;
-            background-position: 68% center;
+            background-position: 73% 58%;
           }
 
           .next-payday-editorial-card {
             top: auto;
-            bottom: 24px;
-            left: 18px;
-            width: calc(100% - 36px);
-            padding: 24px;
+            bottom: 18px;
+            left: 14px;
+            width: calc(100% - 28px);
+            padding: 20px 20px 18px;
             border-radius: 22px;
           }
 
           .next-payday-editorial-card h1 {
-            font-size: clamp(2.55rem, 11.5vw, 3.55rem);
+            margin-top: 8px;
+            font-size: clamp(2.2rem, 10.2vw, 3rem);
+            line-height: 0.96;
           }
 
           .next-payday-editorial-divider {
-            margin: 20px 0 16px;
+            margin: 15px 0 12px;
+          }
+
+          .next-payday-editorial-rule {
+            font-size: 0.9rem;
           }
 
           .next-payday-editorial-date {
-            font-size: clamp(2.45rem, 10.5vw, 3.35rem);
+            font-size: clamp(2.25rem, 9.8vw, 3rem);
+          }
+
+          .next-payday-editorial-weekday {
+            margin-top: 5px;
+            font-size: 0.94rem;
+          }
+
+          .next-payday-editorial-meta {
+            margin-top: 14px;
+            padding: 10px 12px;
           }
 
           .next-payday-editorial-meta {
