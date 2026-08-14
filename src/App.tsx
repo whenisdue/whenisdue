@@ -16245,12 +16245,12 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-editorial-image-wrap {
-            min-height: 560px;
+            min-height: 470px;
             border-radius: 24px;
           }
 
           .invoice-editorial-image {
-            object-position: 58% center;
+            object-position: 62% 68%;
           }
 
           .invoice-editorial-image-wrap::after {
@@ -16264,26 +16264,28 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
           .invoice-editorial-answer {
             position: absolute;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
             width: auto;
             margin: 0;
-            padding: 22px 22px 20px;
-            border-radius: 20px;
+            padding: 18px 18px 16px;
+            border-radius: 18px;
           }
 
           .invoice-editorial-answer h1 {
-            font-size: clamp(2.35rem, 10.5vw, 3.25rem);
+            margin-top: 7px;
+            font-size: clamp(2.05rem, 9.2vw, 2.8rem);
+            line-height: 0.98;
           }
 
           .invoice-editorial-primary-answer {
-            margin-top: 18px;
-            padding-top: 15px;
+            margin-top: 14px;
+            padding-top: 12px;
           }
 
           .invoice-editorial-primary-answer strong {
-            font-size: clamp(2rem, 9.8vw, 2.9rem);
+            font-size: clamp(1.9rem, 8.8vw, 2.55rem);
           }
 
           .invoice-editorial-path {
@@ -16336,18 +16338,38 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-editorial-result {
-            padding: 24px 20px 20px;
+            padding: 22px 18px 18px;
             border-radius: 18px;
           }
 
           .invoice-result-date {
-            font-size: clamp(3rem, 13vw, 4.7rem);
+            font-size: clamp(2.85rem, 11.2vw, 4.1rem);
             line-height: 0.94;
           }
 
           .invoice-result-note {
+            margin-top: 16px;
             font-size: 0.9rem;
-            line-height: 1.5;
+            line-height: 1.45;
+          }
+
+          .invoice-editorial-result .result-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 14px;
+          }
+
+          .invoice-editorial-result .result-actions button,
+          .invoice-editorial-result .result-actions a {
+            min-height: 46px;
+            width: 100%;
+            padding: 9px 10px;
+            font-size: 0.82rem;
+          }
+
+          .invoice-editorial-result .result-actions > :last-child {
+            grid-column: 1 / -1;
           }
 
           .invoice-term-links {
@@ -16356,8 +16378,13 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             border-radius: 22px;
           }
 
+          .invoice-term-links > div {
+            display: block;
+          }
+
           .invoice-term-links h2 {
-            font-size: clamp(1.8rem, 8vw, 2.4rem);
+            margin-top: 5px;
+            font-size: clamp(1.8rem, 8vw, 2.35rem);
           }
 
           .invoice-term-links nav {
@@ -16391,8 +16418,8 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           .invoice-editorial-content article dd,
           .invoice-editorial-content article li {
             color: #66798d;
-            font-size: 0.98rem;
-            line-height: 1.55;
+            font-size: 0.92rem;
+            line-height: 1.5;
           }
 
           .invoice-editorial-content article dl {
@@ -16400,10 +16427,10 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-editorial-content article dt {
-            margin-top: 15px;
+            margin-top: 14px;
             color: #172c47;
-            font-size: 0.98rem;
-            line-height: 1.35;
+            font-size: 0.94rem;
+            line-height: 1.32;
           }
         }
 
@@ -16421,14 +16448,27 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-editorial-image-wrap {
-            min-height: 530px;
+            min-height: 450px;
           }
 
           .invoice-editorial-answer {
-            left: 16px;
-            right: 16px;
-            bottom: 16px;
-            padding: 20px 18px 18px;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            padding: 17px 16px 15px;
+          }
+
+          .invoice-editorial-eyebrow {
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+          }
+
+          .invoice-editorial-primary-answer span {
+            font-size: 0.85rem;
+          }
+
+          .invoice-editorial-primary-answer small {
+            font-size: 0.9rem;
           }
 
           .invoice-editorial-path {
