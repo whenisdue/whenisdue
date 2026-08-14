@@ -20842,6 +20842,86 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
             font-size: 0.94rem;
             line-height: 1.52;
           }
+
+          /* Mobile compactness pass: keep tap targets comfortable without stretched cards. */
+          .sla-editorial-workspace {
+            padding: 20px 16px;
+          }
+
+          .sla-editorial-form {
+            gap: 12px;
+            padding: 16px;
+          }
+
+          .sla-editorial-form input {
+            min-height: 46px;
+            padding: 8px 11px;
+          }
+
+          .sla-editorial-quick-picks {
+            gap: 6px;
+          }
+
+          .sla-editorial-quick-picks button,
+          .sla-editorial-workday-presets button {
+            min-height: 38px;
+            padding: 6px 8px;
+          }
+
+          .sla-editorial-default-note {
+            margin-top: -3px;
+            font-size: 0.8rem;
+            line-height: 1.35;
+          }
+
+          .sla-editorial-advanced summary {
+            min-height: 40px;
+          }
+
+          .sla-editorial-preference-actions button {
+            min-height: 38px;
+            padding: 6px 9px;
+          }
+
+          .sla-editorial-result {
+            padding: 20px 16px 16px;
+          }
+
+          .sla-result-time-card {
+            margin-top: 15px;
+            padding: 12px 14px;
+          }
+
+          .sla-result-summary {
+            margin-top: 15px;
+          }
+
+          .sla-result-note {
+            margin-top: 15px;
+          }
+
+          .sla-editorial-result .result-actions {
+            gap: 7px;
+          }
+
+          .sla-editorial-result .result-actions button,
+          .sla-editorial-result .result-actions a {
+            min-height: 42px;
+            padding: 7px 9px;
+          }
+
+          .sla-editorial-related {
+            padding: 18px 16px;
+          }
+
+          .sla-editorial-related nav {
+            gap: 6px;
+          }
+
+          .sla-editorial-related a {
+            min-height: 50px;
+            padding: 10px 12px;
+          }
         }
 
         @media (max-width: 430px) {
