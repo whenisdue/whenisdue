@@ -17806,11 +17806,14 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           <>
             <strong className="invoice-answer-date" aria-label={`${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}`}>
               <span className="invoice-answer-weekday">{formatWeekday(invoiceDueDate)},</span>
-              <span className="invoice-answer-month">
-                {new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(invoiceDueDate.year, invoiceDueDate.month - 1, invoiceDueDate.day)))}
+              <span className="invoice-answer-date-main" aria-hidden="true">
+                <span className="invoice-answer-month">
+                  {new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(invoiceDueDate.year, invoiceDueDate.month - 1, invoiceDueDate.day)))}
+                </span>
+                <span className="invoice-answer-day">{invoiceDueDate.day}</span>
+                <span className="invoice-answer-comma">,</span>
+                <span className="invoice-answer-year">{invoiceDueDate.year}</span>
               </span>
-              <span className="invoice-answer-day">{invoiceDueDate.day}</span>
-              <span className="invoice-answer-year">{invoiceDueDate.year}</span>
             </strong>
             <p className="invoice-answer-context">
               {invoiceTermLabels[invoiceTerm]} · Invoice dated {formatPlainDate(parsedInvoiceDate)}
@@ -18796,36 +18799,46 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         }
 
         .invoice-answer-date {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          align-items: baseline;
-          gap: 0 0.18em;
+          display: grid;
+          justify-items: center;
           max-width: 100%;
           margin: 25px auto 0;
           color: var(--invoice-ink);
-          font-size: clamp(3rem, 7.4vw, 6.7rem);
           font-weight: 900;
-          line-height: 0.93;
-          letter-spacing: -0.06em;
-          text-wrap: balance;
+          text-align: center;
         }
 
         .invoice-answer-weekday {
+          display: block;
           color: #315b75;
-          font-size: 0.54em;
+          font-size: clamp(2.8rem, 4.5vw, 4.25rem);
           font-weight: 850;
-          letter-spacing: -0.035em;
+          line-height: 0.98;
+          letter-spacing: -0.045em;
+        }
+
+        .invoice-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.09em;
+          max-width: 100%;
+          margin-top: 6px;
+          font-size: clamp(3.9rem, 6.35vw, 6rem);
+          line-height: 0.92;
+          letter-spacing: -0.06em;
+          white-space: nowrap;
         }
 
         .invoice-answer-month,
         .invoice-answer-day,
+        .invoice-answer-comma,
         .invoice-answer-year {
           display: inline;
         }
 
-        .invoice-answer-year::before {
-          content: ', ';
+        .invoice-answer-comma {
+          margin-left: -0.08em;
         }
 
         .invoice-answer-context,
@@ -18975,18 +18988,25 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-answer-date {
-            display: grid;
-            justify-content: start;
-            gap: 0;
+            justify-items: start;
             margin-top: 20px;
-            font-size: clamp(3.1rem, 15vw, 5rem);
-            line-height: 0.88;
             text-align: left;
           }
 
           .invoice-answer-weekday {
             margin-bottom: 9px;
-            font-size: 0.42em;
+            font-size: clamp(2.35rem, 10.5vw, 3.2rem);
+            line-height: 0.96;
+          }
+
+          .invoice-answer-date-main {
+            display: grid;
+            justify-items: start;
+            gap: 0;
+            margin-top: 0;
+            font-size: clamp(3.1rem, 15vw, 5rem);
+            line-height: 0.88;
+            white-space: normal;
           }
 
           .invoice-answer-month,
@@ -18995,8 +19015,8 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             display: block;
           }
 
-          .invoice-answer-year::before {
-            content: '';
+          .invoice-answer-comma {
+            display: none;
           }
 
           .invoice-answer-context {
