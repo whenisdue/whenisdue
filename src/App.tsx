@@ -16293,24 +16293,42 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 
 
 function ReturnWindowPage({ onNavigate }: NavigationProps) {
-  const currentTime = useCurrentMinute()
-  const today = useMemo(() => getTodayPlainDate(currentTime), [currentTime])
-  const [purchaseDate, setPurchaseDate] = useState(() => getInitialDateQueryParam('start', todayInputValue()))
+  const [purchaseDate, setPurchaseDate] = useState(() =>
+    getInitialDateQueryParam('start', todayInputValue()),
+  )
   const [returnWindow, setReturnWindow] = useState(() =>
-    getInitialPositiveIntegerQueryParam('days', '30', getAmountLimit('return')),
+    getInitialPositiveIntegerQueryParam(
+      'days',
+      '30',
+      getAmountLimit('return'),
+    ),
   )
   const [title, setTitle] = useState(getDefaultTitle('return'))
-  const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
+  const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() =>
+    loadSavedDeadlines(),
+  )
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
 
   const parsedPurchaseDate = parsePlainDate(purchaseDate)
   const parsedReturnWindow = parseInteger(returnWindow)
-  const validationMessage = getReturnWindowValidationMessage(parsedPurchaseDate, parsedReturnWindow)
+  const validationMessage = getReturnWindowValidationMessage(
+    parsedPurchaseDate,
+    parsedReturnWindow,
+  )
   const titleValidationMessage = getSaveTitleValidationMessage(title)
-  const returnDeadline = parsedPurchaseDate && parsedReturnWindow !== null && !validationMessage
-    ? addCalendarDays(parsedPurchaseDate, Math.max(parsedReturnWindow - 1, 0))
-    : null
-  const canSave = Boolean(returnDeadline && parsedPurchaseDate && !validationMessage && !titleValidationMessage)
+  const returnDeadline =
+    parsedPurchaseDate && parsedReturnWindow !== null && !validationMessage
+      ? addCalendarDays(
+          parsedPurchaseDate,
+          Math.max(parsedReturnWindow - 1, 0),
+        )
+      : null
+  const canSave = Boolean(
+    returnDeadline &&
+      parsedPurchaseDate &&
+      !validationMessage &&
+      !titleValidationMessage,
+  )
 
   useEffect(() => {
     syncShareableQueryParams({ start: purchaseDate, days: returnWindow })
@@ -16349,1166 +16367,685 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   }
 
   return (
-    <main className="page-shell return-window-page">
-      <section className="return-landing-stage" aria-labelledby="return-window-title">
-        <div className="return-landing-task">
-          <p className="return-answer-eyebrow">Return Window Calculator</p>
-          <h1 id="return-window-title">Find your last day to return an item</h1>
+    <main className="page-shell return-window-page return-answer-first-page">
+      <header
+        className="return-answer-header"
+        aria-label="WhenIsDue navigation"
+      >
+        <a
+          className="return-answer-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+          aria-label="WhenIsDue home"
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
 
-          <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
-            <label className="field start-field">
-              <span>When did the return period start?</span>
-              <input
-                type="date"
-                min="1900-01-01"
-                max="2100-12-31"
-                value={purchaseDate}
-                onChange={(event) => {
-                  setPurchaseDate(event.target.value)
-                  trackWhenIsDueEvent('date_changed', { context: 'return_window', value: event.target.value })
-                }}
-              />
-            </label>
+        <nav className="return-answer-nav" aria-label="Main navigation">
+          <a
+            className="return-answer-home-link"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            Home
+          </a>
+          <a
+            href="/calculators"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/calculators')
+            }}
+          >
+            Calculators
+          </a>
+          <a
+            href="/workspace"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/workspace')
+            }}
+          >
+            VA Workspace
+          </a>
+        </nav>
+      </header>
 
-            <label className="field value-field">
-              <span>How many days do you have?</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max={getAmountLimit('return')}
-                value={returnWindow}
-                onChange={(event) => {
-                  setReturnWindow(event.target.value)
-                  trackWhenIsDueEvent('number_changed', { context: 'return_window', value: event.target.value })
-                }}
-              />
-              <span className="quick-picks" aria-label="Common return windows">
-                {returnWindowQuickPicks.map((quickPick) => (
-                  <button
-                    className={returnWindow === String(quickPick) ? 'is-selected' : ''}
-                    key={quickPick}
-                    type="button"
-                    onClick={() => {
-                      setReturnWindow(String(quickPick))
-                      trackWhenIsDueEvent('quick_pick', { context: 'return_window', value: quickPick })
-                    }}
-                  >
-                    <span className="quick-pick-value">
-                      {returnWindow === String(quickPick) ? (
-                        <b className="quick-pick-check" aria-hidden="true">✓</b>
-                      ) : null}
-                      {quickPick}
-                    </span>
-                    {quickPick === 30 ? <small>Common</small> : null}
-                  </button>
-                ))}
+      <section
+        className="return-answer-hero"
+        aria-labelledby="return-window-title"
+        aria-live="polite"
+      >
+        <div className="return-answer-copy">
+          <p className="return-answer-eyebrow">Return window calculator</p>
+          <h1 id="return-window-title">Last day to return</h1>
+
+          {returnDeadline && parsedReturnWindow !== null && parsedPurchaseDate ? (
+            <>
+              <strong className="return-answer-date">
+                {formatPlainDate(returnDeadline)}
+              </strong>
+              <span className="return-answer-weekday">
+                {formatWeekday(returnDeadline)}
               </span>
-            </label>
-
-            <details className="return-input-help">
-              <summary>Purchase date or delivery date?</summary>
-              <p>
-                Use whichever date the retailer says starts the return period. For shipped orders,
-                that may be the delivery date.
+              <p className="return-answer-context">
+                {parsedReturnWindow}-day window · Starts{' '}
+                {formatPlainDate(parsedPurchaseDate)}
               </p>
-            </details>
-
-            {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
-          </form>
+            </>
+          ) : (
+            <p className="return-answer-error">
+              {validationMessage ?? 'Enter a valid return window.'}
+            </p>
+          )}
         </div>
 
-        <figure className="return-landing-art">
-          <img
-            src="/return-window-editorial.webp"
-            alt="A tagged garment draped over a wooden chair beside its shopping bag and open box."
-            decoding="async"
-            fetchPriority="high"
-          />
-          {returnDeadline && parsedReturnWindow !== null ? (
-            <div className="return-answer-overlay" aria-hidden="true">
-              <span>Last day to return</span>
-              <strong>{formatPlainDate(returnDeadline)}</strong>
-              <small>{formatWeekday(returnDeadline)}</small>
-            </div>
+        <form
+          className="return-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
+          aria-label="Change return window"
+        >
+          <label>
+            <span>Return period starts</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={purchaseDate}
+              onChange={(event) => {
+                setPurchaseDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'return_window',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <label>
+            <span>Days to return</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="1"
+              max={getAmountLimit('return')}
+              value={returnWindow}
+              onChange={(event) => {
+                setReturnWindow(event.target.value)
+                trackWhenIsDueEvent('number_changed', {
+                  context: 'return_window',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <div className="return-answer-quick-picks" aria-label="Common return windows">
+            {returnWindowQuickPicks.map((quickPick) => {
+              const selected = returnWindow === String(quickPick)
+              return (
+                <button
+                  className={selected ? 'is-selected' : ''}
+                  key={quickPick}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => {
+                    setReturnWindow(String(quickPick))
+                    trackWhenIsDueEvent('quick_pick', {
+                      context: 'return_window',
+                      value: quickPick,
+                    })
+                  }}
+                >
+                  {quickPick} days
+                </button>
+              )
+            })}
+          </div>
+
+          {validationMessage ? (
+            <p className="return-answer-form-message">{validationMessage}</p>
           ) : null}
-        </figure>
+        </form>
       </section>
 
-      <section className="return-primary-workspace" aria-label="Return deadline result">
-        <section className="result-panel return-window-result">
-          {returnDeadline && parsedReturnWindow !== null ? (
-            <>
-              <div className="return-result-support">
-                <p className="return-result-kicker">Use this deadline</p>
-                <div className="result-meta result-meta-stack">
-                  <span className="status-badge status-comfortable">
-                    {parsedReturnWindow}-day window · Start date = Day 1
-                  </span>
-                </div>
-              </div>
+      {returnDeadline && parsedReturnWindow !== null && parsedPurchaseDate ? (
+        <section className="return-answer-actions" aria-label="Return deadline actions">
+          <ResultActions
+            title="Return deadline"
+            date={returnDeadline}
+            details={`${parsedReturnWindow}-day return window`}
+            variant="return-window"
+          />
+        </section>
+      ) : null}
 
-              <aside className="return-result-caveat" aria-label="Return policy reminder">
-                <strong>Check the retailer&apos;s rule</strong>
-                <span>Some return periods start from purchase; others start from delivery.</span>
-              </aside>
-
-              <ResultActions
-                title="Return deadline"
-                date={returnDeadline}
-                details={`${parsedReturnWindow}-day return window`}
-                variant="return-window"
-              />
-
-              <details className="return-why-details">
-                <summary>Why this date?</summary>
-                <p className="return-citation-explanation">
-                  {formatReturnWindowExplanation(
-                    parsedPurchaseDate!,
-                    parsedReturnWindow!,
-                    returnDeadline,
-                  )}
-                </p>
-              </details>
-
+      <section className="return-answer-details" aria-label="Return calculation details">
+        <details className="return-answer-detail-card">
+          <summary>Why this date?</summary>
+          {returnDeadline && parsedReturnWindow !== null && parsedPurchaseDate ? (
+            <div className="return-answer-detail-body">
+              <p>
+                {formatReturnWindowExplanation(
+                  parsedPurchaseDate,
+                  parsedReturnWindow,
+                  returnDeadline,
+                )}
+              </p>
               <CalculationReceipt
                 analyticsContext="return_window"
                 rows={[
-                  { label: 'Window starts', value: `${formatWeekday(parsedPurchaseDate!)}, ${formatPlainDate(parsedPurchaseDate!)}` },
-                  { label: 'Window length', value: `${parsedReturnWindow} ${parsedReturnWindow === 1 ? 'day' : 'days'}` },
-                  { label: 'Counting rule', value: 'Start date counts as day 1' },
-                  { label: 'Last day to return', value: `${formatWeekday(returnDeadline)}, ${formatPlainDate(returnDeadline)}` },
+                  {
+                    label: 'Window starts',
+                    value: `${formatWeekday(parsedPurchaseDate)}, ${formatPlainDate(parsedPurchaseDate)}`,
+                  },
+                  {
+                    label: 'Window length',
+                    value: `${parsedReturnWindow} ${parsedReturnWindow === 1 ? 'day' : 'days'}`,
+                  },
+                  {
+                    label: 'Counting rule',
+                    value: 'Start date counts as day 1',
+                  },
+                  {
+                    label: 'Last day to return',
+                    value: `${formatWeekday(returnDeadline)}, ${formatPlainDate(returnDeadline)}`,
+                  },
                 ]}
               />
-              <details className="result-save-details">
-                <summary>Save this date</summary>
-                <div className="business-save">
-                  <label className="field title-field">
-                    <span>Title</span>
-                    <input
-                      maxLength={titleMaxLength}
-                      value={title}
-                      onChange={(event) => setTitle(event.target.value)}
-                    />
-                    {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-                  </label>
-                  <button className="primary-button" type="button" disabled={!canSave} onClick={saveReturnDeadline}>
-                    Save to My due dates
-                  </button>
-                  {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-                </div>
-              </details>
-            </>
-          ) : (
-            <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
-          )}
-        </section>
+            </div>
+          ) : null}
+        </details>
+
+        <details className="return-answer-detail-card">
+          <summary>Which date starts the return period?</summary>
+          <div className="return-answer-detail-body">
+            <p>
+              Use whichever date the retailer says starts the return period.
+              For shipped orders, that may be the delivery date rather than the
+              purchase date.
+            </p>
+          </div>
+        </details>
+
+        <details className="return-answer-detail-card">
+          <summary>Save this date</summary>
+          <div className="return-answer-detail-body return-answer-save">
+            <label>
+              <span>Title</span>
+              <input
+                maxLength={titleMaxLength}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+            </label>
+            {titleValidationMessage ? (
+              <span className="field-error">{titleValidationMessage}</span>
+            ) : null}
+            <button
+              className="primary-button"
+              type="button"
+              disabled={!canSave}
+              onClick={saveReturnDeadline}
+            >
+              Save to My due dates
+            </button>
+            {storageMessage ? (
+              <p className="form-message">{storageMessage}</p>
+            ) : null}
+          </div>
+        </details>
       </section>
 
-      <section className="return-holiday-callout" aria-label="Holiday return reminder">
-        <div>
-          <span>Holiday purchase?</span>
-          <strong>Your retailer may give you extra time.</strong>
-        </div>
+      <section className="return-policy-note" aria-label="Return policy reminder">
         <p>
-          Check the holiday return period on the receipt or retailer policy, then enter that number of days above.
+          <strong>Check the retailer&apos;s policy.</strong> Some return periods
+          start from purchase, others from delivery, and holiday purchases may
+          get extra time.
         </p>
       </section>
 
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. The retailer's written return policy controls the actual return deadline."
+      />
+
       <style>{`
-        .return-landing-stage {
+        .return-answer-first-page {
+          --return-ink: #113356;
+          --return-muted: #657a8f;
+          --return-accent: #2d7461;
+          --return-panel: #e8f2ec;
+          --return-panel-deep: #dcebe3;
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .return-answer-header {
           width: min(100% - 32px, 1130px);
-          margin: 18px auto 0;
-          display: grid;
-          grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-          min-height: 610px;
-          overflow: hidden;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 26px;
-          background: #315447;
-          box-shadow: 0 22px 58px rgba(19, 38, 70, 0.1);
-        }
-
-        .return-landing-task {
+          min-height: 70px;
+          margin: 0 auto;
           display: flex;
-          flex-direction: column;
-          justify-content: center;
-          min-width: 0;
-          padding: clamp(34px, 4.5vw, 58px);
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
-            #315447;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          border-bottom: 1px solid rgba(17, 51, 86, 0.11);
         }
 
-        .return-landing-task .return-answer-eyebrow {
-          margin: 0 0 10px;
-          color: #d5eadf;
-          font-size: 0.76rem;
-          font-weight: 950;
-          letter-spacing: 0.11em;
-          text-transform: uppercase;
-        }
-
-        .return-landing-task h1 {
-          max-width: 520px;
-          margin: 0;
-          color: #fffaf2;
-          font-size: clamp(3rem, 4.35vw, 4.7rem);
-          line-height: 0.95;
-          letter-spacing: -0.05em;
-          text-wrap: balance;
-        }
-
-        .return-landing-task .business-calculator {
-          width: 100%;
-          margin-top: 30px;
-          padding: 18px;
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          border-radius: 16px;
-          background: rgba(255, 250, 242, 0.97);
-          box-shadow: none;
-        }
-
-        .return-landing-task .business-calculator {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 14px;
-        }
-
-        .return-landing-task .business-calculator .field {
-          width: 100%;
-          margin: 0;
-        }
-
-        .return-landing-task .business-calculator .field > span:first-child {
-          margin-bottom: 6px;
-          color: #29435e;
-          font-size: 0.82rem;
-          font-weight: 900;
-        }
-
-        .return-landing-task .business-calculator input {
-          width: 100%;
-        }
-
-        .return-landing-task .return-input-help {
-          margin-top: -2px;
-        }
-
-        .return-landing-task .return-input-help summary {
-          color: #526f8c;
-        }
-
-        .return-landing-art {
-          position: relative;
-          min-width: 0;
-          min-height: 610px;
-          margin: 0;
-          overflow: hidden;
-          background: #d8cbbb;
-        }
-
-        .return-landing-art img {
-          display: block;
-          width: 100%;
-          height: 100%;
-          min-height: 610px;
-          object-fit: cover;
-          object-position: 56% center;
-        }
-
-        .return-answer-overlay {
-          position: absolute;
-          left: 50%;
-          top: 52%;
-          width: min(78%, 430px);
-          padding: 18px 22px 20px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 16px;
-          background: rgba(255, 250, 242, 0.44);
-          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.14);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          text-align: center;
-          transform: translate(-50%, -50%);
-        }
-
-        .return-answer-overlay span,
-        .return-answer-overlay strong,
-        .return-answer-overlay small {
-          display: block;
-        }
-
-        .return-answer-overlay span {
-          color: #246b52;
-          font-size: 0.69rem;
-          font-weight: 950;
-          letter-spacing: 0.11em;
-          text-transform: uppercase;
-        }
-
-        .return-answer-overlay strong {
-          margin-top: 7px;
-          color: #10213f;
-          font-size: clamp(2rem, 3.8vw, 3.45rem);
-          line-height: 0.98;
-          letter-spacing: -0.05em;
-          text-wrap: balance;
-        }
-
-        .return-answer-overlay small {
-          margin-top: 7px;
-          color: #60758d;
-          font-size: 0.82rem;
-          font-weight: 850;
-        }
-
-        .return-window-page .return-primary-workspace {
-          width: min(100% - 32px, 1130px);
-          margin: 18px auto 0;
-          display: block;
-        }
-
-        .return-window-page .return-window-result {
-          width: 100%;
-        }
-
-        .return-citation-explanation {
-          max-width: 680px;
-          margin: 10px auto 0;
-          color: #536b85;
-          font-size: 0.94rem;
-          line-height: 1.5;
-          text-align: center;
-        }
-
-        .return-result-support {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 6px;
-          margin-bottom: 4px;
-        }
-
-        .return-result-kicker {
-          margin: 0;
-          color: #28435f;
-          font-size: 0.95rem;
-          font-weight: 900;
-          letter-spacing: 0.02em;
-        }
-
-        .return-input-help,
-        .return-why-details {
-          width: 100%;
-        }
-
-        .return-input-help {
-          margin-top: -2px;
-        }
-
-        .return-input-help summary,
-        .return-why-details summary {
-          min-height: 44px;
+        .return-answer-brand {
           display: inline-flex;
           align-items: center;
-          color: #52708d;
-          font-size: 0.86rem;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .return-input-help p {
-          margin: 2px 0 0;
-          color: #667d94;
-          font-size: 0.86rem;
-          line-height: 1.5;
-        }
-
-        .return-why-details {
-          margin-top: 4px;
-          text-align: center;
-        }
-
-        .return-result-weekday {
-          margin: 6px 0 0;
-          color: #60738d;
-          font-size: 1rem;
-          font-weight: 800;
-          text-align: center;
-        }
-
-        .return-related-tools {
-          width: min(100% - 24px, 920px);
-          margin: 24px auto 0;
-          padding: 18px 0;
-          border-top: 1px solid rgba(19, 38, 70, 0.1);
-          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
-        }
-
-        .return-related-tools > div > span {
-          color: #7b8da0;
-          font-size: 0.76rem;
-          font-weight: 900;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-        }
-
-        .return-related-tools h2 {
-          margin: 4px 0 0;
-          color: #28435f;
-          font-size: 1.05rem;
-        }
-
-        .return-related-tools nav {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 7px;
-          margin-top: 12px;
-        }
-
-        .return-related-tools a {
-          min-height: 44px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 7px 11px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 999px;
-          background: #fff;
-          color: #4f6a85;
-          font-size: 0.82rem;
-          font-weight: 850;
           text-decoration: none;
         }
 
-        .return-window-page .return-answer-intro {
-          padding-bottom: 8px;
+        .return-answer-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
         }
 
-        .return-window-page .return-primary-workspace {
-          align-items: stretch;
-        }
-
-        .return-window-page .business-calculator {
-          padding-top: 14px;
-          padding-bottom: 14px;
-        }
-
-        .return-window-page .business-calculator .field {
-          margin-bottom: 10px;
-        }
-
-        .return-window-page .return-window-result .due-date {
-          font-size: clamp(3.8rem, 8.5vw, 7.4rem);
-          line-height: 0.96;
-          letter-spacing: -0.05em;
-        }
-
-        .return-window-page .return-window-result {
+        .return-answer-nav {
           display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          align-items: stretch;
-        }
-
-        .return-window-page .return-window-result .result-actions {
-          margin-top: 12px;
-        }
-
-        .return-window-page .return-window-result .calculation-receipt {
-          margin-top: 8px;
-        }
-
-        .return-start-helper {
-          display: block;
-          margin-top: 7px;
-          color: #667d94;
-          font-size: 0.84rem;
-          line-height: 1.45;
-        }
-
-        .return-window-page .quick-picks button {
-          min-width: 54px;
-          min-height: 50px;
-          display: inline-flex;
-          flex-direction: column;
           align-items: center;
-          justify-content: center;
-          gap: 2px;
-          padding-inline: 10px;
+          gap: 18px;
         }
 
-        .return-window-page .quick-picks button > span {
-          font-size: 1rem;
-          font-weight: 900;
+        .return-answer-nav a {
+          color: #5a7187;
+          font-size: 0.9rem;
+          font-weight: 850;
+          text-decoration: none;
+          white-space: nowrap;
         }
 
-        .return-window-page .quick-picks button small {
-          font-size: 0.62rem;
-          font-weight: 900;
-          line-height: 1;
-          letter-spacing: 0.035em;
-          text-transform: uppercase;
-          opacity: 0.72;
+        .return-answer-hero {
+          width: min(100% - 32px, 1130px);
+          margin: 22px auto 0;
+          overflow: hidden;
+          border: 1px solid rgba(17, 51, 86, 0.09);
+          border-radius: 28px;
+          background: var(--return-panel);
         }
 
-        .return-window-page .quick-picks button {
-          position: relative;
-          transition:
-            background 140ms ease,
-            border-color 140ms ease,
-            color 140ms ease,
-            transform 140ms ease,
-            box-shadow 140ms ease;
+        .return-answer-copy {
+          padding: clamp(36px, 5vw, 64px) clamp(28px, 5vw, 64px) 34px;
         }
 
-        .return-window-page .quick-picks button:hover {
-          border-color: rgba(36, 107, 82, 0.36);
-          background: #f7fbf8;
-        }
-
-        .return-window-page .quick-picks button:active {
-          transform: translateY(1px);
-        }
-
-        .return-window-page .quick-picks button:focus-visible {
-          outline: 3px solid rgba(29, 79, 130, 0.26);
-          outline-offset: 2px;
-        }
-
-        .return-window-page .quick-picks button.is-selected {
-          border: 2px solid #246b52;
-          background: #eaf5ef;
-          color: #17304d;
-          box-shadow: 0 0 0 2px rgba(36, 107, 82, 0.07);
-        }
-
-        .return-window-page .quick-pick-value {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-        }
-
-        .return-window-page .quick-pick-check {
-          color: #246b52;
-          font-size: 0.76rem;
-          line-height: 1;
-        }
-
-        .return-result-caveat {
-          width: min(100%, 620px);
-          margin: 12px auto 0;
-          padding: 10px 12px;
-          border: 1px solid rgba(217, 164, 65, 0.42);
-          border-left: 4px solid #d9a441;
-          border-radius: 10px;
-          background: #fff6df;
-          text-align: left;
-        }
-
-        .return-result-caveat strong,
-        .return-result-caveat span {
-          display: block;
-        }
-
-        .return-result-caveat strong {
-          color: #7a5314;
+        .return-answer-eyebrow {
+          margin: 0;
+          color: var(--return-accent);
           font-size: 0.78rem;
           font-weight: 950;
-        }
-
-        .return-result-caveat span {
-          margin-top: 2px;
-          color: #6d6049;
-          font-size: 0.76rem;
-          line-height: 1.4;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .return-window-page .quick-picks button {
-            transition: none;
-          }
-        }
-
-        .return-holiday-callout {
-          width: min(100% - 32px, 1130px);
-          margin: 16px auto 0;
-          padding: 15px 17px;
-          border: 1px solid rgba(161, 111, 28, 0.16);
-          border-radius: 14px;
-          background: #fffaf0;
-        }
-
-        .return-holiday-callout > div {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px 10px;
-          align-items: baseline;
-        }
-
-        .return-holiday-callout span {
-          color: #8a6322;
-          font-size: 0.8rem;
-          font-weight: 950;
-          letter-spacing: 0.045em;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .return-holiday-callout strong {
-          color: #47381f;
+        .return-answer-copy h1 {
+          margin: 9px 0 0;
+          color: var(--return-ink);
+          font-size: clamp(2rem, 3vw, 3.1rem);
+          line-height: 1;
+          letter-spacing: -0.045em;
+        }
+
+        .return-answer-date {
+          display: block;
+          max-width: 1020px;
+          margin-top: 18px;
+          color: var(--return-ink);
+          font-size: clamp(4.6rem, 10.5vw, 9.2rem);
+          font-weight: 900;
+          line-height: 0.86;
+          letter-spacing: -0.075em;
+          text-wrap: balance;
+        }
+
+        .return-answer-weekday {
+          display: block;
+          margin-top: 18px;
+          color: var(--return-ink);
+          font-size: clamp(1.15rem, 2vw, 1.55rem);
+          font-weight: 850;
+        }
+
+        .return-answer-context {
+          margin: 12px 0 0;
+          color: var(--return-muted);
+          font-size: 1rem;
+          font-weight: 700;
+        }
+
+        .return-answer-error {
+          margin: 22px 0 0;
+          color: #7a5314;
+          font-size: 1rem;
+          font-weight: 750;
+        }
+
+        .return-answer-controls {
+          display: grid;
+          grid-template-columns: minmax(220px, 1.15fr) minmax(150px, 0.65fr) minmax(380px, 1.7fr);
+          gap: 12px;
+          align-items: end;
+          padding: 22px clamp(28px, 5vw, 64px);
+          border-top: 1px solid rgba(17, 51, 86, 0.08);
+          background: rgba(255, 255, 255, 0.42);
+        }
+
+        .return-answer-controls label {
+          display: grid;
+          gap: 7px;
+        }
+
+        .return-answer-controls label > span {
+          color: #536b80;
+          font-size: 0.82rem;
+          font-weight: 900;
+        }
+
+        .return-answer-controls input {
+          width: 100%;
+          min-height: 48px;
+          padding: 9px 12px;
+          border: 1px solid rgba(17, 51, 86, 0.14);
+          border-radius: 11px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
           font-size: 1rem;
         }
 
-        .return-holiday-callout p {
-          margin: 7px 0 0;
-          color: #6d6049;
+        .return-answer-quick-picks {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 7px;
+        }
+
+        .return-answer-quick-picks button {
+          min-height: 48px;
+          padding: 8px 6px;
+          border: 1px solid rgba(17, 51, 86, 0.13);
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.78);
+          color: #4e6880;
+          font: inherit;
+          font-size: 0.8rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .return-answer-quick-picks button.is-selected {
+          border-color: rgba(45, 116, 97, 0.62);
+          background: #f4fbf7;
+          color: #225f50;
+          box-shadow: inset 0 0 0 1px rgba(45, 116, 97, 0.14);
+        }
+
+        .return-answer-form-message {
+          grid-column: 1 / -1;
+          margin: 0;
+          color: #7a5314;
+          font-size: 0.9rem;
+          font-weight: 750;
+        }
+
+        .return-answer-actions {
+          width: min(100% - 32px, 1130px);
+          margin: 14px auto 0;
+        }
+
+        .return-answer-actions .result-actions {
+          justify-content: flex-start;
+        }
+
+        .return-answer-details {
+          width: min(100% - 32px, 900px);
+          margin: 28px auto 0;
+          border-top: 1px solid rgba(17, 51, 86, 0.1);
+        }
+
+        .return-answer-detail-card {
+          border-bottom: 1px solid rgba(17, 51, 86, 0.1);
+        }
+
+        .return-answer-detail-card summary {
+          min-height: 58px;
+          display: flex;
+          align-items: center;
+          color: #36536d;
+          font-size: 0.94rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .return-answer-detail-body {
+          padding: 0 0 20px;
+        }
+
+        .return-answer-detail-body > p {
+          max-width: 720px;
+          margin: 0;
+          color: #63798f;
+          font-size: 0.95rem;
+          line-height: 1.58;
+        }
+
+        .return-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
+        }
+
+        .return-answer-save {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 10px 12px;
+          align-items: end;
+        }
+
+        .return-answer-save label {
+          display: grid;
+          gap: 7px;
+        }
+
+        .return-answer-save label > span {
+          color: #536b80;
+          font-size: 0.82rem;
+          font-weight: 900;
+        }
+
+        .return-answer-save input {
+          min-height: 46px;
+          width: 100%;
+          padding: 9px 11px;
+          border: 1px solid rgba(17, 51, 86, 0.14);
+          border-radius: 10px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+        }
+
+        .return-answer-save .field-error,
+        .return-answer-save .form-message {
+          grid-column: 1 / -1;
+        }
+
+        .return-policy-note {
+          width: min(100% - 32px, 900px);
+          margin: 24px auto 0;
+          padding: 15px 18px;
+          border-left: 4px solid #d6a340;
+          border-radius: 10px;
+          background: #fff7e4;
+        }
+
+        .return-policy-note p {
+          margin: 0;
+          color: #65583d;
           font-size: 0.9rem;
           line-height: 1.5;
         }
 
-        .return-window-page input,
-        .return-window-page select,
-        .return-window-page .quick-picks {
-          max-width: 100%;
+        .return-policy-note strong {
+          color: #6f4d16;
         }
 
-        @media (max-width: 760px) {
-          .return-landing-stage {
-            width: calc(100% - 18px);
-            margin-top: 6px;
-            grid-template-columns: 1fr;
-            min-height: 0;
-            border-radius: 20px;
+        @media (max-width: 860px) {
+          .return-answer-controls {
+            grid-template-columns: 1fr 0.7fr;
           }
 
-          .return-landing-task {
-            padding: 18px 14px 10px;
+          .return-answer-quick-picks {
+            grid-column: 1 / -1;
           }
+        }
 
-          .return-landing-task .return-answer-eyebrow {
-            margin-bottom: 8px;
-          }
-
-          .return-landing-task h1 {
-            max-width: 320px;
-            font-size: clamp(2.05rem, 9.2vw, 2.8rem);
-            line-height: 0.93;
-          }
-
-          .return-landing-task .business-calculator {
-            margin-top: 14px;
-            padding: 12px;
+        @media (max-width: 720px) {
+          .return-answer-header {
+            width: min(100% - 24px, 680px);
+            min-height: 58px;
             gap: 12px;
           }
 
-          .return-landing-art {
-            min-height: 0;
+          .return-answer-brand img {
+            width: 154px;
           }
 
-          .return-landing-art img {
-            min-height: 0;
-            height: min(54vw, 220px);
-            object-position: 52% center;
+          .return-answer-nav {
+            gap: 12px;
           }
 
-          .return-answer-overlay {
-            top: 24%;
-            width: min(84%, 330px);
-            padding: 12px 14px 14px;
-            border-radius: 14px;
+          .return-answer-nav a {
+            font-size: 0.8rem;
           }
 
-          .return-answer-overlay span {
-            font-size: 0.6rem;
+          .return-answer-home-link {
+            display: none;
           }
 
-          .return-answer-overlay strong {
-            margin-top: 4px;
-            font-size: clamp(1.42rem, 7.2vw, 1.95rem);
+          .return-answer-hero {
+            width: calc(100% - 24px);
+            margin-top: 14px;
+            border-radius: 22px;
           }
 
-          .return-answer-overlay small {
-            margin-top: 4px;
+          .return-answer-copy {
+            padding: 26px 20px 24px;
+          }
+
+          .return-answer-copy h1 {
+            font-size: clamp(1.75rem, 8vw, 2.25rem);
+          }
+
+          .return-answer-date {
+            margin-top: 18px;
+            font-size: clamp(4.2rem, 19vw, 6.1rem);
+            line-height: 0.88;
+          }
+
+          .return-answer-weekday {
+            margin-top: 14px;
+            font-size: 1.12rem;
+          }
+
+          .return-answer-context {
+            margin-top: 9px;
+            font-size: 0.9rem;
+          }
+
+          .return-answer-controls {
+            grid-template-columns: 1fr 0.62fr;
+            gap: 10px;
+            padding: 16px 18px 18px;
+          }
+
+          .return-answer-controls input {
+            min-height: 46px;
+          }
+
+          .return-answer-quick-picks {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 5px;
+          }
+
+          .return-answer-quick-picks button {
+            min-height: 42px;
+            padding: 6px 3px;
+            border-radius: 9px;
             font-size: 0.72rem;
           }
 
-          .return-window-page .return-primary-workspace {
-            width: calc(100% - 18px);
-            margin-top: 8px;
+          .return-answer-actions {
+            width: calc(100% - 24px);
+            margin-top: 12px;
           }
 
-          .return-window-page .identity-row {
-            margin-bottom: 8px;
+          .return-answer-actions .result-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
           }
 
-          .return-window-page .return-answer-eyebrow {
-            margin-bottom: 3px;
-            font-size: 0.68rem;
-          }
-
-          .return-window-page .return-answer-intro h1 {
-            max-width: 320px;
-            font-size: clamp(1.72rem, 8.8vw, 2.35rem);
-            line-height: 0.96;
-          }
-
-          .return-window-page .return-primary-workspace {
-            gap: 6px;
-            margin-top: 10px;
-          }
-
-          .return-window-page .business-calculator {
-            padding: 10px 12px;
-          }
-
-          .return-window-page .business-calculator .field {
-            margin-bottom: 6px;
-          }
-
-          .return-window-page .business-calculator .field > span:first-child {
-            margin-bottom: 3px;
-            font-size: 0.86rem;
-          }
-
-          .return-window-page .business-calculator input[type='date'],
-          .return-window-page .business-calculator input[type='number'],
-          .return-window-page .business-calculator input[type='text'] {
+          .return-answer-actions .result-actions button,
+          .return-answer-actions .result-actions a {
+            width: 100%;
             min-height: 44px;
-          }
-
-          .return-window-page .quick-picks {
-            gap: 5px;
-            flex-wrap: nowrap;
-          }
-
-          .return-window-page .quick-picks button {
-            min-width: 0;
-            flex: 1 1 0;
-            min-height: 44px;
-            padding-inline: 5px;
-          }
-
-          .return-window-page .quick-picks button > span {
-            font-size: 0.92rem;
-          }
-
-          .return-window-page .quick-picks button small {
-            font-size: 0.54rem;
-          }
-
-          .return-input-help {
-            margin-top: 0;
-          }
-
-          .return-input-help summary {
-            min-height: 34px;
-            font-size: 0.78rem;
-          }
-
-          .return-input-help p {
+            padding: 8px 9px;
             font-size: 0.8rem;
           }
 
-          .return-window-page .return-window-result {
-            padding: 10px 12px 12px;
-            min-height: 0;
+          .return-answer-actions .result-actions > :last-child {
+            grid-column: 1 / -1;
           }
 
-          .return-result-kicker {
-            font-size: 0.86rem;
+          .return-answer-details,
+          .return-policy-note {
+            width: calc(100% - 24px);
           }
 
-          .return-window-page .return-window-result .status-badge {
-            margin-top: 0;
+          .return-answer-details {
+            margin-top: 22px;
+          }
+
+          .return-answer-detail-card summary {
+            min-height: 54px;
+          }
+
+          .return-answer-save {
+            grid-template-columns: 1fr;
+          }
+
+          .return-answer-save .primary-button {
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 430px) {
+          .return-answer-brand img {
+            width: 142px;
+          }
+
+          .return-answer-nav {
+            gap: 10px;
+          }
+
+          .return-answer-nav a {
             font-size: 0.76rem;
           }
 
-          .return-window-page .return-window-result .result-actions {
-            margin-top: 8px;
+          .return-answer-date {
+            font-size: clamp(3.75rem, 18vw, 5.25rem);
           }
 
-          .return-window-page .return-window-result .result-actions button,
-          .return-window-page .return-window-result .result-actions a {
-            min-height: 42px;
+          .return-answer-controls {
+            grid-template-columns: 1fr;
           }
 
-          .return-why-details summary {
-            min-height: 36px;
-            font-size: 0.8rem;
-          }
-        }
-      `}</style>
-
-      <section className="return-today-answers return-secondary-answers" aria-labelledby="return-today-title">
-        <div className="return-today-heading">
-          <h2 id="return-today-title">Quick answers for common return windows</h2>
-          <p className="return-today-date">
-            Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
-            <span aria-hidden="true"> · </span>
-            {getLocalTimeZoneName()}
-          </p>
-        </div>
-
-        <div className="return-today-grid">
-          {[7, 14, 30, 60, 90].map((dayCount) => {
-            const answerDate = addCalendarDays(today, Math.max(dayCount - 1, 0))
-
-            return (
-              <button
-                className={`return-today-card${dayCount === 30 ? ' is-common' : ''}`}
-                key={dayCount}
-                type="button"
-                onClick={() => {
-                  setPurchaseDate(todayInputValue())
-                  setReturnWindow(String(dayCount))
-                  trackWhenIsDueEvent('return_window_common_window_selected', {
-                    days: dayCount,
-                    source: 'today_answers',
-                  })
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
-              >
-                <div className="return-today-card-top">
-                  <span>{dayCount}-day window</span>
-                  {dayCount === 30 ? <b>Common</b> : null}
-                </div>
-                <strong>{formatPlainDate(answerDate)}</strong>
-                <small>{formatWeekday(answerDate)}</small>
-              </button>
-            )
-          })}
-        </div>
-        <p className="return-today-note">
-          Tap a window to load it into the calculator. For an actual purchase, replace today with the retailer’s stated start date.
-        </p>
-      </section>
-
-      <section className="business-content" aria-label="Return window help">
-        <article>
-          <h2>Which date should I enter?</h2>
-          <p>
-            Use the date the retailer says starts the return period. That may be the purchase date, delivery date, or another date named in the policy.
-          </p>
-        </article>
-
-        <article>
-          <h2>Common return windows</h2>
-          <ul>
-            <li>7-day return window</li>
-            <li>14-day return window</li>
-            <li>30-day return window</li>
-            <li>60-day return window</li>
-            <li>90-day return window</li>
-          </ul>
-        </article>
-
-        <article>
-          <h2>Return window calculation example</h2>
-          <p>
-            If a 30-day return window begins on July 1, this calculator shows July 30 as the last day to return the item. It counts July 1 as day one. Some retailers begin counting on the delivery date or the day after delivery, so use the date and counting rule stated in the store's policy.
-          </p>
-        </article>
-
-        <article>
-          <h2>Common return deadline mistakes</h2>
-          <ul>
-            <li>Using the purchase date when the policy starts on the delivery date</li>
-            <li>Assuming every item follows the store's standard return window</li>
-            <li>Overlooking final-sale, clearance, personalized, or opened-item exclusions</li>
-            <li>Confusing the deadline to start a return with the deadline for the store to receive it</li>
-            <li>Waiting until the final day without checking store hours or shipping requirements</li>
-          </ul>
-        </article>
-
-        <article>
-          <h2>Return window FAQ</h2>
-          <dl>
-            <dt>Does the purchase day count as day one?</dt>
-            <dd>It does in this calculator. A retailer may count differently, especially for shipped orders.</dd>
-            <dt>Should I use the order date or delivery date?</dt>
-            <dd>Use whichever starting date the official return policy specifies. For online purchases, that is often the delivery date, but policies vary.</dd>
-            <dt>What if the last day falls on a weekend or holiday?</dt>
-            <dd>This calculator does not automatically move the deadline. Check whether the retailer allows an online return to be started that day or gives a next-business-day extension.</dd>
-            <dt>Do holiday return policies give you extra time?</dt>
-            <dd>Some retailers publish extended holiday return periods. Use the retailer’s stated holiday window rather than assuming the normal return period applies.</dd>
-            <dt>Does starting an online return meet the deadline?</dt>
-            <dd>Some retailers require only that the return be initiated by the deadline; others require shipment or receipt. Check the exact wording of the policy.</dd>
-          </dl>
-        </article>
-
-        <article>
-          <h2>Related deadline tool</h2>
-          <p>
-            Need to avoid an automatic renewal instead? Use the{' '}
-            <a
-              href="/free-trial-calculator"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/free-trial-calculator')
-              }}
-            >
-              Free Trial Calculator
-            </a>
-            .
-          </p>
-        </article>
-      </section>
-
-      <section className="return-related-tools" aria-label="Related deadline calculators">
-        <div>
-          <span>Related deadlines</span>
-          <h2>Other common date questions</h2>
-        </div>
-
-        <nav>
-          {[
-            ['/free-trial-calculator', 'Free trial end date'],
-            ['/invoice-due-date-calculator', 'Invoice due date'],
-            ['/business-days-calculator', 'Business days'],
-          ].map(([path, label]) => (
-            <a
-              href={path}
-              key={path}
-              onClick={(event) => {
-                event.preventDefault()
-                trackWhenIsDueEvent('related_return_tool_click', { path })
-                onNavigate(path)
-              }}
-            >
-              {label}
-            </a>
-          ))}
-        </nav>
-      </section>
-
-      <SiteFooter onNavigate={onNavigate} />
-
-      <style>{`
-        .return-answer-intro {
-          padding-bottom: 10px;
-        }
-
-        .return-answer-intro .friendly-site-header {
-          margin-bottom: 8px;
-        }
-
-        .return-answer-intro h1 {
-          margin-bottom: 6px;
-          font-size: clamp(2rem, 4vw, 3.2rem);
-        }
-
-        .return-answer-eyebrow {
-          margin: 0 0 6px;
-          color: #627b94;
-          font-size: 0.78rem;
-          font-weight: 950;
-          line-height: 1.2;
-          letter-spacing: 0.085em;
-          text-transform: uppercase;
-        }
-
-        .return-answer-intro h1 {
-          max-width: 760px;
-          margin: 0;
-          color: #10213f;
-          font-size: clamp(2.25rem, 5vw, 4rem);
-          line-height: 0.98;
-          letter-spacing: -0.045em;
-          text-wrap: balance;
-        }
-
-        .return-primary-workspace {
-          margin-top: 0;
-        }
-
-        .return-primary-workspace .return-window-result .due-date {
-          font-size: clamp(2.4rem, 6vw, 5rem);
-          line-height: 1;
-        }
-
-        .return-result-label {
-          font-weight: 800;
-          color: #10213f;
-        }
-
-        .return-today-answers {
-          width: min(100% - 32px, 1130px);
-          margin: 20px auto;
-          padding: 18px;
-          border: 1px solid rgba(19, 38, 70, 0.12);
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.72);
-        }
-
-        .return-secondary-answers {
-          margin-top: 24px;
-        }
-
-        .return-today-heading h2,
-        .return-custom-heading h2 {
-          margin: 4px 0 6px;
-        }
-
-        .return-today-heading p,
-        .return-custom-heading p,
-        .return-today-note {
-          margin: 0;
-        }
-
-        .return-today-date {
-          margin-top: 8px !important;
-          font-size: 1rem;
-          color: #10213f;
-        }
-
-        .return-today-timezone {
-          margin-top: 3px !important;
-          font-size: 0.92rem;
-          color: #60738d;
-        }
-
-        .return-today-grid {
-          display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 16px;
-        }
-
-        .return-today-card {
-          min-height: 124px;
-          padding: 16px;
-          border: 1px solid rgba(19, 38, 70, 0.12);
-          border-radius: 12px;
-          background: #fff;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          color: inherit;
-          font: inherit;
-          text-align: left;
-          cursor: pointer;
-          transition:
-            transform 120ms ease,
-            border-color 120ms ease,
-            box-shadow 120ms ease;
-        }
-
-        .return-today-card:hover {
-          transform: translateY(-1px);
-          border-color: rgba(19, 38, 70, 0.22);
-          box-shadow: 0 8px 20px rgba(19, 38, 70, 0.06);
-        }
-
-        .return-today-card:focus-visible {
-          outline: 3px solid rgba(53, 101, 154, 0.24);
-          outline-offset: 2px;
-        }
-
-        .return-today-card.is-common {
-          border-width: 2px;
-        }
-
-        .return-today-card-top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-        }
-
-        .return-today-card-top span {
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: #55708f;
-        }
-
-        .return-today-card-top b {
-          font-size: 0.72rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          color: #55708f;
-        }
-
-        .return-today-card > strong {
-          margin-top: 8px;
-          font-size: clamp(1.05rem, 1.7vw, 1.35rem);
-          line-height: 1.2;
-          color: #10213f;
-        }
-
-        .return-today-card small {
-          margin-top: 4px;
-          color: #60738d;
-        }
-
-        .return-policy-warning {
-          display: flex;
-          gap: 8px 12px;
-          flex-wrap: wrap;
-          margin-top: 14px;
-          padding: 12px 14px;
-          border-radius: 10px;
-          background: rgba(255, 247, 224, 0.8);
-          color: #4f4a3c;
-        }
-
-        .return-policy-warning strong {
-          color: #2f3c50;
-        }
-
-        .return-today-note {
-          margin-top: 14px;
-          color: #516783;
-        }
-
-        .return-custom-heading {
-          grid-column: 1 / -1;
-          margin-bottom: 4px;
-        }
-
-        @media (max-width: 760px) {
-          .return-answer-intro {
-            padding-top: 10px;
-          }
-
-          .return-answer-intro h1 {
-            font-size: 1.72rem;
-          }
-
-          .return-answer-eyebrow {
-            font-size: 0.66rem;
-          }
-
-          .return-primary-workspace {
-            margin-top: 0;
-          }
-
-          .return-primary-workspace .return-window-result .due-date {
-            font-size: 2.65rem;
-          }
-
-          .return-today-answers {
-            width: min(100% - 24px, 1130px);
-            padding: 14px;
-          }
-
-          .return-holiday-callout {
-            width: min(100% - 24px, 1130px);
-            padding: 14px;
-          }
-
-          .return-today-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .return-today-card {
-            min-height: 96px;
-          }
-
-          .return-today-card:last-child {
-            grid-column: 1 / -1;
+          .return-answer-quick-picks {
+            grid-column: auto;
           }
         }
       `}</style>
