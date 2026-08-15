@@ -6779,11 +6779,27 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
             ? '15th & last day'
             : 'Monthly'
 
+  const formatPaydayDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
+
   return (
-    <main className="page-shell next-payday-page">
-      <header className="next-payday-brand-header">
+    <main className="page-shell payday-answer-page">
+      <header className="payday-answer-header" aria-label="WhenIsDue navigation">
         <a
-          className="next-payday-brand"
+          className="payday-answer-brand"
           href="/"
           aria-label="WhenIsDue home"
           onClick={(event) => {
@@ -6793,185 +6809,183 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="next-payday-brand-nav" aria-label="Main navigation">
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
-      <section className="next-payday-editorial-hero" aria-label="Next payday answer">
-        <div className="next-payday-editorial-card">
-          <p className="friendly-eyebrow">Next payday calculator</p>
-          <h1>When is my next payday?</h1>
+      <section className="payday-answer-shell" aria-labelledby="payday-answer-title">
+        <div className="payday-answer-hero">
+          <p className="payday-answer-eyebrow">Next payday calculator</p>
 
           {nextPayday && parsedKnownPayday ? (
             <>
-              <div className="next-payday-editorial-divider" />
-              <p className="next-payday-editorial-rule">{scheduleShortLabel}</p>
-              <strong className="next-payday-editorial-date">
-                {formatPlainDate(nextPayday)}
+              <h1 id="payday-answer-title">Your next payday is</h1>
+
+              <strong
+                className="payday-answer-date"
+                aria-label={`${formatWeekday(nextPayday)}, ${formatPlainDate(nextPayday)}`}
+              >
+                <span className="payday-answer-weekday">
+                  {formatWeekday(nextPayday)},
+                </span>
+                <span className="payday-answer-date-main" aria-hidden="true">
+                  <span className="payday-answer-month">
+                    {
+                      [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December',
+                      ][nextPayday.month - 1]
+                    }
+                  </span>
+                  <span className="payday-answer-day">{nextPayday.day}</span>
+                  <span className="payday-answer-comma">,</span>
+                  <span className="payday-answer-year">{nextPayday.year}</span>
+                </span>
               </strong>
-              <span className="next-payday-editorial-weekday">
-                {formatWeekday(nextPayday)}
-              </span>
-              <div className="next-payday-editorial-meta">
-                <span>Known payday</span>
-                <strong>{formatPlainDate(parsedKnownPayday)}</strong>
-              </div>
+
+              <p className="payday-answer-context">
+                {scheduleShortLabel} · Known payday {formatPaydayDate(parsedKnownPayday)}
+              </p>
+
+              <p className="payday-answer-caveat">
+                Schedule date only · Employer or bank adjustments may change it
+              </p>
             </>
           ) : (
-            <p className="next-payday-editorial-empty">Choose a valid known payday.</p>
+            <>
+              <h1 id="payday-answer-title">When is my next payday?</h1>
+              <p className="payday-answer-context">
+                Choose a valid known payday and pay schedule below.
+              </p>
+            </>
           )}
         </div>
-      </section>
 
-      <section className="next-payday-calculation-shell" aria-label="Next payday calculator">
-        <header className="next-payday-calculation-heading">
-          <p className="friendly-eyebrow">Your calculation</p>
-          <h2>Set a known payday and pay schedule</h2>
-          <p>The next scheduled payday updates immediately.</p>
-        </header>
+        <form
+          className="payday-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            <span>Known payday</span>
+            <input
+              type="date"
+              value={knownPayday}
+              onChange={(event) => {
+                setKnownPayday(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'next_payday',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
 
-        <div className="next-payday-workspace">
-          <div className="next-payday-form">
-            <label>
-              <span>Known payday</span>
-              <input
-                type="date"
-                value={knownPayday}
-                onChange={(event) => {
-                  setKnownPayday(event.target.value)
-                  trackWhenIsDueEvent('date_changed', {
+          <label>
+            <span>Pay schedule</span>
+            <select
+              value={schedule}
+              onChange={(event) => {
+                const next = event.target.value as PaySchedule
+                setSchedule(next)
+                trackWhenIsDueEvent('pay_schedule_changed', { value: next })
+              }}
+            >
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Biweekly · every 2 weeks</option>
+              <option value="semimonthly-1-15">Semimonthly · 1st and 15th</option>
+              <option value="semimonthly-15-last">Semimonthly · 15th and last day</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+
+          <div className="payday-answer-quick-picks" aria-label="Common pay schedules">
+            {[
+              ['Weekly', 'weekly'],
+              ['Every 2 weeks', 'biweekly'],
+              ['1st & 15th', 'semimonthly-1-15'],
+              ['15th & last', 'semimonthly-15-last'],
+            ].map(([label, value]) => (
+              <button
+                type="button"
+                key={value}
+                className={schedule === value ? 'is-active' : ''}
+                aria-pressed={schedule === value}
+                onClick={() => {
+                  setSchedule(value as PaySchedule)
+                  trackWhenIsDueEvent('quick_pick', {
                     context: 'next_payday',
-                    value: event.target.value,
+                    value,
                   })
                 }}
-              />
-            </label>
-
-            <label>
-              <span>Pay schedule</span>
-              <select
-                value={schedule}
-                onChange={(event) => {
-                  const next = event.target.value as PaySchedule
-                  setSchedule(next)
-                  trackWhenIsDueEvent('pay_schedule_changed', { value: next })
-                }}
               >
-                <option value="weekly">Weekly</option>
-                <option value="biweekly">Biweekly · every 2 weeks</option>
-                <option value="semimonthly-1-15">Semimonthly · 1st and 15th</option>
-                <option value="semimonthly-15-last">Semimonthly · 15th and last day</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </label>
-
-            <div className="next-payday-quick-picks" aria-label="Common pay schedules">
-              {[
-                ['Weekly', 'weekly'],
-                ['Every 2 weeks', 'biweekly'],
-                ['1st & 15th', 'semimonthly-1-15'],
-                ['15th & last', 'semimonthly-15-last'],
-              ].map(([label, value]) => (
-                <button
-                  type="button"
-                  key={value}
-                  className={schedule === value ? 'is-active' : ''}
-                  onClick={() => {
-                    setSchedule(value as PaySchedule)
-                    trackWhenIsDueEvent('quick_pick', {
-                      context: 'next_payday',
-                      value,
-                    })
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+                {label}
+              </button>
+            ))}
           </div>
-
-          <div className="next-payday-result" aria-live="polite">
-            {nextPayday && parsedKnownPayday ? (
-              <>
-                <p>Next payday</p>
-                <div className="next-payday-date">{formatPlainDate(nextPayday)}</div>
-                <div className="next-payday-weekday">{formatWeekday(nextPayday)}</div>
-                <div className="next-payday-schedule-pill">{scheduleShortLabel}</div>
-                <p className="next-payday-rule">{payScheduleLabel(schedule)}</p>
-
-                <p className="next-payday-citation-explanation">
-                  {formatPaydayExplanation(
-                    parsedKnownPayday,
-                    schedule,
-                    nextPayday,
-                  )}
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="next_payday"
-                  rows={[
-                    {
-                      label: 'Known payday',
-                      value: `${formatWeekday(parsedKnownPayday)}, ${formatPlainDate(parsedKnownPayday)}`,
-                    },
-                    {
-                      label: 'Pay schedule',
-                      value: payScheduleLabel(schedule),
-                    },
-                    {
-                      label: 'Weekend / holiday adjustment',
-                      value: 'Not automatically applied',
-                    },
-                    {
-                      label: 'Next payday',
-                      value: `${formatWeekday(nextPayday)}, ${formatPlainDate(nextPayday)}`,
-                    },
-                  ]}
-                />
-
-                <ResultActions
-                  title="Next payday"
-                  date={nextPayday}
-                  details={payScheduleLabel(schedule)}
-                />
-              </>
-            ) : (
-              <p className="next-payday-empty">Choose a valid known payday.</p>
-            )}
-          </div>
-        </div>
-
-        <p className="next-payday-caveat">
-          This calculates the schedule only. Employers and banks may move payments
-          for weekends, holidays, payroll processing, or local rules.
-        </p>
+        </form>
       </section>
 
-      <section className="next-payday-related" aria-labelledby="next-payday-related-title">
+      {nextPayday && parsedKnownPayday ? (
+        <section className="payday-answer-actions">
+          <ResultActions
+            title="Next payday"
+            date={nextPayday}
+            details={payScheduleLabel(schedule)}
+            variant="return-window"
+          />
+
+          <details className="payday-answer-details">
+            <summary>Why this date?</summary>
+            <div className="payday-answer-detail-body">
+              <p>
+                {formatPaydayExplanation(
+                  parsedKnownPayday,
+                  schedule,
+                  nextPayday,
+                )}
+              </p>
+
+              <CalculationReceipt
+                analyticsContext="next_payday"
+                rows={[
+                  {
+                    label: 'Known payday',
+                    value: `${formatWeekday(parsedKnownPayday)}, ${formatPlainDate(parsedKnownPayday)}`,
+                  },
+                  {
+                    label: 'Pay schedule',
+                    value: payScheduleLabel(schedule),
+                  },
+                  {
+                    label: 'Weekend / holiday adjustment',
+                    value: 'Not automatically applied',
+                  },
+                  {
+                    label: 'Next payday',
+                    value: `${formatWeekday(nextPayday)}, ${formatPlainDate(nextPayday)}`,
+                  },
+                ]}
+              />
+            </div>
+          </details>
+        </section>
+      ) : null}
+
+      <section className="payday-answer-related" aria-label="Related timing tools">
         <div>
-          <p className="friendly-eyebrow">Related timing tools</p>
-          <h2 id="next-payday-related-title">Plan around the payment date</h2>
+          <p className="payday-answer-section-eyebrow">Related timing tools</p>
+          <h2>Plan around the payment date</h2>
         </div>
-        <div className="next-payday-related-grid">
+
+        <nav>
           <a
             href="/business-days-calculator"
             onClick={(event) => {
@@ -6979,8 +6993,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
               onNavigate('/business-days-calculator')
             }}
           >
-            <span>Business days calculator</span>
-            <strong>→</strong>
+            Business days calculator
           </a>
           <a
             href="/invoice-due-date-calculator"
@@ -6989,8 +7002,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
               onNavigate('/invoice-due-date-calculator')
             }}
           >
-            <span>Invoice due date calculator</span>
-            <strong>→</strong>
+            Invoice due date calculator
           </a>
           <a
             href="/deadline-calculator"
@@ -6999,694 +7011,514 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
               onNavigate('/deadline-calculator')
             }}
           >
-            <span>Deadline calculator</span>
-            <strong>→</strong>
+            Deadline calculator
           </a>
-        </div>
+        </nav>
       </section>
 
-      <section className="next-payday-rules" aria-label="Pay schedule help">
-        <header>
-          <p className="friendly-eyebrow">Pay schedule rules</p>
+      <section className="payday-answer-content" aria-label="Pay schedule help">
+        <div className="payday-answer-content-heading">
+          <p className="payday-answer-section-eyebrow">Pay schedule rules</p>
           <h2>Known payday, schedule, next payday</h2>
-        </header>
-
-        <div className="next-payday-rules-grid">
-          <article>
-            <h3>How this calculator works</h3>
-            <p>
-              Weekly and biweekly schedules add 7 or 14 calendar days. Semimonthly
-              schedules use the selected dates each month. Monthly schedules use the
-              same calendar day when that day exists, or the last day of a shorter month.
-            </p>
-          </article>
-
-          <article>
-            <h3>Biweekly is not twice a month</h3>
-            <p>
-              Biweekly means every 14 days. Semimonthly means two scheduled pay dates
-              each month, so the spacing between checks can vary.
-            </p>
-          </article>
-
-          <article>
-            <h3>Weekend and holiday changes</h3>
-            <p>
-              This calculator shows the scheduled date before employer or bank
-              adjustments. Your payroll policy may move a payment earlier or later.
-            </p>
-          </article>
-
-          <article>
-            <h3>If your schedule is different</h3>
-            <p>
-              Use the closest matching schedule here, then confirm the actual payroll
-              policy with your employer or payroll provider.
-            </p>
-          </article>
         </div>
 
-        <div className="next-payday-faq">
-          <h3>Next payday FAQ</h3>
+        <article>
+          <h2>How this calculator works</h2>
+          <p>
+            Weekly and biweekly schedules add 7 or 14 calendar days. Semimonthly
+            schedules use the selected dates each month. Monthly schedules use
+            the same calendar day when that day exists, or the last day of a
+            shorter month.
+          </p>
+        </article>
+
+        <article>
+          <h2>Biweekly is not twice a month</h2>
+          <p>
+            Biweekly means every 14 days. Semimonthly means two scheduled pay
+            dates each month, so the spacing between checks can vary.
+          </p>
+        </article>
+
+        <article>
+          <h2>Weekend and holiday changes</h2>
+          <p>
+            This calculator shows the scheduled date before employer or bank
+            adjustments. Your payroll policy may move a payment earlier or
+            later.
+          </p>
+        </article>
+
+        <article>
+          <h2>If your schedule is different</h2>
+          <p>
+            Use the closest matching schedule here, then confirm the actual
+            payroll policy with your employer or payroll provider.
+          </p>
+        </article>
+
+        <article>
+          <h2>Next payday FAQ</h2>
           <dl>
-            <div>
-              <dt>Is biweekly the same as twice a month?</dt>
-              <dd>No. Biweekly means every 14 days. Semimonthly means two scheduled pay dates each month.</dd>
-            </div>
-            <div>
-              <dt>Does this move payday for a weekend or holiday?</dt>
-              <dd>No. Payroll policies differ, so the displayed date is the schedule date before employer or bank adjustments.</dd>
-            </div>
-            <div>
-              <dt>What if my employer uses a different schedule?</dt>
-              <dd>Use the closest matching schedule here and confirm the actual payroll policy with your employer.</dd>
-            </div>
+            <dt>Is biweekly the same as twice a month?</dt>
+            <dd>
+              No. Biweekly means every 14 days. Semimonthly means two scheduled
+              pay dates each month.
+            </dd>
+            <dt>Does this move payday for a weekend or holiday?</dt>
+            <dd>
+              No. Payroll policies differ, so the displayed date is the schedule
+              date before employer or bank adjustments.
+            </dd>
+            <dt>What if my employer uses a different schedule?</dt>
+            <dd>
+              Use the closest matching schedule here and confirm the actual
+              payroll policy with your employer.
+            </dd>
           </dl>
-        </div>
+        </article>
       </section>
 
-      <SiteFooter onNavigate={onNavigate} />
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Employers, payroll providers, and banks may adjust scheduled pay dates for weekends, holidays, or processing rules."
+      />
 
       <style>{`
-        .next-payday-page {
+        .payday-answer-page {
+          --payday-ink: #173651;
+          --payday-muted: #687b8e;
+          --payday-accent: #2d7b64;
+          --payday-field: #e8ebd8;
+          --payday-field-soft: #f2f3e7;
+          min-height: 100vh;
           background: #fffaf2;
         }
 
-        .next-payday-brand-header {
+        .payday-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 24px;
-          width: min(1080px, calc(100% - 36px));
-          margin: 0 auto;
-          padding: 22px 0 16px;
-          border-bottom: 1px solid rgba(19, 38, 70, 0.12);
+          border-bottom: 1px solid rgba(23, 54, 81, 0.12);
         }
 
-        .next-payday-brand {
+        .payday-answer-brand {
           display: inline-flex;
           align-items: center;
-          flex: 0 0 auto;
-        }
-
-        .next-payday-brand img {
-          display: block;
-          width: auto;
-          height: 42px;
-        }
-
-        .next-payday-brand-nav {
-          display: flex;
-          align-items: center;
-          gap: 22px;
-        }
-
-        .next-payday-brand-nav a {
-          color: #58708a;
-          font-size: 0.94rem;
-          font-weight: 850;
           text-decoration: none;
         }
 
-        .next-payday-editorial-hero {
-          position: relative;
-          min-height: 560px;
-          width: min(1080px, calc(100% - 36px));
-          margin: 14px auto 0;
-          overflow: hidden;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 28px;
-          background-image: url('/next-payday-background.webp');
-          background-position: center;
-          background-size: cover;
-        }
-
-        .next-payday-editorial-card {
-          position: absolute;
-          top: 32px;
-          left: 32px;
-          width: min(475px, calc(100% - 64px));
-          padding: 30px 32px;
-          border: 1px solid rgba(19, 38, 70, 0.08);
-          border-radius: 24px;
-          background: rgba(255, 252, 245, 0.94);
-          box-shadow: 0 18px 48px rgba(40, 33, 23, 0.08);
-          backdrop-filter: blur(7px);
-        }
-
-        .next-payday-editorial-card h1 {
-          margin: 12px 0 0;
-          max-width: 420px;
-          color: #12355d;
-          font-size: clamp(2.9rem, 5vw, 4.55rem);
-          font-weight: 950;
-          line-height: 0.94;
-          letter-spacing: -0.06em;
-          text-wrap: balance;
-        }
-
-        .next-payday-editorial-divider {
-          height: 1px;
-          margin: 24px 0 20px;
-          background: rgba(19, 38, 70, 0.12);
-        }
-
-        .next-payday-editorial-rule {
-          margin: 0;
-          color: #657b92;
-          font-size: 1rem;
-          font-weight: 850;
-        }
-
-        .next-payday-editorial-date {
+        .payday-answer-brand img {
           display: block;
-          margin-top: 6px;
-          color: #12355d;
-          font-size: clamp(2.35rem, 4vw, 3.6rem);
-          line-height: 0.98;
-          letter-spacing: -0.045em;
+          width: 176px;
+          height: auto;
         }
 
-        .next-payday-editorial-weekday {
-          display: block;
-          margin-top: 7px;
-          color: #5f7790;
-          font-size: 1rem;
-          font-weight: 800;
+        .payday-answer-shell,
+        .payday-answer-actions,
+        .payday-answer-related,
+        .payday-answer-content {
+          width: min(100% - 32px, 1100px);
+          margin-left: auto;
+          margin-right: auto;
         }
 
-        .next-payday-editorial-meta {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
+        .payday-answer-shell {
           margin-top: 22px;
-          padding: 13px 14px;
-          border-radius: 14px;
-          background: #edf5f7;
-          color: #365875;
         }
 
-        .next-payday-editorial-meta span {
-          font-size: 0.78rem;
-          font-weight: 900;
-          letter-spacing: 0.07em;
+        .payday-answer-hero {
+          padding: clamp(42px, 6vw, 68px) clamp(24px, 5vw, 58px) 34px;
+          border: 1px solid rgba(82, 91, 48, 0.13);
+          border-radius: 28px 28px 0 0;
+          background: var(--payday-field);
+          text-align: center;
+        }
+
+        .payday-answer-eyebrow,
+        .payday-answer-section-eyebrow {
+          margin: 0;
+          color: var(--payday-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .next-payday-editorial-meta strong {
-          font-size: 0.96rem;
-        }
-
-        .next-payday-editorial-empty {
-          margin: 22px 0 0;
-          color: #6b7e91;
-        }
-
-        .next-payday-calculation-shell {
-          width: min(1080px, calc(100% - 36px));
-          margin: 22px auto 0;
-          padding: 30px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 24px;
-          background: rgba(255, 255, 255, 0.7);
-        }
-
-        .next-payday-calculation-heading h2 {
-          margin: 7px 0 0;
-          color: #12355d;
-          font-size: clamp(2.15rem, 4vw, 3.6rem);
-          line-height: 0.98;
-          letter-spacing: -0.045em;
-        }
-
-        .next-payday-calculation-heading > p:last-child {
+        .payday-answer-hero h1 {
           margin: 10px 0 0;
-          color: #6b8094;
-          font-size: 1rem;
-        }
-
-        .next-payday-workspace {
-          display: grid;
-          grid-template-columns: minmax(280px, 0.72fr) minmax(390px, 1.28fr);
-          gap: 16px;
-          margin-top: 22px;
-        }
-
-        .next-payday-form,
-        .next-payday-result {
-          min-width: 0;
-          border-radius: 20px;
-        }
-
-        .next-payday-form {
-          display: grid;
-          align-content: start;
-          gap: 18px;
-          padding: 22px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          background: #f3eee4;
-        }
-
-        .next-payday-form label {
-          display: grid;
-          gap: 7px;
-        }
-
-        .next-payday-form label > span {
-          color: #526b85;
-          font-size: 0.93rem;
-          font-weight: 900;
-        }
-
-        .next-payday-form input,
-        .next-payday-form select {
-          width: 100%;
-          min-width: 0;
-          min-height: 52px;
-          padding: 10px 12px;
-          border: 1px solid rgba(19, 38, 70, 0.14);
-          border-radius: 12px;
-          background: #fff;
-          color: #243f5e;
-          font: inherit;
-          font-size: 1rem;
-        }
-
-        .next-payday-quick-picks {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
-        }
-
-        .next-payday-quick-picks button {
-          min-height: 46px;
-          padding: 8px 10px;
-          border: 1px solid rgba(19, 38, 70, 0.12);
-          border-radius: 11px;
-          background: #fff;
-          color: #58718a;
-          font: inherit;
-          font-size: 0.88rem;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .next-payday-quick-picks button.is-active {
-          border-color: rgba(43, 129, 112, 0.48);
-          background: #e7f4ee;
-          color: #1f6b5c;
-          box-shadow: inset 0 0 0 1px rgba(43, 129, 112, 0.18);
-        }
-
-        .next-payday-result {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          padding: 28px 34px;
-          background: #153a64;
-          color: #fffaf2;
-          text-align: left;
-        }
-
-        .next-payday-result > p:first-child {
-          margin: 0;
-          color: #9bcab8;
-          font-size: 0.82rem;
-          font-weight: 950;
-          letter-spacing: 0.11em;
-          text-transform: uppercase;
-        }
-
-        .next-payday-date {
-          margin-top: 12px;
-          color: #fff8ea;
-          font-size: clamp(4.2rem, 7vw, 7rem);
-          font-weight: 950;
-          line-height: 0.88;
-          letter-spacing: -0.065em;
+          color: var(--payday-ink);
+          font-size: clamp(2.8rem, 5.8vw, 5rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
           text-wrap: balance;
         }
 
-        .next-payday-weekday {
-          margin-top: 16px;
-          color: #dbe6ef;
-          font-size: 1.12rem;
-          font-weight: 850;
-        }
-
-        .next-payday-schedule-pill {
-          align-self: flex-start;
-          margin-top: 20px;
-          padding: 8px 13px;
-          border: 1px solid #e5c995;
-          border-radius: 999px;
-          background: #fff7e7;
-          color: #7c5422;
-          font-size: 0.88rem;
+        .payday-answer-date {
+          display: grid;
+          justify-items: center;
+          margin-top: 26px;
+          color: var(--payday-ink);
           font-weight: 900;
         }
 
-        .next-payday-rule {
-          margin: 14px 0 0;
-          color: #c6d5e2;
-          font-size: 0.98rem;
-          line-height: 1.45;
-        }
-
-        .next-payday-citation-explanation {
-          max-width: 680px;
-          margin: 22px 0 0;
-          color: #d6e0e8;
-          font-size: 1rem;
-          line-height: 1.62;
-          text-align: left;
-        }
-
-        .next-payday-result .calculation-receipt {
-          margin-top: 22px;
-        }
-
-        .next-payday-result .result-actions {
-          margin-top: 18px;
-        }
-
-        .next-payday-empty {
-          margin: auto;
-          color: #d4e0e8;
-        }
-
-        .next-payday-caveat {
-          margin: 14px 4px 0;
-          color: #687e92;
-          font-size: 0.9rem;
-          line-height: 1.55;
-        }
-
-        .next-payday-related {
-          width: min(1080px, calc(100% - 36px));
-          margin: 24px auto 0;
-          padding: 28px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 24px;
-          background: #edf5f7;
-        }
-
-        .next-payday-related > div:first-child {
-          display: flex;
-          align-items: end;
-          justify-content: space-between;
-          gap: 20px;
-        }
-
-        .next-payday-related h2 {
-          margin: 7px 0 0;
-          color: #12355d;
-          font-size: clamp(2rem, 4vw, 3.2rem);
+        .payday-answer-weekday {
+          color: #466b74;
+          font-size: clamp(2.5rem, 4.4vw, 4rem);
           line-height: 0.98;
           letter-spacing: -0.04em;
         }
 
-        .next-payday-related-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 20px;
+        .payday-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.09em;
+          max-width: 100%;
+          margin-top: 6px;
+          font-size: clamp(3.7rem, 6.2vw, 6rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          white-space: nowrap;
         }
 
-        .next-payday-related-grid a {
+        .payday-answer-month,
+        .payday-answer-day,
+        .payday-answer-comma,
+        .payday-answer-year {
+          display: inline;
+        }
+
+        .payday-answer-comma {
+          margin-left: -0.08em;
+        }
+
+        .payday-answer-context {
+          margin: 18px 0 0;
+          color: var(--payday-muted);
+          font-size: 0.98rem;
+          line-height: 1.5;
+        }
+
+        .payday-answer-caveat {
+          width: fit-content;
+          margin: 14px auto 0;
+          padding: 8px 12px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.58);
+          color: #667883;
+          font-size: 0.84rem;
+        }
+
+        .payday-answer-controls {
+          display: grid;
+          grid-template-columns: minmax(0, 1.05fr) minmax(220px, 0.95fr) minmax(420px, 1.7fr);
+          gap: 12px;
+          align-items: end;
+          padding: 18px;
+          border: 1px solid rgba(82, 91, 48, 0.13);
+          border-top: 1px solid rgba(82, 91, 48, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--payday-field-soft);
+        }
+
+        .payday-answer-controls label {
+          display: grid;
+          gap: 7px;
+        }
+
+        .payday-answer-controls label > span {
+          color: #526a82;
+          font-size: 0.88rem;
+          font-weight: 850;
+        }
+
+        .payday-answer-controls input,
+        .payday-answer-controls select {
+          width: 100%;
+          min-height: 50px;
+          padding: 10px 12px;
+          border: 1px solid rgba(23, 54, 81, 0.14);
+          border-radius: 11px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .payday-answer-quick-picks {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 7px;
+        }
+
+        .payday-answer-quick-picks button {
+          min-height: 50px;
+          padding: 8px 9px;
+          border: 1px solid rgba(23, 54, 81, 0.13);
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.82);
+          color: #4f6780;
+          font: inherit;
+          font-size: 0.8rem;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .payday-answer-quick-picks button.is-active {
+          border-color: rgba(45, 123, 100, 0.58);
+          background: #e7f3ee;
+          color: #1f6655;
+        }
+
+        .payday-answer-actions {
+          margin-top: 16px;
+        }
+
+        .payday-answer-actions > .result-actions {
+          justify-content: center;
+        }
+
+        .payday-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(23, 54, 81, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .payday-answer-details summary {
+          min-height: 50px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          min-height: 62px;
-          padding: 14px 16px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 13px;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .payday-answer-detail-body {
+          padding: 0 14px 16px;
+        }
+
+        .payday-answer-detail-body > p {
+          max-width: 760px;
+          margin: 0;
+          color: #61768a;
+          font-size: 0.95rem;
+          line-height: 1.58;
+        }
+
+        .payday-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
+        }
+
+        .payday-answer-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(23, 54, 81, 0.1);
+          border-radius: 22px;
+          background: #eff1e6;
+        }
+
+        .payday-answer-related h2,
+        .payday-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--payday-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+        }
+
+        .payday-answer-related nav {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .payday-answer-related a {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 13px;
+          border: 1px solid rgba(23, 54, 81, 0.11);
+          border-radius: 12px;
           background: #fff;
-          color: #173a63;
-          font-size: 0.92rem;
+          color: #35536e;
+          font-size: 0.88rem;
           font-weight: 850;
           text-decoration: none;
         }
 
-        .next-payday-related-grid strong {
-          color: #2c846f;
-          font-size: 1.15rem;
-        }
-
-        .next-payday-rules {
-          width: min(1080px, calc(100% - 36px));
-          margin: 36px auto 0;
-          padding-bottom: 18px;
-        }
-
-        .next-payday-rules > header h2 {
-          margin: 8px 0 0;
-          color: #12355d;
-          font-size: clamp(2.25rem, 4vw, 3.6rem);
-          line-height: 0.98;
-          letter-spacing: -0.045em;
-        }
-
-        .next-payday-rules-grid {
+        .payday-answer-content {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 12px;
-          margin-top: 22px;
+          margin-top: 34px;
         }
 
-        .next-payday-rules-grid article,
-        .next-payday-faq {
-          padding: 22px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.76);
+        .payday-answer-content-heading {
+          grid-column: 1 / -1;
+          margin-bottom: 3px;
         }
 
-        .next-payday-rules-grid h3,
-        .next-payday-faq h3 {
+        .payday-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(23, 54, 81, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
+        }
+
+        .payday-answer-content article:last-child {
+          grid-column: 1 / -1;
+        }
+
+        .payday-answer-content h2,
+        .payday-answer-content h3 {
           margin: 0;
-          color: #173a63;
-          font-size: 1.05rem;
+          color: var(--payday-ink);
+          font-size: 1.08rem;
         }
 
-        .next-payday-rules-grid p {
-          margin: 12px 0 0;
-          color: #667d93;
-          line-height: 1.6;
+        .payday-answer-content p,
+        .payday-answer-content dd {
+          color: #65798d;
+          line-height: 1.55;
         }
 
-        .next-payday-faq {
-          margin-top: 12px;
+        .payday-answer-content dl {
+          margin: 14px 0 0;
         }
 
-        .next-payday-faq dl {
-          display: grid;
-          gap: 14px;
-          margin: 18px 0 0;
-        }
-
-        .next-payday-faq dl > div {
-          display: grid;
-          gap: 5px;
-        }
-
-        .next-payday-faq dt {
-          color: #173a63;
+        .payday-answer-content dt {
+          margin: 16px 0 0;
+          color: var(--payday-ink);
           font-weight: 850;
         }
 
-        .next-payday-faq dd {
-          margin: 0;
-          color: #6a7f92;
-          line-height: 1.58;
+        .payday-answer-content dd {
+          margin: 4px 0 0;
         }
 
         @media (max-width: 760px) {
-          .next-payday-brand-header,
-          .next-payday-editorial-hero,
-          .next-payday-calculation-shell,
-          .next-payday-related,
-          .next-payday-rules {
-            width: calc(100% - 20px);
+          .payday-answer-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
           }
 
-          .next-payday-brand-header {
-            gap: 14px;
-            padding: 18px 0 12px;
+          .payday-answer-brand img {
+            width: 154px;
           }
 
-          .next-payday-brand img {
-            height: 34px;
+          .payday-answer-shell,
+          .payday-answer-actions,
+          .payday-answer-related,
+          .payday-answer-content {
+            width: min(100% - 24px, 680px);
           }
 
-          .next-payday-brand-nav {
-            gap: 14px;
-          }
-
-          .next-payday-brand-nav a {
-            font-size: 0.8rem;
-            white-space: nowrap;
-          }
-
-          .next-payday-editorial-hero {
-            min-height: 540px;
-            margin-top: 12px;
-            border-radius: 24px;
-            background-position: 73% 58%;
-          }
-
-          .next-payday-editorial-card {
-            top: 16px;
-            bottom: auto;
-            left: 14px;
-            width: calc(100% - 28px);
-            padding: 18px 20px 16px;
-            border-radius: 22px;
-          }
-
-          .next-payday-editorial-card h1 {
-            margin-top: 8px;
-            font-size: clamp(2.2rem, 10.2vw, 3rem);
-            line-height: 0.96;
-          }
-
-          .next-payday-editorial-divider {
-            margin: 15px 0 12px;
-          }
-
-          .next-payday-editorial-rule {
-            font-size: 0.9rem;
-          }
-
-          .next-payday-editorial-date {
-            font-size: clamp(2.25rem, 9.8vw, 3rem);
-          }
-
-          .next-payday-editorial-weekday {
-            margin-top: 5px;
-            font-size: 0.94rem;
-          }
-
-          .next-payday-editorial-meta {
+          .payday-answer-shell {
             margin-top: 14px;
-            padding: 10px 12px;
           }
 
-          .next-payday-editorial-meta {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 4px;
+          .payday-answer-hero {
+            padding: 26px 20px 24px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .next-payday-calculation-shell {
-            margin-top: 14px;
-            padding: 18px 14px;
+          .payday-answer-hero h1 {
+            font-size: clamp(2.5rem, 11vw, 3.7rem);
           }
 
-          .next-payday-calculation-heading h2 {
-            font-size: clamp(2.25rem, 10vw, 3rem);
+          .payday-answer-date {
+            justify-items: start;
+            margin-top: 20px;
           }
 
-          .next-payday-workspace {
+          .payday-answer-weekday {
+            font-size: clamp(2.15rem, 9.4vw, 3rem);
+          }
+
+          .payday-answer-date-main {
+            display: grid;
+            justify-items: start;
+            gap: 0;
+            font-size: clamp(2.9rem, 13.2vw, 4.3rem);
+            line-height: 0.9;
+            white-space: normal;
+          }
+
+          .payday-answer-month,
+          .payday-answer-day,
+          .payday-answer-year {
+            display: block;
+          }
+
+          .payday-answer-comma {
+            display: none;
+          }
+
+          .payday-answer-context,
+          .payday-answer-caveat {
+            margin-left: 0;
+            margin-right: 0;
+          }
+
+          .payday-answer-caveat {
+            border-radius: 12px;
+          }
+
+          .payday-answer-controls {
             grid-template-columns: 1fr;
             gap: 10px;
-            margin-top: 16px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
           }
 
-          .next-payday-form {
-            gap: 14px;
-            padding: 16px;
-          }
-
-          .next-payday-form input,
-          .next-payday-form select {
-            min-height: 46px;
-            padding: 8px 10px;
-          }
-
-          .next-payday-quick-picks {
-            gap: 7px;
-          }
-
-          .next-payday-quick-picks button {
-            min-height: 42px;
-            padding: 7px 8px;
-            font-size: 0.84rem;
-          }
-
-          .next-payday-result {
-            padding: 24px 18px 22px;
-          }
-
-          .next-payday-result .result-actions {
-            display: grid;
+          .payday-answer-quick-picks {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
           }
 
-          .next-payday-result .result-actions button,
-          .next-payday-result .result-actions a {
-            width: 100%;
+          .payday-answer-controls input,
+          .payday-answer-controls select,
+          .payday-answer-quick-picks button {
             min-height: 46px;
-            padding: 9px 10px;
-            font-size: 0.82rem;
           }
 
-          .next-payday-result .result-actions > :last-child {
-            grid-column: 1 / -1;
+          .payday-answer-related {
+            padding: 20px 18px;
           }
 
-          .next-payday-date {
-            font-size: clamp(4rem, 17vw, 5.5rem);
-          }
-
-          .next-payday-citation-explanation {
-            font-size: 0.98rem;
-          }
-
-          .next-payday-related {
-            padding: 20px 16px;
-          }
-
-          .next-payday-related > div:first-child {
-            align-items: flex-start;
-            gap: 12px;
-          }
-
-          .next-payday-related-grid {
-            grid-template-columns: 1fr;
-            gap: 7px;
-            margin-top: 16px;
-          }
-
-          .next-payday-related-grid a {
-            min-height: 52px;
-            padding: 11px 14px;
-          }
-
-          .next-payday-rules {
-            margin-top: 30px;
-          }
-
-          .next-payday-rules-grid {
+          .payday-answer-related nav {
             grid-template-columns: 1fr;
           }
 
-          .next-payday-rules-grid article,
-          .next-payday-faq {
-            padding: 16px;
+          .payday-answer-content {
+            display: block;
+            margin-top: 28px;
           }
 
-          .next-payday-rules-grid {
-            gap: 9px;
-            margin-top: 18px;
+          .payday-answer-content-heading {
+            margin-bottom: 8px;
           }
 
-          .next-payday-faq dl {
-            gap: 11px;
-            margin-top: 14px;
+          .payday-answer-content article {
+            padding: 20px 2px;
+            border: 0;
+            border-top: 1px solid rgba(23, 54, 81, 0.1);
+            border-radius: 0;
+            background: transparent;
+          }
+
+          .payday-answer-content p,
+          .payday-answer-content dd {
+            font-size: 0.94rem;
+            line-height: 1.52;
           }
         }
       `}</style>
