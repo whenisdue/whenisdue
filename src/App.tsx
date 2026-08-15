@@ -16326,199 +16326,223 @@ function TwoTenNetThirtyPage({ onNavigate }: NavigationProps) {
     syncShareableQueryParams({ date: invoiceDate })
   }, [invoiceDate])
 
+  const formatTwoTenDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
+
   return (
-    <main className="page-shell two-ten-net-thirty-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
-
-      <section className="two-ten-net-thirty-shell">
-        <header className="two-ten-net-thirty-intro">
-          <p className="friendly-eyebrow">Invoice payment terms</p>
-          <h1>2/10 Net 30 calculator</h1>
-          <p>
-            Enter the invoice date to see the early-payment discount deadline
-            and the final Net 30 due date.
-          </p>
-        </header>
-
-        <section
-          className="two-ten-net-thirty-workspace"
-          aria-label="2/10 Net 30 calculator"
+    <main className="page-shell two-ten-answer-page">
+      <header className="two-ten-answer-header" aria-label="WhenIsDue navigation">
+        <a
+          className="two-ten-answer-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+          aria-label="WhenIsDue home"
         >
-          <form
-            className="two-ten-net-thirty-form"
-            onSubmit={(event) => event.preventDefault()}
-          >
-            <label>
-              <span>Invoice date</span>
-              <input
-                type="date"
-                min="1900-01-01"
-                max="2100-12-31"
-                value={invoiceDate}
-                onChange={(event) => {
-                  setInvoiceDate(event.target.value)
-                  trackWhenIsDueEvent('date_changed', {
-                    context: 'two_ten_net_30',
-                    value: event.target.value,
-                  })
-                }}
-              />
-            </label>
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
 
-            <div className="two-ten-net-thirty-definition">
-              <strong>2/10 Net 30 means:</strong>
-              <span>
-                2% discount if payment is made within 10 calendar days;
-                otherwise the full invoice amount is due in 30 calendar days.
-              </span>
-            </div>
-          </form>
+      <section className="two-ten-answer-shell" aria-labelledby="two-ten-answer-title">
+        <div className="two-ten-answer-hero">
+          <p className="two-ten-answer-eyebrow">2/10 Net 30 calculator</p>
 
-          <section className="two-ten-net-thirty-result" aria-live="polite">
-            {parsedInvoiceDate && discountDeadline && finalDueDate ? (
-              <>
-                <span>Payment deadlines</span>
+          {parsedInvoiceDate && discountDeadline && finalDueDate ? (
+            <>
+              <h1 id="two-ten-answer-title">Two payment dates matter</h1>
 
-                <div className="two-ten-net-thirty-result-grid">
-                  <div className="two-ten-net-thirty-discount">
-                    <small>Pay by this date for 2% discount</small>
-                    <strong>{formatPlainDate(discountDeadline)}</strong>
-                    <b>{formatWeekday(discountDeadline)}</b>
-                    <p>10 calendar days after the invoice date.</p>
-                  </div>
+              <div className="two-ten-answer-grid" aria-live="polite">
+                <article className="two-ten-answer-card is-discount">
+                  <span>Pay by this date to save 2%</span>
+                  <strong>{formatWeekday(discountDeadline)},</strong>
+                  <b>{formatTwoTenDate(discountDeadline)}</b>
+                  <small>10 calendar days after the invoice date</small>
+                </article>
 
-                  <div>
-                    <small>Full payment due</small>
-                    <strong>{formatPlainDate(finalDueDate)}</strong>
-                    <b>{formatWeekday(finalDueDate)}</b>
-                    <p>30 calendar days after the invoice date.</p>
-                  </div>
-                </div>
+                <article className="two-ten-answer-card is-final">
+                  <span>Otherwise, full payment is due</span>
+                  <strong>{formatWeekday(finalDueDate)},</strong>
+                  <b>{formatTwoTenDate(finalDueDate)}</b>
+                  <small>30 calendar days after the invoice date</small>
+                </article>
+              </div>
 
-                <p className="two-ten-net-thirty-note">
-                  The invoice date is treated as day zero. Weekends and public
-                  holidays are not automatically moved. The written invoice or
-                  contract controls if it uses a different rule.
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="two_ten_net_30"
-                  rows={[
-                    {
-                      label: 'Invoice date',
-                      value: `${formatWeekday(
-                        parsedInvoiceDate,
-                      )}, ${formatPlainDate(parsedInvoiceDate)}`,
-                    },
-                    {
-                      label: 'Early-payment term',
-                      value: '2% discount within 10 calendar days',
-                    },
-                    {
-                      label: 'Discount deadline',
-                      value: `${formatWeekday(
-                        discountDeadline,
-                      )}, ${formatPlainDate(discountDeadline)}`,
-                    },
-                    {
-                      label: 'Final payment term',
-                      value: 'Net 30 — 30 calendar days',
-                    },
-                    {
-                      label: 'Final due date',
-                      value: `${formatWeekday(
-                        finalDueDate,
-                      )}, ${formatPlainDate(finalDueDate)}`,
-                    },
-                  ]}
-                />
-
-                <ResultActions
-                  title="2/10 Net 30 final due date"
-                  date={finalDueDate}
-                  details={`2% discount deadline: ${formatPlainDate(
-                    discountDeadline,
-                  )}`}
-                />
-              </>
-            ) : (
-              <p className="two-ten-net-thirty-error">
-                Enter a valid invoice date.
+              <p className="two-ten-answer-context">
+                Invoice dated {formatTwoTenDate(parsedInvoiceDate)}
               </p>
-            )}
-          </section>
-        </section>
+            </>
+          ) : (
+            <>
+              <h1 id="two-ten-answer-title">When are 2/10 Net 30 payments due?</h1>
+              <p className="two-ten-answer-context">
+                Enter a valid invoice date below.
+              </p>
+            </>
+          )}
+        </div>
 
-        <section className="two-ten-net-thirty-content">
-          <article>
-            <h2>What does 2/10 Net 30 mean?</h2>
-            <p>
-              “2/10” is the early-payment discount: the buyer may take a 2%
-              discount when paying within 10 days. “Net 30” is the final
-              payment term: if the discount is not taken, the full invoice is
-              due 30 days after the invoice date.
-            </p>
-          </article>
-
-          <article>
-            <h2>Example</h2>
-            <p>
-              For an invoice dated August 10, the discount deadline is August
-              20 and the Net 30 due date is September 9 when both periods are
-              counted as calendar days from the invoice date.
-            </p>
-          </article>
-
-          <article>
-            <h2>Do weekends and holidays change the dates?</h2>
-            <p>
-              Not automatically in this calculator. Some contracts or company
-              policies move a payment date that lands on a weekend or holiday,
-              while others do not. Use the written payment terms that apply to
-              the invoice.
-            </p>
-          </article>
-
-          <article>
-            <h2>What this calculator does not calculate</h2>
-            <p>
-              It does not calculate late fees, interest, penalties, or legal
-              payment rules. Those can depend on the contract and applicable
-              law.
-            </p>
-          </article>
-        </section>
-
-        <section
-          className="two-ten-net-thirty-related"
-          aria-label="Related invoice calculators"
+        <form
+          className="two-ten-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
         >
-          <div>
-            <span>Related invoice tools</span>
-            <h2>Need a different payment term?</h2>
-          </div>
+          <label>
+            <span>Invoice date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={invoiceDate}
+              onChange={(event) => {
+                setInvoiceDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'two_ten_net_30',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
 
-          <nav>
-            <a
-              href="/invoice-due-date-calculator"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/invoice-due-date-calculator')
-              }}
-            >
-              Invoice due date calculator
-            </a>
-            <a
-              href="/net-30-due-date"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/net-30-due-date')
-              }}
-            >
-              Net 30 due date
-            </a>
-          </nav>
+          <div className="two-ten-answer-definition">
+            <strong>2/10 Net 30</strong>
+            <span>2% discount within 10 days · full amount due in 30 days</span>
+          </div>
+        </form>
+      </section>
+
+      {parsedInvoiceDate && discountDeadline && finalDueDate ? (
+        <section className="two-ten-answer-actions">
+          <ResultActions
+            title="2/10 Net 30 final due date"
+            date={finalDueDate}
+            details={`2% discount deadline: ${formatTwoTenDate(discountDeadline)}`}
+            variant="return-window"
+          />
+
+          <details className="two-ten-answer-details">
+            <summary>Why these dates?</summary>
+            <div className="two-ten-answer-detail-body">
+              <p>
+                The invoice date is treated as day zero. The 2% discount window
+                ends 10 calendar days after the invoice date, and the full Net
+                30 amount is due 30 calendar days after it. Weekends and public
+                holidays are not moved automatically.
+              </p>
+
+              <CalculationReceipt
+                analyticsContext="two_ten_net_30"
+                rows={[
+                  {
+                    label: 'Invoice date',
+                    value: `${formatWeekday(parsedInvoiceDate)}, ${formatPlainDate(parsedInvoiceDate)}`,
+                  },
+                  {
+                    label: 'Early-payment term',
+                    value: '2% discount within 10 calendar days',
+                  },
+                  {
+                    label: 'Discount deadline',
+                    value: `${formatWeekday(discountDeadline)}, ${formatPlainDate(discountDeadline)}`,
+                  },
+                  {
+                    label: 'Final payment term',
+                    value: 'Net 30 — 30 calendar days',
+                  },
+                  {
+                    label: 'Final due date',
+                    value: `${formatWeekday(finalDueDate)}, ${formatPlainDate(finalDueDate)}`,
+                  },
+                ]}
+              />
+            </div>
+          </details>
         </section>
+      ) : null}
+
+      <section className="two-ten-answer-related" aria-label="Related invoice calculators">
+        <div>
+          <p className="two-ten-answer-section-eyebrow">Related invoice tools</p>
+          <h2>Need a different payment term?</h2>
+        </div>
+
+        <nav>
+          <a
+            href="/invoice-due-date-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/invoice-due-date-calculator')
+            }}
+          >
+            Invoice due date calculator
+          </a>
+          <a
+            href="/net-30-due-date"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/net-30-due-date')
+            }}
+          >
+            Net 30 due date
+          </a>
+        </nav>
+      </section>
+
+      <section className="two-ten-answer-content" aria-label="2/10 Net 30 help">
+        <div className="two-ten-answer-content-heading">
+          <p className="two-ten-answer-section-eyebrow">Payment-term rules</p>
+          <h2>Discount window, final due date</h2>
+        </div>
+
+        <article>
+          <h2>What does 2/10 Net 30 mean?</h2>
+          <p>
+            “2/10” is the early-payment discount: the buyer may take a 2%
+            discount when paying within 10 days. “Net 30” is the final payment
+            term: if the discount is not taken, the full invoice is due 30 days
+            after the invoice date.
+          </p>
+        </article>
+
+        <article>
+          <h2>Example</h2>
+          <p>
+            For an invoice dated August 10, the discount deadline is August 20
+            and the Net 30 due date is September 9 when both periods are counted
+            as calendar days from the invoice date.
+          </p>
+        </article>
+
+        <article>
+          <h2>Do weekends and holidays change the dates?</h2>
+          <p>
+            Not automatically in this calculator. Some contracts or company
+            policies move a payment date that lands on a weekend or holiday,
+            while others do not. Use the written payment terms that apply to
+            the invoice.
+          </p>
+        </article>
+
+        <article>
+          <h2>What this calculator does not calculate</h2>
+          <p>
+            It does not calculate late fees, interest, penalties, or legal
+            payment rules. Those can depend on the contract and applicable law.
+          </p>
+        </article>
       </section>
 
       <SiteFooter
@@ -16527,270 +16551,424 @@ function TwoTenNetThirtyPage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .two-ten-net-thirty-page {
+        .two-ten-answer-page {
+          --two-ten-ink: #153553;
+          --two-ten-muted: #687b8e;
+          --two-ten-accent: #2d7b64;
+          --two-ten-field: #f2e3d7;
+          --two-ten-field-soft: #f8eee7;
           min-height: 100vh;
           background: #fffaf2;
         }
 
-        .two-ten-net-thirty-shell {
-          width: min(100% - 32px, 980px);
+        .two-ten-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
           margin: 0 auto;
-          padding: 34px 0 64px;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(21, 53, 83, 0.12);
         }
 
-        .two-ten-net-thirty-intro {
+        .two-ten-answer-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+        }
+
+        .two-ten-answer-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .two-ten-answer-shell,
+        .two-ten-answer-actions,
+        .two-ten-answer-related,
+        .two-ten-answer-content {
+          width: min(100% - 32px, 1100px);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .two-ten-answer-shell {
+          margin-top: 22px;
+        }
+
+        .two-ten-answer-hero {
+          padding: clamp(34px, 4.6vw, 52px) clamp(24px, 5vw, 58px) 28px;
+          border: 1px solid rgba(112, 75, 52, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--two-ten-field);
           text-align: center;
         }
 
-        .two-ten-net-thirty-intro h1 {
-          margin: 6px 0 0;
-          color: #152d48;
-          font-size: clamp(2.35rem, 6vw, 4.4rem);
-          line-height: 1;
-          letter-spacing: -0.04em;
+        .two-ten-answer-eyebrow,
+        .two-ten-answer-section-eyebrow {
+          margin: 0;
+          color: var(--two-ten-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
         }
 
-        .two-ten-net-thirty-intro > p:last-child {
-          max-width: 680px;
-          margin: 12px auto 0;
-          color: #61788f;
-          font-size: 1rem;
-          line-height: 1.55;
+        .two-ten-answer-hero h1 {
+          margin: 10px 0 0;
+          color: var(--two-ten-ink);
+          font-size: clamp(2.7rem, 5.5vw, 4.8rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
         }
 
-        .two-ten-net-thirty-workspace {
+        .two-ten-answer-grid {
           display: grid;
-          grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.2fr);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 14px;
-          margin-top: 24px;
+          max-width: 900px;
+          margin: 24px auto 0;
         }
 
-        .two-ten-net-thirty-form,
-        .two-ten-net-thirty-result {
-          min-width: 0;
-          padding: 20px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
+        .two-ten-answer-card {
+          padding: 18px 20px;
+          border: 1px solid rgba(21, 53, 83, 0.09);
           border-radius: 18px;
-          background: #fff;
+          background: rgba(255, 255, 255, 0.66);
         }
 
-        .two-ten-net-thirty-form {
+        .two-ten-answer-card.is-discount {
+          border-color: rgba(45, 123, 100, 0.26);
+          background: #e7f2ec;
+        }
+
+        .two-ten-answer-card.is-final {
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .two-ten-answer-card span,
+        .two-ten-answer-card strong,
+        .two-ten-answer-card b,
+        .two-ten-answer-card small {
+          display: block;
+        }
+
+        .two-ten-answer-card span {
+          color: #5a7085;
+          font-size: 0.84rem;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.055em;
+        }
+
+        .two-ten-answer-card strong {
+          margin-top: 9px;
+          color: #3c667b;
+          font-size: clamp(1.65rem, 3vw, 2.5rem);
+          line-height: 1;
+        }
+
+        .two-ten-answer-card b {
+          margin-top: 4px;
+          color: var(--two-ten-ink);
+          font-size: clamp(2.2rem, 4.6vw, 4rem);
+          line-height: 0.95;
+          letter-spacing: -0.045em;
+        }
+
+        .two-ten-answer-card small {
+          margin-top: 10px;
+          color: #738497;
+          font-size: 0.82rem;
+        }
+
+        .two-ten-answer-context {
+          margin: 14px 0 0;
+          color: var(--two-ten-muted);
+          font-size: 0.92rem;
+        }
+
+        .two-ten-answer-controls {
           display: grid;
-          gap: 14px;
-          align-content: start;
+          grid-template-columns: minmax(0, 1fr) minmax(320px, 1.2fr);
+          gap: 12px;
+          align-items: end;
+          padding: 15px 18px;
+          border: 1px solid rgba(112, 75, 52, 0.12);
+          border-top: 1px solid rgba(112, 75, 52, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--two-ten-field-soft);
         }
 
-        .two-ten-net-thirty-form label {
+        .two-ten-answer-controls label {
           display: grid;
-          gap: 6px;
+          gap: 7px;
         }
 
-        .two-ten-net-thirty-form label > span {
+        .two-ten-answer-controls label > span {
           color: #526a82;
-          font-size: 0.9rem;
+          font-size: 0.88rem;
           font-weight: 850;
         }
 
-        .two-ten-net-thirty-form input {
-          min-height: 48px;
+        .two-ten-answer-controls input {
           width: 100%;
-          padding: 9px 11px;
-          border: 1px solid rgba(19, 38, 70, 0.14);
-          border-radius: 10px;
+          min-height: 50px;
+          padding: 10px 12px;
+          border: 1px solid rgba(21, 53, 83, 0.14);
+          border-radius: 11px;
           background: #fff;
           color: #17304d;
           font: inherit;
           font-size: 1rem;
         }
 
-        .two-ten-net-thirty-definition {
+        .two-ten-answer-definition {
           display: grid;
-          gap: 5px;
-          padding: 14px;
-          border: 1px solid rgba(19, 38, 70, 0.08);
-          border-radius: 12px;
-          background: #f8fafb;
+          gap: 4px;
+          align-content: center;
+          min-height: 50px;
+          padding: 8px 12px;
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.62);
         }
 
-        .two-ten-net-thirty-definition strong {
-          color: #2d4965;
-          font-size: 0.94rem;
+        .two-ten-answer-definition strong {
+          color: #214c64;
+          font-size: 0.9rem;
         }
 
-        .two-ten-net-thirty-definition span {
-          color: #667c92;
-          font-size: 0.92rem;
-          line-height: 1.5;
+        .two-ten-answer-definition span {
+          color: #687b8e;
+          font-size: 0.84rem;
+          line-height: 1.4;
         }
 
-        .two-ten-net-thirty-result {
-          display: flex;
-          flex-direction: column;
+        .two-ten-answer-actions {
+          margin-top: 10px;
+        }
+
+        .two-ten-answer-actions > .result-actions {
           justify-content: center;
-          text-align: center;
         }
 
-        .two-ten-net-thirty-result > span {
-          color: #71869b;
-          font-size: 0.82rem;
+        .two-ten-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(21, 53, 83, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .two-ten-answer-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
           font-weight: 900;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
+          cursor: pointer;
         }
 
-        .two-ten-net-thirty-result-grid {
+        .two-ten-answer-detail-body {
+          padding: 0 14px 16px;
+        }
+
+        .two-ten-answer-detail-body > p {
+          max-width: 760px;
+          margin: 0;
+          color: #61768a;
+          font-size: 0.95rem;
+          line-height: 1.58;
+        }
+
+        .two-ten-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
+        }
+
+        .two-ten-answer-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 53, 83, 0.1);
+          border-radius: 22px;
+          background: #f4ece6;
+        }
+
+        .two-ten-answer-related h2,
+        .two-ten-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--two-ten-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+        }
+
+        .two-ten-answer-related nav {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 12px;
-        }
-
-        .two-ten-net-thirty-result-grid > div {
-          padding: 17px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 13px;
-          background: #fffdf9;
-        }
-
-        .two-ten-net-thirty-result-grid .two-ten-net-thirty-discount {
-          background: #f7fcf7;
-          border-color: rgba(62, 126, 82, 0.14);
-        }
-
-        .two-ten-net-thirty-result-grid small {
-          display: block;
-          color: #72869a;
-          font-size: 0.78rem;
-          font-weight: 900;
-          line-height: 1.35;
-          letter-spacing: 0.035em;
-          text-transform: uppercase;
-        }
-
-        .two-ten-net-thirty-result-grid strong {
-          display: block;
-          margin-top: 7px;
-          color: #10213f;
-          font-size: clamp(1.7rem, 3.4vw, 2.55rem);
-          line-height: 1.05;
-        }
-
-        .two-ten-net-thirty-result-grid b {
-          display: block;
-          margin-top: 5px;
-          color: #667c92;
-          font-size: 0.92rem;
-        }
-
-        .two-ten-net-thirty-result-grid p {
-          margin: 9px 0 0;
-          color: #667c92;
-          font-size: 0.9rem;
-          line-height: 1.5;
-        }
-
-        .two-ten-net-thirty-note {
-          max-width: 700px;
-          margin: 14px auto 0;
-          color: #586f86;
-          font-size: 0.95rem;
-          line-height: 1.55;
-        }
-
-        .two-ten-net-thirty-error {
-          margin: auto;
-          color: #73869a;
-        }
-
-        .two-ten-net-thirty-content {
-          display: grid;
-          gap: 12px;
-          margin-top: 22px;
-        }
-
-        .two-ten-net-thirty-content article {
-          padding: 18px;
-          border: 1px solid rgba(19, 38, 70, 0.08);
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.72);
-        }
-
-        .two-ten-net-thirty-content h2 {
-          margin: 0;
-          color: #29435e;
-          font-size: 1.12rem;
-        }
-
-        .two-ten-net-thirty-content p {
-          margin: 8px 0 0;
-          color: #5f748a;
-          font-size: 0.97rem;
-          line-height: 1.6;
-        }
-
-        .two-ten-net-thirty-related {
-          margin-top: 24px;
-          padding-top: 18px;
-          border-top: 1px solid rgba(19, 38, 70, 0.1);
-        }
-
-        .two-ten-net-thirty-related > div > span {
-          color: #7a8da1;
-          font-size: 0.78rem;
-          font-weight: 900;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-        }
-
-        .two-ten-net-thirty-related h2 {
-          margin: 5px 0 0;
-          color: #29435e;
-          font-size: 1.2rem;
-        }
-
-        .two-ten-net-thirty-related nav {
-          display: flex;
-          flex-wrap: wrap;
           gap: 8px;
-          margin-top: 12px;
+          margin-top: 14px;
         }
 
-        .two-ten-net-thirty-related a {
-          min-height: 44px;
-          display: inline-flex;
+        .two-ten-answer-related a {
+          min-height: 52px;
+          display: flex;
           align-items: center;
-          padding: 8px 12px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 999px;
+          justify-content: center;
+          padding: 10px 13px;
+          border: 1px solid rgba(21, 53, 83, 0.11);
+          border-radius: 12px;
           background: #fff;
-          color: #4f6a85;
-          font-size: 0.86rem;
+          color: #35536e;
+          font-size: 0.88rem;
           font-weight: 850;
           text-decoration: none;
         }
 
+        .two-ten-answer-content {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 34px;
+        }
+
+        .two-ten-answer-content-heading {
+          grid-column: 1 / -1;
+          margin-bottom: 3px;
+        }
+
+        .two-ten-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(21, 53, 83, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
+        }
+
+        .two-ten-answer-content h2 {
+          margin: 0;
+          color: var(--two-ten-ink);
+          font-size: 1.08rem;
+        }
+
+        .two-ten-answer-content p {
+          margin: 8px 0 0;
+          color: #65798d;
+          line-height: 1.55;
+        }
+
         @media (max-width: 760px) {
-          .two-ten-net-thirty-shell {
-            width: min(100% - 20px, 980px);
-            padding-top: 24px;
+          .two-ten-answer-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
           }
 
-          .two-ten-net-thirty-workspace,
-          .two-ten-net-thirty-result-grid {
+          .two-ten-answer-brand img {
+            width: 154px;
+          }
+
+          .two-ten-answer-shell,
+          .two-ten-answer-actions,
+          .two-ten-answer-related,
+          .two-ten-answer-content {
+            width: min(100% - 24px, 680px);
+          }
+
+          .two-ten-answer-shell {
+            margin-top: 14px;
+          }
+
+          .two-ten-answer-hero {
+            padding: 25px 20px 23px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
+          }
+
+          .two-ten-answer-hero h1 {
+            font-size: clamp(2.4rem, 10.8vw, 3.55rem);
+          }
+
+          .two-ten-answer-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 20px;
+          }
+
+          .two-ten-answer-card {
+            position: relative;
+            padding: 16px 16px 16px 20px;
+          }
+
+          .two-ten-answer-card::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            bottom: 16px;
+            left: 9px;
+            width: 3px;
+            border-radius: 999px;
+            background: rgba(61, 104, 124, 0.28);
+          }
+
+          .two-ten-answer-card.is-discount::before {
+            background: rgba(45, 123, 100, 0.74);
+          }
+
+          .two-ten-answer-card strong {
+            font-size: clamp(1.8rem, 8.5vw, 2.65rem);
+          }
+
+          .two-ten-answer-card b {
+            font-size: clamp(2.25rem, 10.8vw, 3.45rem);
+          }
+
+          .two-ten-answer-context {
+            font-size: 0.88rem;
+          }
+
+          .two-ten-answer-controls {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
+          }
+
+          .two-ten-answer-definition {
+            min-height: auto;
+          }
+
+          .two-ten-answer-related {
+            padding: 20px 18px;
+          }
+
+          .two-ten-answer-related nav {
             grid-template-columns: 1fr;
           }
 
-          .two-ten-net-thirty-form,
-          .two-ten-net-thirty-result {
-            padding: 16px;
+          .two-ten-answer-content {
+            display: block;
+            margin-top: 28px;
+          }
+
+          .two-ten-answer-content-heading {
+            margin-bottom: 8px;
+          }
+
+          .two-ten-answer-content article {
+            padding: 20px 2px;
+            border: 0;
+            border-top: 1px solid rgba(21, 53, 83, 0.1);
+            border-radius: 0;
+            background: transparent;
+          }
+
+          .two-ten-answer-content p {
+            font-size: 0.94rem;
+            line-height: 1.52;
           }
         }
       `}</style>
     </main>
   )
 }
-
-
 function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
   const [invoiceDate, setInvoiceDate] = useState(() => getInitialDateQueryParam('date', todayInputValue()))
   const [invoiceTerm, setInvoiceTerm] = useState<InvoiceTerm>(() =>
