@@ -12068,7 +12068,19 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
     <main className="page-shell home-page friendly-home calculator-hub-page">
       <a className="skip-to-calculator" href="#calculator" onClick={(event) => { event.preventDefault(); focusHomeSection('calculator', 'calculator-heading') }}>Skip to calculator</a>
       <section className="dual-intent-hero" aria-labelledby="homepage-title">
-        <IdentityRow onNavigate={onNavigate} />
+        <header className="calculator-directory-header" aria-label="WhenIsDue navigation">
+          <a
+            className="calculator-directory-brand"
+            href="/"
+            aria-label="WhenIsDue home"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+          </a>
+        </header>
 
         <div className="dual-intent-grid utility-hub-hero">
           <div className="dual-intent-copy">
@@ -12076,13 +12088,9 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span aria-hidden="true">◷</span>
               Date and deadline tools
             </p>
-            <h1 id="homepage-title" tabIndex={-1}>Choose what you need to know.</h1>
+            <h1 id="homepage-title" tabIndex={-1}>Choose a calculator.</h1>
             <p className="friendly-subtitle">
-              Business days, invoice due dates, returns, free trials, and date differences — with the answer shown as quickly as possible.
-            </p>
-
-            <p className="friendly-subtitle">
-              Choose the calculator that matches your question. Dedicated tools are faster and easier to verify.
+              Pick what you need. Get the answer.
             </p>
           </div>
 
@@ -12302,7 +12310,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           <span className="step-number">+</span>
           <div>
             <h2>Need one flexible calculator?</h2>
-            <p>Open the older all-in-one date calculator.</p>
+            <p>Use one calculator when you need custom counting rules.</p>
           </div>
         </summary>
 
@@ -12648,6 +12656,84 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
         <span><b aria-hidden="true">⌁</b> Calculator dates stay on this device</span>
         <span><b aria-hidden="true">○</b> No account is required for calculations</span>
       </section>
+
+      <style>{`
+        .calculator-hub-page .calculator-directory-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
+        }
+
+        .calculator-hub-page .calculator-directory-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+        }
+
+        .calculator-hub-page .calculator-directory-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .calculator-hub-page .utility-hub-hero {
+          display: grid !important;
+        }
+
+        .calculator-hub-page .utility-directory-cards {
+          display: grid !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
+
+        .calculator-hub-page .utility-directory-cards .proof-calculator {
+          display: flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+
+        /* The public calculator directory should not advertise VA Workspace. */
+        .calculator-hub-page .workspace-showcase {
+          display: none !important;
+        }
+
+        @media (max-width: 760px) {
+          .calculator-hub-page .calculator-directory-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
+          }
+
+          .calculator-hub-page .calculator-directory-brand img {
+            width: 154px;
+          }
+
+          .calculator-hub-page .utility-hub-hero {
+            display: block !important;
+          }
+
+          .calculator-hub-page .dual-intent-copy {
+            margin-bottom: 14px;
+          }
+
+          .calculator-hub-page .dual-intent-copy h1 {
+            margin-bottom: 8px;
+          }
+
+          .calculator-hub-page .utility-directory-cards {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+
+          .calculator-hub-page .utility-directory-cards .proof-calculator {
+            min-height: 82px !important;
+          }
+        }
+      `}</style>
 
       <SiteFooter onNavigate={onNavigate} />
     </main>
