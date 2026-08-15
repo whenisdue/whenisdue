@@ -12882,21 +12882,21 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-answer-shell {
-            margin-top: 16px;
+            margin-top: 12px;
             border-radius: 24px;
           }
 
           .business-answer-hero {
             min-width: 0;
             overflow: hidden;
-            padding: 26px 20px 22px;
+            padding: 22px 20px 18px;
           }
 
           .business-answer-hero h1 {
             max-width: 100%;
-            margin-top: 10px;
-            font-size: clamp(1.9rem, 8.7vw, 2.8rem);
-            line-height: 1;
+            margin-top: 8px;
+            font-size: clamp(1.7rem, 7.8vw, 2.45rem);
+            line-height: 0.99;
             overflow-wrap: anywhere;
           }
 
@@ -12904,13 +12904,13 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             display: grid;
             justify-items: start;
             max-width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
           }
 
           .business-answer-weekday {
             display: block;
             max-width: 100%;
-            font-size: clamp(2.15rem, 9.5vw, 3rem);
+            font-size: clamp(1.95rem, 8.7vw, 2.7rem);
             line-height: 0.98;
           }
 
@@ -12919,10 +12919,10 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             justify-items: start;
             max-width: 100%;
             gap: 0;
-            margin-top: 5px;
-            font-size: clamp(2.85rem, 13vw, 4.2rem);
+            margin-top: 4px;
+            font-size: clamp(2.55rem, 11.7vw, 3.8rem);
             line-height: 0.9;
-            letter-spacing: -0.055em;
+            letter-spacing: -0.052em;
             white-space: normal;
           }
 
@@ -12938,15 +12938,15 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-answer-rule {
-            margin-top: 22px;
-            font-size: 0.94rem;
-            line-height: 1.4;
+            margin-top: 15px;
+            font-size: 0.86rem;
+            line-height: 1.35;
           }
 
           .business-answer-controls {
             grid-template-columns: 1fr 0.48fr;
-            gap: 12px;
-            padding: 22px 20px 24px;
+            gap: 10px;
+            padding: 16px 20px 18px;
           }
 
           .business-answer-start {
