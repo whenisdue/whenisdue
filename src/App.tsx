@@ -579,7 +579,50 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell deadline-rule-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+      <header className="shipping-editorial-header" aria-label="WhenIsDue navigation">
+        <a
+          className="shipping-editorial-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+          aria-label="WhenIsDue home"
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+
+        <nav className="shipping-editorial-nav" aria-label="Main navigation">
+          <a
+            className="shipping-editorial-home-link"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/')
+            }}
+          >
+            Home
+          </a>
+          <a
+            href="/calculators"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/calculators')
+            }}
+          >
+            Calculators
+          </a>
+          <a
+            href="/workspace"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/workspace')
+            }}
+          >
+            VA Workspace
+          </a>
+        </nav>
+      </header>
 
       <section className="deadline-editorial-hero" aria-label="Deadline calculator answer">
         <div className="deadline-editorial-card">
