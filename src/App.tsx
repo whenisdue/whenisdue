@@ -631,8 +631,32 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
               <span className="deadline-answer-weekday">
                 {formatWeekday(result.answerDate)},
               </span>
-              <span className="deadline-answer-date-main">
-                {formatPlainDate(result.answerDate)}
+              <span className="deadline-answer-date-main" aria-hidden="true">
+                <span className="deadline-answer-month">
+                  {
+                    [
+                      'January',
+                      'February',
+                      'March',
+                      'April',
+                      'May',
+                      'June',
+                      'July',
+                      'August',
+                      'September',
+                      'October',
+                      'November',
+                      'December',
+                    ][result.answerDate.month - 1]
+                  }
+                </span>
+                <span className="deadline-answer-day">
+                  {result.answerDate.day}
+                </span>
+                <span className="deadline-answer-comma">,</span>
+                <span className="deadline-answer-year">
+                  {result.answerDate.year}
+                </span>
               </span>
             </strong>
             <p className="deadline-answer-context">
@@ -1133,10 +1157,27 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         .deadline-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.09em;
+          max-width: 100%;
           margin-top: 6px;
           font-size: clamp(3.7rem, 6.2vw, 6rem);
           line-height: 0.92;
           letter-spacing: -0.055em;
+          white-space: nowrap;
+        }
+
+        .deadline-answer-month,
+        .deadline-answer-day,
+        .deadline-answer-comma,
+        .deadline-answer-year {
+          display: inline;
+        }
+
+        .deadline-answer-comma {
+          margin-left: -0.08em;
         }
 
         .deadline-answer-context {
@@ -1437,8 +1478,22 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           }
 
           .deadline-answer-date-main {
+            display: grid;
+            justify-items: start;
+            gap: 0;
             font-size: clamp(3.05rem, 14vw, 4.6rem);
             line-height: 0.9;
+            white-space: normal;
+          }
+
+          .deadline-answer-month,
+          .deadline-answer-day,
+          .deadline-answer-year {
+            display: block;
+          }
+
+          .deadline-answer-comma {
+            display: none;
           }
 
           .deadline-answer-context {
