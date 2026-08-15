@@ -5101,8 +5101,6 @@ function SubscriptionRenewalCalculatorPage({
     })
   }, [startDate, intervalAmount, intervalUnit, noticeDays])
 
-
-
   const subscriptionIntervalLabel =
     parsedIntervalAmount !== null
       ? `${parsedIntervalAmount} ${
@@ -5124,14 +5122,30 @@ function SubscriptionRenewalCalculatorPage({
         }`
       : 'renewal interval'
 
+  const formatSubscriptionDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
+
   return (
-    <main className="page-shell subscription-lifecycle-page">
+    <main className="page-shell subscription-answer-page">
       <header
-        className="subscription-lifecycle-header"
+        className="subscription-answer-header"
         aria-label="WhenIsDue navigation"
       >
         <a
-          className="subscription-lifecycle-brand"
+          className="subscription-answer-brand"
           href="/"
           onClick={(event) => {
             event.preventDefault()
@@ -5141,289 +5155,248 @@ function SubscriptionRenewalCalculatorPage({
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="subscription-lifecycle-nav" aria-label="Main navigation">
-          <a
-            className="subscription-lifecycle-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
       <section
-        className="subscription-lifecycle-hero"
+        className="subscription-answer-shell"
         aria-labelledby="subscription-renewal-title"
       >
-        <div className="subscription-lifecycle-image-wrap">
-          <img
-            className="subscription-lifecycle-image"
-            src="/homepage-editorial.webp"
-            alt=""
+        <div className="subscription-answer-hero">
+          <p className="subscription-answer-eyebrow">
+            Subscription renewal calculator
+          </p>
+
+          {nextRenewal && parsedStart && parsedIntervalAmount !== null ? (
+            <>
+              <h1 id="subscription-renewal-title">
+                Your subscription renews
+              </h1>
+
+              <strong
+                className="subscription-answer-date"
+                aria-label={`${formatWeekday(nextRenewal)}, ${formatPlainDate(nextRenewal)}`}
+              >
+                <span className="subscription-answer-weekday">
+                  {formatWeekday(nextRenewal)},
+                </span>
+                <span
+                  className="subscription-answer-date-main"
+                  aria-hidden="true"
+                >
+                  <span className="subscription-answer-month">
+                    {
+                      [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December',
+                      ][nextRenewal.month - 1]
+                    }
+                  </span>
+                  <span className="subscription-answer-day">
+                    {nextRenewal.day}
+                  </span>
+                  <span className="subscription-answer-comma">,</span>
+                  <span className="subscription-answer-year">
+                    {nextRenewal.year}
+                  </span>
+                </span>
+              </strong>
+
+              <p className="subscription-answer-context">
+                Every {subscriptionIntervalLabel} · Starting from{' '}
+                {formatSubscriptionDate(parsedStart)}
+              </p>
+
+              {cancellationDeadline ? (
+                <p className="subscription-answer-reminder">
+                  Cancel by{' '}
+                  <strong>
+                    {formatWeekday(cancellationDeadline)},{' '}
+                    {formatSubscriptionDate(cancellationDeadline)}
+                  </strong>
+                </p>
+              ) : (
+                <p className="subscription-answer-reminder">
+                  No advance cancellation notice applied
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <h1 id="subscription-renewal-title">
+                When does my subscription renew?
+              </h1>
+              <p className="subscription-answer-context">
+                Enter a valid date and renewal interval below.
+              </p>
+            </>
+          )}
+        </div>
+
+        <form
+          className="subscription-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            <span>Start or last renewal</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Renews every</span>
+            <input
+              type="number"
+              min="1"
+              max="365"
+              step="1"
+              inputMode="numeric"
+              value={intervalAmount}
+              onChange={(event) => setIntervalAmount(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Interval</span>
+            <select
+              value={intervalUnit}
+              onChange={(event) =>
+                setIntervalUnit(
+                  event.target.value as SubscriptionIntervalUnit,
+                )
+              }
+            >
+              <option value="days">Days</option>
+              <option value="weeks">Weeks</option>
+              <option value="months">Months</option>
+              <option value="years">Years</option>
+            </select>
+          </label>
+
+          <div
+            className="subscription-answer-quick-picks"
+            aria-label="Common renewal intervals"
+          >
+            {[
+              ['Monthly', '1', 'months'],
+              ['Quarterly', '3', 'months'],
+              ['6 months', '6', 'months'],
+              ['Yearly', '1', 'years'],
+            ].map(([label, amount, unit]) => {
+              const active =
+                intervalAmount === amount && intervalUnit === unit
+              return (
+                <button
+                  className={active ? 'is-active' : ''}
+                  type="button"
+                  aria-pressed={active}
+                  key={label}
+                  onClick={() => {
+                    setIntervalAmount(amount)
+                    setIntervalUnit(unit as SubscriptionIntervalUnit)
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+
+          <label className="subscription-answer-notice">
+            <span>Cancel this many days before</span>
+            <input
+              type="number"
+              min="0"
+              max="365"
+              step="1"
+              inputMode="numeric"
+              value={noticeDays}
+              onChange={(event) => setNoticeDays(event.target.value)}
+            />
+          </label>
+        </form>
+      </section>
+
+      {nextRenewal && parsedStart && parsedIntervalAmount !== null ? (
+        <section className="subscription-answer-actions">
+          <ResultActions
+            title="Subscription renewal"
+            date={nextRenewal}
+            details={
+              cancellationDeadline
+                ? `Cancel by ${formatSubscriptionDate(cancellationDeadline)}`
+                : `Renews every ${subscriptionIntervalLabel}`
+            }
+            variant="return-window"
           />
 
-          <div className="subscription-lifecycle-answer">
-            <p className="subscription-lifecycle-eyebrow">
-              Subscription renewal calculator
-            </p>
-            <h1 id="subscription-renewal-title">
-              When does my subscription renew?
-            </h1>
-
-            {nextRenewal && parsedStart && parsedIntervalAmount !== null ? (
-              <>
-                <div className="subscription-lifecycle-primary-answer">
-                  <span>{subscriptionIntervalLabel}</span>
-                  <strong>{formatPlainDate(nextRenewal)}</strong>
-                  <small>{formatWeekday(nextRenewal)}</small>
-                </div>
-
-                <div className="subscription-lifecycle-reminder">
-                  <span>
-                    {cancellationDeadline
-                      ? 'Last day to cancel'
-                      : 'Advance notice'}
-                  </span>
-                  <b>
-                    {cancellationDeadline
-                      ? formatPlainDate(cancellationDeadline)
-                      : 'Not applied'}
-                  </b>
-                </div>
-              </>
-            ) : (
-              <p className="subscription-lifecycle-error">
-                Enter a valid date and renewal interval.
+          <details className="subscription-answer-details">
+            <summary>Why this date?</summary>
+            <div className="subscription-answer-detail-body">
+              <p>
+                WhenIsDue moved forward {subscriptionIntervalLabel} from{' '}
+                {formatSubscriptionDate(parsedStart)}. Month and year intervals
+                are calendar-based. If the target month does not contain the
+                same day number, the calculation uses that month's last day.
               </p>
-            )}
-          </div>
-        </div>
-      </section>
+
+              <CalculationReceipt
+                analyticsContext="subscription_renewal"
+                rows={[
+                  {
+                    label: 'Start / last renewal',
+                    value: `${formatWeekday(parsedStart)}, ${formatPlainDate(parsedStart)}`,
+                  },
+                  {
+                    label: 'Renewal interval',
+                    value: subscriptionIntervalLabel,
+                  },
+                  {
+                    label: 'Next renewal',
+                    value: `${formatWeekday(nextRenewal)}, ${formatPlainDate(nextRenewal)}`,
+                  },
+                  ...(cancellationDeadline
+                    ? [
+                        {
+                          label: 'Advance notice',
+                          value: `${parsedNoticeDays} ${
+                            parsedNoticeDays === 1 ? 'day' : 'days'
+                          }`,
+                        },
+                        {
+                          label: 'Cancel by',
+                          value: `${formatWeekday(cancellationDeadline)}, ${formatPlainDate(cancellationDeadline)}`,
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            </div>
+          </details>
+        </section>
+      ) : null}
 
       <section
-        className="subscription-lifecycle-workspace"
-        aria-label="Subscription renewal calculator"
-      >
-        <div className="subscription-lifecycle-heading">
-          <p className="subscription-section-eyebrow">Your calculation</p>
-          <h2>Set the renewal schedule</h2>
-          <p>The next renewal and cancellation date update immediately.</p>
-        </div>
-
-        <div className="subscription-lifecycle-calculation-grid">
-          <form
-            className="subscription-lifecycle-form"
-            onSubmit={(event) => event.preventDefault()}
-          >
-            <label>
-              <span>Start or last renewal date</span>
-              <input
-                type="date"
-                min="1900-01-01"
-                max="2100-12-31"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-              />
-            </label>
-
-            <div className="subscription-lifecycle-interval-grid">
-              <label>
-                <span>Renews every</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  step="1"
-                  inputMode="numeric"
-                  value={intervalAmount}
-                  onChange={(event) => setIntervalAmount(event.target.value)}
-                />
-              </label>
-
-              <label>
-                <span>Interval</span>
-                <select
-                  value={intervalUnit}
-                  onChange={(event) =>
-                    setIntervalUnit(
-                      event.target.value as SubscriptionIntervalUnit,
-                    )
-                  }
-                >
-                  <option value="days">Days</option>
-                  <option value="weeks">Weeks</option>
-                  <option value="months">Months</option>
-                  <option value="years">Years</option>
-                </select>
-              </label>
-            </div>
-
-            <div
-              className="subscription-lifecycle-quick-picks"
-              aria-label="Common renewal intervals"
-            >
-              {[
-                ['Monthly', '1', 'months'],
-                ['Quarterly', '3', 'months'],
-                ['6 months', '6', 'months'],
-                ['Yearly', '1', 'years'],
-              ].map(([label, amount, unit]) => {
-                const isActive =
-                  intervalAmount === amount && intervalUnit === unit
-                return (
-                  <button
-                    className={isActive ? 'is-active' : ''}
-                    type="button"
-                    aria-pressed={isActive}
-                    key={label}
-                    onClick={() => {
-                      setIntervalAmount(amount)
-                      setIntervalUnit(unit as SubscriptionIntervalUnit)
-                    }}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
-            </div>
-
-            <label>
-              <span>Cancel this many days before renewal</span>
-              <input
-                type="number"
-                min="0"
-                max="365"
-                step="1"
-                inputMode="numeric"
-                value={noticeDays}
-                onChange={(event) => setNoticeDays(event.target.value)}
-              />
-              <small>Use 0 if the plan has no advance-notice rule.</small>
-            </label>
-          </form>
-
-          <section className="subscription-lifecycle-result" aria-live="polite">
-            {nextRenewal &&
-            parsedStart &&
-            parsedIntervalAmount !== null &&
-            parsedIntervalAmount >= 1 ? (
-              <>
-                <p className="subscription-result-kicker">Next renewal</p>
-                <p className="subscription-result-date">
-                  {formatPlainDate(nextRenewal)}
-                </p>
-                <p className="subscription-result-weekday">
-                  {formatWeekday(nextRenewal)}
-                </p>
-
-                <div className="subscription-result-summary">
-                  <span>{subscriptionIntervalLabel}</span>
-                  <small>after {formatPlainDate(parsedStart)}</small>
-                </div>
-
-                {cancellationDeadline && parsedNoticeDays ? (
-                  <div className="subscription-cancel-card">
-                    <small>Last day to cancel</small>
-                    <strong>{formatPlainDate(cancellationDeadline)}</strong>
-                    <span>{formatWeekday(cancellationDeadline)}</span>
-                    <p>{parsedNoticeDays} calendar days before renewal.</p>
-                  </div>
-                ) : (
-                  <div className="subscription-cancel-card is-neutral">
-                    <small>Advance cancellation notice</small>
-                    <strong>Not applied</strong>
-                    <p>
-                      Enter a notice period above if your plan requires one.
-                    </p>
-                  </div>
-                )}
-
-                <p className="subscription-result-note">
-                  This projects the next billing date from the date and interval
-                  you enter. Provider time zones, billing cut-off times,
-                  trial-conversion rules, and grace periods can change the
-                  actual charge or cancellation deadline.
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="subscription_renewal"
-                  rows={[
-                    {
-                      label: 'Start / last renewal date',
-                      value: `${formatWeekday(parsedStart)}, ${formatPlainDate(parsedStart)}`,
-                    },
-                    {
-                      label: 'Renewal interval',
-                      value: subscriptionIntervalLabel,
-                    },
-                    {
-                      label: 'Next renewal',
-                      value: `${formatWeekday(nextRenewal)}, ${formatPlainDate(nextRenewal)}`,
-                    },
-                    ...(cancellationDeadline && parsedNoticeDays
-                      ? [
-                          {
-                            label: 'Advance notice',
-                            value: `${parsedNoticeDays} calendar days`,
-                          },
-                          {
-                            label: 'Last day to cancel',
-                            value: `${formatWeekday(cancellationDeadline)}, ${formatPlainDate(cancellationDeadline)}`,
-                          },
-                        ]
-                      : []),
-                  ]}
-                />
-
-                <ResultActions
-                  title="Subscription renewal date"
-                  date={nextRenewal}
-                  details={
-                    cancellationDeadline
-                      ? `Last day to cancel: ${formatPlainDate(cancellationDeadline)}`
-                      : `${subscriptionIntervalLabel} after ${formatPlainDate(parsedStart)}`
-                  }
-                />
-              </>
-            ) : (
-              <p className="subscription-lifecycle-error">
-                Enter a valid date and renewal interval.
-              </p>
-            )}
-          </section>
-        </div>
-      </section>
-
-      <section
-        className="subscription-lifecycle-related"
-        aria-label="Related lifecycle tools"
+        className="subscription-answer-related"
+        aria-label="Related subscription timing tools"
       >
         <div>
-          <p className="subscription-section-eyebrow">Related lifecycle tools</p>
-          <h2>Before and after renewal</h2>
+          <p className="subscription-answer-section-eyebrow">Related tools</p>
+          <h2>Need another renewal or cancellation date?</h2>
         </div>
 
         <nav>
@@ -5434,7 +5407,7 @@ function SubscriptionRenewalCalculatorPage({
               onNavigate('/free-trial-calculator')
             }}
           >
-            Free trial calculator <span aria-hidden="true">→</span>
+            Free trial calculator
           </a>
           <a
             href="/notice-period-calculator"
@@ -5443,7 +5416,7 @@ function SubscriptionRenewalCalculatorPage({
               onNavigate('/notice-period-calculator')
             }}
           >
-            Notice period calculator <span aria-hidden="true">→</span>
+            Notice period calculator
           </a>
           <a
             href="/deadline-calculator"
@@ -5452,322 +5425,235 @@ function SubscriptionRenewalCalculatorPage({
               onNavigate('/deadline-calculator')
             }}
           >
-            Deadline calculator <span aria-hidden="true">→</span>
+            Deadline calculator
           </a>
         </nav>
       </section>
 
       <section
-        className="subscription-lifecycle-content"
+        className="subscription-answer-content"
         aria-label="Subscription renewal help"
       >
-        <div className="subscription-content-heading">
-          <p className="subscription-section-eyebrow">Renewal timing rules</p>
+        <div className="subscription-answer-content-heading">
+          <p className="subscription-answer-section-eyebrow">
+            Renewal timing rules
+          </p>
           <h2>Start, interval, renewal</h2>
         </div>
 
         <article>
           <h2>How this calculator works</h2>
           <p>
-            Enter the start date or most recent renewal date, then choose how
-            often the subscription renews. WhenIsDue projects the next renewal
-            date from that schedule.
+            Enter the subscription start date or most recent renewal date, then
+            choose how often the plan renews. WhenIsDue shows the next renewal
+            date immediately.
           </p>
         </article>
 
         <article>
-          <h2>How monthly renewals are handled</h2>
+          <h2>Monthly and yearly renewals</h2>
           <p>
-            Monthly and yearly intervals try to keep the same day number. If
-            the target month does not contain that day, the calculator uses the
-            last day of that month.
+            Month and year intervals are calendar-based. If a renewal started on
+            a date that does not exist in the target month, the calculator uses
+            the last day of that month.
           </p>
         </article>
 
         <article>
-          <h2>How the cancellation deadline is calculated</h2>
+          <h2>Advance cancellation notice</h2>
           <p>
-            If the subscription requires advance notice, enter the number of
-            calendar days required before renewal. WhenIsDue counts backward
-            from the projected renewal date.
+            If the provider requires cancellation a certain number of days
+            before renewal, enter that number to show a separate cancel-by date.
+            Use zero when there is no known advance-notice requirement.
           </p>
         </article>
 
         <article>
-          <h2>What to confirm with the provider</h2>
-          <ul>
-            <li>The exact renewal date shown in your account</li>
-            <li>The billing time and time zone</li>
-            <li>Any required cancellation-notice period</li>
-            <li>Trial-conversion, grace-period, or refund rules</li>
-          </ul>
+          <h2>Check the provider's actual terms</h2>
+          <p>
+            Some subscriptions renew at a specific time, in a specific time
+            zone, or under billing rules that differ from simple calendar
+            counting. The provider's displayed renewal date and cancellation
+            terms should take priority.
+          </p>
         </article>
 
         <article>
-          <h2>Subscription renewal FAQ</h2>
-          <dl>
-            <dt>Does a monthly subscription always renew on the same date?</dt>
-            <dd>
-              Usually it follows the same day number, but shorter months and
-              provider rules can move the billing date.
-            </dd>
-            <dt>What if my plan says cancel 7 days before renewal?</dt>
-            <dd>
-              Enter 7 in the notice field. The calculator will show a projected
-              last day to cancel seven calendar days before the renewal date.
-            </dd>
-            <dt>Does this include billing time zones?</dt>
-            <dd>
-              No. This calculator works with calendar dates only. Use the
-              provider's displayed billing time and time zone when the cutoff
-              matters.
-            </dd>
-            <dt>Can a trial and subscription use different renewal rules?</dt>
-            <dd>
-              Yes. Trial conversion can follow different timing from later
-              recurring billing. Check the service's actual renewal terms.
-            </dd>
-          </dl>
+          <h2>Important</h2>
+          <p>
+            This is a planning calculator. It does not determine whether a
+            cancellation request has been received, accepted, or processed by a
+            provider.
+          </p>
         </article>
       </section>
 
       <SiteFooter
         onNavigate={onNavigate}
-        planningNote="For planning only. Subscription providers can use different billing dates, time zones, cut-off times, trial rules, and cancellation policies."
+        planningNote="For planning only. Always confirm the provider's renewal date, cancellation deadline, billing time, and time zone."
       />
 
       <style>{`
-        .subscription-lifecycle-page {
-          --sub-navy: #112f53;
-          --sub-green: #2d7c67;
-          --sub-blue: #eef5f8;
-          --sub-warm: #f2ede4;
+        .subscription-answer-page {
+          --subscription-ink: #153553;
+          --subscription-muted: #667a8d;
+          --subscription-accent: #2d7b64;
+          --subscription-field: #eee5f2;
+          --subscription-field-soft: #f6f0f7;
+          min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .subscription-lifecycle-header {
-          width: min(100% - 32px, 1130px);
-          min-height: 70px;
-          margin: 0 auto 14px;
+        .subscription-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+          border-bottom: 1px solid rgba(21, 53, 83, 0.12);
         }
 
-        .subscription-lifecycle-brand {
+        .subscription-answer-brand {
           display: inline-flex;
           align-items: center;
           text-decoration: none;
         }
 
-        .subscription-lifecycle-brand img {
+        .subscription-answer-brand img {
           display: block;
           width: 176px;
           height: auto;
         }
 
-        .subscription-lifecycle-nav {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-        }
-
-        .subscription-lifecycle-nav a {
-          color: #5a728d;
-          font-size: 0.9rem;
-          font-weight: 850;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .subscription-lifecycle-hero,
-        .subscription-lifecycle-workspace,
-        .subscription-lifecycle-related,
-        .subscription-lifecycle-content {
-          width: min(100% - 32px, 1130px);
+        .subscription-answer-shell,
+        .subscription-answer-actions,
+        .subscription-answer-related,
+        .subscription-answer-content {
+          width: min(100% - 32px, 1100px);
           margin-left: auto;
           margin-right: auto;
         }
 
-        .subscription-lifecycle-image-wrap {
-          position: relative;
-          min-height: 470px;
-          overflow: hidden;
-          border: 1px solid rgba(17, 47, 83, 0.12);
-          border-radius: 28px;
-          background: #d8c8b3;
+        .subscription-answer-shell {
+          margin-top: 22px;
         }
 
-        .subscription-lifecycle-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
+        .subscription-answer-hero {
+          padding: clamp(42px, 6vw, 68px) clamp(24px, 5vw, 58px) 34px;
+          border: 1px solid rgba(88, 66, 105, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--subscription-field);
+          text-align: center;
         }
 
-        .subscription-lifecycle-image-wrap::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            90deg,
-            rgba(11, 24, 39, 0.12),
-            rgba(11, 24, 39, 0.01) 58%,
-            rgba(11, 24, 39, 0)
-          );
-          pointer-events: none;
-        }
-
-        .subscription-lifecycle-answer {
-          position: relative;
-          z-index: 1;
-          width: min(500px, calc(100% - 64px));
-          margin: 32px;
-          padding: 32px 34px 28px;
-          border: 1px solid rgba(255, 255, 255, 0.45);
-          border-radius: 24px;
-          background: rgba(250, 247, 239, 0.94);
-          box-shadow: 0 18px 52px rgba(11, 24, 39, 0.15);
-          backdrop-filter: blur(10px);
-        }
-
-        .subscription-lifecycle-eyebrow,
-        .subscription-section-eyebrow {
+        .subscription-answer-eyebrow,
+        .subscription-answer-section-eyebrow {
           margin: 0;
-          color: var(--sub-green);
-          font-size: 0.78rem;
+          color: var(--subscription-accent);
+          font-size: 0.8rem;
           font-weight: 950;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .subscription-lifecycle-answer h1 {
+        .subscription-answer-hero h1 {
           margin: 10px 0 0;
-          color: var(--sub-navy);
-          font-size: clamp(2.65rem, 5vw, 4.5rem);
-          line-height: 0.97;
+          color: var(--subscription-ink);
+          font-size: clamp(2.8rem, 5.8vw, 5rem);
+          line-height: 0.98;
           letter-spacing: -0.05em;
           text-wrap: balance;
         }
 
-        .subscription-lifecycle-primary-answer {
+        .subscription-answer-date {
           display: grid;
-          gap: 4px;
-          margin-top: 22px;
-          padding-top: 18px;
-          border-top: 1px solid rgba(17, 47, 83, 0.11);
-        }
-
-        .subscription-lifecycle-primary-answer span {
-          color: #687e91;
-          font-size: 0.95rem;
-          font-weight: 850;
-        }
-
-        .subscription-lifecycle-primary-answer strong {
-          color: var(--sub-navy);
-          font-size: clamp(2.15rem, 4vw, 3.4rem);
-          line-height: 1;
-          letter-spacing: -0.045em;
-        }
-
-        .subscription-lifecycle-primary-answer small {
-          color: #5e7489;
-          font-size: 1rem;
-          font-weight: 800;
-        }
-
-        .subscription-lifecycle-reminder {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 14px;
-          margin-top: 18px;
-          padding: 13px 14px;
-          border-radius: 14px;
-          background: rgba(238, 245, 248, 0.92);
-        }
-
-        .subscription-lifecycle-reminder span {
-          color: #667e91;
-          font-size: 0.78rem;
+          justify-items: center;
+          margin-top: 26px;
+          color: var(--subscription-ink);
           font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
         }
 
-        .subscription-lifecycle-reminder b {
-          color: #24435f;
-          font-size: 0.95rem;
-        }
-
-        .subscription-lifecycle-workspace {
-          margin-top: 22px;
-          padding: 30px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 26px;
-          background: #fffdf9;
-        }
-
-        .subscription-lifecycle-heading h2,
-        .subscription-lifecycle-related h2,
-        .subscription-content-heading h2 {
-          margin: 6px 0 0;
-          color: var(--sub-navy);
-          font-size: clamp(2rem, 3.7vw, 3.15rem);
-          line-height: 1;
+        .subscription-answer-weekday {
+          color: #3e647c;
+          font-size: clamp(2.5rem, 4.4vw, 4rem);
+          line-height: 0.98;
           letter-spacing: -0.04em;
-          text-wrap: balance;
         }
 
-        .subscription-lifecycle-heading > p:last-child {
-          margin: 8px 0 0;
-          color: #6b7f92;
+        .subscription-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.09em;
+          max-width: 100%;
+          margin-top: 6px;
+          font-size: clamp(3.7rem, 6.2vw, 6rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          white-space: nowrap;
         }
 
-        .subscription-lifecycle-calculation-grid {
+        .subscription-answer-month,
+        .subscription-answer-day,
+        .subscription-answer-comma,
+        .subscription-answer-year {
+          display: inline;
+        }
+
+        .subscription-answer-comma {
+          margin-left: -0.08em;
+        }
+
+        .subscription-answer-context {
+          margin: 18px 0 0;
+          color: var(--subscription-muted);
+          font-size: 0.98rem;
+          line-height: 1.5;
+        }
+
+        .subscription-answer-reminder {
+          width: fit-content;
+          margin: 16px auto 0;
+          padding: 9px 13px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.64);
+          color: #607286;
+          font-size: 0.9rem;
+        }
+
+        .subscription-answer-reminder strong {
+          color: #294c66;
+        }
+
+        .subscription-answer-controls {
           display: grid;
-          grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.28fr);
-          gap: 16px;
-          margin-top: 22px;
+          grid-template-columns: minmax(0, 1.2fr) minmax(110px, 0.5fr) minmax(170px, 0.72fr) minmax(360px, 1.5fr);
+          gap: 12px;
+          align-items: end;
+          padding: 18px;
+          border: 1px solid rgba(88, 66, 105, 0.12);
+          border-top: 1px solid rgba(88, 66, 105, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--subscription-field-soft);
         }
 
-        .subscription-lifecycle-form {
-          display: grid;
-          gap: 15px;
-          align-content: start;
-          padding: 22px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 18px;
-          background: var(--sub-warm);
-        }
-
-        .subscription-lifecycle-form label {
+        .subscription-answer-controls label {
           display: grid;
           gap: 7px;
         }
 
-        .subscription-lifecycle-form label > span {
-          color: #566f87;
+        .subscription-answer-controls label > span {
+          color: #526a82;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 850;
         }
 
-        .subscription-lifecycle-form label > small {
-          color: #6d8196;
-          font-size: 0.82rem;
-          line-height: 1.4;
-        }
-
-        .subscription-lifecycle-form input,
-        .subscription-lifecycle-form select {
+        .subscription-answer-controls input,
+        .subscription-answer-controls select {
           width: 100%;
           min-height: 50px;
           padding: 10px 12px;
-          border: 1px solid rgba(17, 47, 83, 0.16);
+          border: 1px solid rgba(21, 53, 83, 0.14);
           border-radius: 11px;
           background: #fff;
           color: #17304d;
@@ -5775,435 +5661,281 @@ function SubscriptionRenewalCalculatorPage({
           font-size: 1rem;
         }
 
-        .subscription-lifecycle-interval-grid,
-        .subscription-lifecycle-quick-picks {
+        .subscription-answer-quick-picks {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 7px;
         }
 
-        .subscription-lifecycle-quick-picks button {
-          min-height: 44px;
-          border: 1px solid rgba(17, 47, 83, 0.13);
+        .subscription-answer-quick-picks button {
+          min-height: 50px;
+          padding: 8px 9px;
+          border: 1px solid rgba(21, 53, 83, 0.13);
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.78);
+          background: rgba(255, 255, 255, 0.82);
           color: #4f6780;
           font: inherit;
-          font-size: 0.82rem;
+          font-size: 0.8rem;
           font-weight: 850;
           cursor: pointer;
         }
 
-        .subscription-lifecycle-quick-picks button.is-active {
-          border-color: rgba(45, 124, 103, 0.6);
-          background: #e8f4ef;
-          color: #1f6656;
-          box-shadow: inset 0 0 0 1px rgba(45, 124, 103, 0.18);
+        .subscription-answer-quick-picks button.is-active {
+          border-color: rgba(45, 123, 100, 0.58);
+          background: #e7f3ee;
+          color: #1f6655;
         }
 
-        .subscription-lifecycle-result {
-          min-width: 0;
-          padding: 30px 34px;
-          border-radius: 20px;
-          background: var(--sub-navy);
-          color: #f8f1e6;
+        .subscription-answer-notice {
+          grid-column: 1 / 2;
+          margin-top: 2px;
         }
 
-        .subscription-result-kicker {
-          margin: 0;
-          color: #9fc6b4;
-          font-size: 0.76rem;
-          font-weight: 950;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-        }
-
-        .subscription-result-date {
-          margin: 10px 0 0;
-          color: #fff8ec;
-          font-size: clamp(3.5rem, 7vw, 6.2rem);
-          font-weight: 850;
-          line-height: 0.92;
-          letter-spacing: -0.055em;
-          text-wrap: balance;
-        }
-
-        .subscription-result-weekday {
-          margin: 10px 0 0;
-          color: #d5dfea;
-          font-size: 1.1rem;
-          font-weight: 800;
-        }
-
-        .subscription-result-summary {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 8px 12px;
+        .subscription-answer-actions {
           margin-top: 16px;
         }
 
-        .subscription-result-summary span {
-          display: inline-flex;
-          align-items: center;
-          min-height: 30px;
-          padding: 5px 10px;
-          border: 1px solid rgba(223, 189, 122, 0.55);
-          border-radius: 999px;
-          background: #fff7e8;
-          color: #7b4f26;
-          font-size: 0.82rem;
-          font-weight: 900;
+        .subscription-answer-actions > .result-actions {
+          justify-content: center;
         }
 
-        .subscription-result-summary small,
-        .subscription-result-note,
-        .subscription-cancel-card p {
-          color: #c8d4df;
-        }
-
-        .subscription-cancel-card {
-          display: grid;
-          gap: 3px;
-          margin-top: 18px;
-          padding: 14px 16px;
+        .subscription-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(21, 53, 83, 0.1);
           border-radius: 14px;
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(255, 255, 255, 0.74);
         }
 
-        .subscription-cancel-card small {
-          color: #9fc6b4;
-          font-size: 0.75rem;
+        .subscription-answer-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
           font-weight: 900;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
+          cursor: pointer;
         }
 
-        .subscription-cancel-card strong {
-          color: #fff8ec;
-          font-size: 1.15rem;
+        .subscription-answer-detail-body {
+          padding: 0 14px 16px;
         }
 
-        .subscription-cancel-card span {
-          color: #d5dfea;
-          font-size: 0.88rem;
-          font-weight: 800;
-        }
-
-        .subscription-cancel-card p {
-          margin: 3px 0 0;
-          font-size: 0.86rem;
-        }
-
-        .subscription-result-note {
-          max-width: 720px;
-          margin: 18px 0 0;
+        .subscription-answer-detail-body > p {
+          max-width: 760px;
+          margin: 0;
+          color: #61768a;
           font-size: 0.95rem;
-          line-height: 1.52;
+          line-height: 1.58;
         }
 
-        .subscription-lifecycle-result .calculation-receipt {
-          margin-top: 18px;
+        .subscription-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
         }
 
-        .subscription-lifecycle-result .result-actions {
-          margin-top: 14px;
+        .subscription-answer-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 53, 83, 0.1);
+          border-radius: 22px;
+          background: #f2edf4;
         }
 
-        .subscription-lifecycle-related {
-          margin-top: 22px;
-          padding: 24px 28px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 24px;
-          background: var(--sub-blue);
+        .subscription-answer-related h2,
+        .subscription-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--subscription-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
         }
 
-        .subscription-lifecycle-related nav {
+        .subscription-answer-related nav {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 8px;
-          margin-top: 16px;
+          margin-top: 14px;
         }
 
-        .subscription-lifecycle-related a {
+        .subscription-answer-related a {
+          min-height: 52px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          min-height: 58px;
-          padding: 12px 14px;
-          border: 1px solid rgba(17, 47, 83, 0.12);
+          justify-content: center;
+          padding: 10px 13px;
+          border: 1px solid rgba(21, 53, 83, 0.11);
           border-radius: 12px;
-          background: rgba(255, 255, 255, 0.82);
-          color: #24425e;
+          background: #fff;
+          color: #35536e;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 850;
           text-decoration: none;
         }
 
-        .subscription-lifecycle-related a span {
-          color: var(--sub-green);
-          font-size: 1.05rem;
-        }
-
-        .subscription-lifecycle-content {
-          margin-top: 38px;
+        .subscription-answer-content {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 12px;
+          margin-top: 34px;
         }
 
-        .subscription-content-heading {
+        .subscription-answer-content-heading {
           grid-column: 1 / -1;
-          margin-bottom: 4px;
+          margin-bottom: 3px;
         }
 
-        .subscription-lifecycle-content article {
-          padding: 22px;
-          border: 1px solid rgba(17, 47, 83, 0.09);
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.72);
+        .subscription-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(21, 53, 83, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
         }
 
-        .subscription-lifecycle-content article:last-child {
+        .subscription-answer-content article:last-child {
           grid-column: 1 / -1;
         }
 
-        .subscription-lifecycle-content article h2 {
+        .subscription-answer-content h2 {
           margin: 0;
-          color: var(--sub-navy);
+          color: var(--subscription-ink);
           font-size: 1.08rem;
         }
 
-        .subscription-lifecycle-content article p,
-        .subscription-lifecycle-content article li,
-        .subscription-lifecycle-content article dd {
+        .subscription-answer-content p {
+          margin: 8px 0 0;
           color: #65798d;
           line-height: 1.55;
         }
 
-        .subscription-lifecycle-content article dl {
-          margin: 14px 0 0;
-        }
-
-        .subscription-lifecycle-content article dt {
-          margin: 16px 0 0;
-          color: var(--sub-navy);
-          font-weight: 850;
-        }
-
-        .subscription-lifecycle-content article dd {
-          margin: 4px 0 0;
-        }
-
         @media (max-width: 760px) {
-          .subscription-lifecycle-header {
+          .subscription-answer-header {
             width: min(100% - 24px, 680px);
-            min-height: 58px;
-            margin-bottom: 12px;
-            gap: 12px;
+            min-height: 76px;
           }
 
-          .subscription-lifecycle-brand img {
+          .subscription-answer-brand img {
             width: 154px;
           }
 
-          .subscription-lifecycle-nav {
-            gap: 12px;
-          }
-
-          .subscription-lifecycle-nav a {
-            font-size: 0.8rem;
-          }
-
-          .subscription-lifecycle-home-link {
-            display: none;
-          }
-
-          .subscription-lifecycle-hero,
-          .subscription-lifecycle-workspace,
-          .subscription-lifecycle-related,
-          .subscription-lifecycle-content {
+          .subscription-answer-shell,
+          .subscription-answer-actions,
+          .subscription-answer-related,
+          .subscription-answer-content {
             width: min(100% - 24px, 680px);
           }
 
-          .subscription-lifecycle-image-wrap {
-            min-height: 465px;
-            border-radius: 24px;
-          }
-
-          .subscription-lifecycle-image {
-            object-position: 58% center;
-          }
-
-          .subscription-lifecycle-answer {
-            position: absolute;
-            left: 16px;
-            right: 16px;
-            bottom: 16px;
-            width: auto;
-            margin: 0;
-            padding: 18px;
-            border-radius: 18px;
-          }
-
-          .subscription-lifecycle-answer h1 {
-            font-size: clamp(2.05rem, 9.3vw, 2.85rem);
-          }
-
-          .subscription-lifecycle-primary-answer {
+          .subscription-answer-shell {
             margin-top: 14px;
-            padding-top: 12px;
           }
 
-          .subscription-lifecycle-primary-answer strong {
-            font-size: clamp(1.95rem, 8.8vw, 2.6rem);
+          .subscription-answer-hero {
+            padding: 28px 20px 26px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .subscription-lifecycle-reminder {
-            margin-top: 13px;
-            padding: 11px 12px;
+          .subscription-answer-hero h1 {
+            font-size: clamp(2.65rem, 12vw, 4rem);
           }
 
-          .subscription-lifecycle-workspace {
-            margin-top: 14px;
-            padding: 22px 18px;
-            border-radius: 22px;
+          .subscription-answer-date {
+            justify-items: start;
+            margin-top: 22px;
           }
 
-          .subscription-lifecycle-heading h2,
-          .subscription-lifecycle-related h2,
-          .subscription-content-heading h2 {
-            font-size: clamp(1.9rem, 8.5vw, 2.55rem);
+          .subscription-answer-weekday {
+            font-size: clamp(2.3rem, 10vw, 3.2rem);
           }
 
-          .subscription-lifecycle-calculation-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 18px;
-          }
-
-          .subscription-lifecycle-form {
-            padding: 18px;
-          }
-
-          .subscription-lifecycle-result {
-            padding: 22px 18px 18px;
-          }
-
-          .subscription-result-date {
-            font-size: clamp(2.9rem, 11.5vw, 4.2rem);
-          }
-
-          .subscription-result-note {
-            font-size: 0.92rem;
-            line-height: 1.48;
-          }
-
-          .subscription-lifecycle-result .result-actions {
+          .subscription-answer-date-main {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            justify-items: start;
+            gap: 0;
+            font-size: clamp(3.05rem, 14vw, 4.6rem);
+            line-height: 0.9;
+            white-space: normal;
           }
 
-          .subscription-lifecycle-result .result-actions button,
-          .subscription-lifecycle-result .result-actions a {
-            width: 100%;
-            min-height: 46px;
-            padding: 9px 10px;
-            font-size: 0.82rem;
+          .subscription-answer-month,
+          .subscription-answer-day,
+          .subscription-answer-year {
+            display: block;
           }
 
-          .subscription-lifecycle-result .result-actions > :last-child {
+          .subscription-answer-comma {
+            display: none;
+          }
+
+          .subscription-answer-context,
+          .subscription-answer-reminder {
+            margin-left: 0;
+            margin-right: 0;
+          }
+
+          .subscription-answer-reminder {
+            border-radius: 12px;
+          }
+
+          .subscription-answer-controls {
+            grid-template-columns: minmax(0, 1.15fr) minmax(95px, 0.55fr);
+            gap: 10px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
+          }
+
+          .subscription-answer-controls > label:nth-child(3) {
             grid-column: 1 / -1;
           }
 
-          .subscription-lifecycle-related {
-            margin-top: 14px;
+          .subscription-answer-quick-picks {
+            grid-column: 1 / -1;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .subscription-answer-notice {
+            grid-column: 1 / -1;
+          }
+
+          .subscription-answer-controls input,
+          .subscription-answer-controls select,
+          .subscription-answer-quick-picks button {
+            min-height: 46px;
+          }
+
+          .subscription-answer-related {
             padding: 20px 18px;
-            border-radius: 22px;
           }
 
-          .subscription-lifecycle-related nav {
+          .subscription-answer-related nav {
             grid-template-columns: 1fr;
-            gap: 7px;
           }
 
-          .subscription-lifecycle-content {
+          .subscription-answer-content {
             display: block;
             margin-top: 28px;
           }
 
-          .subscription-content-heading {
+          .subscription-answer-content-heading {
             margin-bottom: 8px;
           }
 
-          .subscription-lifecycle-content article {
+          .subscription-answer-content article {
             padding: 20px 2px;
             border: 0;
-            border-top: 1px solid rgba(17, 47, 83, 0.1);
+            border-top: 1px solid rgba(21, 53, 83, 0.1);
             border-radius: 0;
             background: transparent;
           }
 
-          .subscription-lifecycle-content article h2 {
-            font-size: 1.08rem;
-            line-height: 1.3;
-          }
-
-          .subscription-lifecycle-content article p,
-          .subscription-lifecycle-content article li,
-          .subscription-lifecycle-content article dd {
+          .subscription-answer-content p {
             font-size: 0.94rem;
             line-height: 1.52;
-          }
-
-          .subscription-lifecycle-content article dt {
-            margin-top: 18px;
-          }
-        }
-
-        @media (max-width: 430px) {
-          .subscription-lifecycle-brand img {
-            width: 142px;
-          }
-
-          .subscription-lifecycle-nav {
-            gap: 10px;
-          }
-
-          .subscription-lifecycle-nav a {
-            font-size: 0.76rem;
-          }
-
-          .subscription-lifecycle-image-wrap {
-            min-height: 440px;
-          }
-
-          .subscription-lifecycle-answer {
-            left: 14px;
-            right: 14px;
-            bottom: 14px;
-            padding: 16px;
-          }
-
-          .subscription-lifecycle-eyebrow {
-            font-size: 0.7rem;
-          }
-
-          .subscription-lifecycle-reminder span {
-            font-size: 0.68rem;
-          }
-
-          .subscription-lifecycle-reminder b {
-            font-size: 0.84rem;
           }
         }
       `}</style>
     </main>
   )
 }
-
 function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
   const [amount, setAmount] = useState(() =>
     getInitialPositiveIntegerQueryParam('amount', '5', 365),
