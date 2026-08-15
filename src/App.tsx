@@ -15094,24 +15094,36 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
 }
 
 function FreeTrialPage({ onNavigate }: NavigationProps) {
-  const [startDate, setStartDate] = useState(() => getInitialDateQueryParam('start', todayInputValue()))
+  const [startDate, setStartDate] = useState(() =>
+    getInitialDateQueryParam('start', todayInputValue()),
+  )
   const [trialLength, setTrialLength] = useState(() =>
     getInitialPositiveIntegerQueryParam('days', '7', getAmountLimit('trial')),
   )
   const [title, setTitle] = useState(getDefaultTitle('trial'))
-  const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() => loadSavedDeadlines())
+  const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() =>
+    loadSavedDeadlines(),
+  )
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
 
   const parsedStartDate = parsePlainDate(startDate)
   const parsedTrialLength = parseInteger(trialLength)
-  const validationMessage = getTrialValidationMessage(parsedStartDate, parsedTrialLength)
+  const validationMessage = getTrialValidationMessage(
+    parsedStartDate,
+    parsedTrialLength,
+  )
   const titleValidationMessage = getSaveTitleValidationMessage(title)
-  const trialEndDate = parsedStartDate && parsedTrialLength !== null && !validationMessage
-    ? addCalendarDays(parsedStartDate, parsedTrialLength)
-    : null
+  const trialEndDate =
+    parsedStartDate && parsedTrialLength !== null && !validationMessage
+      ? addCalendarDays(parsedStartDate, parsedTrialLength)
+      : null
   const cancelByDate = trialEndDate ? addCalendarDays(trialEndDate, -1) : null
-  const calendarDaysFromStart = parsedStartDate && trialEndDate ? daysBetween(parsedStartDate, trialEndDate) : 0
-  const canSave = Boolean(trialEndDate && parsedStartDate && !validationMessage && !titleValidationMessage)
+  const canSave = Boolean(
+    trialEndDate &&
+      parsedStartDate &&
+      !validationMessage &&
+      !titleValidationMessage,
+  )
 
   useEffect(() => {
     syncShareableQueryParams({ start: startDate, days: trialLength })
@@ -15150,10 +15162,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
   }
 
   return (
-    <main className="page-shell free-trial-page trial-editorial-page">
-      <header className="trial-editorial-header" aria-label="WhenIsDue navigation">
+    <main className="page-shell free-trial-answer-page">
+      <header className="free-trial-answer-header" aria-label="WhenIsDue navigation">
         <a
-          className="trial-editorial-brand"
+          className="free-trial-answer-brand"
           href="/"
           onClick={(event) => {
             event.preventDefault()
@@ -15163,201 +15175,228 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="trial-editorial-nav" aria-label="Main navigation">
-          <a
-            className="trial-editorial-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
-      <section className="trial-editorial-hero" aria-labelledby="free-trial-title">
-        <div className="trial-editorial-image-wrap">
-          <img
-            className="trial-editorial-image"
-            src="/homepage-editorial.webp"
-            alt="Warm editorial still life with papers and small packages arranged in a quiet architectural setting"
+      <section
+        className="free-trial-answer-shell"
+        aria-labelledby="free-trial-title"
+      >
+        <div className="free-trial-answer-hero">
+          <p className="free-trial-answer-eyebrow">Free trial calculator</p>
+
+          {trialEndDate && parsedStartDate && parsedTrialLength !== null ? (
+            <>
+              <h1 id="free-trial-title">Your free trial ends</h1>
+              <strong
+                className="free-trial-answer-date"
+                aria-label={`${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}`}
+              >
+                <span className="free-trial-answer-weekday">
+                  {formatWeekday(trialEndDate)},
+                </span>
+                <span className="free-trial-answer-date-main" aria-hidden="true">
+                  <span className="free-trial-answer-month">
+                    {
+                      [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December',
+                      ][trialEndDate.month - 1]
+                    }
+                  </span>
+                  <span className="free-trial-answer-day">
+                    {trialEndDate.day}
+                  </span>
+                  <span className="free-trial-answer-comma">,</span>
+                  <span className="free-trial-answer-year">
+                    {trialEndDate.year}
+                  </span>
+                </span>
+              </strong>
+
+              <p className="free-trial-answer-context">
+                {parsedTrialLength}-day trial · Starts {formatPlainDate(parsedStartDate)}
+              </p>
+
+              {cancelByDate ? (
+                <p className="free-trial-answer-reminder">
+                  Suggested reminder: <strong>{formatWeekday(cancelByDate)}, {formatPlainDate(cancelByDate)}</strong>
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <h1 id="free-trial-title">When does my free trial end?</h1>
+              <p className="free-trial-answer-context">
+                Enter a valid start date and trial length below.
+              </p>
+            </>
+          )}
+        </div>
+
+        <div className="free-trial-answer-controls">
+          <label>
+            <span>Trial starts</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={startDate}
+              onChange={(event) => {
+                setStartDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'free_trial',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <label>
+            <span>Trial length</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="1"
+              max={getAmountLimit('trial')}
+              value={trialLength}
+              onChange={(event) => {
+                setTrialLength(event.target.value)
+                trackWhenIsDueEvent('number_changed', {
+                  context: 'free_trial',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <div
+            className="free-trial-answer-quick-picks"
+            aria-label="Quick trial length values"
+          >
+            {trialLengthQuickPicks.map((quickPick) => (
+              <button
+                className={
+                  trialLength === String(quickPick) ? 'is-active' : ''
+                }
+                key={quickPick}
+                type="button"
+                aria-pressed={trialLength === String(quickPick)}
+                onClick={() => {
+                  setTrialLength(String(quickPick))
+                  trackWhenIsDueEvent('quick_pick', {
+                    context: 'free_trial',
+                    value: quickPick,
+                  })
+                }}
+              >
+                {quickPick} days
+              </button>
+            ))}
+          </div>
+
+          {validationMessage ? (
+            <p className="form-message">{validationMessage}</p>
+          ) : null}
+        </div>
+      </section>
+
+      {trialEndDate &&
+      cancelByDate &&
+      parsedStartDate &&
+      parsedTrialLength !== null ? (
+        <section className="free-trial-answer-actions">
+          <ResultActions
+            title="Free trial ends"
+            date={trialEndDate}
+            details={`Suggested reminder: ${formatPlainDate(cancelByDate)}`}
           />
 
-          <div className="trial-editorial-answer">
-            <p className="trial-editorial-eyebrow">Free trial calculator</p>
-            <h1 id="free-trial-title">When does my free trial end?</h1>
+          <details className="free-trial-answer-details">
+            <summary>Why this date?</summary>
+            <div className="free-trial-answer-detail-body">
+              <p>
+                {formatFreeTrialExplanation(
+                  parsedStartDate,
+                  parsedTrialLength,
+                  trialEndDate,
+                )}
+              </p>
 
-            {trialEndDate && cancelByDate && parsedTrialLength !== null ? (
-              <>
-                <div className="trial-editorial-primary-answer">
-                  <span>{parsedTrialLength}-day trial</span>
-                  <strong>{formatPlainDate(trialEndDate)}</strong>
-                  <small>{formatWeekday(trialEndDate)}</small>
-                </div>
-
-                <div className="trial-editorial-reminder">
-                  <span>Suggested reminder</span>
-                  <b>{formatPlainDate(cancelByDate)}</b>
-                </div>
-              </>
-            ) : (
-              <p className="trial-editorial-error">{validationMessage ?? 'Enter a valid trial date.'}</p>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="trial-editorial-workspace" aria-label="Free trial calculator">
-        <div className="trial-editorial-heading">
-          <p className="trial-section-eyebrow">Your calculation</p>
-          <h2>Set the trial start date and length</h2>
-          <p>The answer updates immediately.</p>
-        </div>
-
-        <div className="trial-editorial-calculation-grid">
-          <form className="trial-editorial-form" onSubmit={(event) => event.preventDefault()}>
-            <label className="field">
-              <span>Trial start date</span>
-              <input
-                type="date"
-                min="1900-01-01"
-                max="2100-12-31"
-                value={startDate}
-                onChange={(event) => {
-                  setStartDate(event.target.value)
-                  trackWhenIsDueEvent('date_changed', { context: 'free_trial', value: event.target.value })
-                }}
+              <CalculationReceipt
+                analyticsContext="free_trial"
+                rows={[
+                  {
+                    label: 'Trial starts',
+                    value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}`,
+                  },
+                  {
+                    label: 'Trial length',
+                    value: `${parsedTrialLength} ${
+                      parsedTrialLength === 1 ? 'day' : 'days'
+                    }`,
+                  },
+                  {
+                    label: 'Counting rule',
+                    value: 'Full trial length added to the start date',
+                  },
+                  {
+                    label: 'Trial ends',
+                    value: `${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}`,
+                  },
+                  {
+                    label: 'Suggested reminder',
+                    value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}`,
+                  },
+                ]}
               />
-            </label>
-
-            <label className="field">
-              <span>Trial length in days</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max={getAmountLimit('trial')}
-                value={trialLength}
-                onChange={(event) => {
-                  setTrialLength(event.target.value)
-                  trackWhenIsDueEvent('number_changed', { context: 'free_trial', value: event.target.value })
-                }}
-              />
-            </label>
-
-            <div className="trial-editorial-quick-picks" aria-label="Quick trial length values">
-              {trialLengthQuickPicks.map((quickPick) => (
-                <button
-                  className={trialLength === String(quickPick) ? 'is-active' : ''}
-                  key={quickPick}
-                  type="button"
-                  aria-pressed={trialLength === String(quickPick)}
-                  onClick={() => {
-                    setTrialLength(String(quickPick))
-                    trackWhenIsDueEvent('quick_pick', { context: 'free_trial', value: quickPick })
-                  }}
-                >
-                  {quickPick} days
-                </button>
-              ))}
             </div>
+          </details>
 
-            {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
-          </form>
+          <details className="free-trial-answer-details">
+            <summary>Save this date</summary>
+            <div className="free-trial-answer-detail-body">
+              <div className="business-save">
+                <label className="field title-field">
+                  <span>Title</span>
+                  <input
+                    maxLength={titleMaxLength}
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                  />
+                  {titleValidationMessage ? (
+                    <span className="field-error">{titleValidationMessage}</span>
+                  ) : null}
+                </label>
+                <button
+                  className="primary-button"
+                  type="button"
+                  disabled={!canSave}
+                  onClick={saveTrialDeadline}
+                >
+                  Save to My due dates
+                </button>
+                {storageMessage ? (
+                  <p className="form-message">{storageMessage}</p>
+                ) : null}
+              </div>
+            </div>
+          </details>
+        </section>
+      ) : null}
 
-          <section className="trial-editorial-result" aria-live="polite">
-            <p className="trial-result-kicker">Trial ends</p>
-
-            {trialEndDate && cancelByDate && parsedTrialLength !== null ? (
-              <>
-                <p className="trial-result-date">{formatPlainDate(trialEndDate)}</p>
-                <p className="trial-result-weekday">{formatWeekday(trialEndDate)}</p>
-
-                <div className="trial-result-summary">
-                  <span>{parsedTrialLength}-day trial</span>
-                  <small>{calendarDaysFromStart} calendar days from start date</small>
-                </div>
-
-                <div className="trial-reminder-card">
-                  <small>Suggested reminder</small>
-                  <strong>{formatPlainDate(cancelByDate)}</strong>
-                </div>
-
-                <p className="trial-result-note">
-                  {formatFreeTrialExplanation(
-                    parsedStartDate!,
-                    parsedTrialLength!,
-                    trialEndDate,
-                  )}
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="free_trial"
-                  rows={[
-                    { label: 'Trial starts', value: `${formatWeekday(parsedStartDate!)}, ${formatPlainDate(parsedStartDate!)}` },
-                    { label: 'Trial length', value: `${parsedTrialLength} ${parsedTrialLength === 1 ? 'day' : 'days'}` },
-                    { label: 'Counting rule', value: 'Full trial length added to the start date' },
-                    { label: 'Trial ends', value: `${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}` },
-                    { label: 'Suggested reminder', value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}` },
-                  ]}
-                />
-
-                <ResultActions
-                  title="Free trial ends"
-                  date={trialEndDate}
-                  details={`Suggested reminder: ${formatPlainDate(cancelByDate)}`}
-                />
-
-                <details className="trial-save-details">
-                  <summary>More options</summary>
-                  <div className="business-save">
-                    <label className="field title-field">
-                      <span>Title</span>
-                      <input
-                        maxLength={titleMaxLength}
-                        value={title}
-                        onChange={(event) => setTitle(event.target.value)}
-                      />
-                      {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-                    </label>
-                    <button className="primary-button" type="button" disabled={!canSave} onClick={saveTrialDeadline}>
-                      Save to My due dates
-                    </button>
-                    {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-                  </div>
-                </details>
-              </>
-            ) : (
-              <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
-            )}
-          </section>
-        </div>
-      </section>
-
-      <section className="trial-editorial-related" aria-label="Related trial and renewal tools">
+      <section className="free-trial-answer-related" aria-label="Related trial and renewal tools">
         <div>
-          <p className="trial-section-eyebrow">Next step</p>
+          <p className="free-trial-answer-section-eyebrow">Next step</p>
           <h2>What happens after the trial?</h2>
         </div>
 
@@ -15369,7 +15408,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               onNavigate('/subscription-renewal-calculator')
             }}
           >
-            Subscription renewal calculator <span aria-hidden="true">→</span>
+            Subscription renewal calculator
           </a>
           <a
             href="/return-window-calculator"
@@ -15378,21 +15417,24 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               onNavigate('/return-window-calculator')
             }}
           >
-            Return window calculator <span aria-hidden="true">→</span>
+            Return window calculator
           </a>
         </nav>
       </section>
 
-      <section className="trial-editorial-content" aria-label="Free trial help">
-        <div className="trial-content-heading">
-          <p className="trial-section-eyebrow">Trial timing rules</p>
+      <section className="free-trial-answer-content" aria-label="Free trial help">
+        <div className="free-trial-answer-content-heading">
+          <p className="free-trial-answer-section-eyebrow">Trial timing rules</p>
           <h2>Start, trial, renewal</h2>
         </div>
 
         <article>
           <h2>How this calculator works</h2>
           <p>
-            Enter the day your trial starts and the number of days in the trial. The calculator shows the trial end date and the suggested one-day-before reminder. Always check the company's official cancellation terms because some services renew earlier or use a specific billing time.
+            Enter the day your trial starts and the number of days in the trial.
+            The calculator shows the trial end date and a suggested one-day-before
+            reminder. Always check the company's official cancellation terms
+            because some services renew earlier or use a specific billing time.
           </p>
         </article>
 
@@ -15408,7 +15450,11 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
         <article>
           <h2>Free trial calculation example</h2>
           <p>
-            Suppose a 14-day trial starts on May 1. Using this calculator's date-addition method, the trial end date is May 15 and the suggested reminder date is May 14. This treats the start date as day zero. A service may instead count the signup date as day one, so its displayed renewal date should take priority.
+            Suppose a 14-day trial starts on May 1. Using this calculator's
+            date-addition method, the trial end date is May 15 and the suggested
+            reminder date is May 14. This treats the start date as day zero.
+            A service may instead count the signup date as day one, so its
+            displayed renewal date should take priority.
           </p>
         </article>
 
@@ -15427,13 +15473,28 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           <h2>Free trial FAQ</h2>
           <dl>
             <dt>Does the signup day count as the first day?</dt>
-            <dd>This calculator adds the full trial length to the start date. Services may use a different counting convention, so check the renewal date displayed by the provider.</dd>
+            <dd>
+              This calculator adds the full trial length to the start date.
+              Services may use a different counting convention, so check the
+              renewal date displayed by the provider.
+            </dd>
             <dt>Why is the suggested reminder one day earlier?</dt>
-            <dd>It provides a simple planning buffer before the calculated end date. It is not a guarantee that every provider will accept cancellation until that date.</dd>
+            <dd>
+              It provides a simple planning buffer before the calculated end
+              date. It is not a guarantee that every provider will accept
+              cancellation until that date.
+            </dd>
             <dt>Does uninstalling an app cancel a free trial?</dt>
-            <dd>Usually, uninstalling an app and cancelling its subscription are separate actions. Use the provider, App Store, or Google Play subscription controls and confirm the cancellation.</dd>
+            <dd>
+              Usually, uninstalling an app and cancelling its subscription are
+              separate actions. Use the provider, App Store, or Google Play
+              subscription controls and confirm the cancellation.
+            </dd>
             <dt>Can a trial renew at a specific time?</dt>
-            <dd>Yes. Some services use a particular time or time zone. This calculator works with calendar dates only.</dd>
+            <dd>
+              Yes. Some services use a particular time or time zone. This
+              calculator works with calendar dates only.
+            </dd>
           </dl>
         </article>
       </section>
@@ -15444,226 +15505,165 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .trial-editorial-page {
-          --trial-deep: #17385f;
-          --trial-navy: #112f53;
-          --trial-green: #2d7c67;
-          --trial-blue: #eef5f8;
-          --trial-warm: #f2ede4;
+        .free-trial-answer-page {
+          --trial-ink: #143454;
+          --trial-muted: #65798d;
+          --trial-accent: #2e7a63;
+          --trial-field: #e8edf7;
+          --trial-field-soft: #f1f4fa;
+          min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .trial-editorial-header {
-          width: min(100% - 32px, 1130px);
-          min-height: 70px;
-          margin: 0 auto 14px;
+        .free-trial-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+          border-bottom: 1px solid rgba(20, 52, 84, 0.12);
         }
 
-        .trial-editorial-brand {
+        .free-trial-answer-brand {
           display: inline-flex;
           align-items: center;
           text-decoration: none;
         }
 
-        .trial-editorial-brand img {
+        .free-trial-answer-brand img {
           display: block;
           width: 176px;
           height: auto;
         }
 
-        .trial-editorial-nav {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-        }
-
-        .trial-editorial-nav a {
-          color: #5a728d;
-          font-size: 0.9rem;
-          font-weight: 850;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .trial-editorial-hero,
-        .trial-editorial-workspace,
-        .trial-editorial-related,
-        .trial-editorial-content {
-          width: min(100% - 32px, 1130px);
+        .free-trial-answer-shell,
+        .free-trial-answer-actions,
+        .free-trial-answer-related,
+        .free-trial-answer-content {
+          width: min(100% - 32px, 1100px);
           margin-left: auto;
           margin-right: auto;
         }
 
-        .trial-editorial-image-wrap {
-          position: relative;
-          min-height: 470px;
-          overflow: hidden;
-          border: 1px solid rgba(17, 47, 83, 0.12);
-          border-radius: 28px;
-          background: #d8c8b3;
+        .free-trial-answer-shell {
+          margin-top: 22px;
         }
 
-        .trial-editorial-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
+        .free-trial-answer-hero {
+          padding: clamp(42px, 6vw, 68px) clamp(24px, 5vw, 58px) 34px;
+          border: 1px solid rgba(64, 76, 113, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--trial-field);
+          text-align: center;
         }
 
-        .trial-editorial-image-wrap::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(90deg, rgba(11,24,39,0.12), rgba(11,24,39,0.01) 58%, rgba(11,24,39,0));
-          pointer-events: none;
-        }
-
-        .trial-editorial-answer {
-          position: relative;
-          z-index: 1;
-          width: min(475px, calc(100% - 64px));
-          margin: 32px;
-          padding: 32px 34px 28px;
-          border: 1px solid rgba(255,255,255,0.45);
-          border-radius: 24px;
-          background: rgba(250,247,239,0.94);
-          box-shadow: 0 18px 52px rgba(11,24,39,0.15);
-          backdrop-filter: blur(10px);
-        }
-
-        .trial-editorial-eyebrow,
-        .trial-section-eyebrow {
+        .free-trial-answer-eyebrow,
+        .free-trial-answer-section-eyebrow {
           margin: 0;
-          color: var(--trial-green);
-          font-size: 0.78rem;
+          color: var(--trial-accent);
+          font-size: 0.8rem;
           font-weight: 950;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .trial-editorial-answer h1 {
+        .free-trial-answer-hero h1 {
           margin: 10px 0 0;
-          color: var(--trial-navy);
-          font-size: clamp(2.65rem, 5vw, 4.5rem);
-          line-height: 0.97;
+          color: var(--trial-ink);
+          font-size: clamp(2.8rem, 5.8vw, 5rem);
+          line-height: 0.98;
           letter-spacing: -0.05em;
           text-wrap: balance;
         }
 
-        .trial-editorial-primary-answer {
+        .free-trial-answer-date {
           display: grid;
-          gap: 4px;
-          margin-top: 22px;
-          padding-top: 18px;
-          border-top: 1px solid rgba(17,47,83,0.11);
-        }
-
-        .trial-editorial-primary-answer span {
-          color: #687e91;
-          font-size: 0.95rem;
-          font-weight: 850;
-        }
-
-        .trial-editorial-primary-answer strong {
-          color: var(--trial-navy);
-          font-size: clamp(2.15rem, 4vw, 3.4rem);
-          line-height: 1;
-          letter-spacing: -0.045em;
-        }
-
-        .trial-editorial-primary-answer small {
-          color: #5e7489;
-          font-size: 1rem;
-          font-weight: 800;
-        }
-
-        .trial-editorial-reminder {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 14px;
-          margin-top: 18px;
-          padding: 13px 14px;
-          border-radius: 14px;
-          background: rgba(238,245,248,0.92);
-        }
-
-        .trial-editorial-reminder span {
-          color: #667e91;
-          font-size: 0.78rem;
+          justify-items: center;
+          margin-top: 26px;
+          color: var(--trial-ink);
           font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
         }
 
-        .trial-editorial-reminder b {
-          color: #24435f;
-          font-size: 0.95rem;
-        }
-
-        .trial-editorial-workspace {
-          margin-top: 22px;
-          padding: 30px;
-          border: 1px solid rgba(17,47,83,0.1);
-          border-radius: 26px;
-          background: #fffdf9;
-        }
-
-        .trial-editorial-heading h2,
-        .trial-editorial-related h2,
-        .trial-content-heading h2 {
-          margin: 6px 0 0;
-          color: var(--trial-navy);
-          font-size: clamp(2rem, 3.7vw, 3.15rem);
-          line-height: 1;
+        .free-trial-answer-weekday {
+          color: #37627b;
+          font-size: clamp(2.5rem, 4.4vw, 4rem);
+          line-height: 0.98;
           letter-spacing: -0.04em;
-          text-wrap: balance;
         }
 
-        .trial-editorial-heading > p:last-child {
-          margin: 8px 0 0;
-          color: #6b7f92;
+        .free-trial-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.09em;
+          max-width: 100%;
+          margin-top: 6px;
+          font-size: clamp(3.7rem, 6.2vw, 6rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          white-space: nowrap;
         }
 
-        .trial-editorial-calculation-grid {
+        .free-trial-answer-month,
+        .free-trial-answer-day,
+        .free-trial-answer-comma,
+        .free-trial-answer-year {
+          display: inline;
+        }
+
+        .free-trial-answer-comma {
+          margin-left: -0.08em;
+        }
+
+        .free-trial-answer-context {
+          margin: 18px 0 0;
+          color: var(--trial-muted);
+          font-size: 0.98rem;
+          line-height: 1.5;
+        }
+
+        .free-trial-answer-reminder {
+          width: fit-content;
+          margin: 16px auto 0;
+          padding: 9px 13px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.62);
+          color: #5f7186;
+          font-size: 0.9rem;
+        }
+
+        .free-trial-answer-reminder strong {
+          color: #294b66;
+        }
+
+        .free-trial-answer-controls {
           display: grid;
-          grid-template-columns: minmax(290px, 0.72fr) minmax(0, 1.28fr);
-          gap: 16px;
-          margin-top: 22px;
+          grid-template-columns: minmax(0, 1.25fr) minmax(150px, 0.7fr) minmax(260px, 1fr);
+          gap: 12px;
+          align-items: end;
+          padding: 18px;
+          border: 1px solid rgba(64, 76, 113, 0.12);
+          border-top: 1px solid rgba(64, 76, 113, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--trial-field-soft);
         }
 
-        .trial-editorial-form {
-          display: grid;
-          gap: 15px;
-          align-content: start;
-          padding: 22px;
-          border: 1px solid rgba(17,47,83,0.1);
-          border-radius: 18px;
-          background: var(--trial-warm);
-        }
-
-        .trial-editorial-form .field {
+        .free-trial-answer-controls label {
           display: grid;
           gap: 7px;
         }
 
-        .trial-editorial-form .field > span {
-          color: #566f87;
-          font-size: 0.88rem;
-          font-weight: 900;
+        .free-trial-answer-controls label > span {
+          color: #526a82;
+          font-size: 0.9rem;
+          font-weight: 850;
         }
 
-        .trial-editorial-form input {
+        .free-trial-answer-controls input {
           width: 100%;
           min-height: 50px;
           padding: 10px 12px;
-          border: 1px solid rgba(17,47,83,0.16);
+          border: 1px solid rgba(20, 52, 84, 0.14);
           border-radius: 11px;
           background: #fff;
           color: #17304d;
@@ -15671,437 +15671,306 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           font-size: 1rem;
         }
 
-        .trial-editorial-quick-picks {
+        .free-trial-answer-quick-picks {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 7px;
         }
 
-        .trial-editorial-quick-picks button {
-          min-height: 44px;
-          border: 1px solid rgba(17,47,83,0.13);
+        .free-trial-answer-quick-picks button {
+          min-height: 50px;
+          border: 1px solid rgba(20, 52, 84, 0.13);
           border-radius: 10px;
-          background: rgba(255,255,255,0.78);
-          color: #4f6780;
+          background: rgba(255, 255, 255, 0.8);
+          color: #4e6680;
           font: inherit;
           font-size: 0.82rem;
           font-weight: 850;
           cursor: pointer;
         }
 
-        .trial-editorial-quick-picks button.is-active {
-          border-color: rgba(45,124,103,0.6);
-          background: #e8f4ef;
-          color: #1f6656;
-          box-shadow: inset 0 0 0 1px rgba(45,124,103,0.18);
+        .free-trial-answer-quick-picks button.is-active {
+          border-color: rgba(46, 122, 99, 0.58);
+          background: #e7f3ee;
+          color: #1f6655;
+          box-shadow: inset 0 0 0 1px rgba(46, 122, 99, 0.16);
         }
 
-        .trial-editorial-result {
-          min-width: 0;
-          padding: 30px 34px;
-          border-radius: 20px;
-          background: var(--trial-navy);
-          color: #f8f1e6;
-        }
-
-        .trial-result-kicker {
+        .free-trial-answer-controls .form-message {
+          grid-column: 1 / -1;
           margin: 0;
-          color: #9fc6b4;
-          font-size: 0.76rem;
-          font-weight: 950;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
         }
 
-        .trial-result-date {
-          margin: 10px 0 0;
-          color: #fff8ec;
-          font-size: clamp(3.5rem, 7vw, 6.2rem);
-          font-weight: 850;
-          line-height: 0.92;
-          letter-spacing: -0.055em;
-          text-wrap: balance;
-        }
-
-        .trial-result-weekday {
-          margin: 10px 0 0;
-          color: #d5dfea;
-          font-size: 1.1rem;
-          font-weight: 800;
-        }
-
-        .trial-result-summary {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 8px 12px;
+        .free-trial-answer-actions {
           margin-top: 16px;
         }
 
-        .trial-result-summary span {
-          display: inline-flex;
-          align-items: center;
-          min-height: 30px;
-          padding: 5px 10px;
-          border: 1px solid rgba(223,189,122,0.55);
-          border-radius: 999px;
-          background: #fff7e8;
-          color: #7b4f26;
-          font-size: 0.82rem;
-          font-weight: 900;
+        .free-trial-answer-actions > .result-actions {
+          justify-content: center;
         }
 
-        .trial-result-summary small {
-          color: #c8d4df;
-          font-size: 0.88rem;
-        }
-
-        .trial-reminder-card {
-          display: grid;
-          gap: 3px;
-          margin-top: 18px;
-          padding: 14px 16px;
+        .free-trial-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(20, 52, 84, 0.1);
           border-radius: 14px;
-          background: rgba(255,255,255,0.08);
+          background: rgba(255, 255, 255, 0.74);
         }
 
-        .trial-reminder-card small {
-          color: #9fc6b4;
-          font-size: 0.75rem;
+        .free-trial-answer-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
           font-weight: 900;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-
-        .trial-reminder-card strong {
-          color: #fff8ec;
-          font-size: 1.15rem;
-        }
-
-        .trial-result-note {
-          max-width: 720px;
-          margin: 18px 0 0;
-          color: #ced8e2;
-          font-size: 0.95rem;
-          line-height: 1.52;
-        }
-
-        .trial-editorial-result .calculation-receipt {
-          margin-top: 18px;
-        }
-
-        .trial-editorial-result .result-actions {
-          margin-top: 14px;
-        }
-
-        .trial-save-details {
-          margin-top: 16px;
-          padding-top: 14px;
-          border-top: 1px solid rgba(255,255,255,0.16);
-          color: #e7edf3;
-        }
-
-        .trial-save-details summary {
           cursor: pointer;
-          font-weight: 850;
         }
 
-        .trial-editorial-related {
-          margin-top: 22px;
-          padding: 24px 28px;
-          border: 1px solid rgba(17,47,83,0.1);
-          border-radius: 24px;
-          background: var(--trial-blue);
+        .free-trial-answer-detail-body {
+          padding: 0 14px 16px;
         }
 
-        .trial-editorial-related nav {
+        .free-trial-answer-detail-body > p {
+          max-width: 760px;
+          margin: 0;
+          color: #61768a;
+          font-size: 0.95rem;
+          line-height: 1.58;
+        }
+
+        .free-trial-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
+        }
+
+        .free-trial-answer-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(20, 52, 84, 0.1);
+          border-radius: 22px;
+          background: #eef3f9;
+        }
+
+        .free-trial-answer-related h2,
+        .free-trial-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--trial-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+        }
+
+        .free-trial-answer-related nav {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 8px;
-          margin-top: 16px;
+          margin-top: 14px;
         }
 
-        .trial-editorial-related a {
+        .free-trial-answer-related a {
+          min-height: 52px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          min-height: 58px;
-          padding: 12px 14px;
-          border: 1px solid rgba(17,47,83,0.12);
+          justify-content: center;
+          padding: 10px 13px;
+          border: 1px solid rgba(20, 52, 84, 0.11);
           border-radius: 12px;
-          background: rgba(255,255,255,0.82);
-          color: #24425e;
+          background: #fff;
+          color: #35536e;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 850;
           text-decoration: none;
         }
 
-        .trial-editorial-related a span {
-          color: var(--trial-green);
-          font-size: 1.05rem;
-        }
-
-        .trial-editorial-content {
-          margin-top: 38px;
-        }
-
-        .trial-content-heading {
-          margin-bottom: 16px;
-        }
-
-        .trial-editorial-content {
+        .free-trial-answer-content {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 12px;
+          margin-top: 34px;
         }
 
-        .trial-content-heading {
+        .free-trial-answer-content-heading {
+          grid-column: 1 / -1;
+          margin-bottom: 3px;
+        }
+
+        .free-trial-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(20, 52, 84, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
+        }
+
+        .free-trial-answer-content article:last-child {
           grid-column: 1 / -1;
         }
 
-        .trial-editorial-content article {
-          padding: 22px;
-          border: 1px solid rgba(17,47,83,0.09);
-          border-radius: 18px;
-          background: rgba(255,255,255,0.72);
-        }
-
-        .trial-editorial-content article h2 {
+        .free-trial-answer-content h2 {
           margin: 0;
-          color: var(--trial-navy);
+          color: var(--trial-ink);
           font-size: 1.08rem;
         }
 
-        .trial-editorial-content article:last-child {
-          grid-column: 1 / -1;
-        }
-
-        .trial-editorial-content article dl {
-          margin: 14px 0 0;
-        }
-
-        .trial-editorial-content article dt {
-          margin: 16px 0 0;
-          color: var(--trial-navy);
-          font-weight: 850;
-        }
-
-        .trial-editorial-content article dd {
-          margin: 4px 0 0;
-        }
-
-        .trial-editorial-content article p,
-        .trial-editorial-content article li,
-        .trial-editorial-content article dd {
+        .free-trial-answer-content p,
+        .free-trial-answer-content li,
+        .free-trial-answer-content dd {
           color: #65798d;
           line-height: 1.55;
         }
 
+        .free-trial-answer-content dl {
+          margin: 14px 0 0;
+        }
+
+        .free-trial-answer-content dt {
+          margin: 16px 0 0;
+          color: var(--trial-ink);
+          font-weight: 850;
+        }
+
+        .free-trial-answer-content dd {
+          margin: 4px 0 0;
+        }
+
         @media (max-width: 760px) {
-          .trial-editorial-header {
+          .free-trial-answer-header {
             width: min(100% - 24px, 680px);
-            min-height: 58px;
-            margin-bottom: 12px;
-            gap: 12px;
+            min-height: 76px;
           }
 
-          .trial-editorial-brand img {
+          .free-trial-answer-brand img {
             width: 154px;
           }
 
-          .trial-editorial-nav {
-            gap: 12px;
-          }
-
-          .trial-editorial-nav a {
-            font-size: 0.8rem;
-          }
-
-          .trial-editorial-home-link {
-            display: none;
-          }
-
-          .trial-editorial-hero,
-          .trial-editorial-workspace,
-          .trial-editorial-related,
-          .trial-editorial-content {
+          .free-trial-answer-shell,
+          .free-trial-answer-actions,
+          .free-trial-answer-related,
+          .free-trial-answer-content {
             width: min(100% - 24px, 680px);
           }
 
-          .trial-editorial-image-wrap {
-            min-height: 465px;
-            border-radius: 24px;
-          }
-
-          .trial-editorial-image {
-            object-position: 58% center;
-          }
-
-          .trial-editorial-answer {
-            position: absolute;
-            left: 16px;
-            right: 16px;
-            bottom: 16px;
-            width: auto;
-            margin: 0;
-            padding: 18px;
-            border-radius: 18px;
-          }
-
-          .trial-editorial-answer h1 {
-            font-size: clamp(2.05rem, 9.3vw, 2.85rem);
-          }
-
-          .trial-editorial-primary-answer {
+          .free-trial-answer-shell {
             margin-top: 14px;
-            padding-top: 12px;
           }
 
-          .trial-editorial-primary-answer strong {
-            font-size: clamp(1.95rem, 8.8vw, 2.6rem);
+          .free-trial-answer-hero {
+            padding: 28px 20px 26px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .trial-editorial-reminder {
-            margin-top: 13px;
-            padding: 11px 12px;
+          .free-trial-answer-hero h1 {
+            font-size: clamp(2.65rem, 12vw, 4rem);
           }
 
-          .trial-editorial-workspace {
-            margin-top: 14px;
-            padding: 22px 18px;
-            border-radius: 22px;
+          .free-trial-answer-date {
+            justify-items: start;
+            margin-top: 22px;
           }
 
-          .trial-editorial-heading h2,
-          .trial-editorial-related h2,
-          .trial-content-heading h2 {
-            font-size: clamp(1.9rem, 8.5vw, 2.55rem);
+          .free-trial-answer-weekday {
+            font-size: clamp(2.3rem, 10vw, 3.2rem);
           }
 
-          .trial-editorial-calculation-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 18px;
+          .free-trial-answer-date-main {
+            display: grid;
+            justify-items: start;
+            gap: 0;
+            font-size: clamp(3.05rem, 14vw, 4.6rem);
+            line-height: 0.9;
+            white-space: normal;
           }
 
-          .trial-editorial-form {
-            padding: 18px;
+          .free-trial-answer-month,
+          .free-trial-answer-day,
+          .free-trial-answer-year {
+            display: block;
           }
 
-          .trial-editorial-result {
-            padding: 22px 18px 18px;
+          .free-trial-answer-comma {
+            display: none;
           }
 
-          .trial-result-date {
-            font-size: clamp(2.9rem, 11.5vw, 4.2rem);
+          .free-trial-answer-context,
+          .free-trial-answer-reminder {
+            margin-left: 0;
+            margin-right: 0;
           }
 
-          .trial-result-note {
-            font-size: 0.92rem;
-            line-height: 1.48;
+          .free-trial-answer-reminder {
+            border-radius: 12px;
           }
 
-          .trial-editorial-result .result-actions {
+          .free-trial-answer-controls {
+            grid-template-columns: minmax(0, 1.15fr) minmax(105px, 0.65fr);
+            gap: 10px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
+          }
+
+          .free-trial-answer-quick-picks {
+            grid-column: 1 / -1;
+          }
+
+          .free-trial-answer-controls input,
+          .free-trial-answer-quick-picks button {
+            min-height: 46px;
+          }
+
+          .free-trial-answer-actions > .result-actions {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
           }
 
-          .trial-editorial-result .result-actions button,
-          .trial-editorial-result .result-actions a {
+          .free-trial-answer-actions > .result-actions button,
+          .free-trial-answer-actions > .result-actions a {
             width: 100%;
             min-height: 46px;
             padding: 9px 10px;
             font-size: 0.82rem;
           }
 
-          .trial-editorial-result .result-actions > :last-child {
+          .free-trial-answer-actions > .result-actions > :last-child {
             grid-column: 1 / -1;
           }
 
-          .trial-editorial-related {
-            margin-top: 14px;
+          .free-trial-answer-related {
             padding: 20px 18px;
-            border-radius: 22px;
           }
 
-          .trial-editorial-related nav {
+          .free-trial-answer-related nav {
             grid-template-columns: 1fr;
-            gap: 7px;
           }
 
-          .trial-editorial-content {
+          .free-trial-answer-content {
             display: block;
             margin-top: 28px;
           }
 
-          .trial-content-heading {
+          .free-trial-answer-content-heading {
             margin-bottom: 8px;
           }
 
-          .trial-editorial-content article {
+          .free-trial-answer-content article {
             padding: 20px 2px;
             border: 0;
-            border-top: 1px solid rgba(17,47,83,0.1);
+            border-top: 1px solid rgba(20, 52, 84, 0.1);
             border-radius: 0;
             background: transparent;
           }
 
-          .trial-editorial-content article h2 {
-            font-size: 1.08rem;
-            line-height: 1.3;
-          }
-
-          .trial-editorial-content article p,
-          .trial-editorial-content article li,
-          .trial-editorial-content article dd {
+          .free-trial-answer-content article p,
+          .free-trial-answer-content article li,
+          .free-trial-answer-content article dd {
             font-size: 0.94rem;
             line-height: 1.52;
-          }
-        }
-
-        @media (max-width: 430px) {
-          .trial-editorial-brand img {
-            width: 142px;
-          }
-
-          .trial-editorial-nav {
-            gap: 10px;
-          }
-
-          .trial-editorial-nav a {
-            font-size: 0.76rem;
-          }
-
-          .trial-editorial-image-wrap {
-            min-height: 440px;
-          }
-
-          .trial-editorial-answer {
-            left: 14px;
-            right: 14px;
-            bottom: 14px;
-            padding: 16px;
-          }
-
-          .trial-editorial-eyebrow {
-            font-size: 0.7rem;
-          }
-
-          .trial-editorial-reminder span {
-            font-size: 0.68rem;
-          }
-
-          .trial-editorial-reminder b {
-            font-size: 0.84rem;
           }
         }
       `}</style>
     </main>
   )
 }
-
 
 function ReturnWindowPage({ onNavigate }: NavigationProps) {
   const [purchaseDate, setPurchaseDate] = useState(() =>
