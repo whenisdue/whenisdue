@@ -3190,7 +3190,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
               <h1 id="shipping-answer-title">Estimated delivery</h1>
 
               <div className="shipping-answer-range" aria-live="polite">
-                <div>
+                <div className="shipping-answer-range-card is-earliest">
                   <span>Earliest</span>
                   <strong>{formatWeekday(earliest)},</strong>
                   <b>{formatShippingDate(earliest)}</b>
@@ -3199,7 +3199,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
                 {toDateKey(earliest) !== toDateKey(latest) ? (
                   <>
                     <i aria-hidden="true">to</i>
-                    <div>
+                    <div className="shipping-answer-range-card is-latest">
                       <span>Latest</span>
                       <strong>{formatWeekday(latest)},</strong>
                       <b>{formatShippingDate(latest)}</b>
@@ -3536,7 +3536,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         }
 
         .shipping-answer-hero {
-          padding: clamp(42px, 6vw, 66px) clamp(24px, 5vw, 58px) 34px;
+          padding: clamp(34px, 4.5vw, 50px) clamp(24px, 5vw, 58px) 26px;
           border: 1px solid rgba(46, 88, 102, 0.12);
           border-radius: 28px 28px 0 0;
           background: var(--shipping-field);
@@ -3564,17 +3564,28 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         .shipping-answer-range {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-          gap: 18px;
+          gap: 16px;
           align-items: center;
-          max-width: 880px;
-          margin: 28px auto 0;
+          max-width: 860px;
+          margin: 22px auto 0;
         }
 
-        .shipping-answer-range > div {
+        .shipping-answer-range-card {
           min-width: 0;
-          padding: 18px 20px;
+          padding: 15px 18px;
+          border: 1px solid rgba(21, 54, 84, 0.08);
           border-radius: 18px;
-          background: rgba(255, 255, 255, 0.58);
+          background: rgba(255, 255, 255, 0.62);
+        }
+
+        .shipping-answer-range-card.is-earliest {
+          background: rgba(255, 255, 255, 0.68);
+        }
+
+        .shipping-answer-range-card.is-latest {
+          border-color: rgba(45, 123, 100, 0.22);
+          background: rgba(226, 241, 238, 0.78);
+          box-shadow: inset 0 0 0 1px rgba(45, 123, 100, 0.06);
         }
 
         .shipping-answer-range span,
@@ -3616,7 +3627,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
 
         .shipping-answer-context,
         .shipping-answer-rule {
-          margin: 18px 0 0;
+          margin: 13px 0 0;
           color: var(--shipping-muted);
           font-size: 0.96rem;
           line-height: 1.5;
@@ -3630,9 +3641,9 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         .shipping-answer-controls {
           display: grid;
           grid-template-columns: minmax(0, 1.2fr) minmax(100px, 0.45fr) minmax(100px, 0.45fr) minmax(170px, 0.72fr);
-          gap: 12px;
+          gap: 10px;
           align-items: end;
-          padding: 18px;
+          padding: 14px 18px 15px;
           border: 1px solid rgba(46, 88, 102, 0.12);
           border-top: 1px solid rgba(46, 88, 102, 0.08);
           border-radius: 0 0 28px 28px;
@@ -3698,7 +3709,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         }
 
         .shipping-answer-actions {
-          margin-top: 16px;
+          margin-top: 10px;
         }
 
         .shipping-answer-actions > .result-actions {
@@ -3846,8 +3857,29 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
             margin-top: 20px;
           }
 
-          .shipping-answer-range > div {
-            padding: 15px 16px;
+          .shipping-answer-range-card {
+            position: relative;
+            padding: 16px 16px 16px 20px;
+          }
+
+          .shipping-answer-range-card::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            bottom: 16px;
+            left: 10px;
+            width: 3px;
+            border-radius: 999px;
+            background: rgba(61, 104, 124, 0.28);
+          }
+
+          .shipping-answer-range-card.is-latest::before {
+            background: rgba(45, 123, 100, 0.72);
+          }
+
+          .shipping-answer-range-card.is-latest {
+            border-color: rgba(45, 123, 100, 0.26);
+            background: #e3f0ee;
           }
 
           .shipping-answer-range i {
