@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-import './VaHomeCompact.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
 import { DeadlineFinalAdjustmentNotice } from './DeadlineFinalAdjustmentNotice.tsx'
 import { buildDeadlineExplanation } from './deadlineExplanation.ts'
@@ -566,6 +565,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     endDayAdjustment,
     holidayCalendar,
     triggerKind,
+    cameFromWithinPhrase,
   ])
 
   function applySavedRule(profile: DeadlineRuleProfile) {
@@ -17783,10 +17783,10 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
   ]
 
   return (
-    <main className="page-shell invoice-due-date-page invoice-editorial-page">
-      <header className="invoice-editorial-header" aria-label="WhenIsDue navigation">
+    <main className="page-shell invoice-due-date-page invoice-answer-first-page">
+      <header className="invoice-answer-header" aria-label="WhenIsDue">
         <a
-          className="invoice-editorial-brand"
+          className="invoice-answer-brand"
           href="/"
           onClick={(event) => {
             event.preventDefault()
@@ -17796,92 +17796,33 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="invoice-editorial-nav" aria-label="Main navigation">
-          <a
-            className="invoice-editorial-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
-      <section className="invoice-editorial-hero" aria-labelledby="invoice-due-date-title">
-        <div className="invoice-editorial-image-wrap">
-          <img
-            className="invoice-editorial-image"
-            src="/invoice-fixed-span.webp"
-            alt="Two precision-crafted markers positioned along one continuous metal channel with a clear span between them"
-          />
+      <section className="invoice-answer-hero" aria-labelledby="invoice-due-date-title" aria-live="polite">
+        <p className="invoice-answer-eyebrow">Invoice due date</p>
+        <h1 id="invoice-due-date-title">Your invoice is due</h1>
 
-          <div className="invoice-editorial-answer">
-            <p className="invoice-editorial-eyebrow">Invoice due date calculator</p>
-            <h1 id="invoice-due-date-title">When is this invoice due?</h1>
-
-            {invoiceDueDate && parsedInvoiceDate ? (
-              <>
-                <div className="invoice-editorial-primary-answer">
-                  <span>{invoiceTermLabels[invoiceTerm]}</span>
-                  <strong>{formatPlainDate(invoiceDueDate)}</strong>
-                  <small>{formatWeekday(invoiceDueDate)}</small>
-                </div>
-
-                <div className="invoice-editorial-path" aria-label="Invoice date, terms, and due date">
-                  <span>
-                    <small>Issued</small>
-                    <b>{formatPlainDate(parsedInvoiceDate)}</b>
-                  </span>
-                  <i aria-hidden="true">→</i>
-                  <span>
-                    <small>Terms</small>
-                    <b>{invoiceTermLabels[invoiceTerm]}</b>
-                  </span>
-                  <i aria-hidden="true">→</i>
-                  <span>
-                    <small>Due</small>
-                    <b>{formatPlainDate(invoiceDueDate)}</b>
-                  </span>
-                </div>
-              </>
-            ) : (
-              <p className="invoice-editorial-error">{validationMessage ?? 'Enter a valid invoice date.'}</p>
-            )}
-          </div>
-        </div>
+        {invoiceDueDate && parsedInvoiceDate ? (
+          <>
+            <strong className="invoice-answer-date" aria-label={`${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}`}>
+              <span className="invoice-answer-weekday">{formatWeekday(invoiceDueDate)},</span>
+              <span className="invoice-answer-month">
+                {new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(invoiceDueDate.year, invoiceDueDate.month - 1, invoiceDueDate.day)))}
+              </span>
+              <span className="invoice-answer-day">{invoiceDueDate.day}</span>
+              <span className="invoice-answer-year">{invoiceDueDate.year}</span>
+            </strong>
+            <p className="invoice-answer-context">
+              {invoiceTermLabels[invoiceTerm]} · Invoice dated {formatPlainDate(parsedInvoiceDate)}
+            </p>
+          </>
+        ) : (
+          <p className="invoice-answer-error">{validationMessage ?? 'Enter a valid invoice date.'}</p>
+        )}
       </section>
 
-      <section className="invoice-editorial-workspace" aria-label="Invoice due date calculator">
-        <div className="invoice-custom-heading">
-          <p className="invoice-section-eyebrow">Your calculation</p>
-          <h2>Set the invoice date and terms</h2>
-          <p>The answer updates immediately.</p>
-        </div>
-
-        <div className="invoice-editorial-calculation-grid">
-          <form className="invoice-editorial-form" onSubmit={(event) => event.preventDefault()}>
+      <section className="invoice-answer-controls" aria-label="Change invoice due date calculation">
+        <form className="invoice-answer-form" onSubmit={(event) => event.preventDefault()}>
             <label className="field start-field">
               <span>Invoice date</span>
               <input
@@ -17932,79 +17873,58 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             </div>
 
             {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
-          </form>
-
-          <section className="invoice-editorial-result" aria-live="polite">
-            <p className="invoice-result-kicker">Due date</p>
-
-            {invoiceDueDate && parsedInvoiceDate ? (
-              <>
-                <p className="invoice-result-date">{formatPlainDate(invoiceDueDate)}</p>
-                <p className="invoice-result-weekday">{formatWeekday(invoiceDueDate)}</p>
-
-                <div className="invoice-result-term">
-                  <span>{invoiceTermLabels[invoiceTerm]}</span>
-                  <small>
-                    {invoiceTerm === 'eom'
-                      ? 'End of invoice month'
-                      : `${calendarDaysFromInvoice} ${calendarDaysFromInvoice === 1 ? 'calendar day' : 'calendar days'} from invoice date`}
-                  </small>
-                </div>
-
-                <p className="invoice-result-note">
-                  {formatInvoiceTermExplanation(
-                    parsedInvoiceDate,
-                    invoiceTerm,
-                    invoiceDueDate,
-                  )}
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="invoice_due_date"
-                  rows={[
-                    { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate)}, ${formatPlainDate(parsedInvoiceDate)}` },
-                    { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
-                    {
-                      label: 'Counting rule',
-                      value: invoiceTerm === 'eom'
-                        ? 'Last calendar day of the invoice month'
-                        : `${calendarDaysFromInvoice} calendar ${calendarDaysFromInvoice === 1 ? 'day' : 'days'} after invoice date`,
-                    },
-                    { label: 'Due date', value: `${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}` },
-                  ]}
-                />
-
-                <ResultActions
-                  title="Invoice due date"
-                  date={invoiceDueDate}
-                  details={invoiceTermLabels[invoiceTerm]}
-                />
-
-                <details className="invoice-save-details">
-                  <summary>More options</summary>
-                  <div className="business-save">
-                    <label className="field title-field">
-                      <span>Title</span>
-                      <input
-                        maxLength={titleMaxLength}
-                        value={title}
-                        onChange={(event) => setTitle(event.target.value)}
-                      />
-                      {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-                    </label>
-                    <button className="primary-button" type="button" disabled={!canSave} onClick={saveInvoiceDeadline}>
-                      Save to My due dates
-                    </button>
-                    {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-                  </div>
-                </details>
-              </>
-            ) : (
-              <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
-            )}
-          </section>
-        </div>
+        </form>
       </section>
+
+      {invoiceDueDate && parsedInvoiceDate ? (
+        <section className="invoice-answer-support" aria-label="Invoice due date actions and details">
+          <ResultActions
+            title="Invoice due date"
+            date={invoiceDueDate}
+            details={invoiceTermLabels[invoiceTerm]}
+          />
+
+          <details className="invoice-answer-detail-card">
+            <summary>Why this date?</summary>
+            <div className="invoice-answer-detail-body">
+              <p>{formatInvoiceTermExplanation(parsedInvoiceDate, invoiceTerm, invoiceDueDate)}</p>
+              <CalculationReceipt
+                analyticsContext="invoice_due_date"
+                rows={[
+                  { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate)}, ${formatPlainDate(parsedInvoiceDate)}` },
+                  { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
+                  {
+                    label: 'Counting rule',
+                    value: invoiceTerm === 'eom'
+                      ? 'Last calendar day of the invoice month'
+                      : `${calendarDaysFromInvoice} calendar ${calendarDaysFromInvoice === 1 ? 'day' : 'days'} after invoice date`,
+                  },
+                  { label: 'Due date', value: `${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}` },
+                ]}
+              />
+            </div>
+          </details>
+
+          <details className="invoice-answer-detail-card">
+            <summary>Save this date</summary>
+            <div className="invoice-answer-detail-body business-save">
+              <label className="field title-field">
+                <span>Title</span>
+                <input
+                  maxLength={titleMaxLength}
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                />
+                {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+              </label>
+              <button className="primary-button" type="button" disabled={!canSave} onClick={saveInvoiceDeadline}>
+                Save to My due dates
+              </button>
+              {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+            </div>
+          </details>
+        </section>
+      ) : null}
 
       <section className="invoice-term-links" aria-label="Exact invoice term pages">
         <div>
@@ -18812,6 +18732,319 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
           .invoice-term-presets {
             grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
+        }
+
+        .invoice-answer-first-page {
+          --invoice-ink: #112c4d;
+          --invoice-muted: #63778b;
+          --invoice-accent: #2d7c67;
+          --invoice-paper: #f4ecdf;
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .invoice-answer-header,
+        .invoice-answer-hero,
+        .invoice-answer-controls,
+        .invoice-answer-support,
+        .invoice-answer-first-page .invoice-term-links,
+        .invoice-answer-first-page .invoice-editorial-content {
+          width: min(100% - 32px, 1040px);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .invoice-answer-header {
+          min-height: 70px;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(17, 44, 77, 0.12);
+        }
+
+        .invoice-answer-brand {
+          display: inline-flex;
+          align-items: center;
+        }
+
+        .invoice-answer-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .invoice-answer-hero {
+          padding: clamp(42px, 7vw, 76px) 0 30px;
+          text-align: center;
+        }
+
+        .invoice-answer-eyebrow {
+          margin: 0;
+          color: var(--invoice-accent);
+          font-size: 0.77rem;
+          font-weight: 900;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+        }
+
+        .invoice-answer-hero h1 {
+          margin: 10px 0 0;
+          color: var(--invoice-ink);
+          font-size: clamp(2.4rem, 5vw, 4.6rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
+        }
+
+        .invoice-answer-date {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: baseline;
+          gap: 0 0.18em;
+          max-width: 100%;
+          margin: 25px auto 0;
+          color: var(--invoice-ink);
+          font-size: clamp(3rem, 7.4vw, 6.7rem);
+          font-weight: 900;
+          line-height: 0.93;
+          letter-spacing: -0.06em;
+          text-wrap: balance;
+        }
+
+        .invoice-answer-weekday {
+          color: #315b75;
+          font-size: 0.54em;
+          font-weight: 850;
+          letter-spacing: -0.035em;
+        }
+
+        .invoice-answer-month,
+        .invoice-answer-day,
+        .invoice-answer-year {
+          display: inline;
+        }
+
+        .invoice-answer-year::before {
+          content: ', ';
+        }
+
+        .invoice-answer-context,
+        .invoice-answer-error {
+          margin: 18px 0 0;
+          color: var(--invoice-muted);
+          font-size: 0.95rem;
+          line-height: 1.5;
+        }
+
+        .invoice-answer-error {
+          color: #7b4a28;
+        }
+
+        .invoice-answer-controls {
+          padding: 18px;
+          border: 1px solid rgba(17, 44, 77, 0.1);
+          border-radius: 18px;
+          background: var(--invoice-paper);
+        }
+
+        .invoice-answer-form {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(300px, 1.35fr);
+          gap: 12px;
+          align-items: end;
+        }
+
+        .invoice-answer-form .field {
+          display: grid;
+          gap: 6px;
+        }
+
+        .invoice-answer-form .field > span {
+          color: #526b83;
+          font-size: 0.84rem;
+          font-weight: 850;
+        }
+
+        .invoice-answer-form input,
+        .invoice-answer-form select {
+          width: 100%;
+          min-height: 46px;
+          box-sizing: border-box;
+          padding: 8px 10px;
+          border: 1px solid rgba(17, 44, 77, 0.16);
+          border-radius: 9px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+        }
+
+        .invoice-answer-form .invoice-term-presets {
+          grid-column: 1 / -1;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          gap: 6px;
+        }
+
+        .invoice-answer-form .invoice-term-presets button {
+          min-height: 38px;
+          padding: 5px 7px;
+          border-radius: 8px;
+          font-size: 0.78rem;
+        }
+
+        .invoice-answer-form .form-message {
+          grid-column: 1 / -1;
+          margin: 0;
+        }
+
+        .invoice-answer-support {
+          display: grid;
+          gap: 10px;
+          margin-top: 18px;
+        }
+
+        .invoice-answer-support .result-actions {
+          justify-content: center;
+          margin: 0;
+        }
+
+        .invoice-answer-detail-card {
+          border: 1px solid rgba(17, 44, 77, 0.1);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.68);
+        }
+
+        .invoice-answer-detail-card summary {
+          padding: 13px 15px;
+          color: #24425e;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .invoice-answer-detail-body {
+          padding: 0 15px 15px;
+          color: var(--invoice-muted);
+          font-size: 0.92rem;
+          line-height: 1.55;
+        }
+
+        .invoice-answer-detail-body > p:first-child {
+          margin-top: 0;
+        }
+
+        .invoice-answer-detail-body .calculation-receipt {
+          margin-top: 14px;
+        }
+
+        .invoice-answer-first-page .invoice-term-links {
+          margin-top: 28px;
+          padding: 20px 22px;
+          border-radius: 16px;
+          background: #edf1ee;
+        }
+
+        .invoice-answer-first-page .invoice-editorial-content {
+          margin-top: 34px;
+        }
+
+        @media (max-width: 760px) {
+          .invoice-answer-header,
+          .invoice-answer-hero,
+          .invoice-answer-controls,
+          .invoice-answer-support,
+          .invoice-answer-first-page .invoice-term-links,
+          .invoice-answer-first-page .invoice-editorial-content {
+            width: min(100% - 24px, 680px);
+          }
+
+          .invoice-answer-header {
+            min-height: 58px;
+          }
+
+          .invoice-answer-brand img {
+            width: 154px;
+          }
+
+          .invoice-answer-hero {
+            padding: 30px 0 20px;
+            text-align: left;
+          }
+
+          .invoice-answer-hero h1 {
+            font-size: clamp(2.2rem, 10vw, 3.2rem);
+          }
+
+          .invoice-answer-date {
+            display: grid;
+            justify-content: start;
+            gap: 0;
+            margin-top: 20px;
+            font-size: clamp(3.1rem, 15vw, 5rem);
+            line-height: 0.88;
+            text-align: left;
+          }
+
+          .invoice-answer-weekday {
+            margin-bottom: 9px;
+            font-size: 0.42em;
+          }
+
+          .invoice-answer-month,
+          .invoice-answer-day,
+          .invoice-answer-year {
+            display: block;
+          }
+
+          .invoice-answer-year::before {
+            content: '';
+          }
+
+          .invoice-answer-context {
+            margin-top: 16px;
+            font-size: 0.9rem;
+          }
+
+          .invoice-answer-controls {
+            padding: 14px;
+            border-radius: 14px;
+          }
+
+          .invoice-answer-form {
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .invoice-answer-form .invoice-term-presets {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
+
+          .invoice-answer-form .invoice-term-presets button {
+            min-height: 36px;
+            padding: 5px 4px;
+            font-size: 0.74rem;
+          }
+
+          .invoice-answer-support {
+            margin-top: 14px;
+          }
+
+          .invoice-answer-support .result-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+          }
+
+          .invoice-answer-support .result-actions > :last-child {
+            grid-column: 1 / -1;
+          }
+
+          .invoice-answer-first-page .invoice-term-links {
+            margin-top: 22px;
+            padding: 18px 14px;
+          }
+
+          .invoice-answer-first-page .invoice-editorial-content {
+            margin-top: 28px;
           }
         }
       `}</style>

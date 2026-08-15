@@ -229,10 +229,6 @@
   font-size: 0.74rem;
 }
 
-.typing-start-hint.phase-running strong {
-  color: #8d5142;
-}
-
 .typing-viewport {
   position: relative;
   height: 220px;
