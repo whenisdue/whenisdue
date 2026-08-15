@@ -16393,16 +16393,45 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       >
         <div className="return-answer-copy">
           <p className="return-answer-eyebrow">Return window calculator</p>
-          <h1 id="return-window-title">Last day to return</h1>
+          <h1 id="return-window-title">Last day to return is</h1>
 
           {returnDeadline && parsedReturnWindow !== null && parsedPurchaseDate ? (
             <>
-              <strong className="return-answer-date">
-                {formatPlainDate(returnDeadline)}
+              <strong
+                className="return-answer-date"
+                aria-label={`${formatWeekday(returnDeadline)}, ${formatPlainDate(returnDeadline)}`}
+              >
+                <span className="return-answer-weekday">
+                  {formatWeekday(returnDeadline)},
+                </span>
+                <span className="return-answer-date-main" aria-hidden="true">
+                  <span className="return-answer-month">
+                    {
+                      [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December',
+                      ][returnDeadline.month - 1]
+                    }
+                  </span>
+                  <span className="return-answer-day">
+                    {returnDeadline.day}
+                  </span>
+                  <span className="return-answer-comma">,</span>
+                  <span className="return-answer-year">
+                    {returnDeadline.year}
+                  </span>
+                </span>
               </strong>
-              <span className="return-answer-weekday">
-                {formatWeekday(returnDeadline)}
-              </span>
               <p className="return-answer-context">
                 {parsedReturnWindow}-day window · Starts{' '}
                 {formatPlainDate(parsedPurchaseDate)}
@@ -16685,23 +16714,41 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-answer-date {
-          display: block;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 0.18em;
           max-width: 1020px;
-          margin-top: 18px;
+          margin-top: 22px;
           color: var(--return-ink);
-          font-size: clamp(4.6rem, 10.5vw, 9.2rem);
           font-weight: 900;
-          line-height: 0.86;
-          letter-spacing: -0.075em;
-          text-wrap: balance;
+          line-height: 0.9;
+          letter-spacing: -0.055em;
         }
 
         .return-answer-weekday {
-          display: block;
-          margin-top: 18px;
+          display: inline;
+          margin: 0;
           color: var(--return-ink);
-          font-size: clamp(1.15rem, 2vw, 1.55rem);
-          font-weight: 850;
+          font-size: clamp(2.55rem, 5vw, 4.6rem);
+          font-weight: 900;
+          line-height: 0.95;
+          letter-spacing: -0.045em;
+        }
+
+        .return-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 0.08em;
+          font-size: clamp(3.6rem, 7.6vw, 7.1rem);
+          line-height: 0.9;
+        }
+
+        .return-answer-month,
+        .return-answer-day,
+        .return-answer-year,
+        .return-answer-comma {
+          display: inline;
         }
 
         .return-answer-context {
@@ -16953,14 +17000,48 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           }
 
           .return-answer-date {
+            display: block;
             margin-top: 18px;
-            font-size: clamp(4.2rem, 19vw, 6.1rem);
-            line-height: 0.88;
+            line-height: 0.9;
           }
 
           .return-answer-weekday {
-            margin-top: 14px;
-            font-size: 1.12rem;
+            display: block;
+            margin: 0 0 10px;
+            font-size: clamp(1.85rem, 8.8vw, 2.6rem);
+            line-height: 0.98;
+          }
+
+          .return-answer-date-main {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            font-size: clamp(3.55rem, 17vw, 5rem);
+            line-height: 0.82;
+            letter-spacing: -0.06em;
+          }
+
+          .return-answer-month,
+          .return-answer-day,
+          .return-answer-year {
+            display: block;
+          }
+
+          .return-answer-comma {
+            display: none;
+          }
+
+          .return-answer-month {
+            font-size: 0.92em;
+          }
+
+          .return-answer-day {
+            font-size: 1.08em;
+          }
+
+          .return-answer-year {
+            font-size: 0.96em;
           }
 
           .return-answer-context {
@@ -17048,8 +17129,12 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             font-size: 0.76rem;
           }
 
-          .return-answer-date {
-            font-size: clamp(3.75rem, 18vw, 5.25rem);
+          .return-answer-date-main {
+            font-size: clamp(3.25rem, 16.5vw, 4.6rem);
+          }
+
+          .return-answer-weekday {
+            font-size: clamp(1.7rem, 8vw, 2.3rem);
           }
 
           .return-answer-controls {
