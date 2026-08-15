@@ -581,14 +581,38 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
     <main className="page-shell deadline-rule-page">
       <IdentityRow onNavigate={onNavigate} showHomeLink />
 
+      <section className="deadline-editorial-hero" aria-label="Deadline calculator answer">
+        <div className="deadline-editorial-card">
+          <p className="deadline-editorial-eyebrow">Rule-aware deadline calculator</p>
+          <h1>When is it due?</h1>
+          {result && parsedTriggerDate && parsedDuration !== null ? (
+            <>
+              <div className="deadline-editorial-divider" />
+              <p className="deadline-editorial-rule">
+                {parsedDuration} {unit === 'business-days' ? 'business days' : 'calendar days'} {direction === 'after' ? 'after' : 'before'}
+              </p>
+              <strong className="deadline-editorial-date">
+                {formatPlainDate(result.answerDate)}
+              </strong>
+              <span className="deadline-editorial-weekday">
+                {formatWeekday(result.answerDate)}
+              </span>
+              <div className="deadline-editorial-meta">
+                <span>Start date</span>
+                <strong>{formatPlainDate(parsedTriggerDate)}</strong>
+              </div>
+            </>
+          ) : (
+            <p className="deadline-editorial-empty">Set the date and counting rule below.</p>
+          )}
+        </div>
+      </section>
+
       <section className="deadline-rule-shell">
         <header className="deadline-rule-intro">
-          <p className="friendly-eyebrow">Rule-aware deadline</p>
-          <h1>When is it due?</h1>
-          <p>
-            Start with the simple answer. Open the rule choices only when the
-            wording you were given needs them.
-          </p>
+          <p className="friendly-eyebrow">Your calculation</p>
+          <h2>Set the date and counting rule</h2>
+          <p>The due date updates immediately.</p>
         </header>
 
         {cameFromWithinPhrase ? (
@@ -1000,29 +1024,136 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           background: #fffaf2;
         }
 
+        .deadline-editorial-hero {
+          position: relative;
+          width: min(100% - 24px, 1100px);
+          min-height: 520px;
+          margin: 14px auto 0;
+          overflow: hidden;
+          border: 1px solid rgba(22, 49, 78, 0.12);
+          border-radius: 28px;
+          background-image: url('/deadline-calculator-background.webp');
+          background-position: center;
+          background-size: cover;
+        }
+
+        .deadline-editorial-card {
+          position: absolute;
+          top: 34px;
+          left: 34px;
+          width: min(46%, 500px);
+          padding: 34px 36px 30px;
+          border: 1px solid rgba(22, 49, 78, 0.08);
+          border-radius: 24px;
+          background: rgba(255, 252, 245, 0.94);
+          box-shadow: 0 18px 50px rgba(39, 40, 34, 0.08);
+          backdrop-filter: blur(8px);
+        }
+
+        .deadline-editorial-eyebrow {
+          margin: 0;
+          color: #2e8872;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .deadline-editorial-card h1 {
+          margin: 10px 0 0;
+          color: #14375f;
+          font-size: clamp(3rem, 5.2vw, 5.2rem);
+          line-height: 0.94;
+          letter-spacing: -0.055em;
+        }
+
+        .deadline-editorial-divider {
+          height: 1px;
+          margin: 24px 0 18px;
+          background: rgba(22, 49, 78, 0.13);
+        }
+
+        .deadline-editorial-rule {
+          margin: 0;
+          color: #657b91;
+          font-size: 1rem;
+          font-weight: 800;
+        }
+
+        .deadline-editorial-date {
+          display: block;
+          margin-top: 8px;
+          color: #14375f;
+          font-size: clamp(2.45rem, 4.5vw, 4.4rem);
+          line-height: 0.98;
+          letter-spacing: -0.045em;
+        }
+
+        .deadline-editorial-weekday {
+          display: block;
+          margin-top: 7px;
+          color: #627990;
+          font-size: 1.08rem;
+          font-weight: 800;
+        }
+
+        .deadline-editorial-meta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-top: 22px;
+          padding: 14px 16px;
+          border-radius: 14px;
+          background: #edf6f8;
+        }
+
+        .deadline-editorial-meta span {
+          color: #60788e;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .deadline-editorial-meta strong {
+          color: #234765;
+          font-size: 0.98rem;
+        }
+
+        .deadline-editorial-empty {
+          margin: 22px 0 0;
+          color: #657b91;
+          font-size: 1rem;
+          line-height: 1.5;
+        }
+
         .deadline-rule-shell {
-          width: min(100% - 24px, 860px);
-          margin: 0 auto;
-          padding: 36px 0 64px;
+          width: min(100% - 24px, 1100px);
+          margin: 22px auto 0;
+          padding: 30px 32px 54px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 24px;
+          background: rgba(255, 255, 255, 0.72);
         }
 
         .deadline-rule-intro {
-          text-align: center;
+          text-align: left;
         }
 
-        .deadline-rule-intro h1 {
+        .deadline-rule-intro h2 {
           margin: 6px 0 0;
           color: #152d48;
-          font-size: clamp(2.35rem, 7vw, 4rem);
+          font-size: clamp(2.1rem, 4vw, 3.3rem);
           line-height: 1;
+          letter-spacing: -0.04em;
         }
 
         .deadline-rule-intro > p:last-child {
-          max-width: 650px;
-          margin: 14px auto 0;
+          margin: 10px 0 0;
           color: #61788f;
-          font-size: 1.05rem;
-          line-height: 1.6;
+          font-size: 1rem;
+          line-height: 1.5;
         }
 
         .deadline-rule-source-note {
@@ -1048,9 +1179,13 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         .deadline-rule-essential {
           display: grid;
-          grid-template-columns: 1.25fr 0.85fr 1fr 1fr;
-          gap: 10px;
-          margin-top: 28px;
+          grid-template-columns: 1.25fr 0.8fr 1fr 1fr;
+          gap: 12px;
+          margin-top: 24px;
+          padding: 22px;
+          border: 1px solid rgba(22, 49, 78, 0.1);
+          border-radius: 18px;
+          background: #f2eee5;
         }
 
         .deadline-rule-essential label,
@@ -1082,15 +1217,15 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         .deadline-rule-answer {
           margin-top: 16px;
-          padding: 24px 18px;
-          border: 1px solid rgba(22, 49, 78, 0.09);
-          border-radius: 18px;
-          background: #fff;
-          text-align: center;
+          padding: 30px 28px;
+          border: 0;
+          border-radius: 20px;
+          background: #173b63;
+          text-align: left;
         }
 
         .deadline-rule-answer > span {
-          color: #71869b;
+          color: #9fd0b4;
           font-size: 0.78rem;
           font-weight: 900;
           letter-spacing: 0.06em;
@@ -1099,24 +1234,24 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         .deadline-rule-answer > strong {
           display: block;
-          margin-top: 6px;
-          color: #132c47;
+          margin-top: 8px;
+          color: #fff7e8;
           font-size: clamp(2.1rem, 7vw, 3.7rem);
           line-height: 1.05;
         }
 
         .deadline-rule-answer > small {
           display: block;
-          margin-top: 6px;
-          color: #6d8296;
+          margin-top: 8px;
+          color: #d5e0eb;
           font-size: 1rem;
           font-weight: 750;
         }
 
         .deadline-rule-answer > p {
-          max-width: 680px;
-          margin: 16px auto 0;
-          color: #536b85;
+          max-width: 760px;
+          margin: 18px 0 0;
+          color: #d5e0eb;
           font-size: 1rem;
           line-height: 1.6;
         }
@@ -1248,12 +1383,63 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 720px) {
+          .deadline-editorial-hero {
+            width: calc(100% - 28px);
+            min-height: 660px;
+            margin-top: 14px;
+            border-radius: 24px;
+            background-position: 58% center;
+          }
+
+          .deadline-editorial-card {
+            top: 24px;
+            left: 20px;
+            right: 20px;
+            width: auto;
+            padding: 24px 22px 22px;
+            border-radius: 22px;
+          }
+
+          .deadline-editorial-card h1 {
+            font-size: clamp(3.25rem, 14vw, 4.25rem);
+          }
+
+          .deadline-editorial-date {
+            font-size: clamp(2.55rem, 11.5vw, 3.65rem);
+          }
+
+          .deadline-editorial-meta {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 5px;
+          }
+
           .deadline-rule-shell {
-            padding-top: 24px;
+            width: calc(100% - 28px);
+            margin-top: 16px;
+            padding: 24px 18px 38px;
+            border-radius: 22px;
+          }
+
+          .deadline-rule-intro h2 {
+            font-size: clamp(2.35rem, 11vw, 3.15rem);
           }
 
           .deadline-rule-essential {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 16px;
+          }
+
+          .deadline-rule-essential label:first-child,
+          .deadline-rule-essential label:nth-child(3),
+          .deadline-rule-essential label:nth-child(4) {
+            grid-column: 1 / -1;
+          }
+
+          .deadline-rule-essential input,
+          .deadline-rule-essential select {
+            min-height: 50px;
           }
 
           .deadline-rule-compare-grid {
@@ -1261,7 +1447,12 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           }
 
           .deadline-rule-answer {
-            padding: 20px 14px;
+            padding: 26px 20px;
+            border-radius: 20px;
+          }
+
+          .deadline-rule-answer > strong {
+            font-size: clamp(2.65rem, 12vw, 3.6rem);
           }
         }
       `}</style>
