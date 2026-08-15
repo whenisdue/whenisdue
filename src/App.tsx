@@ -4261,13 +4261,31 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
           : 'calendar days'
 
   const noticeRuleLabel =
-    parsedAmount !== null ? `${parsedAmount} ${unitLabel}` : `${noticeAmount} ${unitLabel}`
+    parsedAmount !== null
+      ? `${parsedAmount} ${unitLabel}`
+      : `${noticeAmount} ${unitLabel}`
+
+  const formatNoticeDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
 
   return (
-    <main className="page-shell notice-editorial-page">
-      <header className="notice-editorial-header" aria-label="WhenIsDue navigation">
+    <main className="page-shell notice-answer-page">
+      <header className="notice-answer-header" aria-label="WhenIsDue navigation">
         <a
-          className="notice-editorial-brand"
+          className="notice-answer-brand"
           href="/"
           onClick={(event) => {
             event.preventDefault()
@@ -4277,259 +4295,243 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="notice-editorial-nav" aria-label="Main navigation">
-          <a
-            className="notice-editorial-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
       <section
-        className="notice-editorial-hero"
+        className="notice-answer-shell"
         aria-labelledby="notice-period-title"
       >
-        <div className="notice-editorial-image-wrap">
-          <img
-            className="notice-editorial-image"
-            src="/notice-period-background.webp"
-            alt=""
+        <div className="notice-answer-hero">
+          <p className="notice-answer-eyebrow">Notice period calculator</p>
+
+          {noticeDeadline && parsedEventDate && parsedAmount !== null ? (
+            <>
+              <h1 id="notice-period-title">Give notice by</h1>
+
+              <strong
+                className="notice-answer-date"
+                aria-label={`${formatWeekday(noticeDeadline)}, ${formatPlainDate(noticeDeadline)}`}
+              >
+                <span className="notice-answer-weekday">
+                  {formatWeekday(noticeDeadline)},
+                </span>
+                <span className="notice-answer-date-main" aria-hidden="true">
+                  <span className="notice-answer-month">
+                    {
+                      [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December',
+                      ][noticeDeadline.month - 1]
+                    }
+                  </span>
+                  <span className="notice-answer-day">
+                    {noticeDeadline.day}
+                  </span>
+                  <span className="notice-answer-comma">,</span>
+                  <span className="notice-answer-year">
+                    {noticeDeadline.year}
+                  </span>
+                </span>
+              </strong>
+
+              <p className="notice-answer-context">
+                {noticeRuleLabel} before {formatNoticeDate(parsedEventDate)}
+              </p>
+
+              {noticeUnit === 'business-days' ? (
+                <p className="notice-answer-rule">
+                  {holidayCalendar === 'none'
+                    ? 'Weekends skipped · Public holidays still count'
+                    : `Weekends + ${getHolidayCalendarOption(
+                        holidayCalendar,
+                      ).shortLabel} holidays skipped`}
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <h1 id="notice-period-title">When should I give notice?</h1>
+              <p className="notice-answer-context">
+                Enter a valid event date and notice period below.
+              </p>
+            </>
+          )}
+        </div>
+
+        <form
+          className="notice-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            <span>Event or renewal date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={eventDate}
+              onChange={(event) => setEventDate(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Notice period</span>
+            <input
+              type="number"
+              min="0"
+              max="365"
+              step="1"
+              inputMode="numeric"
+              value={noticeAmount}
+              onChange={(event) => setNoticeAmount(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Count as</span>
+            <select
+              value={noticeUnit}
+              onChange={(event) =>
+                setNoticeUnit(event.target.value as NoticePeriodUnit)
+              }
+            >
+              <option value="calendar-days">Calendar days</option>
+              <option value="business-days">Business days</option>
+              <option value="weeks">Weeks</option>
+              <option value="months">Months</option>
+            </select>
+          </label>
+
+          <div
+            className="notice-answer-quick-picks"
+            aria-label="Common notice periods"
+          >
+            {[
+              ['14 days', '14', 'calendar-days'],
+              ['30 days', '30', 'calendar-days'],
+              ['60 days', '60', 'calendar-days'],
+              ['3 months', '3', 'months'],
+            ].map(([label, amount, unit]) => {
+              const active = noticeAmount === amount && noticeUnit === unit
+              return (
+                <button
+                  className={active ? 'is-active' : ''}
+                  type="button"
+                  aria-pressed={active}
+                  key={label}
+                  onClick={() => {
+                    setNoticeAmount(amount)
+                    setNoticeUnit(unit as NoticePeriodUnit)
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+
+          {noticeUnit === 'business-days' ? (
+            <div className="notice-answer-calendar">
+              <HolidayCalendarSelect
+                value={holidayCalendar}
+                onChange={(nextCalendar) => {
+                  setHolidayCalendar(nextCalendar)
+                  trackWhenIsDueEvent('holiday_calendar_changed', {
+                    context: 'notice_period',
+                    value: nextCalendar,
+                  })
+                }}
+                compact
+              />
+            </div>
+          ) : null}
+        </form>
+      </section>
+
+      {noticeDeadline && parsedEventDate && parsedAmount !== null ? (
+        <section className="notice-answer-actions">
+          <ResultActions
+            title="Notice deadline"
+            date={noticeDeadline}
+            details={`${noticeRuleLabel} before ${formatNoticeDate(parsedEventDate)}`}
+            variant="return-window"
           />
 
-          <div className="notice-editorial-answer">
-            <p className="notice-editorial-eyebrow">Notice period calculator</p>
-            <h1 id="notice-period-title">When should I give notice?</h1>
-
-            {noticeDeadline && parsedEventDate && parsedAmount !== null ? (
-              <>
-                <div className="notice-editorial-primary-answer">
-                  <span>{noticeRuleLabel} before</span>
-                  <strong>{formatPlainDate(noticeDeadline)}</strong>
-                  <small>{formatWeekday(noticeDeadline)}</small>
-                </div>
-
-                <div className="notice-editorial-event-row">
-                  <span>Event date</span>
-                  <b>{formatPlainDate(parsedEventDate)}</b>
-                </div>
-              </>
-            ) : (
-              <p className="notice-editorial-error">
-                Enter a valid event date and notice period.
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="notice-editorial-workspace"
-        aria-label="Notice period calculator"
-      >
-        <div className="notice-editorial-heading">
-          <p className="notice-section-eyebrow">Your calculation</p>
-          <h2>Set the event date and notice period</h2>
-          <p>The latest notice date updates immediately.</p>
-        </div>
-
-        <div className="notice-editorial-calculation-grid">
-          <form
-            className="notice-editorial-form"
-            onSubmit={(event) => event.preventDefault()}
-          >
-            <label>
-              <span>Event or renewal date</span>
-              <input
-                type="date"
-                min="1900-01-01"
-                max="2100-12-31"
-                value={eventDate}
-                onChange={(event) => setEventDate(event.target.value)}
-              />
-            </label>
-
-            <div className="notice-editorial-input-grid">
-              <label>
-                <span>Notice period</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="365"
-                  step="1"
-                  inputMode="numeric"
-                  value={noticeAmount}
-                  onChange={(event) => setNoticeAmount(event.target.value)}
-                />
-              </label>
-
-              <label>
-                <span>Count as</span>
-                <select
-                  value={noticeUnit}
-                  onChange={(event) =>
-                    setNoticeUnit(event.target.value as NoticePeriodUnit)
-                  }
-                >
-                  <option value="calendar-days">Calendar days</option>
-                  <option value="business-days">Business days</option>
-                  <option value="weeks">Weeks</option>
-                  <option value="months">Months</option>
-                </select>
-              </label>
-            </div>
-
-            {noticeUnit === 'business-days' ? (
-              <div className="notice-editorial-calendar">
-                <HolidayCalendarSelect
-                  value={holidayCalendar}
-                  onChange={(nextCalendar) => {
-                    setHolidayCalendar(nextCalendar)
-                    trackWhenIsDueEvent('holiday_calendar_changed', {
-                      context: 'notice_period',
-                      value: nextCalendar,
-                    })
-                  }}
-                  compact
-                />
-              </div>
-            ) : null}
-
-            <div
-              className="notice-editorial-quick-picks"
-              aria-label="Common notice periods"
-            >
-              {[
-                ['14 days', '14', 'calendar-days'],
-                ['30 days', '30', 'calendar-days'],
-                ['60 days', '60', 'calendar-days'],
-                ['3 months', '3', 'months'],
-              ].map(([label, amount, unit]) => {
-                const active = noticeAmount === amount && noticeUnit === unit
-                return (
-                  <button
-                    className={active ? 'is-active' : ''}
-                    type="button"
-                    aria-pressed={active}
-                    key={label}
-                    onClick={() => {
-                      setNoticeAmount(amount)
-                      setNoticeUnit(unit as NoticePeriodUnit)
-                    }}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
-            </div>
-          </form>
-
-          <section className="notice-editorial-result" aria-live="polite">
-            {noticeDeadline && parsedEventDate && parsedAmount !== null ? (
-              <>
-                <p className="notice-result-kicker">Give notice by</p>
-                <p className="notice-result-date">
-                  {formatPlainDate(noticeDeadline)}
-                </p>
-                <p className="notice-result-weekday">
-                  {formatWeekday(noticeDeadline)}
-                </p>
-
-                <div className="notice-result-summary">
-                  <span>{noticeRuleLabel}</span>
-                  <small>before {formatPlainDate(parsedEventDate)}</small>
-                </div>
-
-                <p className="notice-result-note">
-                  {noticeUnit === 'business-days'
-                    ? holidayCalendar === 'none'
-                      ? 'Weekends are skipped. Public holidays still count as weekdays.'
-                      : `Weekends and ${
-                          getHolidayCalendarOption(holidayCalendar).shortLabel
-                        } holidays are skipped.`
-                    : noticeUnit === 'months'
-                      ? 'Month-based notice moves back by whole calendar months, clamping to the last day when needed.'
-                      : 'The calculation counts backward from the event date using the unit selected above.'}
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="notice_period"
-                  rows={[
-                    {
-                      label: 'Event / renewal date',
-                      value: `${formatWeekday(
+          <details className="notice-answer-details">
+            <summary>Why this date?</summary>
+            <div className="notice-answer-detail-body">
+              <p>
+                {noticeUnit === 'business-days'
+                  ? holidayCalendar === 'none'
+                    ? `WhenIsDue counted backward ${parsedAmount} business days from ${formatNoticeDate(
                         parsedEventDate,
-                      )}, ${formatPlainDate(parsedEventDate)}`,
-                    },
-                    {
-                      label: 'Notice period',
-                      value: noticeRuleLabel,
-                    },
-                    ...(noticeUnit === 'business-days'
-                      ? [
-                          {
-                            label: 'Holiday calendar',
-                            value:
-                              getHolidayCalendarOption(holidayCalendar).label,
-                          },
-                        ]
-                      : []),
-                    {
-                      label: 'Latest notice date',
-                      value: `${formatWeekday(
-                        noticeDeadline,
-                      )}, ${formatPlainDate(noticeDeadline)}`,
-                    },
-                  ]}
-                />
-
-                <ResultActions
-                  title="Notice deadline"
-                  date={noticeDeadline}
-                  details={`${noticeRuleLabel} before ${formatPlainDate(
-                    parsedEventDate,
-                  )}`}
-                />
-              </>
-            ) : (
-              <p className="notice-editorial-error">
-                Enter a valid event date and notice period.
+                      )}. Weekends were skipped and public holidays were treated like ordinary weekdays.`
+                    : `WhenIsDue counted backward ${parsedAmount} business days from ${formatNoticeDate(
+                        parsedEventDate,
+                      )}, skipping weekends and ${
+                        getHolidayCalendarOption(holidayCalendar).shortLabel
+                      } holidays.`
+                  : noticeUnit === 'months'
+                    ? `WhenIsDue moved backward ${parsedAmount} ${
+                        parsedAmount === 1 ? 'calendar month' : 'calendar months'
+                      } from ${formatNoticeDate(
+                        parsedEventDate,
+                      )}. If the target month does not contain the same day number, the calculation uses that month's last day.`
+                    : `WhenIsDue counted backward ${noticeRuleLabel} from ${formatNoticeDate(
+                        parsedEventDate,
+                      )}.`}
               </p>
-            )}
-          </section>
-        </div>
-      </section>
+
+              <CalculationReceipt
+                analyticsContext="notice_period"
+                rows={[
+                  {
+                    label: 'Event / renewal date',
+                    value: `${formatWeekday(
+                      parsedEventDate,
+                    )}, ${formatPlainDate(parsedEventDate)}`,
+                  },
+                  {
+                    label: 'Notice period',
+                    value: noticeRuleLabel,
+                  },
+                  ...(noticeUnit === 'business-days'
+                    ? [
+                        {
+                          label: 'Holiday calendar',
+                          value:
+                            getHolidayCalendarOption(holidayCalendar).label,
+                        },
+                      ]
+                    : []),
+                  {
+                    label: 'Latest notice date',
+                    value: `${formatWeekday(
+                      noticeDeadline,
+                    )}, ${formatPlainDate(noticeDeadline)}`,
+                  },
+                ]}
+              />
+            </div>
+          </details>
+        </section>
+      ) : null}
 
       <section
-        className="notice-editorial-related"
+        className="notice-answer-related"
         aria-label="Related deadline tools"
       >
         <div>
-          <p className="notice-section-eyebrow">Related deadline tools</p>
+          <p className="notice-answer-section-eyebrow">Related deadline tools</p>
           <h2>Need a more specific counting rule?</h2>
         </div>
 
@@ -4541,7 +4543,7 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
               onNavigate('/deadline-calculator')
             }}
           >
-            Deadline calculator <span aria-hidden="true">→</span>
+            Deadline calculator
           </a>
           <a
             href="/business-days-calculator"
@@ -4550,7 +4552,7 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
               onNavigate('/business-days-calculator')
             }}
           >
-            Business days calculator <span aria-hidden="true">→</span>
+            Business days calculator
           </a>
           <a
             href="/does-the-start-date-count"
@@ -4559,17 +4561,17 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
               onNavigate('/does-the-start-date-count')
             }}
           >
-            Does the start date count? <span aria-hidden="true">→</span>
+            Does the start date count?
           </a>
         </nav>
       </section>
 
       <section
-        className="notice-editorial-content"
+        className="notice-answer-content"
         aria-label="Notice period help"
       >
-        <div className="notice-content-heading">
-          <p className="notice-section-eyebrow">Notice-period rules</p>
+        <div className="notice-answer-content-heading">
+          <p className="notice-answer-section-eyebrow">Notice-period rules</p>
           <h2>Event, notice, deadline</h2>
         </div>
 
@@ -4626,218 +4628,158 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .notice-editorial-page {
-          --notice-navy: #112f53;
-          --notice-green: #2d7c67;
-          --notice-blue: #eef5f8;
-          --notice-warm: #f2ede4;
+        .notice-answer-page {
+          --notice-ink: #153655;
+          --notice-muted: #667a8d;
+          --notice-accent: #2d7b64;
+          --notice-field: #e8efe4;
+          --notice-field-soft: #f1f5ee;
+          min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .notice-editorial-header {
-          width: min(100% - 32px, 1130px);
-          min-height: 70px;
-          margin: 0 auto 14px;
+        .notice-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+          border-bottom: 1px solid rgba(21, 54, 85, 0.12);
         }
 
-        .notice-editorial-brand {
+        .notice-answer-brand {
           display: inline-flex;
           align-items: center;
           text-decoration: none;
         }
 
-        .notice-editorial-brand img {
+        .notice-answer-brand img {
           display: block;
           width: 176px;
           height: auto;
         }
 
-        .notice-editorial-nav {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-        }
-
-        .notice-editorial-nav a {
-          color: #5a728d;
-          font-size: 0.9rem;
-          font-weight: 850;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .notice-editorial-hero,
-        .notice-editorial-workspace,
-        .notice-editorial-related,
-        .notice-editorial-content {
-          width: min(100% - 32px, 1130px);
+        .notice-answer-shell,
+        .notice-answer-actions,
+        .notice-answer-related,
+        .notice-answer-content {
+          width: min(100% - 32px, 1100px);
           margin-left: auto;
           margin-right: auto;
         }
 
-        .notice-editorial-image-wrap {
-          position: relative;
-          min-height: 470px;
-          overflow: hidden;
-          border: 1px solid rgba(17, 47, 83, 0.12);
-          border-radius: 28px;
-          background: #d8c7ad;
+        .notice-answer-shell {
+          margin-top: 22px;
         }
 
-        .notice-editorial-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
+        .notice-answer-hero {
+          padding: clamp(42px, 6vw, 68px) clamp(24px, 5vw, 58px) 34px;
+          border: 1px solid rgba(52, 87, 60, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--notice-field);
+          text-align: center;
         }
 
-        .notice-editorial-answer {
-          position: relative;
-          z-index: 1;
-          width: min(500px, calc(100% - 64px));
-          margin: 32px;
-          padding: 32px 34px 28px;
-          border: 1px solid rgba(255, 255, 255, 0.45);
-          border-radius: 24px;
-          background: rgba(250, 247, 239, 0.94);
-          box-shadow: 0 18px 52px rgba(11, 24, 39, 0.15);
-          backdrop-filter: blur(10px);
-        }
-
-        .notice-editorial-eyebrow,
-        .notice-section-eyebrow {
+        .notice-answer-eyebrow,
+        .notice-answer-section-eyebrow {
           margin: 0;
-          color: var(--notice-green);
-          font-size: 0.78rem;
+          color: var(--notice-accent);
+          font-size: 0.8rem;
           font-weight: 950;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .notice-editorial-answer h1 {
+        .notice-answer-hero h1 {
           margin: 10px 0 0;
-          color: var(--notice-navy);
-          font-size: clamp(2.65rem, 5vw, 4.5rem);
-          line-height: 0.97;
+          color: var(--notice-ink);
+          font-size: clamp(2.8rem, 5.8vw, 5rem);
+          line-height: 0.98;
           letter-spacing: -0.05em;
           text-wrap: balance;
         }
 
-        .notice-editorial-primary-answer {
+        .notice-answer-date {
           display: grid;
-          gap: 4px;
-          margin-top: 22px;
-          padding-top: 18px;
-          border-top: 1px solid rgba(17, 47, 83, 0.11);
-        }
-
-        .notice-editorial-primary-answer span {
-          color: #687e91;
-          font-size: 0.95rem;
-          font-weight: 850;
-        }
-
-        .notice-editorial-primary-answer strong {
-          color: var(--notice-navy);
-          font-size: clamp(2.15rem, 4vw, 3.4rem);
-          line-height: 1;
-          letter-spacing: -0.045em;
-        }
-
-        .notice-editorial-primary-answer small {
-          color: #5e7489;
-          font-size: 1rem;
-          font-weight: 800;
-        }
-
-        .notice-editorial-event-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 14px;
-          margin-top: 18px;
-          padding: 13px 14px;
-          border-radius: 14px;
-          background: rgba(238, 245, 248, 0.92);
-        }
-
-        .notice-editorial-event-row span {
-          color: #667e91;
-          font-size: 0.78rem;
+          justify-items: center;
+          margin-top: 26px;
+          color: var(--notice-ink);
           font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
         }
 
-        .notice-editorial-event-row b {
-          color: #24435f;
-          font-size: 0.95rem;
-        }
-
-        .notice-editorial-workspace {
-          margin-top: 22px;
-          padding: 30px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 26px;
-          background: #fffdf9;
-        }
-
-        .notice-editorial-heading h2,
-        .notice-editorial-related h2,
-        .notice-content-heading h2 {
-          margin: 6px 0 0;
-          color: var(--notice-navy);
-          font-size: clamp(2rem, 3.7vw, 3.15rem);
-          line-height: 1;
+        .notice-answer-weekday {
+          color: #3b6579;
+          font-size: clamp(2.5rem, 4.4vw, 4rem);
+          line-height: 0.98;
           letter-spacing: -0.04em;
-          text-wrap: balance;
         }
 
-        .notice-editorial-heading > p:last-child {
-          margin: 8px 0 0;
-          color: #6b7f92;
+        .notice-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.09em;
+          max-width: 100%;
+          margin-top: 6px;
+          font-size: clamp(3.7rem, 6.2vw, 6rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          white-space: nowrap;
         }
 
-        .notice-editorial-calculation-grid {
+        .notice-answer-month,
+        .notice-answer-day,
+        .notice-answer-comma,
+        .notice-answer-year {
+          display: inline;
+        }
+
+        .notice-answer-comma {
+          margin-left: -0.08em;
+        }
+
+        .notice-answer-context,
+        .notice-answer-rule {
+          margin: 18px 0 0;
+          color: var(--notice-muted);
+          font-size: 0.98rem;
+          line-height: 1.5;
+        }
+
+        .notice-answer-rule {
+          margin-top: 7px;
+          font-size: 0.88rem;
+        }
+
+        .notice-answer-controls {
           display: grid;
-          grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.28fr);
-          gap: 16px;
-          margin-top: 22px;
+          grid-template-columns: minmax(0, 1.3fr) minmax(120px, 0.55fr) minmax(180px, 0.8fr) minmax(360px, 1.5fr);
+          gap: 12px;
+          align-items: end;
+          padding: 18px;
+          border: 1px solid rgba(52, 87, 60, 0.12);
+          border-top: 1px solid rgba(52, 87, 60, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--notice-field-soft);
         }
 
-        .notice-editorial-form {
-          display: grid;
-          gap: 15px;
-          align-content: start;
-          padding: 22px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 18px;
-          background: var(--notice-warm);
-        }
-
-        .notice-editorial-form label {
+        .notice-answer-controls label {
           display: grid;
           gap: 7px;
         }
 
-        .notice-editorial-form label > span {
-          color: #566f87;
+        .notice-answer-controls label > span {
+          color: #526a82;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 850;
         }
 
-        .notice-editorial-form input,
-        .notice-editorial-form select {
+        .notice-answer-controls input,
+        .notice-answer-controls select {
           width: 100%;
           min-height: 50px;
           padding: 10px 12px;
-          border: 1px solid rgba(17, 47, 83, 0.16);
+          border: 1px solid rgba(21, 54, 85, 0.14);
           border-radius: 11px;
           background: #fff;
           color: #17304d;
@@ -4845,390 +4787,266 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
           font-size: 1rem;
         }
 
-        .notice-editorial-input-grid {
+        .notice-answer-quick-picks {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 7px;
         }
 
-        .notice-editorial-quick-picks {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
-        }
-
-        .notice-editorial-quick-picks button {
-          min-height: 44px;
-          border: 1px solid rgba(17, 47, 83, 0.13);
+        .notice-answer-quick-picks button {
+          min-height: 50px;
+          padding: 8px 9px;
+          border: 1px solid rgba(21, 54, 85, 0.13);
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.78);
+          background: rgba(255, 255, 255, 0.82);
           color: #4f6780;
           font: inherit;
-          font-size: 0.82rem;
+          font-size: 0.8rem;
           font-weight: 850;
           cursor: pointer;
         }
 
-        .notice-editorial-quick-picks button.is-active {
-          border-color: rgba(45, 124, 103, 0.6);
-          background: #e8f4ef;
-          color: #1f6656;
-          box-shadow: inset 0 0 0 1px rgba(45, 124, 103, 0.18);
+        .notice-answer-quick-picks button.is-active {
+          border-color: rgba(45, 123, 100, 0.58);
+          background: #e7f3ee;
+          color: #1f6655;
         }
 
-        .notice-editorial-result {
-          min-width: 0;
-          padding: 30px 34px;
-          border-radius: 20px;
-          background: var(--notice-navy);
-          color: #f8f1e6;
+        .notice-answer-calendar {
+          grid-column: 1 / -1;
         }
 
-        .notice-result-kicker {
-          margin: 0;
-          color: #9fc6b4;
-          font-size: 0.76rem;
-          font-weight: 950;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-        }
-
-        .notice-result-date {
-          margin: 10px 0 0;
-          color: #fff8ec;
-          font-size: clamp(3.5rem, 7vw, 6.2rem);
-          font-weight: 850;
-          line-height: 0.92;
-          letter-spacing: -0.055em;
-          text-wrap: balance;
-        }
-
-        .notice-result-weekday {
-          margin: 10px 0 0;
-          color: #d5dfea;
-          font-size: 1.1rem;
-          font-weight: 800;
-        }
-
-        .notice-result-summary {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 8px 12px;
+        .notice-answer-actions {
           margin-top: 16px;
         }
 
-        .notice-result-summary span {
-          display: inline-flex;
+        .notice-answer-actions > .result-actions {
+          justify-content: center;
+        }
+
+        .notice-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(21, 54, 85, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .notice-answer-details summary {
+          min-height: 50px;
+          display: flex;
           align-items: center;
-          min-height: 30px;
-          padding: 5px 10px;
-          border: 1px solid rgba(223, 189, 122, 0.55);
-          border-radius: 999px;
-          background: #fff7e8;
-          color: #7b4f26;
-          font-size: 0.82rem;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
           font-weight: 900;
+          cursor: pointer;
         }
 
-        .notice-result-summary small,
-        .notice-result-note {
-          color: #c8d4df;
+        .notice-answer-detail-body {
+          padding: 0 14px 16px;
         }
 
-        .notice-result-note {
-          max-width: 720px;
-          margin: 18px 0 0;
+        .notice-answer-detail-body > p {
+          max-width: 760px;
+          margin: 0;
+          color: #61768a;
           font-size: 0.95rem;
-          line-height: 1.52;
+          line-height: 1.58;
         }
 
-        .notice-editorial-result .calculation-receipt {
-          margin-top: 18px;
+        .notice-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
         }
 
-        .notice-editorial-result .result-actions {
-          margin-top: 14px;
+        .notice-answer-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 85, 0.1);
+          border-radius: 22px;
+          background: #eef4ec;
         }
 
-        .notice-editorial-related {
-          margin-top: 22px;
-          padding: 24px 28px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 24px;
-          background: var(--notice-blue);
+        .notice-answer-related h2,
+        .notice-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--notice-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
         }
 
-        .notice-editorial-related nav {
+        .notice-answer-related nav {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 8px;
-          margin-top: 16px;
+          margin-top: 14px;
         }
 
-        .notice-editorial-related a {
+        .notice-answer-related a {
+          min-height: 52px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          min-height: 58px;
-          padding: 12px 14px;
-          border: 1px solid rgba(17, 47, 83, 0.12);
+          justify-content: center;
+          padding: 10px 13px;
+          border: 1px solid rgba(21, 54, 85, 0.11);
           border-radius: 12px;
-          background: rgba(255, 255, 255, 0.82);
-          color: #24425e;
+          background: #fff;
+          color: #35536e;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 850;
           text-decoration: none;
         }
 
-        .notice-editorial-related a span {
-          color: var(--notice-green);
-          font-size: 1.05rem;
-        }
-
-        .notice-editorial-content {
-          margin-top: 38px;
+        .notice-answer-content {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 12px;
+          margin-top: 34px;
         }
 
-        .notice-content-heading {
+        .notice-answer-content-heading {
           grid-column: 1 / -1;
-          margin-bottom: 4px;
+          margin-bottom: 3px;
         }
 
-        .notice-editorial-content article {
-          padding: 22px;
-          border: 1px solid rgba(17, 47, 83, 0.09);
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.72);
+        .notice-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(21, 54, 85, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
         }
 
-        .notice-editorial-content article:last-child {
+        .notice-answer-content article:last-child {
           grid-column: 1 / -1;
         }
 
-        .notice-editorial-content article h2 {
+        .notice-answer-content h2 {
           margin: 0;
-          color: var(--notice-navy);
+          color: var(--notice-ink);
           font-size: 1.08rem;
         }
 
-        .notice-editorial-content article p {
+        .notice-answer-content p {
           margin: 8px 0 0;
           color: #65798d;
           line-height: 1.55;
         }
 
-        .notice-editorial-error {
-          color: #65798d;
-        }
-
         @media (max-width: 760px) {
-          .notice-editorial-header {
+          .notice-answer-header {
             width: min(100% - 24px, 680px);
-            min-height: 58px;
-            margin-bottom: 12px;
-            gap: 12px;
+            min-height: 76px;
           }
 
-          .notice-editorial-brand img {
+          .notice-answer-brand img {
             width: 154px;
           }
 
-          .notice-editorial-nav {
-            gap: 12px;
-          }
-
-          .notice-editorial-nav a {
-            font-size: 0.8rem;
-          }
-
-          .notice-editorial-home-link {
-            display: none;
-          }
-
-          .notice-editorial-hero,
-          .notice-editorial-workspace,
-          .notice-editorial-related,
-          .notice-editorial-content {
+          .notice-answer-shell,
+          .notice-answer-actions,
+          .notice-answer-related,
+          .notice-answer-content {
             width: min(100% - 24px, 680px);
           }
 
-          .notice-editorial-image-wrap {
-            min-height: 465px;
-            border-radius: 24px;
-          }
-
-          .notice-editorial-image {
-            object-position: 56% center;
-          }
-
-          .notice-editorial-answer {
-            position: absolute;
-            left: 16px;
-            right: 16px;
-            bottom: 16px;
-            width: auto;
-            margin: 0;
-            padding: 18px;
-            border-radius: 18px;
-          }
-
-          .notice-editorial-answer h1 {
-            font-size: clamp(2.05rem, 9.3vw, 2.85rem);
-          }
-
-          .notice-editorial-primary-answer {
+          .notice-answer-shell {
             margin-top: 14px;
-            padding-top: 12px;
           }
 
-          .notice-editorial-primary-answer strong {
-            font-size: clamp(1.95rem, 8.8vw, 2.6rem);
+          .notice-answer-hero {
+            padding: 28px 20px 26px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .notice-editorial-event-row {
-            margin-top: 13px;
-            padding: 11px 12px;
+          .notice-answer-hero h1 {
+            font-size: clamp(2.65rem, 12vw, 4rem);
           }
 
-          .notice-editorial-workspace {
-            margin-top: 14px;
-            padding: 22px 18px;
-            border-radius: 22px;
+          .notice-answer-date {
+            justify-items: start;
+            margin-top: 22px;
           }
 
-          .notice-editorial-heading h2,
-          .notice-editorial-related h2,
-          .notice-content-heading h2 {
-            font-size: clamp(1.9rem, 8.5vw, 2.55rem);
+          .notice-answer-weekday {
+            font-size: clamp(2.3rem, 10vw, 3.2rem);
           }
 
-          .notice-editorial-calculation-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 18px;
-          }
-
-          .notice-editorial-form {
-            padding: 18px;
-          }
-
-          .notice-editorial-result {
-            padding: 22px 18px 18px;
-          }
-
-          .notice-result-date {
-            font-size: clamp(2.9rem, 11.5vw, 4.2rem);
-          }
-
-          .notice-result-note {
-            font-size: 0.92rem;
-            line-height: 1.48;
-          }
-
-          .notice-editorial-result .result-actions {
+          .notice-answer-date-main {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            justify-items: start;
+            gap: 0;
+            font-size: clamp(3.05rem, 14vw, 4.6rem);
+            line-height: 0.9;
+            white-space: normal;
           }
 
-          .notice-editorial-result .result-actions button,
-          .notice-editorial-result .result-actions a {
-            width: 100%;
-            min-height: 46px;
-            padding: 9px 10px;
-            font-size: 0.82rem;
+          .notice-answer-month,
+          .notice-answer-day,
+          .notice-answer-year {
+            display: block;
           }
 
-          .notice-editorial-result .result-actions > :last-child {
+          .notice-answer-comma {
+            display: none;
+          }
+
+          .notice-answer-controls {
+            grid-template-columns: minmax(0, 1.15fr) minmax(105px, 0.65fr);
+            gap: 10px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
+          }
+
+          .notice-answer-controls > label:nth-child(3) {
             grid-column: 1 / -1;
           }
 
-          .notice-editorial-related {
-            margin-top: 14px;
+          .notice-answer-quick-picks {
+            grid-column: 1 / -1;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .notice-answer-controls input,
+          .notice-answer-controls select,
+          .notice-answer-quick-picks button {
+            min-height: 46px;
+          }
+
+          .notice-answer-related {
             padding: 20px 18px;
-            border-radius: 22px;
           }
 
-          .notice-editorial-related nav {
+          .notice-answer-related nav {
             grid-template-columns: 1fr;
-            gap: 7px;
           }
 
-          .notice-editorial-content {
+          .notice-answer-content {
             display: block;
             margin-top: 28px;
           }
 
-          .notice-content-heading {
+          .notice-answer-content-heading {
             margin-bottom: 8px;
           }
 
-          .notice-editorial-content article {
+          .notice-answer-content article {
             padding: 20px 2px;
             border: 0;
-            border-top: 1px solid rgba(17, 47, 83, 0.1);
+            border-top: 1px solid rgba(21, 54, 85, 0.1);
             border-radius: 0;
             background: transparent;
           }
 
-          .notice-editorial-content article h2 {
-            font-size: 1.08rem;
-            line-height: 1.3;
-          }
-
-          .notice-editorial-content article p {
+          .notice-answer-content p {
             font-size: 0.94rem;
             line-height: 1.52;
-          }
-        }
-
-        @media (max-width: 430px) {
-          .notice-editorial-brand img {
-            width: 142px;
-          }
-
-          .notice-editorial-nav {
-            gap: 10px;
-          }
-
-          .notice-editorial-nav a {
-            font-size: 0.76rem;
-          }
-
-          .notice-editorial-image-wrap {
-            min-height: 440px;
-          }
-
-          .notice-editorial-answer {
-            left: 14px;
-            right: 14px;
-            bottom: 14px;
-            padding: 16px;
-          }
-
-          .notice-editorial-eyebrow {
-            font-size: 0.7rem;
-          }
-
-          .notice-editorial-event-row span {
-            font-size: 0.68rem;
-          }
-
-          .notice-editorial-event-row b {
-            font-size: 0.84rem;
           }
         }
       `}</style>
     </main>
   )
 }
-
-
 type SubscriptionIntervalUnit = 'days' | 'weeks' | 'months' | 'years'
 
 function SubscriptionRenewalCalculatorPage({
