@@ -1592,70 +1592,76 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
     '/deadline-calculator?date=2026-08-10&days=5&unit=business-days&direction=after&startday=unspecified'
 
   return (
-    <main className="page-shell start-date-guide-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+    <main className="page-shell start-date-answer-page">
+      <header className="start-date-answer-header" aria-label="WhenIsDue navigation">
+        <a
+          className="start-date-answer-brand"
+          href="/"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+          aria-label="WhenIsDue home"
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
 
-      <article className="start-date-guide-shell">
-        <header className="start-date-guide-hero">
-          <p className="friendly-eyebrow">Deadline counting guide</p>
-          <h1>Does the start date count?</h1>
+      <article className="start-date-answer-shell">
+        <section className="start-date-answer-hero" aria-labelledby="start-date-count-title">
+          <p className="start-date-answer-eyebrow">Deadline counting guide</p>
+          <h1 id="start-date-count-title">Does the start date count?</h1>
 
-          <div className="start-date-guide-answer">
-            <strong>It depends on the wording of the rule.</strong>
+          <div className="start-date-answer-primary">
+            <strong>Usually no — unless the rule says to count it.</strong>
             <p>
               If a deadline says <b>“5 business days after August 10”</b>,
-              August 10 is normally treated as the reference date and counting
-              starts after it. If the rule says <b>“count August 10 as day
-              one”</b>, the start date counts when it is a qualifying day.
-              Wording such as <b>“within 5 business days of August 10”</b> may
-              not tell you which convention to use.
+              August 10 is normally the reference date and counting starts
+              after it. If the rule says to count August 10 as day one, then
+              the start date counts when it qualifies.
             </p>
           </div>
 
-          <p className="start-date-guide-scope">
-            General counting guidance only. The contract, policy, law, or
-            instruction that created the deadline controls.
+          <p className="start-date-answer-context">
+            Wording such as “within 5 business days of August 10” can be
+            ambiguous. The original rule controls.
           </p>
-        </header>
+        </section>
 
         <section
-          className="start-date-guide-example"
-          aria-labelledby="start-date-guide-example-title"
+          className="start-date-answer-example"
+          aria-labelledby="start-date-answer-example-title"
         >
-          <div className="start-date-guide-example-heading">
-            <span>Worked example</span>
-            <h2 id="start-date-guide-example-title">
+          <div className="start-date-answer-example-heading">
+            <span>Same start date. Two rules.</span>
+            <h2 id="start-date-answer-example-title">
               August 10, 2026 + 5 business days
             </h2>
             <p>Monday–Friday only. Public holidays are not excluded.</p>
           </div>
 
-          <div className="start-date-guide-results">
-            <div>
+          <div className="start-date-answer-results">
+            <article>
               <span>Start date does not count</span>
               <strong>
                 {excluded ? formatPlainDate(excluded.answerDate) : '—'}
               </strong>
-              <small>
-                {excluded ? formatWeekday(excluded.answerDate) : ''}
-              </small>
+              <small>{excluded ? formatWeekday(excluded.answerDate) : ''}</small>
               <p>Counting begins with the next qualifying business day.</p>
-            </div>
+            </article>
 
-            <div>
+            <article>
               <span>Start date counts as day 1</span>
               <strong>
                 {included ? formatPlainDate(included.answerDate) : '—'}
               </strong>
-              <small>
-                {included ? formatWeekday(included.answerDate) : ''}
-              </small>
+              <small>{included ? formatWeekday(included.answerDate) : ''}</small>
               <p>August 10 is day 1 because it is a Monday.</p>
-            </div>
+            </article>
           </div>
 
           <a
-            className="start-date-guide-cta"
+            className="start-date-answer-cta"
             href={calculatorPath}
             onClick={(event) => {
               event.preventDefault()
@@ -1665,71 +1671,51 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
               onNavigate(calculatorPath)
             }}
           >
-            Check your exact deadline →
+            Check your exact deadline
           </a>
         </section>
 
-        <section className="start-date-guide-content">
-          <article>
-            <h2>When the wording is clear</h2>
-            <dl>
-              <div>
-                <dt>“5 business days after receipt”</dt>
-                <dd>
-                  The receipt date is the reference event. Counting starts
-                  after that date unless the governing rule says otherwise.
-                </dd>
-              </div>
-              <div>
-                <dt>“Count the date received as day one”</dt>
-                <dd>
-                  The instruction explicitly tells you to include the start
-                  date when it qualifies.
-                </dd>
-              </div>
-            </dl>
-          </article>
-
-          <article>
-            <h2>When the wording is not clear</h2>
+        <details className="start-date-answer-details">
+          <summary>When does the start date count?</summary>
+          <div className="start-date-answer-detail-body">
             <p>
-              Phrases such as “within 5 business days of,” “5 business days
-              from,” or similar wording can leave the start-day convention
-              unstated. In that situation, a calculator should not silently
-              turn one interpretation into an authoritative deadline.
+              It counts when the governing wording explicitly says the
+              triggering date is day one, or otherwise tells you to include it.
+              If the wording says a number of days <b>after</b> an event or
+              date, the triggering date is normally treated as the reference
+              point rather than the first counted day.
             </p>
-            <p>
-              WhenIsDue can show both possible dates so you can compare them
-              against the original instruction before choosing a rule.
-            </p>
-          </article>
+          </div>
+        </details>
 
-          <article>
-            <h2>Why one day can change the answer</h2>
+        <details className="start-date-answer-details">
+          <summary>What if the wording is unclear?</summary>
+          <div className="start-date-answer-detail-body">
             <p>
-              With calendar days, including the start date can shift the result
-              by one calendar day. With business days, weekends and selected
-              public holidays can make the difference look larger on the
-              calendar.
+              Phrases such as “within 5 business days of” or “5 business days
+              from” can leave the start-day convention unstated. In that case,
+              do not silently assume one interpretation. Check the contract,
+              policy, notice, law, court rule, or instruction that created the
+              deadline.
             </p>
-          </article>
+          </div>
+        </details>
 
-          <article>
-            <h2>What should you do if the rule is silent?</h2>
+        <details className="start-date-answer-details">
+          <summary>Why can one day change the result?</summary>
+          <div className="start-date-answer-detail-body">
             <p>
-              Do not guess when the deadline matters. Check the original
-              contract, policy, notice, statute, court rule, or other source
-              that created the deadline. If the source still does not resolve
-              the convention, ask the responsible person or qualified adviser
-              before relying on one date.
+              Including the start date can shift a calendar-day result by one
+              day. With business days, weekends and selected holidays can make
+              the difference look larger on the calendar.
             </p>
-          </article>
-        </section>
+          </div>
+        </details>
 
-        <section className="start-date-guide-related" aria-label="Related tools">
+        <section className="start-date-answer-related" aria-label="Related tools">
           <div>
-            <span>Related tools</span>
-            <h2>Calculate the date with the rule made explicit</h2>
+            <span>Related answers</span>
+            <h2>Make the counting rule explicit</h2>
           </div>
 
           <nav>
@@ -1779,256 +1765,332 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .start-date-guide-page {
+        .start-date-answer-page {
+          --start-ink: #173353;
+          --start-muted: #65778d;
+          --start-accent: #2f7862;
+          --start-field: #ece7f1;
+          --start-field-soft: #f4f0f6;
           min-height: 100vh;
           background: #fffaf2;
         }
 
-        .start-date-guide-shell {
-          width: min(100% - 32px, 920px);
+        .start-date-answer-header {
+          width: min(100% - 32px, 1080px);
+          min-height: 82px;
           margin: 0 auto;
-          padding: 36px 0 64px;
-        }
-
-        .start-date-guide-hero {
-          text-align: center;
-        }
-
-        .start-date-guide-hero h1 {
-          margin: 6px 0 0;
-          color: #152d48;
-          font-size: clamp(2.35rem, 7vw, 4.6rem);
-          line-height: 1;
-          letter-spacing: -0.04em;
-        }
-
-        .start-date-guide-answer {
-          max-width: 760px;
-          margin: 22px auto 0;
-          padding: 22px;
-          border: 1px solid rgba(22, 49, 78, 0.09);
-          border-radius: 18px;
-          background: #fff;
-          text-align: left;
-        }
-
-        .start-date-guide-answer > strong {
-          display: block;
-          color: #17304d;
-          font-size: clamp(1.4rem, 3vw, 2rem);
-          line-height: 1.2;
-        }
-
-        .start-date-guide-answer p {
-          margin: 10px 0 0;
-          color: #526a82;
-          font-size: 1.02rem;
-          line-height: 1.65;
-        }
-
-        .start-date-guide-answer b {
-          color: #29435e;
-        }
-
-        .start-date-guide-scope {
-          max-width: 700px;
-          margin: 12px auto 0;
-          color: #718197;
-          font-size: 0.94rem;
-          line-height: 1.5;
-        }
-
-        .start-date-guide-example {
-          margin-top: 28px;
-          padding: 20px;
-          border: 1px solid rgba(183, 121, 31, 0.16);
-          border-radius: 18px;
-          background: #fffdf8;
-        }
-
-        .start-date-guide-example-heading {
-          text-align: center;
-        }
-
-        .start-date-guide-example-heading > span,
-        .start-date-guide-related > div > span {
-          color: #8a6a2c;
-          font-size: 0.8rem;
-          font-weight: 900;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-        }
-
-        .start-date-guide-example-heading h2,
-        .start-date-guide-related h2 {
-          margin: 5px 0 0;
-          color: #29435e;
-          font-size: 1.25rem;
-        }
-
-        .start-date-guide-example-heading p {
-          margin: 6px 0 0;
-          color: #718197;
-          font-size: 0.94rem;
-        }
-
-        .start-date-guide-results {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
-          margin-top: 16px;
-        }
-
-        .start-date-guide-results > div {
-          padding: 17px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
-          border-radius: 14px;
-          background: #fff;
-        }
-
-        .start-date-guide-results span {
-          display: block;
-          color: #526a82;
-          font-size: 0.92rem;
-          font-weight: 850;
-        }
-
-        .start-date-guide-results strong {
-          display: block;
-          margin-top: 7px;
-          color: #17304d;
-          font-size: clamp(1.55rem, 3vw, 2.15rem);
-          line-height: 1.1;
-        }
-
-        .start-date-guide-results small {
-          display: block;
-          margin-top: 4px;
-          color: #6d8196;
-          font-size: 0.94rem;
-        }
-
-        .start-date-guide-results p {
-          margin: 10px 0 0;
-          color: #667c92;
-          font-size: 0.94rem;
-          line-height: 1.5;
-        }
-
-        .start-date-guide-cta {
-          min-height: 48px;
-          width: fit-content;
           display: flex;
           align-items: center;
-          justify-content: center;
-          margin: 18px auto 0;
-          padding: 9px 15px;
-          border-radius: 11px;
-          background: #173a63;
-          color: #fff;
-          font-weight: 850;
+          border-bottom: 1px solid rgba(23, 51, 83, 0.12);
+        }
+
+        .start-date-answer-brand {
+          display: inline-flex;
+          align-items: center;
           text-decoration: none;
         }
 
-        .start-date-guide-content {
-          display: grid;
-          gap: 14px;
-          margin-top: 24px;
+        .start-date-answer-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
         }
 
-        .start-date-guide-content > article {
-          padding: 20px;
-          border: 1px solid rgba(22, 49, 78, 0.08);
-          border-radius: 16px;
-          background: rgba(255, 255, 255, 0.72);
+        .start-date-answer-shell {
+          width: min(100% - 32px, 1080px);
+          margin: 22px auto 0;
+          padding-bottom: 64px;
         }
 
-        .start-date-guide-content h2 {
+        .start-date-answer-hero {
+          padding: clamp(40px, 6vw, 66px) clamp(24px, 5vw, 58px) 38px;
+          border: 1px solid rgba(77, 58, 95, 0.12);
+          border-radius: 28px;
+          background: var(--start-field);
+          text-align: center;
+        }
+
+        .start-date-answer-eyebrow {
           margin: 0;
-          color: #29435e;
-          font-size: 1.2rem;
+          color: var(--start-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
         }
 
-        .start-date-guide-content p {
-          margin: 9px 0 0;
-          color: #5f748a;
-          font-size: 1rem;
-          line-height: 1.65;
+        .start-date-answer-hero h1 {
+          margin: 10px 0 0;
+          color: var(--start-ink);
+          font-size: clamp(2.8rem, 6vw, 5.25rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
         }
 
-        .start-date-guide-content dl {
+        .start-date-answer-primary {
+          max-width: 820px;
+          margin: 28px auto 0;
+        }
+
+        .start-date-answer-primary strong {
+          display: block;
+          color: var(--start-ink);
+          font-size: clamp(2rem, 4.1vw, 3.6rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+          text-wrap: balance;
+        }
+
+        .start-date-answer-primary p {
+          max-width: 760px;
+          margin: 16px auto 0;
+          color: #50687f;
+          font-size: clamp(1rem, 1.7vw, 1.12rem);
+          line-height: 1.62;
+        }
+
+        .start-date-answer-primary b {
+          color: #2c4864;
+        }
+
+        .start-date-answer-context {
+          max-width: 700px;
+          margin: 18px auto 0;
+          color: var(--start-muted);
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .start-date-answer-example {
+          margin-top: 18px;
+          padding: 24px;
+          border: 1px solid rgba(77, 58, 95, 0.11);
+          border-radius: 22px;
+          background: var(--start-field-soft);
+        }
+
+        .start-date-answer-example-heading {
+          text-align: center;
+        }
+
+        .start-date-answer-example-heading > span,
+        .start-date-answer-related > div > span {
+          color: #6f5f85;
+          font-size: 0.78rem;
+          font-weight: 950;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .start-date-answer-example-heading h2,
+        .start-date-answer-related h2 {
+          margin: 6px 0 0;
+          color: var(--start-ink);
+          font-size: clamp(1.35rem, 2.8vw, 2rem);
+          letter-spacing: -0.025em;
+        }
+
+        .start-date-answer-example-heading p {
+          margin: 7px 0 0;
+          color: var(--start-muted);
+          font-size: 0.93rem;
+        }
+
+        .start-date-answer-results {
           display: grid;
-          gap: 10px;
-          margin: 14px 0 0;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 18px;
         }
 
-        .start-date-guide-content dl > div {
-          padding: 13px 14px;
-          border: 1px solid rgba(22, 49, 78, 0.08);
-          border-radius: 12px;
-          background: #fff;
+        .start-date-answer-results article {
+          min-width: 0;
+          padding: 20px;
+          border: 1px solid rgba(23, 51, 83, 0.1);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.82);
+          text-align: center;
         }
 
-        .start-date-guide-content dt {
-          color: #29435e;
+        .start-date-answer-results span {
+          display: block;
+          color: #5a7087;
+          font-size: 0.86rem;
           font-weight: 900;
         }
 
-        .start-date-guide-content dd {
-          margin: 5px 0 0;
-          color: #667c92;
-          line-height: 1.55;
+        .start-date-answer-results strong {
+          display: block;
+          margin-top: 9px;
+          color: var(--start-ink);
+          font-size: clamp(2rem, 4vw, 3.35rem);
+          line-height: 0.98;
+          letter-spacing: -0.045em;
         }
 
-        .start-date-guide-related {
-          margin-top: 24px;
-          padding: 20px 0 0;
-          border-top: 1px solid rgba(22, 49, 78, 0.1);
+        .start-date-answer-results small {
+          display: block;
+          margin-top: 6px;
+          color: #64798f;
+          font-size: 0.96rem;
+          font-weight: 800;
         }
 
-        .start-date-guide-related nav {
+        .start-date-answer-results p {
+          margin: 11px 0 0;
+          color: #687b90;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .start-date-answer-cta {
+          width: fit-content;
+          min-height: 48px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin: 18px auto 0;
+          padding: 10px 18px;
+          border-radius: 11px;
+          background: #1f7159;
+          color: #fff;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        .start-date-answer-example > .start-date-answer-cta {
+          display: flex;
+        }
+
+        .start-date-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(23, 51, 83, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .start-date-answer-details summary {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          padding: 11px 15px;
+          color: #294863;
+          font-size: 1rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .start-date-answer-detail-body {
+          padding: 0 15px 16px;
+        }
+
+        .start-date-answer-detail-body p {
+          max-width: 800px;
+          margin: 0;
+          color: #62778c;
+          font-size: 0.96rem;
+          line-height: 1.62;
+        }
+
+        .start-date-answer-related {
+          margin-top: 26px;
+          padding-top: 22px;
+          border-top: 1px solid rgba(23, 51, 83, 0.1);
+        }
+
+        .start-date-answer-related nav {
           display: flex;
           flex-wrap: wrap;
           gap: 8px;
-          margin-top: 13px;
+          margin-top: 14px;
         }
 
-        .start-date-guide-related a {
+        .start-date-answer-related a {
           min-height: 44px;
           display: inline-flex;
           align-items: center;
           padding: 8px 12px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
+          border: 1px solid rgba(23, 51, 83, 0.1);
           border-radius: 999px;
           background: #fff;
-          color: #4f6a85;
-          font-size: 0.88rem;
+          color: #4e6880;
+          font-size: 0.87rem;
           font-weight: 850;
           text-decoration: none;
         }
 
         @media (max-width: 720px) {
-          .start-date-guide-shell {
-            width: min(100% - 20px, 920px);
-            padding-top: 24px;
+          .start-date-answer-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
           }
 
-          .start-date-guide-results {
+          .start-date-answer-brand img {
+            width: 154px;
+          }
+
+          .start-date-answer-shell {
+            width: min(100% - 24px, 680px);
+            margin-top: 14px;
+          }
+
+          .start-date-answer-hero {
+            padding: 30px 20px 28px;
+            border-radius: 24px;
+            text-align: left;
+          }
+
+          .start-date-answer-hero h1 {
+            font-size: clamp(2.7rem, 12vw, 4rem);
+          }
+
+          .start-date-answer-primary {
+            margin-top: 24px;
+          }
+
+          .start-date-answer-primary strong {
+            font-size: clamp(2.15rem, 10vw, 3.25rem);
+            line-height: 1.02;
+          }
+
+          .start-date-answer-primary p,
+          .start-date-answer-context {
+            margin-left: 0;
+            margin-right: 0;
+          }
+
+          .start-date-answer-example {
+            padding: 18px;
+            border-radius: 20px;
+          }
+
+          .start-date-answer-example-heading {
+            text-align: left;
+          }
+
+          .start-date-answer-results {
             grid-template-columns: 1fr;
           }
 
-          .start-date-guide-answer,
-          .start-date-guide-example,
-          .start-date-guide-content > article {
-            padding: 16px;
+          .start-date-answer-results article {
+            text-align: left;
           }
 
-          .start-date-guide-related nav {
+          .start-date-answer-results strong {
+            font-size: clamp(2.35rem, 11vw, 3.4rem);
+          }
+
+          .start-date-answer-example > .start-date-answer-cta {
+            width: 100%;
+          }
+
+          .start-date-answer-related nav {
             display: grid;
             grid-template-columns: 1fr;
           }
 
-          .start-date-guide-related a {
+          .start-date-answer-related a {
             justify-content: center;
           }
         }
@@ -2036,7 +2098,6 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
     </main>
   )
 }
-
 
 function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
   const friday = parsePlainDate('2026-08-14')!
