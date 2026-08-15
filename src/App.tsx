@@ -1743,6 +1743,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
           <nav>
             <a
               href="/deadline-calculator"
+              data-description="Count forward or backward using custom deadline rules."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/deadline-calculator')
@@ -1770,6 +1771,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
             </a>
             <a
               href="/business-days-calculator"
+              data-description="Add working days while skipping weekends and optional holidays."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/business-days-calculator')
@@ -5215,6 +5217,7 @@ function SubscriptionRenewalCalculatorPage({
         <nav>
           <a
             href="/free-trial-calculator"
+              data-description="Find when a free trial ends."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/free-trial-calculator')
@@ -5224,6 +5227,7 @@ function SubscriptionRenewalCalculatorPage({
           </a>
           <a
             href="/notice-period-calculator"
+              data-description="Count backward to find when notice is due."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/notice-period-calculator')
@@ -6429,6 +6433,7 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
           <nav>
             <a
               href="/invoice-due-date-calculator"
+              data-description="Find an invoice due date from Net terms or EOM."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/invoice-due-date-calculator')
@@ -6439,6 +6444,7 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
 
             <a
               href="/net-30-due-date"
+              data-description="Get the due date for a Net 30 invoice."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/net-30-due-date')
@@ -6449,6 +6455,7 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
 
             <a
               href="/2-10-net-30-calculator"
+              data-description="See the discount deadline and full-payment due date."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/2-10-net-30-calculator')
@@ -10307,6 +10314,7 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           <a
             href="/return-window-calculator"
+              data-description="Find the last day of a return window."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/return-window-calculator')
@@ -10344,6 +10352,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           <a
             className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href="/next-payday-calculator"
+              data-description="Find the next date in a pay schedule."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/next-payday-calculator')
@@ -10408,6 +10417,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           <a
             className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href="/shipping-delivery-range-calculator"
+              data-description="Turn a delivery estimate into earliest and latest dates."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/shipping-delivery-range-calculator')
@@ -12112,6 +12122,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/business-days-between-dates"
+              data-description="Count working days between two dates."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/business-days-between-dates' })
@@ -12183,6 +12194,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/business-hours-deadline-calculator"
+              data-description="Add working hours inside a business-day schedule."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/business-hours-deadline-calculator' })
@@ -12268,6 +12280,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/subscription-renewal-calculator"
+              data-description="Find the next renewal and optional cancellation deadline."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/subscription-renewal-calculator' })
@@ -12750,6 +12763,40 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           outline-offset: 2px;
         }
 
+        .calculator-hub-page .utility-directory-cards .proof-calculator {
+          position: relative;
+        }
+
+        /* Desktop: description appears only on hover or keyboard focus. */
+        .calculator-hub-page .utility-directory-cards .proof-calculator::after {
+          content: attr(data-description);
+          position: absolute;
+          left: 50%;
+          bottom: calc(100% + 8px);
+          z-index: 30;
+          width: max-content;
+          max-width: 250px;
+          padding: 9px 11px;
+          border-radius: 10px;
+          background: #153654;
+          color: #fff;
+          font-size: 0.76rem;
+          font-weight: 750;
+          line-height: 1.35;
+          text-align: left;
+          box-shadow: 0 8px 22px rgba(21, 54, 84, 0.16);
+          opacity: 0;
+          pointer-events: none;
+          transform: translate(-50%, 4px);
+          transition: opacity 120ms ease, transform 120ms ease;
+        }
+
+        .calculator-hub-page .utility-directory-cards .proof-calculator:hover::after,
+        .calculator-hub-page .utility-directory-cards .proof-calculator:focus-visible::after {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+
         /* The public calculator directory should not advertise VA Workspace. */
         .calculator-hub-page .workspace-showcase {
           display: none !important;
@@ -12812,6 +12859,34 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             font-size: 0.86rem;
             line-height: 1.16;
           }
+
+          /* Touch screens have no reliable hover. Show the explanation directly. */
+          .calculator-hub-page .utility-directory-cards .proof-calculator {
+            align-items: flex-start;
+          }
+
+          .calculator-hub-page .utility-directory-cards .proof-calculator > div {
+            display: grid;
+            gap: 4px;
+          }
+
+          .calculator-hub-page .utility-directory-cards .proof-calculator::after {
+            position: static;
+            grid-column: auto;
+            width: auto;
+            max-width: none;
+            margin: 4px 0 0;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+            color: #667b8e;
+            font-size: 0.74rem;
+            font-weight: 650;
+            line-height: 1.3;
+            box-shadow: none;
+            opacity: 1;
+            transform: none;
+          }
         }
 
         @media (max-width: 430px) {
@@ -12820,7 +12895,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           }
 
           .calculator-hub-page .utility-directory-cards .proof-calculator {
-            min-height: 72px !important;
+            min-height: 82px !important;
           }
         }
       `}</style>
