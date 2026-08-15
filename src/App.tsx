@@ -582,9 +582,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell deadline-rule-page">
-      <header className="shipping-editorial-header" aria-label="WhenIsDue navigation">
+      <header className="deadline-answer-header" aria-label="WhenIsDue navigation">
         <a
-          className="shipping-editorial-brand"
+          className="deadline-answer-brand"
           href="/"
           onClick={(event) => {
             event.preventDefault()
@@ -594,73 +594,123 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="shipping-editorial-nav" aria-label="Main navigation">
-          <a
-            className="shipping-editorial-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
-      <section className="deadline-editorial-hero" aria-label="Deadline calculator answer">
-        <div className="deadline-editorial-card">
-          <p className="deadline-editorial-eyebrow">Rule-aware deadline calculator</p>
-          <h1>When is it due?</h1>
-          {result && parsedTriggerDate && parsedDuration !== null ? (
-            <>
-              <div className="deadline-editorial-divider" />
-              <p className="deadline-editorial-rule">
-                {parsedDuration} {unit === 'business-days' ? 'business days' : 'calendar days'} {direction === 'after' ? 'after' : 'before'}
-              </p>
-              <strong className="deadline-editorial-date">
-                {formatPlainDate(result.answerDate)}
-              </strong>
-              <span className="deadline-editorial-weekday">
-                {formatWeekday(result.answerDate)}
-              </span>
-              <div className="deadline-editorial-meta">
-                <span>Start date</span>
-                <strong>{formatPlainDate(parsedTriggerDate)}</strong>
+      <section className="deadline-answer-hero" aria-label="Deadline calculator answer">
+        <p className="deadline-answer-eyebrow">Deadline calculator</p>
+
+        {startDayWordingUnspecified &&
+        startRuleComparison &&
+        parsedTriggerDate &&
+        parsedDuration !== null ? (
+          <>
+            <h1>The start-day rule changes the answer.</h1>
+            <div className="deadline-answer-ambiguity" aria-live="polite">
+              <div>
+                <span>If the start date does not count</span>
+                <strong>{formatWeekday(startRuleComparison.excluded)},</strong>
+                <b>{formatPlainDate(startRuleComparison.excluded)}</b>
               </div>
-            </>
-          ) : (
-            <p className="deadline-editorial-empty">Set the date and counting rule below.</p>
-          )}
-        </div>
+              <div>
+                <span>If the start date counts</span>
+                <strong>{formatWeekday(startRuleComparison.included)},</strong>
+                <b>{formatPlainDate(startRuleComparison.included)}</b>
+              </div>
+            </div>
+            <p className="deadline-answer-context">
+              Choose the rule that matches the contract, policy, message, or law that created the deadline.
+            </p>
+          </>
+        ) : result && parsedTriggerDate && parsedDuration !== null ? (
+          <details className="deadline-answer-details">
+            <summary>Why this date?</summary>
+            <div className="deadline-answer-detail-body">
+              <p>{buildDeadlineExplanation(result, triggerKind)}</p>
+
+              <DeadlineFinalAdjustmentNotice answer={result} />
+
+              <CalculationReceipt
+                analyticsContext="deadline_rule_calculator"
+                rows={[
+                  {
+                    label: direction === 'before' ? 'Reference event' : 'Clock starts',
+                    value: triggerEvent
+                      ? `${triggerEvent.label} — ${formatPlainDate(parsedTriggerDate)}`
+                      : formatPlainDate(parsedTriggerDate),
+                  },
+                  {
+                    label: 'Direction',
+                    value:
+                      direction === 'after'
+                        ? 'Count forward from the start date'
+                        : 'Count backward from the start date',
+                  },
+                  {
+                    label: 'Duration',
+                    value: `${parsedDuration} ${
+                      unit === 'business-days'
+                        ? 'business days'
+                        : 'calendar days'
+                    }`,
+                  },
+                  ...(unit === 'business-days' && workingSchedule
+                    ? [
+                        {
+                          label: 'Working days',
+                          value: workingSchedule.label,
+                        },
+                      ]
+                    : []),
+                  {
+                    label: 'Start-day rule',
+                    value:
+                      startDayConvention === 'exclude-trigger'
+                        ? 'Start date excluded'
+                        : 'Start date included if qualifying',
+                  },
+                  {
+                    label: 'Holiday calendar',
+                    value:
+                      unit === 'business-days' || endDayAdjustment !== 'none'
+                        ? holidayOption.label
+                        : 'Not used',
+                  },
+                  {
+                    label: 'Final-day rule',
+                    value:
+                      endDayAdjustment === 'none'
+                        ? 'No adjustment'
+                        : endDayAdjustment === 'next-business-day'
+                          ? 'Move to next business day'
+                          : 'Move to previous business day',
+                  },
+                  ...(result.skippedDates.length > 0
+                    ? [
+                        {
+                          label: 'Skipped dates',
+                          value:
+                            result.skippedDates.length === 1
+                              ? '1 non-working day skipped'
+                              : `${result.skippedDates.length} non-working days skipped`,
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+              <DeadlineProvenanceDetails answer={result} />
+            </div>
+          </details>
+        ) : (
+          <>
+            <h1>When is it due?</h1>
+            <p className="deadline-answer-context">
+              Enter a valid start date and number of days below.
+            </p>
+          </>
+        )}
       </section>
 
       <section className="deadline-rule-shell">
-        <header className="deadline-rule-intro">
-          <p className="friendly-eyebrow">Your calculation</p>
-          <h2>Set the date and counting rule</h2>
-          <p>The due date updates immediately.</p>
-        </header>
-
         {cameFromWithinPhrase ? (
           <div className="deadline-rule-source-note">
             <strong>“Within” needs a counting rule.</strong>
@@ -1067,182 +1117,153 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .deadline-rule-page {
+          --deadline-ink: #153557;
+          --deadline-muted: #64798d;
+          --deadline-accent: #2d7b64;
+          --deadline-field: #eadfd8;
+          --deadline-field-soft: #f3ebe6;
+          min-height: 100vh;
           background: #fffaf2;
         }
 
-        .deadline-rule-page .shipping-editorial-header {
-          width: min(100% - 32px, 1130px);
-          min-height: 70px;
-          margin: 0 auto 14px;
+        .deadline-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+          border-bottom: 1px solid rgba(21, 53, 87, 0.12);
         }
 
-        .deadline-rule-page .shipping-editorial-brand {
+        .deadline-answer-brand {
           display: inline-flex;
           align-items: center;
           text-decoration: none;
         }
 
-        .deadline-rule-page .shipping-editorial-brand img {
+        .deadline-answer-brand img {
           display: block;
           width: 176px;
           height: auto;
         }
 
-        .deadline-rule-page .shipping-editorial-nav {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-        }
-
-        .deadline-rule-page .shipping-editorial-nav a {
-          color: #5a728d;
-          font-size: 0.9rem;
-          font-weight: 850;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .deadline-editorial-hero {
-          position: relative;
-          width: min(100% - 24px, 1100px);
-          min-height: 520px;
-          margin: 14px auto 0;
-          overflow: hidden;
-          border: 1px solid rgba(22, 49, 78, 0.12);
-          border-radius: 28px;
-          background-image: url('/deadline-calculator-background.webp');
-          background-position: center;
-          background-size: cover;
-        }
-
-        .deadline-editorial-card {
-          position: absolute;
-          top: 34px;
-          left: 34px;
-          width: min(46%, 500px);
-          padding: 34px 36px 30px;
-          border: 1px solid rgba(22, 49, 78, 0.08);
-          border-radius: 24px;
-          background: rgba(255, 252, 245, 0.94);
-          box-shadow: 0 18px 50px rgba(39, 40, 34, 0.08);
-          backdrop-filter: blur(8px);
-        }
-
-        .deadline-editorial-eyebrow {
-          margin: 0;
-          color: #2e8872;
-          font-size: 0.82rem;
-          font-weight: 900;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
-
-        .deadline-editorial-card h1 {
-          margin: 10px 0 0;
-          color: #14375f;
-          font-size: clamp(3rem, 5.2vw, 5.2rem);
-          line-height: 0.94;
-          letter-spacing: -0.055em;
-        }
-
-        .deadline-editorial-divider {
-          height: 1px;
-          margin: 24px 0 18px;
-          background: rgba(22, 49, 78, 0.13);
-        }
-
-        .deadline-editorial-rule {
-          margin: 0;
-          color: #657b91;
-          font-size: 1rem;
-          font-weight: 800;
-        }
-
-        .deadline-editorial-date {
-          display: block;
-          margin-top: 8px;
-          color: #14375f;
-          font-size: clamp(2.45rem, 4.5vw, 4.4rem);
-          line-height: 0.98;
-          letter-spacing: -0.045em;
-        }
-
-        .deadline-editorial-weekday {
-          display: block;
-          margin-top: 7px;
-          color: #627990;
-          font-size: 1.08rem;
-          font-weight: 800;
-        }
-
-        .deadline-editorial-meta {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          margin-top: 22px;
-          padding: 14px 16px;
-          border-radius: 14px;
-          background: #edf6f8;
-        }
-
-        .deadline-editorial-meta span {
-          color: #60788e;
-          font-size: 0.78rem;
-          font-weight: 900;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-
-        .deadline-editorial-meta strong {
-          color: #234765;
-          font-size: 0.98rem;
-        }
-
-        .deadline-editorial-empty {
-          margin: 22px 0 0;
-          color: #657b91;
-          font-size: 1rem;
-          line-height: 1.5;
-        }
-
+        .deadline-answer-hero,
         .deadline-rule-shell {
-          width: min(100% - 24px, 1100px);
-          margin: 22px auto 0;
-          padding: 30px 32px 54px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
-          border-radius: 24px;
-          background: rgba(255, 255, 255, 0.72);
+          width: min(100% - 32px, 1100px);
+          margin-left: auto;
+          margin-right: auto;
         }
 
-        .deadline-rule-intro {
-          text-align: left;
+        .deadline-answer-hero {
+          margin-top: 22px;
+          padding: clamp(42px, 6vw, 68px) clamp(24px, 5vw, 58px) 38px;
+          border: 1px solid rgba(91, 61, 48, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--deadline-field);
+          text-align: center;
         }
 
-        .deadline-rule-intro h2 {
-          margin: 6px 0 0;
-          color: #152d48;
-          font-size: clamp(2.1rem, 4vw, 3.3rem);
-          line-height: 1;
+        .deadline-answer-eyebrow {
+          margin: 0;
+          color: var(--deadline-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .deadline-answer-hero h1 {
+          margin: 10px 0 0;
+          color: var(--deadline-ink);
+          font-size: clamp(2.7rem, 5.8vw, 5rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .deadline-answer-date {
+          display: grid;
+          justify-items: center;
+          margin-top: 26px;
+          color: var(--deadline-ink);
+          font-weight: 900;
+        }
+
+        .deadline-answer-weekday {
+          color: #355f77;
+          font-size: clamp(2.5rem, 4.4vw, 4rem);
+          line-height: 0.98;
           letter-spacing: -0.04em;
         }
 
-        .deadline-rule-intro > p:last-child {
-          margin: 10px 0 0;
-          color: #61788f;
-          font-size: 1rem;
+        .deadline-answer-date-main {
+          margin-top: 6px;
+          font-size: clamp(3.7rem, 6.2vw, 6rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+        }
+
+        .deadline-answer-context {
+          max-width: 720px;
+          margin: 18px auto 0;
+          color: var(--deadline-muted);
+          font-size: 0.98rem;
           line-height: 1.5;
+        }
+
+        .deadline-answer-ambiguity {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          max-width: 820px;
+          margin: 26px auto 0;
+        }
+
+        .deadline-answer-ambiguity > div {
+          padding: 18px;
+          border: 1px solid rgba(21, 53, 87, 0.1);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .deadline-answer-ambiguity span,
+        .deadline-answer-ambiguity strong,
+        .deadline-answer-ambiguity b {
+          display: block;
+        }
+
+        .deadline-answer-ambiguity span {
+          color: #61768a;
+          font-size: 0.84rem;
+          font-weight: 900;
+        }
+
+        .deadline-answer-ambiguity strong {
+          margin-top: 10px;
+          color: #355f77;
+          font-size: 1.25rem;
+        }
+
+        .deadline-answer-ambiguity b {
+          margin-top: 3px;
+          color: var(--deadline-ink);
+          font-size: clamp(1.6rem, 3vw, 2.45rem);
+          letter-spacing: -0.035em;
+        }
+
+        .deadline-rule-shell {
+          margin-top: 0;
+          padding: 22px 24px 42px;
+          border: 1px solid rgba(91, 61, 48, 0.12);
+          border-top: 1px solid rgba(91, 61, 48, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--deadline-field-soft);
         }
 
         .deadline-rule-source-note {
           display: grid;
           gap: 4px;
-          margin: 20px auto 0;
+          margin: 0 0 16px;
           padding: 13px 14px;
           border: 1px solid rgba(183, 121, 31, 0.2);
           border-radius: 12px;
@@ -1256,7 +1277,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         .deadline-rule-source-note span {
-          font-size: 0.96rem;
+          font-size: 0.94rem;
           line-height: 1.5;
         }
 
@@ -1264,11 +1285,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           display: grid;
           grid-template-columns: 1.25fr 0.8fr 1fr 1fr;
           gap: 12px;
-          margin-top: 24px;
-          padding: 22px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
+          padding: 18px;
+          border: 1px solid rgba(21, 53, 87, 0.1);
           border-radius: 18px;
-          background: #f2eee5;
+          background: rgba(255, 255, 255, 0.58);
         }
 
         .deadline-rule-essential label,
@@ -1280,79 +1300,66 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         .deadline-rule-essential label > span,
         .deadline-rule-advanced-grid label > span {
           color: #526a82;
-          font-size: 0.92rem;
+          font-size: 0.9rem;
           font-weight: 850;
         }
 
         .deadline-rule-essential input,
         .deadline-rule-essential select,
         .deadline-rule-advanced-grid select {
-          min-height: 52px;
+          min-height: 50px;
           width: 100%;
           padding: 10px 12px;
-          border: 1px solid rgba(22, 49, 78, 0.14);
-          border-radius: 12px;
+          border: 1px solid rgba(21, 53, 87, 0.14);
+          border-radius: 11px;
           background: #fff;
           color: #17304d;
           font: inherit;
           font-size: 1rem;
         }
 
-        .deadline-rule-answer {
-          margin-top: 16px;
-          padding: 30px 28px;
-          border: 0;
-          border-radius: 20px;
-          background: #173b63;
-          text-align: left;
+        .deadline-answer-details,
+        .deadline-rule-advanced {
+          margin-top: 12px;
+          border: 1px solid rgba(21, 53, 87, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.7);
         }
 
-        .deadline-rule-answer > span {
-          color: #9fd0b4;
-          font-size: 0.78rem;
+        .deadline-answer-details summary,
+        .deadline-rule-advanced summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
           font-weight: 900;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
+          cursor: pointer;
         }
 
-        .deadline-rule-answer > strong {
-          display: block;
-          margin-top: 8px;
-          color: #fff7e8;
-          font-size: clamp(2.1rem, 7vw, 3.7rem);
-          line-height: 1.05;
+        .deadline-answer-detail-body {
+          padding: 0 14px 16px;
         }
 
-        .deadline-rule-answer > small {
-          display: block;
-          margin-top: 8px;
-          color: #d5e0eb;
-          font-size: 1rem;
-          font-weight: 750;
-        }
-
-        .deadline-rule-answer > p {
+        .deadline-answer-detail-body > p {
           max-width: 760px;
-          margin: 18px 0 0;
-          color: #d5e0eb;
-          font-size: 1rem;
-          line-height: 1.6;
+          margin: 0;
+          color: #61768a;
+          font-size: 0.95rem;
+          line-height: 1.58;
+        }
+
+        .deadline-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
         }
 
         .deadline-rule-compare {
-          margin-top: 16px;
+          margin-top: 14px;
           padding: 18px;
           border: 1px solid rgba(183, 121, 31, 0.16);
           border-radius: 16px;
           background: #fffdf8;
-        }
-
-        .deadline-rule-ambiguity {
-          margin-top: 16px;
-        }
-
-        .deadline-rule-ambiguity .deadline-rule-compare-grid button {
-          min-height: 136px;
         }
 
         .deadline-rule-compare-heading {
@@ -1385,7 +1392,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           gap: 5px;
           min-height: 122px;
           padding: 14px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
+          border: 1px solid rgba(21, 53, 87, 0.1);
           border-radius: 13px;
           background: #fff;
           color: inherit;
@@ -1425,24 +1432,6 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           text-align: center;
         }
 
-        .deadline-rule-advanced {
-          margin-top: 16px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.7);
-        }
-
-        .deadline-rule-advanced summary {
-          min-height: 48px;
-          display: flex;
-          align-items: center;
-          padding: 10px 14px;
-          color: #36526f;
-          font-size: 0.98rem;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
         .deadline-rule-advanced-grid {
           display: grid;
           gap: 12px;
@@ -1451,11 +1440,11 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         .deadline-rule-caveat,
         .deadline-rule-error {
-          max-width: 680px;
-          margin: 16px auto 0;
+          max-width: 700px;
+          margin: 15px auto 0;
           color: #657b91;
-          font-size: 0.95rem;
-          line-height: 1.55;
+          font-size: 0.92rem;
+          line-height: 1.5;
           text-align: center;
         }
 
@@ -1466,75 +1455,63 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 720px) {
-          .deadline-rule-page .shipping-editorial-header {
+          .deadline-answer-header {
             width: min(100% - 24px, 680px);
-            min-height: 58px;
-            margin-bottom: 12px;
-            gap: 12px;
+            min-height: 76px;
           }
 
-          .deadline-rule-page .shipping-editorial-brand img {
+          .deadline-answer-brand img {
             width: 154px;
           }
 
-          .deadline-rule-page .shipping-editorial-nav {
-            gap: 12px;
+          .deadline-answer-hero,
+          .deadline-rule-shell {
+            width: min(100% - 24px, 680px);
           }
 
-          .deadline-rule-page .shipping-editorial-nav a {
-            font-size: 0.8rem;
-          }
-
-          .deadline-rule-page .shipping-editorial-home-link {
-            display: none;
-          }
-
-          .deadline-editorial-hero {
-            width: calc(100% - 28px);
-            min-height: 660px;
+          .deadline-answer-hero {
             margin-top: 14px;
-            border-radius: 24px;
-            background-position: 58% center;
+            padding: 28px 20px 26px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .deadline-editorial-card {
-            top: 24px;
-            left: 20px;
-            right: 20px;
-            width: auto;
-            padding: 24px 22px 22px;
-            border-radius: 22px;
+          .deadline-answer-hero h1 {
+            font-size: clamp(2.65rem, 12vw, 4rem);
           }
 
-          .deadline-editorial-card h1 {
-            font-size: clamp(3.25rem, 14vw, 4.25rem);
+          .deadline-answer-date {
+            justify-items: start;
+            margin-top: 22px;
           }
 
-          .deadline-editorial-date {
-            font-size: clamp(2.55rem, 11.5vw, 3.65rem);
+          .deadline-answer-weekday {
+            font-size: clamp(2.3rem, 10vw, 3.2rem);
           }
 
-          .deadline-editorial-meta {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 5px;
+          .deadline-answer-date-main {
+            font-size: clamp(3.05rem, 14vw, 4.6rem);
+            line-height: 0.9;
+          }
+
+          .deadline-answer-context {
+            margin-left: 0;
+            margin-right: 0;
+          }
+
+          .deadline-answer-ambiguity {
+            grid-template-columns: 1fr;
           }
 
           .deadline-rule-shell {
-            width: calc(100% - 28px);
-            margin-top: 16px;
-            padding: 24px 18px 38px;
-            border-radius: 22px;
-          }
-
-          .deadline-rule-intro h2 {
-            font-size: clamp(2.35rem, 11vw, 3.15rem);
+            padding: 16px 16px 34px;
+            border-radius: 0 0 24px 24px;
           }
 
           .deadline-rule-essential {
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            padding: 16px;
+            gap: 10px;
+            padding: 14px;
           }
 
           .deadline-rule-essential label:first-child,
@@ -1543,22 +1520,8 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             grid-column: 1 / -1;
           }
 
-          .deadline-rule-essential input,
-          .deadline-rule-essential select {
-            min-height: 50px;
-          }
-
           .deadline-rule-compare-grid {
             grid-template-columns: 1fr;
-          }
-
-          .deadline-rule-answer {
-            padding: 26px 20px;
-            border-radius: 20px;
-          }
-
-          .deadline-rule-answer > strong {
-            font-size: clamp(2.65rem, 12vw, 3.6rem);
           }
         }
       `}</style>
