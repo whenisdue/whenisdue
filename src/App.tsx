@@ -78,7 +78,6 @@ type SavedDeadline = {
 const storageKey = 'whenisdue.savedDeadlines.v1'
 const modes: CalculatorMode[] = ['calendar', 'business', 'invoice', 'trial', 'return']
 const invoiceTerms: InvoiceTerm[] = ['net7', 'net15', 'net30', 'net45', 'net60', 'net90', 'eom']
-const businessDayQuickPicks = [1, 3, 5, 7, 10]
 const trialLengthQuickPicks = [7, 14, 30]
 const returnWindowQuickPicks = [7, 14, 30, 60, 90]
 const titleMaxLength = 80
@@ -130,6 +129,10 @@ type RouteName =
 
 type NavigationProps = {
   onNavigate: (path: string) => void
+}
+
+type BusinessDaysFromTodayPageProps = NavigationProps & {
+  dayCount: number
 }
 
 function App() {
@@ -12792,8 +12795,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
       ? calculateBusinessDaysWithCalendar(parsedStartDate, parsedBusinessDays, holidayCalendar)
       : null
   const dueDate = businessCalculation?.date ?? null
-  const calendarDaysAway = parsedStartDate && dueDate ? daysBetween(parsedStartDate, dueDate) : 0
-  const daysRemaining = dueDate ? daysBetween(today, dueDate) : 0
   const canSave = Boolean(dueDate && title.trim() && !validationMessage)
 
   useEffect(() => {
@@ -12836,11 +12837,17 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
     setStorageMessage('Saved to My due dates.')
   }
 
+  const primaryAnswerDate = calculateBusinessDaysWithCalendar(
+    today,
+    3,
+    holidayCalendar,
+  ).date
+
   return (
-    <main className="page-shell business-page business-editorial-page">
-      <header className="business-editorial-header" aria-label="WhenIsDue navigation">
+    <main className="page-shell business-page business-answer-first-page">
+      <header className="business-answer-header" aria-label="WhenIsDue">
         <a
-          className="business-editorial-brand"
+          className="business-answer-brand"
           href="/"
           onClick={(event) => {
             event.preventDefault()
@@ -12850,83 +12857,216 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-        <nav className="business-editorial-nav" aria-label="Main navigation">
-          <a
-            className="business-editorial-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
-      <section className="business-editorial-hero" aria-labelledby="business-days-title">
-        <div className="business-editorial-image-wrap">
-          <img
-            className="business-editorial-image"
-            src="/business-days-light-gap.webp"
-            alt="Repeating bands of daylight interrupted by one wider shadow interval in a quiet architectural interior"
-          />
-          <div className="business-editorial-answer">
-            <p className="business-editorial-eyebrow">Business days calculator</p>
-            <h1 id="business-days-title">Business days from today</h1>
-            <div className="business-editorial-primary-answer">
-              <span>3 business days</span>
-              <strong>{formatPlainDate(calculateBusinessDaysWithCalendar(today, 3, holidayCalendar).date)}</strong>
-              <small>{formatWeekday(calculateBusinessDaysWithCalendar(today, 3, holidayCalendar).date)}</small>
-            </div>
-            <p className="business-editorial-context">
-              From {formatWeekday(today)}, {formatPlainDate(today)}
-              <span aria-hidden="true"> · </span>
-              {getLocalTimeZoneName()}
-            </p>
-            <p className="business-editorial-rule">
-              {holidayCalendar === 'none'
-                ? 'Weekends skipped. Public holidays still count as weekdays.'
-                : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
-            </p>
-          </div>
+      <section className="business-answer-shell" aria-labelledby="business-days-title">
+        <div className="business-answer-hero">
+          <p className="business-answer-eyebrow">Business days calculator</p>
+          <h1 id="business-days-title">
+            3 business days from today is
+          </h1>
+          <p className="business-answer-date">
+            <span className="business-answer-weekday">{formatWeekday(primaryAnswerDate)},</span>
+            <span className="business-answer-month-date">{formatPlainDate(primaryAnswerDate)}</span>
+          </p>
+          <p className="business-answer-rule">
+            {holidayCalendar === 'none'
+              ? 'Weekends are skipped. Public holidays still count as weekdays.'
+              : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays are skipped.`}
+          </p>
         </div>
+
+        <form
+          className="business-answer-controls"
+          id="custom-business-days"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label className="business-answer-field business-answer-start">
+            <span>Start date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={startDate}
+              onChange={(event) => {
+                setStartDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'business_days',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <label className="business-answer-field business-answer-days">
+            <span>Business days</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="1"
+              max="2600"
+              value={businessDays}
+              onChange={(event) => {
+                setBusinessDays(event.target.value)
+                trackWhenIsDueEvent('number_changed', {
+                  context: 'business_days',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <div className="business-answer-picks" aria-label="Common business day counts">
+            {[3, 5, 7, 10].map((quickPick) => (
+              <button
+                className={businessDays === String(quickPick) ? 'is-selected' : ''}
+                key={quickPick}
+                type="button"
+                aria-pressed={businessDays === String(quickPick)}
+                onClick={() => {
+                  setBusinessDays(String(quickPick))
+                  trackWhenIsDueEvent('quick_pick', {
+                    context: 'business_days',
+                    value: quickPick,
+                  })
+                }}
+              >
+                {quickPick} days
+              </button>
+            ))}
+          </div>
+
+          <div className="business-answer-counting-status">
+            <span>Counting</span>
+            <strong>
+              {holidayCalendar === 'none'
+                ? 'Weekends skipped'
+                : `Weekends + ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`}
+            </strong>
+          </div>
+
+          <HolidayCalendarSelect
+            value={holidayCalendar}
+            onChange={(nextCalendar) => {
+              setHolidayCalendar(nextCalendar)
+              trackWhenIsDueEvent('holiday_calendar_changed', {
+                context: 'business_days',
+                value: nextCalendar,
+              })
+            }}
+            compact
+          />
+
+          {validationMessage ? (
+            <p className="business-answer-form-message">{validationMessage}</p>
+          ) : null}
+        </form>
       </section>
 
-      <section className="business-today-answers business-bam-answers" aria-label="Common business day answers from today">
-        <div className="business-quick-heading">
-          <div>
-            <p className="business-section-eyebrow">Quick answers</p>
-            <h2>Common business-day counts</h2>
-          </div>
-          <button
-            className="business-jump-button"
-            type="button"
-            onClick={() => document.getElementById('custom-business-days')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          >
-            Change date / days ↓
-          </button>
-        </div>
+      {dueDate && parsedBusinessDays !== null && parsedStartDate ? (
+        <section className="business-answer-live-result" aria-live="polite">
+          <p className="business-answer-live-label">Your answer</p>
+          <p className="business-answer-live-sentence">
+            {parsedBusinessDays} {parsedBusinessDays === 1 ? 'business day' : 'business days'} from{' '}
+            {toDateKey(parsedStartDate) === toDateKey(today) ? 'today' : formatPlainDate(parsedStartDate)} is
+          </p>
+          <p className="business-answer-live-date">
+            <strong>{formatWeekday(dueDate)},</strong>
+            <span>{formatPlainDate(dueDate)}</span>
+          </p>
+          <p className="business-answer-live-note">
+            {holidayCalendar === 'none'
+              ? 'Weekends are skipped. Public holidays are not removed.'
+              : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays are skipped.`}
+          </p>
+        </section>
+      ) : null}
 
-        <div className="business-bam-list">
+      {dueDate && parsedBusinessDays !== null && parsedStartDate ? (
+        <section className="business-answer-actions" aria-label="Business day result actions">
+          <ResultActions
+            title={`${parsedBusinessDays} business days from ${toDateKey(parsedStartDate) === toDateKey(today) ? 'today' : formatPlainDate(parsedStartDate)}`}
+            date={dueDate}
+            details={`${formatWeekday(dueDate)} · ${holidayCalendar === 'none' ? 'weekends skipped' : `${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`}`}
+            variant="return-window"
+          />
+        </section>
+      ) : null}
+
+      <section className="business-answer-details" aria-label="Business day calculation details">
+        <details>
+          <summary>Why this date?</summary>
+          {parsedStartDate && businessCalculation && dueDate && parsedBusinessDays !== null ? (
+            <div className="business-answer-detail-body">
+              <p>
+                {formatBusinessDayExplanation(
+                  parsedStartDate,
+                  parsedBusinessDays,
+                  dueDate,
+                  holidayCalendar,
+                )}
+              </p>
+              <CalculationReceipt
+                analyticsContext="business_days"
+                rows={[
+                  {
+                    label: 'Start date',
+                    value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}`,
+                  },
+                  {
+                    label: 'Business days added',
+                    value: String(parsedBusinessDays),
+                  },
+                  {
+                    label: 'Holiday calendar',
+                    value: getHolidayCalendarOption(holidayCalendar).label,
+                  },
+                  {
+                    label: 'Skipped holidays',
+                    value: formatSkippedHolidaySummary(businessCalculation.skippedHolidays),
+                  },
+                  {
+                    label: 'Result',
+                    value: `${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}`,
+                  },
+                ]}
+              />
+            </div>
+          ) : (
+            <p>Enter a valid start date and number of business days.</p>
+          )}
+        </details>
+
+        <details>
+          <summary>Save this date</summary>
+          <div className="business-answer-save">
+            <label className="field title-field">
+              <span>Title</span>
+              <input
+                maxLength={titleMaxLength}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+            </label>
+            <button
+              className="primary-button"
+              type="button"
+              disabled={!canSave}
+              onClick={saveBusinessDeadline}
+            >
+              Save to My due dates
+            </button>
+            {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+          </div>
+        </details>
+      </section>
+
+      <section className="business-answer-quick" aria-labelledby="business-answer-quick-title">
+        <div className="business-answer-quick-heading">
+          <p>Quick answers</p>
+          <h2 id="business-answer-quick-title">Common business-day counts from today</h2>
+        </div>
+        <div className="business-answer-quick-grid">
           {[3, 5, 7, 10].map((dayCount) => {
             const answerDate = calculateBusinessDaysWithCalendar(today, dayCount, holidayCalendar).date
             const exactPath = `/${dayCount}-business-days-from-today`
@@ -12935,7 +13075,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
             return (
               <a
-                className="business-bam-row"
                 key={dayCount}
                 href={exactHref}
                 onClick={(event) => {
@@ -12946,7 +13085,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                   })
                   onNavigate(exactHref)
                 }}
-                aria-label={`${dayCount} business days from today is ${formatPlainDate(answerDate)}`}
               >
                 <span>{dayCount} business days</span>
                 <strong>{formatPlainDate(answerDate)}</strong>
@@ -12956,192 +13094,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             )
           })}
         </div>
-
-        <div className="business-counting-settings">
-          <div>
-            <p className="business-bam-rule">
-              {holidayCalendar === 'none'
-                ? 'Weekends skipped. Public holidays still count as weekdays.'
-                : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
-            </p>
-            <HolidayCalendarSelect
-              value={holidayCalendar}
-              onChange={(nextCalendar) => {
-                setHolidayCalendar(nextCalendar)
-                trackWhenIsDueEvent('holiday_calendar_changed', {
-                  context: 'business_days',
-                  value: nextCalendar,
-                })
-              }}
-              compact
-            />
-          </div>
-
-          <nav className="business-exact-links" aria-label="More business days from today answers">
-            <span>More exact answers</span>
-            <div>
-              {[4, 8, 20, 30].map((dayCount) => {
-                const path = `/${dayCount}-business-days-from-today`
-                const calendarQuery = holidayCalendarQueryValue(holidayCalendar)
-                const href = calendarQuery ? `${path}?calendar=${calendarQuery}` : path
-
-                return (
-                  <a
-                    href={href}
-                    key={dayCount}
-                    onClick={(event) => {
-                      event.preventDefault()
-                      trackWhenIsDueEvent('related_bam_click', {
-                        context: 'business_days_calculator_more',
-                        day_count: dayCount,
-                      })
-                      onNavigate(href)
-                    }}
-                  >
-                    {dayCount} business days
-                  </a>
-                )
-              })}
-            </div>
-          </nav>
-        </div>
-      </section>
-
-      <section className="business-workspace business-editorial-workspace" id="custom-business-days" aria-label="Custom business days calculator">
-        <div className="business-custom-heading">
-          <p className="business-section-eyebrow">Your calculation</p>
-          <h2>Use a different date or number</h2>
-          <p>Enter a start date and the number of business days to add.</p>
-        </div>
-
-        <form className="calculator-card business-calculator" onSubmit={(event) => event.preventDefault()}>
-          <label className="field start-field">
-            <span>Start date</span>
-            <input
-              type="date"
-              min="1900-01-01"
-              max="2100-12-31"
-              value={startDate}
-              onChange={(event) => {
-                setStartDate(event.target.value)
-                trackWhenIsDueEvent('date_changed', { context: 'business_days', value: event.target.value })
-              }}
-            />
-          </label>
-
-          <label className="field value-field">
-            <span>Business days</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="1"
-              max="2600"
-              value={businessDays}
-              onChange={(event) => {
-                setBusinessDays(event.target.value)
-                trackWhenIsDueEvent('number_changed', { context: 'business_days', value: event.target.value })
-              }}
-            />
-            <span className="quick-picks" aria-label="Quick business day values">
-              {businessDayQuickPicks.map((quickPick) => (
-                <button
-                  className={businessDays === String(quickPick) ? 'is-selected' : ''}
-                  key={quickPick}
-                  type="button"
-                  onClick={() => {
-                    setBusinessDays(String(quickPick))
-                    trackWhenIsDueEvent('quick_pick', { context: 'business_days', value: quickPick })
-                  }}
-                >
-                  <span>{quickPick}</span>
-                  {quickPick === 30 ? <small>Common</small> : null}
-                </button>
-              ))}
-            </span>
-          </label>
-
-          {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
-        </form>
-
-        <section className={`result-panel business-result business-editorial-result ${daysRemaining < 0 ? 'is-overdue' : ''}`} aria-live="polite">
-          <p className="result-label">Due date</p>
-          {dueDate && parsedBusinessDays !== null ? (
-            <>
-              <p className="due-date">{formatPlainDate(dueDate)}</p>
-              <div className="result-meta result-meta-stack">
-                <span>{formatWeekday(dueDate)}</span>
-                <span>{formatBusinessDistance(parsedBusinessDays)} from start date</span>
-                <span className={`status-badge ${getUrgencyClass(daysRemaining)}`}>
-                  {formatCalendarDistance(calendarDaysAway)}
-                </span>
-              </div>
-              <p className="result-note">
-                {holidayCalendar === 'none'
-                  ? 'Weekends skipped. Public holidays are not removed.'
-                  : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
-              </p>
-
-              {parsedStartDate && businessCalculation ? (
-                <>
-                  <p className="business-citation-explanation">
-                    {formatBusinessDayExplanation(
-                      parsedStartDate,
-                      parsedBusinessDays,
-                      dueDate,
-                      holidayCalendar,
-                    )}
-                  </p>
-
-                  <CalculationReceipt
-                    analyticsContext="business_days"
-                    rows={[
-                      {
-                        label: 'Start date',
-                        value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}`,
-                      },
-                      {
-                        label: 'Business days added',
-                        value: String(parsedBusinessDays),
-                      },
-                      {
-                        label: 'Holiday calendar',
-                        value: getHolidayCalendarOption(holidayCalendar).label,
-                      },
-                      {
-                        label: 'Skipped holidays',
-                        value: formatSkippedHolidaySummary(businessCalculation.skippedHolidays),
-                      },
-                      {
-                        label: 'Result',
-                        value: `${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}`,
-                      },
-                    ]}
-                  />
-                </>
-              ) : null}
-
-              <details className="result-save-details">
-                <summary>More options</summary>
-                <div className="business-save">
-                  <label className="field title-field">
-                    <span>Title</span>
-                    <input
-                      maxLength={titleMaxLength}
-                      value={title}
-                      onChange={(event) => setTitle(event.target.value)}
-                    />
-                  </label>
-                  <button className="primary-button" type="button" disabled={!canSave} onClick={saveBusinessDeadline}>
-                    Save to My due dates
-                  </button>
-                  {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-                </div>
-              </details>
-            </>
-          ) : (
-            <p className="result-meta">{validationMessage ?? 'Enter a valid local calendar date.'}</p>
-          )}
-        </section>
       </section>
 
       <section className="business-content business-editorial-content" aria-label="Business days help">
@@ -13280,724 +13232,523 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .business-editorial-page {
-          --business-navy: #17385f;
-          --business-deep: #112c4d;
-          --business-green: #2d7c67;
-          --business-ivory: #fbf6ec;
-          --business-blue-wash: #edf4f7;
+        .business-answer-first-page {
+          --business-paper: #e8f0f4;
+          --business-paper-soft: #f2f6f8;
+          --business-navy: #12365d;
+          --business-muted: #637b92;
+          --business-green: #23785d;
+          min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .business-editorial-header {
+        .business-answer-header {
           width: min(100% - 32px, 1130px);
-          min-height: 70px;
-          margin: 0 auto 14px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-bottom: 1px solid rgba(17, 44, 77, 0.12);
+          margin: 0 auto;
+          padding: 26px 0 18px;
+          border-bottom: 1px solid rgba(18, 54, 93, 0.12);
         }
 
-        .business-editorial-brand {
+        .business-answer-brand {
           display: inline-flex;
-          align-items: center;
-          flex: 0 0 auto;
-          text-decoration: none;
+          width: min(190px, 46vw);
         }
 
-        .business-editorial-brand img {
+        .business-answer-brand img {
           display: block;
-          width: 176px;
+          width: 100%;
           height: auto;
         }
 
-        .business-editorial-nav {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 18px;
-          min-width: 0;
-        }
-
-        .business-editorial-nav a {
-          color: #5e728a;
-          font-size: 0.88rem;
-          font-weight: 800;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .business-editorial-nav a:hover {
-          color: var(--business-deep);
-        }
-
-        .business-editorial-hero {
+        .business-answer-shell,
+        .business-answer-live-result,
+        .business-answer-quick {
           width: min(100% - 32px, 1130px);
-          margin: 0 auto 22px;
+          margin-left: auto;
+          margin-right: auto;
         }
 
-        .business-editorial-image-wrap {
-          position: relative;
-          min-height: 470px;
+        .business-answer-shell {
+          margin-top: 22px;
           overflow: hidden;
-          border: 1px solid rgba(17, 44, 77, 0.13);
-          border-radius: 30px;
-          background: #d9c6a8;
-          box-shadow: 0 24px 60px rgba(29, 45, 62, 0.09);
+          border: 1px solid rgba(18, 54, 93, 0.1);
+          border-radius: 28px;
+          background: var(--business-paper);
         }
 
-        .business-editorial-image {
-          width: 100%;
-          height: 100%;
-          min-height: 470px;
-          position: absolute;
-          inset: 0;
-          object-fit: cover;
-          object-position: center;
-          display: block;
+        .business-answer-hero {
+          padding: clamp(34px, 5vw, 68px) clamp(32px, 5vw, 68px) clamp(28px, 4vw, 48px);
         }
 
-        .business-editorial-image-wrap::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background: linear-gradient(90deg, rgba(13, 34, 59, 0.16) 0%, rgba(13, 34, 59, 0.03) 43%, transparent 72%);
-        }
-
-        .business-editorial-answer {
-          position: absolute;
-          z-index: 2;
-          left: clamp(22px, 4vw, 52px);
-          top: 50%;
-          width: min(42%, 430px);
-          transform: translateY(-50%);
-          padding: clamp(22px, 3vw, 34px);
-          border: 1px solid rgba(255, 255, 255, 0.46);
-          border-radius: 24px;
-          background: rgba(251, 246, 236, 0.9);
-          box-shadow: 0 20px 50px rgba(18, 37, 58, 0.17);
-          backdrop-filter: blur(10px);
-        }
-
-        .business-editorial-eyebrow,
-        .business-section-eyebrow {
+        .business-answer-eyebrow,
+        .business-answer-quick-heading p,
+        .business-content-heading .business-section-eyebrow,
+        .business-answer-live-label {
           margin: 0;
           color: var(--business-green);
           font-size: 0.78rem;
           font-weight: 900;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.17em;
           text-transform: uppercase;
         }
 
-        .business-editorial-answer h1 {
-          margin: 8px 0 20px;
-          color: var(--business-deep);
-          font-size: clamp(2.2rem, 4vw, 4rem);
+        .business-answer-hero h1 {
+          max-width: 900px;
+          margin: 14px 0 0;
+          color: var(--business-navy);
+          font-size: clamp(2rem, 4.4vw, 4.4rem);
           line-height: 0.98;
-          letter-spacing: -0.045em;
+          letter-spacing: -0.05em;
         }
 
-        .business-editorial-primary-answer {
-          padding-top: 18px;
-          border-top: 1px solid rgba(17, 44, 77, 0.12);
-        }
-
-        .business-editorial-primary-answer span {
-          display: block;
-          color: #667a8e;
-          font-size: 0.92rem;
-          font-weight: 800;
-        }
-
-        .business-editorial-primary-answer strong {
-          display: block;
-          margin-top: 4px;
-          color: var(--business-deep);
-          font-size: clamp(2rem, 3.3vw, 3.25rem);
-          line-height: 1;
-          letter-spacing: -0.035em;
-        }
-
-        .business-editorial-primary-answer small {
-          display: block;
-          margin-top: 6px;
-          color: #5d738b;
-          font-size: 1.05rem;
-          font-weight: 750;
-        }
-
-        .business-editorial-context,
-        .business-editorial-rule {
-          margin: 12px 0 0;
-          color: #63768a;
-          font-size: 0.82rem;
-          line-height: 1.45;
-        }
-
-        .business-editorial-rule {
-          margin-top: 4px;
-        }
-
-        .business-today-answers {
-          width: min(100% - 32px, 1130px);
-          margin: 0 auto 22px;
-          padding: clamp(22px, 3vw, 32px);
-          border: 1px solid rgba(17, 44, 77, 0.09);
-          border-radius: 26px;
-          background: var(--business-blue-wash);
-        }
-
-        .business-quick-heading {
-          display: flex;
-          align-items: end;
-          justify-content: space-between;
-          gap: 20px;
-          margin-bottom: 18px;
-        }
-
-        .business-quick-heading h2,
-        .business-custom-heading h2,
-        .business-content-heading h2 {
-          margin: 6px 0 0;
-          color: var(--business-deep);
-          font-size: clamp(1.75rem, 3vw, 2.7rem);
-          line-height: 1.03;
-          letter-spacing: -0.035em;
-        }
-
-        .business-jump-button {
-          min-height: 46px;
-          padding: 9px 15px;
-          border: 1px solid rgba(17, 44, 77, 0.12);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.8);
-          color: #526d87;
-          font: inherit;
-          font-size: 0.86rem;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .business-bam-list {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 10px;
-        }
-
-        .business-bam-row {
-          position: relative;
-          min-height: 132px;
-          padding: 16px 18px;
-          border: 1px solid rgba(17, 44, 77, 0.1);
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.9);
-          color: inherit;
-          text-decoration: none;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
-        }
-
-        .business-bam-row span {
-          color: #61778d;
-          font-size: 0.82rem;
-          font-weight: 850;
-        }
-
-        .business-bam-row strong {
-          margin-top: 7px;
-          color: var(--business-deep);
-          font-size: clamp(1.45rem, 2.35vw, 2.25rem);
-          line-height: 1.03;
-          letter-spacing: -0.025em;
-        }
-
-        .business-bam-row small {
-          margin-top: 5px;
-          color: #73869a;
-          font-size: 0.84rem;
-        }
-
-        .business-bam-row b {
-          position: absolute;
-          right: 16px;
-          bottom: 15px;
-          color: var(--business-green);
-          font-size: 1.2rem;
-        }
-
-        .business-bam-row:hover,
-        .business-bam-row:focus-visible {
-          transform: translateY(-2px);
-          border-color: rgba(45, 124, 103, 0.28);
-          box-shadow: 0 10px 26px rgba(20, 48, 75, 0.07);
-          outline: none;
-        }
-
-        .business-counting-settings {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          gap: 24px;
-          align-items: end;
-          margin-top: 18px;
-          padding-top: 17px;
-          border-top: 1px solid rgba(17, 44, 77, 0.08);
-        }
-
-        .business-bam-rule {
-          margin: 0 0 9px;
-          color: #677b8f;
-          font-size: 0.8rem;
-        }
-
-        .business-exact-links {
-          margin: 0;
-          padding: 0;
-          border: 0;
-        }
-
-        .business-exact-links > span {
-          display: block;
-          margin-bottom: 8px;
-          color: #667b90;
-          font-size: 0.8rem;
-          font-weight: 850;
-        }
-
-        .business-exact-links > div {
+        .business-answer-date {
           display: flex;
           flex-wrap: wrap;
+          align-items: baseline;
+          gap: 0 0.22em;
+          margin: 22px 0 0;
+          color: var(--business-navy);
+          font-size: clamp(3.8rem, 8.8vw, 8.7rem);
+          font-weight: 900;
+          line-height: 0.86;
+          letter-spacing: -0.065em;
+        }
+
+        .business-answer-weekday,
+        .business-answer-month-date {
+          display: inline;
+        }
+
+        .business-answer-rule {
+          margin: 24px 0 0;
+          color: var(--business-muted);
+          font-size: clamp(0.98rem, 1.25vw, 1.12rem);
+          font-weight: 700;
+        }
+
+        .business-answer-controls {
+          display: grid;
+          grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) auto;
+          align-items: end;
+          gap: 14px;
+          padding: 24px clamp(24px, 5vw, 68px);
+          border-top: 1px solid rgba(18, 54, 93, 0.08);
+          background: rgba(255, 255, 255, 0.32);
+        }
+
+        .business-answer-field {
+          display: grid;
           gap: 7px;
         }
 
-        .business-exact-links a {
-          min-height: 40px;
-          display: inline-flex;
-          align-items: center;
-          padding: 7px 11px;
-          border: 1px solid rgba(17, 44, 77, 0.1);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.86);
-          color: #52708b;
-          font-size: 0.8rem;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        .business-editorial-workspace {
-          width: min(100% - 32px, 1130px);
-          margin: 0 auto 24px;
-          padding: clamp(22px, 3vw, 34px);
-          display: grid;
-          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-          gap: 14px;
-          border: 1px solid rgba(17, 44, 77, 0.09);
-          border-radius: 28px;
-          background: #fffdf8;
-        }
-
-        .business-custom-heading {
-          grid-column: 1 / -1;
-          margin-bottom: 4px;
-        }
-
-        .business-custom-heading > p:last-child {
-          margin: 8px 0 4px;
-          color: #6b7e91;
-        }
-
-        .business-editorial-workspace .business-calculator,
-        .business-editorial-workspace .business-editorial-result {
-          margin: 0;
-          border-radius: 22px;
-        }
-
-        .business-editorial-workspace .business-calculator {
-          align-self: start;
-          padding: clamp(18px, 2.3vw, 28px);
-          border: 1px solid rgba(17, 44, 77, 0.1);
-          background: #f7f2e9;
-        }
-
-        .business-editorial-workspace .business-calculator .field > span:first-child {
-          color: #566f88;
+        .business-answer-field > span {
+          color: #4e6780;
+          font-size: 0.82rem;
           font-weight: 850;
         }
 
-        .business-editorial-workspace .business-calculator input[type='date'],
-        .business-editorial-workspace .business-calculator input[type='number'],
-        .business-editorial-workspace .business-calculator input[type='text'] {
+        .business-answer-field input {
+          width: 100%;
           min-height: 50px;
+          box-sizing: border-box;
+          padding: 0 14px;
+          border: 1px solid rgba(18, 54, 93, 0.16);
           border-radius: 12px;
           background: #fff;
+          color: #173451;
+          font: inherit;
+          font-size: 1rem;
         }
 
-        .business-page .quick-picks button {
-          min-width: 44px;
-          min-height: 44px;
+        .business-answer-picks {
+          display: flex;
+          gap: 8px;
         }
 
-        .business-editorial-result {
-          padding: clamp(22px, 3vw, 34px);
-          border: 1px solid rgba(17, 44, 77, 0.12);
-          background: var(--business-deep);
-          color: #f7f2e9;
+        .business-answer-picks button {
+          min-height: 50px;
+          padding: 0 14px;
+          border: 1px solid rgba(18, 54, 93, 0.14);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.8);
+          color: #49637e;
+          font: inherit;
+          font-size: 0.84rem;
+          font-weight: 850;
+          cursor: pointer;
         }
 
-        .business-editorial-result .result-label,
-        .business-editorial-result .due-date,
-        .business-editorial-result .result-meta,
-        .business-editorial-result .result-note,
-        .business-editorial-result .business-citation-explanation {
-          color: inherit;
+        .business-answer-picks button.is-selected {
+          border-color: rgba(35, 120, 93, 0.6);
+          background: #e4f1eb;
+          color: #1e6b54;
         }
 
-        .business-editorial-result .result-label {
-          color: #9ec7b7;
+        .business-answer-counting-status {
+          grid-column: 1 / -1;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-height: 40px;
+          padding-top: 2px;
+          color: var(--business-muted);
+          font-size: 0.88rem;
+        }
+
+        .business-answer-counting-status span {
+          font-weight: 700;
+        }
+
+        .business-answer-counting-status strong {
+          color: #34536e;
+        }
+
+        .business-answer-controls .holiday-calendar-select {
+          grid-column: 1 / -1;
+          max-width: 520px;
+        }
+
+        .business-answer-form-message {
+          grid-column: 1 / -1;
+          margin: 0;
+          color: #9c4e35;
+          font-weight: 700;
+        }
+
+        .business-answer-live-result {
+          margin-top: 18px;
+          padding: clamp(28px, 4vw, 48px);
+          box-sizing: border-box;
+          border-radius: 24px;
+          background: var(--business-navy);
+          color: #fffaf2;
+        }
+
+        .business-answer-live-label {
+          color: #a8cfb5;
+        }
+
+        .business-answer-live-sentence {
+          margin: 12px 0 0;
+          color: rgba(255, 250, 242, 0.78);
+          font-size: clamp(1rem, 1.5vw, 1.28rem);
+          font-weight: 650;
+        }
+
+        .business-answer-live-date {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0 0.18em;
+          margin: 10px 0 0;
+          color: #fff7ea;
+          font-size: clamp(3rem, 6.5vw, 6.8rem);
           font-weight: 900;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
+          line-height: 0.9;
+          letter-spacing: -0.06em;
         }
 
-        .business-editorial-result .due-date {
-          margin-top: 8px;
-          font-size: clamp(2.6rem, 5vw, 4.7rem);
-          line-height: 0.96;
+        .business-answer-live-date strong,
+        .business-answer-live-date span {
+          font: inherit;
+        }
+
+        .business-answer-live-note {
+          margin: 18px 0 0;
+          color: rgba(255, 250, 242, 0.72);
+          font-size: 0.95rem;
+        }
+
+        .business-answer-actions {
+          width: min(100% - 32px, 720px);
+          margin: 16px auto 0;
+        }
+
+        .business-answer-details {
+          width: min(100% - 32px, 910px);
+          margin: 28px auto 0;
+          border-top: 1px solid rgba(18, 54, 93, 0.1);
+        }
+
+        .business-answer-details details {
+          border-bottom: 1px solid rgba(18, 54, 93, 0.1);
+        }
+
+        .business-answer-details summary {
+          padding: 18px 0;
+          cursor: pointer;
+          color: #284b6a;
+          font-weight: 850;
+        }
+
+        .business-answer-detail-body,
+        .business-answer-save {
+          padding: 0 0 20px;
+        }
+
+        .business-answer-detail-body > p {
+          margin-top: 0;
+          color: var(--business-muted);
+          line-height: 1.6;
+        }
+
+        .business-answer-save {
+          display: grid;
+          gap: 12px;
+          max-width: 520px;
+        }
+
+        .business-answer-quick {
+          margin-top: 42px;
+          padding: clamp(26px, 4vw, 42px);
+          box-sizing: border-box;
+          border: 1px solid rgba(18, 54, 93, 0.09);
+          border-radius: 24px;
+          background: #eef5f7;
+        }
+
+        .business-answer-quick-heading h2 {
+          margin: 8px 0 0;
+          color: var(--business-navy);
+          font-size: clamp(1.9rem, 3.4vw, 3.4rem);
+          line-height: 1;
           letter-spacing: -0.045em;
         }
 
-        .business-editorial-result .result-meta-stack {
-          color: #d7e1e8;
+        .business-answer-quick-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+          margin-top: 22px;
         }
 
-        .business-editorial-result .result-note {
-          color: #bac9d5;
+        .business-answer-quick-grid a {
+          position: relative;
+          display: flex;
+          min-height: 128px;
+          flex-direction: column;
+          justify-content: center;
+          padding: 18px;
+          border: 1px solid rgba(18, 54, 93, 0.1);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.86);
+          color: var(--business-navy);
+          text-decoration: none;
         }
 
-        .business-editorial-result .business-citation-explanation {
-          max-width: 680px;
-          margin: 14px auto 0;
-          color: #d3dee7;
-          font-size: 0.96rem;
-          line-height: 1.52;
-          text-align: center;
+        .business-answer-quick-grid span {
+          color: #58718a;
+          font-size: 0.82rem;
+          font-weight: 850;
         }
 
-        .business-editorial-result .result-save-details {
-          margin-top: 16px;
-          padding-top: 12px;
-          border-top: 1px solid rgba(255, 255, 255, 0.14);
+        .business-answer-quick-grid strong {
+          margin-top: 7px;
+          font-size: clamp(1.45rem, 2.3vw, 2.35rem);
+          line-height: 1;
         }
 
-        .business-editorial-result .result-save-details summary {
-          width: fit-content;
-          cursor: pointer;
-          color: #d9e4eb;
-          font-weight: 800;
+        .business-answer-quick-grid small {
+          margin-top: 6px;
+          color: #6f8192;
+          font-size: 0.85rem;
+        }
+
+        .business-answer-quick-grid b {
+          position: absolute;
+          right: 16px;
+          bottom: 14px;
+          color: var(--business-green);
+          font-size: 1.3rem;
         }
 
         .business-editorial-content {
           width: min(100% - 32px, 1130px);
-          margin: 0 auto 26px;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
+          margin: 48px auto 0;
         }
 
         .business-content-heading {
-          grid-column: 1 / -1;
-          padding: 8px 0 10px;
+          margin-bottom: 18px;
         }
 
-        .business-editorial-content article {
-          padding: 22px;
-          border: 1px solid rgba(17, 44, 77, 0.09);
-          border-radius: 20px;
-          background: rgba(255, 255, 255, 0.66);
-        }
-
-        .business-editorial-content article h2 {
-          margin-top: 0;
-          color: var(--business-deep);
-          font-size: 1.18rem;
-          line-height: 1.15;
-        }
-
-        .business-editorial-content article p,
-        .business-editorial-content article li,
-        .business-editorial-content article dd {
-          color: #61758a;
-          line-height: 1.58;
-        }
-
-        .business-editorial-content article a {
-          color: #286d5d;
-          font-weight: 800;
+        .business-content-heading h2 {
+          margin: 8px 0 0;
+          color: var(--business-navy);
+          font-size: clamp(2rem, 4vw, 4rem);
+          line-height: 1;
+          letter-spacing: -0.045em;
         }
 
         @media (max-width: 760px) {
-          .business-editorial-header,
-          .business-editorial-hero,
-          .business-today-answers,
-          .business-editorial-workspace,
-          .business-editorial-content {
-            width: min(100% - 24px, 1130px);
+          .business-answer-header {
+            width: calc(100% - 40px);
+            padding: 20px 0 14px;
           }
 
-          .business-editorial-header {
-            min-height: 66px;
-            margin-bottom: 10px;
-            gap: 12px;
+          .business-answer-brand {
+            width: 176px;
+            max-width: 58vw;
           }
 
-          .business-editorial-brand img {
-            width: 158px;
+          .business-answer-shell,
+          .business-answer-live-result,
+          .business-answer-quick {
+            width: calc(100% - 40px);
           }
 
-          .business-editorial-nav {
-            gap: 12px;
-          }
-
-          .business-editorial-nav a {
-            font-size: 0.82rem;
-          }
-
-          .business-editorial-home-link {
-            display: none;
-          }
-
-          @media (max-width: 430px) {
-            .business-editorial-header {
-              min-height: 60px;
-              gap: 8px;
-            }
-
-            .business-editorial-brand img {
-              width: 140px;
-            }
-
-            .business-editorial-nav {
-              gap: 9px;
-            }
-
-            .business-editorial-nav a {
-              font-size: 0.76rem;
-            }
-          }
-
-          .business-editorial-image-wrap {
-            min-height: 398px;
+          .business-answer-shell {
+            margin-top: 16px;
             border-radius: 24px;
           }
 
-          .business-editorial-image {
-            min-height: 398px;
-            object-position: 54% center;
+          .business-answer-hero {
+            padding: 28px 24px 24px;
           }
 
-          .business-editorial-image-wrap::after {
-            background: linear-gradient(180deg, transparent 0%, rgba(14, 34, 58, 0.08) 40%, rgba(14, 34, 58, 0.14) 100%);
-          }
-
-          .business-editorial-answer {
-            left: 12px;
-            right: 12px;
-            top: auto;
-            bottom: 12px;
-            width: auto;
-            transform: none;
-            padding: 15px;
-            border-radius: 19px;
-            background: rgba(251, 246, 236, 0.91);
-          }
-
-          .business-editorial-answer h1 {
-            margin: 5px 0 10px;
-            font-size: clamp(1.86rem, 8.4vw, 2.45rem);
-          }
-
-          .business-editorial-primary-answer {
-            padding-top: 10px;
-          }
-
-          .business-editorial-primary-answer strong {
-            font-size: clamp(1.9rem, 8.5vw, 2.55rem);
-          }
-
-          .business-editorial-context,
-          .business-editorial-rule {
-            font-size: 0.75rem;
-          }
-
-          .business-today-answers {
-            padding: 18px 16px;
-            border-radius: 22px;
-          }
-
-          .business-quick-heading {
-            align-items: start;
-            gap: 10px;
-          }
-
-          .business-quick-heading h2 {
-            max-width: 220px;
-            font-size: 1.48rem;
+          .business-answer-hero h1 {
+            max-width: 100%;
+            margin-top: 10px;
+            font-size: clamp(2rem, 9.3vw, 3rem);
             line-height: 1.02;
           }
 
-          .business-jump-button {
-            max-width: 132px;
-            min-height: 38px;
-            padding: 6px 9px;
-            font-size: 0.72rem;
-            line-height: 1.15;
+          .business-answer-date {
+            display: block;
+            margin-top: 22px;
+            font-size: clamp(3.25rem, 15vw, 5.2rem);
+            line-height: 0.88;
           }
 
-          .business-bam-list {
-            grid-template-columns: 1fr;
-            gap: 5px;
+          .business-answer-weekday,
+          .business-answer-month-date {
+            display: block;
           }
 
-          .business-bam-row {
-            min-height: 54px;
-            padding: 7px 42px 7px 12px;
+          .business-answer-month-date {
+            margin-top: 4px;
+          }
+
+          .business-answer-rule {
+            margin-top: 22px;
+            font-size: 0.94rem;
+            line-height: 1.4;
+          }
+
+          .business-answer-controls {
+            grid-template-columns: 1fr 0.48fr;
+            gap: 12px;
+            padding: 22px 20px 24px;
+          }
+
+          .business-answer-start {
+            grid-column: 1 / -1;
+          }
+
+          .business-answer-days {
+            grid-column: 1;
+          }
+
+          .business-answer-field input {
+            min-height: 48px;
+          }
+
+          .business-answer-picks {
+            grid-column: 1 / -1;
             display: grid;
-            grid-template-columns: 1fr auto;
-            grid-template-areas:
-              'label date'
-              'label weekday';
-            align-items: center;
-            border-radius: 14px;
-          }
-
-          .business-bam-row span {
-            grid-area: label;
-            font-size: 0.82rem;
-          }
-
-          .business-bam-row strong {
-            grid-area: date;
-            margin: 0;
-            text-align: right;
-            font-size: 1.14rem;
-          }
-
-          .business-bam-row small {
-            grid-area: weekday;
-            margin: 0;
-            text-align: right;
-            font-size: 0.74rem;
-          }
-
-          .business-bam-row b {
-            right: 13px;
-            bottom: 19px;
-          }
-
-          .business-counting-settings {
-            grid-template-columns: 1fr;
-            gap: 14px;
-            margin-top: 14px;
-            padding-top: 14px;
-          }
-
-          .business-exact-links > div {
-            gap: 6px;
-          }
-
-          .business-exact-links a {
-            min-height: 38px;
-            font-size: 0.76rem;
-          }
-
-          .business-editorial-workspace {
-            grid-template-columns: 1fr;
-            padding: 18px 16px;
-            border-radius: 22px;
-          }
-
-          .business-custom-heading h2 {
-            font-size: 1.8rem;
-          }
-
-          .business-custom-heading > p:last-child {
-            font-size: 0.88rem;
-          }
-
-          .business-editorial-workspace .business-calculator,
-          .business-editorial-workspace .business-editorial-result {
-            border-radius: 18px;
-          }
-
-          .business-editorial-workspace .business-calculator {
-            padding: 15px;
-          }
-
-          .business-page .quick-picks {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 7px;
           }
 
-          .business-page .quick-picks button {
-            min-width: 0;
-            width: 100%;
-            min-height: 42px;
-            padding-inline: 4px;
+          .business-answer-picks button {
+            min-height: 44px;
+            padding: 0 6px;
+            font-size: 0.78rem;
           }
 
-          .business-editorial-result {
-            padding: 18px 16px;
+          .business-answer-counting-status {
+            grid-column: 1 / -1;
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 3px;
+            padding-top: 3px;
           }
 
-          .business-editorial-result .due-date {
-            font-family: inherit;
-            font-weight: 850;
-            font-size: clamp(2.25rem, 10vw, 3rem);
-            line-height: 0.98;
+          .business-answer-live-result {
+            margin-top: 14px;
+            padding: 28px 24px;
+            border-radius: 22px;
           }
 
-          .business-editorial-result .business-citation-explanation {
-            margin-top: 12px;
-            font-size: 0.88rem;
-            line-height: 1.45;
-            text-align: left;
+          .business-answer-live-date {
+            display: block;
+            font-size: clamp(3rem, 14.5vw, 5rem);
+          }
+
+          .business-answer-live-date strong,
+          .business-answer-live-date span {
+            display: block;
+          }
+
+          .business-answer-live-date span {
+            margin-top: 4px;
+          }
+
+          .business-answer-actions {
+            width: calc(100% - 40px);
+          }
+
+          .business-answer-details {
+            width: calc(100% - 40px);
+            margin-top: 20px;
+          }
+
+          .business-answer-quick {
+            margin-top: 30px;
+            padding: 24px 20px;
+            border-radius: 22px;
+          }
+
+          .business-answer-quick-heading h2 {
+            font-size: 2.2rem;
+          }
+
+          .business-answer-quick-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 18px;
+          }
+
+          .business-answer-quick-grid a {
+            min-height: 112px;
+            padding: 14px;
+          }
+
+          .business-answer-quick-grid strong {
+            font-size: 1.55rem;
           }
 
           .business-editorial-content {
-            grid-template-columns: 1fr;
-            gap: 0;
-          }
-
-          .business-content-heading {
-            padding-bottom: 4px;
+            width: calc(100% - 40px);
+            margin-top: 34px;
           }
 
           .business-content-heading h2 {
-            font-size: 1.72rem;
+            font-size: 2.5rem;
           }
 
           .business-editorial-content article {
-            padding: 17px 2px;
-            border: 0;
-            border-top: 1px solid rgba(17, 44, 77, 0.09);
-            border-radius: 0;
-            background: transparent;
+            padding: 24px 4px;
+            border-bottom: 1px solid rgba(18, 54, 93, 0.1);
           }
 
           .business-editorial-content article h2 {
-            margin-bottom: 7px;
-            font-size: 1.05rem;
+            font-size: 1.45rem;
           }
 
           .business-editorial-content article p,
           .business-editorial-content article li,
           .business-editorial-content article dd {
-            font-size: 0.92rem;
-            line-height: 1.48;
+            font-size: 1.04rem;
+            line-height: 1.6;
           }
         }
       `}</style>
@@ -14005,10 +13756,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   )
 }
 
-
-type BusinessDaysFromTodayPageProps = NavigationProps & {
-  dayCount: 3 | 4 | 5 | 7 | 8 | 10 | 20 | 30
-}
 
 function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTodayPageProps) {
   const currentTime = useCurrentMinute()
@@ -16406,22 +16153,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 </span>
                 <span className="return-answer-date-main" aria-hidden="true">
                   <span className="return-answer-month">
-                    {
-                      [
-                        'January',
-                        'February',
-                        'March',
-                        'April',
-                        'May',
-                        'June',
-                        'July',
-                        'August',
-                        'September',
-                        'October',
-                        'November',
-                        'December',
-                      ][returnDeadline.month - 1]
-                    }
+                    {new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(returnDeadline.year, returnDeadline.month - 1, returnDeadline.day)))}
                   </span>
                   <span className="return-answer-day">
                     {returnDeadline.day}
@@ -16738,11 +16470,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         .return-answer-date-main {
           display: inline-flex;
-          flex-wrap: wrap;
           align-items: baseline;
           gap: 0.08em;
-          max-width: 100%;
-          font-size: clamp(3.5rem, 6.25vw, 6.35rem);
+          font-size: clamp(3.6rem, 7.6vw, 7.1rem);
           line-height: 0.9;
         }
 
@@ -23161,17 +22891,6 @@ function formatSpotlightRemaining(daysRemaining: number): string {
   }
 
   return `${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} left`
-}
-
-function formatCalendarDistance(daysRemaining: number): string {
-  const days = Math.abs(daysRemaining)
-  const label = days === 1 ? 'calendar day' : 'calendar days'
-
-  if (daysRemaining < 0) {
-    return `${days} ${label} overdue`
-  }
-
-  return `${daysRemaining} ${daysRemaining === 1 ? 'calendar day' : 'calendar days'} away`
 }
 
 function getUrgencyClass(daysRemaining: number): string {
