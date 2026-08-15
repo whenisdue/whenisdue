@@ -19511,10 +19511,7 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
       return
     }
 
-    saveWorkdayPreferences({
-      start: workdayStart,
-      end: workdayEnd,
-    })
+    saveWorkdayPreferences({ start: workdayStart, end: workdayEnd })
     setWorkdayPreferenceMessage('Workday saved on this device.')
     trackWhenIsDueEvent('workday_preference_saved', {
       start: workdayStart,
@@ -19579,10 +19576,10 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
   }, [startDate, startTime, hours, workdayStart, workdayEnd, holidayCalendar])
 
   return (
-    <main className="page-shell sla-editorial-page">
-      <header className="sla-editorial-header" aria-label="WhenIsDue navigation">
+    <main className="page-shell sla-answer-page">
+      <header className="sla-answer-header" aria-label="WhenIsDue navigation">
         <a
-          className="sla-editorial-brand"
+          className="sla-answer-brand"
           href="/"
           aria-label="WhenIsDue home"
           onClick={(event) => {
@@ -19592,346 +19589,285 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="sla-editorial-nav" aria-label="Main navigation">
-          <a
-            className="sla-editorial-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
-      <section className="sla-editorial-hero" aria-labelledby="sla-editorial-title">
-        <div className="sla-editorial-image-wrap">
-          <img
-            className="sla-editorial-image"
-            src="/business-hours-sla-background.webp"
-            alt=""
-          />
+      <section className="sla-answer-shell" aria-labelledby="sla-answer-title">
+        <div className="sla-answer-hero">
+          <p className="sla-answer-eyebrow">Business hours / SLA calculator</p>
 
-          <div className="sla-editorial-answer">
-            <p className="sla-editorial-eyebrow">
-              Business hours / SLA calculator
-            </p>
-            <h1 id="sla-editorial-title">When is this SLA due?</h1>
-
-            {result && parsedStartDate && parsedHours !== null ? (
-              <>
-                <div className="sla-editorial-primary-answer">
-                  <span>
-                    {parsedHours} business {parsedHours === 1 ? 'hour' : 'hours'}
+          {result && parsedStartDate && parsedHours !== null ? (
+            <>
+              <h1 id="sla-answer-title">This SLA is due</h1>
+              <strong
+                className="sla-answer-date"
+                aria-label={`${formatWeekday(result.date)}, ${formatPlainDate(result.date)} at ${formatTime12Hour(result.time)}`}
+              >
+                <span className="sla-answer-weekday">
+                  {formatWeekday(result.date)},
+                </span>
+                <span className="sla-answer-date-main" aria-hidden="true">
+                  <span className="sla-answer-month">
+                    {
+                      [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December',
+                      ][result.date.month - 1]
+                    }
                   </span>
-                  <strong>{formatPlainDate(result.date)}</strong>
-                  <small>{formatWeekday(result.date)}</small>
-                </div>
+                  <span className="sla-answer-day">{result.date.day}</span>
+                  <span className="sla-answer-comma">,</span>
+                  <span className="sla-answer-year">{result.date.year}</span>
+                </span>
+              </strong>
 
-                <div className="sla-editorial-time-row">
-                  <span>Deadline time</span>
-                  <b>{formatTime12Hour(result.time)}</b>
-                </div>
-              </>
-            ) : (
-              <p className="sla-editorial-error">
-                {validationMessage ?? 'Enter valid details to calculate the deadline.'}
+              <strong className="sla-answer-time">
+                {formatTime12Hour(result.time)}
+              </strong>
+
+              <p className="sla-answer-context">
+                {parsedHours} business {parsedHours === 1 ? 'hour' : 'hours'} from{' '}
+                {formatTime12Hour(startTime)} on {formatPlainDate(parsedStartDate)}
               </p>
-            )}
-          </div>
-        </div>
-      </section>
 
-      <section
-        className="sla-editorial-workspace"
-        aria-label="Business hours deadline calculator"
-      >
-        <div className="sla-editorial-heading">
-          <p className="sla-section-eyebrow">Your calculation</p>
-          <h2>Set the start time and working hours</h2>
-          <p>The deadline updates immediately.</p>
+              <p className="sla-answer-rule">
+                Using {formatTime12Hour(workdayStart)}–{formatTime12Hour(workdayEnd)}
+                {' · '}
+                {getHolidayCalendarOption(holidayCalendar).shortLabel}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 id="sla-answer-title">When is this SLA due?</h1>
+              <p className="sla-answer-context">
+                Enter a valid start date, time, and number of business hours below.
+              </p>
+            </>
+          )}
         </div>
 
-        <div className="sla-editorial-calculation-grid">
-          <form
-            className="sla-editorial-form"
-            onSubmit={(event) => event.preventDefault()}
+        <form
+          className="sla-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            <span>Start date</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(event) => {
+                setStartDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'business_hours_deadline',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <label>
+            <span>Start time</span>
+            <input
+              type="time"
+              value={startTime}
+              onChange={(event) => setStartTime(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Business hours</span>
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              step="1"
+              inputMode="numeric"
+              value={hours}
+              onChange={(event) => setHours(event.target.value)}
+            />
+          </label>
+
+          <div
+            className="sla-answer-quick-picks"
+            aria-label="Common SLA hour presets"
           >
-            <div className="sla-editorial-start-grid">
-              <label>
-                <span>Start date</span>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(event) => {
-                    setStartDate(event.target.value)
-                    trackWhenIsDueEvent('date_changed', {
+            {slaPresets.map((preset) => {
+              const active = hours === preset.hours
+              return (
+                <button
+                  type="button"
+                  key={preset.hours}
+                  className={active ? 'is-active' : ''}
+                  aria-pressed={active}
+                  onClick={() => {
+                    setHours(preset.hours)
+                    trackWhenIsDueEvent('quick_pick', {
                       context: 'business_hours_deadline',
-                      value: event.target.value,
+                      value: preset.hours,
                     })
                   }}
-                />
-              </label>
+                >
+                  {preset.label}
+                </button>
+              )
+            })}
+          </div>
 
-              <label>
-                <span>Start time</span>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(event) => setStartTime(event.target.value)}
-                />
-              </label>
-            </div>
+          {validationMessage ? (
+            <p className="sla-answer-error" role="alert">
+              {validationMessage}
+            </p>
+          ) : null}
+        </form>
+      </section>
 
-            <label>
-              <span>Business hours to add</span>
-              <input
-                type="number"
-                min="1"
-                max="1000"
-                step="1"
-                inputMode="numeric"
-                value={hours}
-                onChange={(event) => setHours(event.target.value)}
+      {result && parsedStartDate && parsedHours !== null ? (
+        <section className="sla-answer-actions">
+          <ResultActions
+            title={`${parsedHours}-business-hour deadline`}
+            date={result.date}
+            time={result.time}
+            details={`${formatTime12Hour(result.time)} · ${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)} workday · ${getHolidayCalendarOption(holidayCalendar).shortLabel}`}
+            variant="return-window"
+          />
+
+          <details className="sla-answer-details">
+            <summary>Why this date and time?</summary>
+            <div className="sla-answer-detail-body">
+              <p>
+                {formatBusinessHoursExplanation(
+                  parsedStartDate,
+                  startTime,
+                  parsedHours,
+                  workdayStart,
+                  workdayEnd,
+                  holidayCalendar,
+                  result.date,
+                  result.time,
+                )}
+              </p>
+
+              <CalculationReceipt
+                analyticsContext="business_hours_deadline"
+                rows={[
+                  {
+                    label: 'Start',
+                    value: `${formatPlainDate(parsedStartDate)} · ${formatTime12Hour(startTime)}`,
+                  },
+                  {
+                    label: 'Business hours added',
+                    value: String(parsedHours),
+                  },
+                  {
+                    label: 'Workday',
+                    value: `${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)}`,
+                  },
+                  {
+                    label: 'Holiday calendar',
+                    value: getHolidayCalendarOption(holidayCalendar).label,
+                  },
+                  ...(holidayCalendar !== 'none'
+                    ? [
+                        {
+                          label: 'Holidays skipped',
+                          value: formatSkippedHolidaySummary(result.skippedHolidays),
+                        },
+                      ]
+                    : []),
+                  {
+                    label: 'Deadline',
+                    value: `${formatPlainDate(result.date)} · ${formatTime12Hour(result.time)}`,
+                  },
+                ]}
               />
-            </label>
+            </div>
+          </details>
 
-            <div
-              className="sla-editorial-quick-picks"
-              aria-label="Common SLA hour presets"
-            >
-              {slaPresets.map((preset) => {
-                const active = hours === preset.hours
-                return (
+          <details className="sla-answer-details">
+            <summary>Workday and holiday settings</summary>
+            <div className="sla-answer-settings">
+              <div className="sla-answer-workday">
+                <label>
+                  <span>Workday starts</span>
+                  <input
+                    type="time"
+                    value={workdayStart}
+                    onChange={(event) => {
+                      setWorkdayStart(event.target.value)
+                      setWorkdayPreferenceMessage(null)
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Workday ends</span>
+                  <input
+                    type="time"
+                    value={workdayEnd}
+                    onChange={(event) => {
+                      setWorkdayEnd(event.target.value)
+                      setWorkdayPreferenceMessage(null)
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div className="sla-answer-workday-presets">
+                {workdayPresets.map((preset) => (
                   <button
                     type="button"
-                    key={preset.hours}
-                    className={active ? 'is-active' : ''}
-                    aria-pressed={active}
-                    onClick={() => {
-                      setHours(preset.hours)
-                      trackWhenIsDueEvent('quick_pick', {
-                        context: 'business_hours_deadline',
-                        value: preset.hours,
-                      })
-                    }}
+                    key={preset.label}
+                    className={
+                      workdayStart === preset.start && workdayEnd === preset.end
+                        ? 'is-active'
+                        : ''
+                    }
+                    onClick={() => applyWorkdayPreset(preset.start, preset.end)}
                   >
                     {preset.label}
                   </button>
-                )
-              })}
-            </div>
-
-            {validationMessage ? (
-              <p className="sla-editorial-error" role="alert">
-                {validationMessage}
-              </p>
-            ) : null}
-
-            <p className="sla-editorial-default-note">
-              Using {formatTime12Hour(workdayStart)}–{formatTime12Hour(workdayEnd)}{' '}
-              and {getHolidayCalendarOption(holidayCalendar).shortLabel}.
-            </p>
-
-            <details className="sla-editorial-advanced">
-              <summary>Workday and holiday settings</summary>
-
-              <div className="sla-editorial-advanced-body">
-                <div className="sla-editorial-day">
-                  <span>Working day</span>
-                  <div>
-                    <label>
-                      <span>Starts</span>
-                      <input
-                        type="time"
-                        value={workdayStart}
-                        onChange={(event) => {
-                          setWorkdayStart(event.target.value)
-                          setWorkdayPreferenceMessage(null)
-                        }}
-                      />
-                    </label>
-                    <label>
-                      <span>Ends</span>
-                      <input
-                        type="time"
-                        value={workdayEnd}
-                        onChange={(event) => {
-                          setWorkdayEnd(event.target.value)
-                          setWorkdayPreferenceMessage(null)
-                        }}
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div
-                  className="sla-editorial-workday-presets"
-                  aria-label="Common workday presets"
-                >
-                  {workdayPresets.map((preset) => (
-                    <button
-                      type="button"
-                      key={preset.label}
-                      className={
-                        workdayStart === preset.start && workdayEnd === preset.end
-                          ? 'is-active'
-                          : ''
-                      }
-                      onClick={() => applyWorkdayPreset(preset.start, preset.end)}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="sla-editorial-preference-actions">
-                  <button type="button" onClick={saveCurrentWorkday}>
-                    Remember this workday
-                  </button>
-                  <button
-                    type="button"
-                    className="is-secondary"
-                    onClick={resetSavedWorkday}
-                  >
-                    Reset
-                  </button>
-                  {workdayPreferenceMessage ? (
-                    <span aria-live="polite">{workdayPreferenceMessage}</span>
-                  ) : null}
-                </div>
-
-                <HolidayCalendarSelect
-                  value={holidayCalendar}
-                  onChange={(nextCalendar) => {
-                    setHolidayCalendar(nextCalendar)
-                    trackWhenIsDueEvent('holiday_calendar_changed', {
-                      context: 'business_hours_deadline',
-                      value: nextCalendar,
-                    })
-                  }}
-                  compact
-                />
+                ))}
               </div>
-            </details>
-          </form>
 
-          <section className="sla-editorial-result" aria-live="polite">
-            {result && parsedStartDate && parsedHours !== null ? (
-              <>
-                <p className="sla-result-kicker">Deadline</p>
-                <p className="sla-result-date">{formatPlainDate(result.date)}</p>
-                <p className="sla-result-weekday">
-                  {formatWeekday(result.date)}
-                </p>
+              <HolidayCalendarSelect
+                value={holidayCalendar}
+                onChange={(nextCalendar) => {
+                  setHolidayCalendar(nextCalendar)
+                  trackWhenIsDueEvent('holiday_calendar_changed', {
+                    context: 'business_hours_deadline',
+                    value: nextCalendar,
+                  })
+                }}
+                compact
+              />
 
-                <div className="sla-result-time-card">
-                  <small>Deadline time</small>
-                  <strong>{formatTime12Hour(result.time)}</strong>
-                </div>
+              <div className="sla-answer-preference-actions">
+                <button type="button" onClick={saveCurrentWorkday}>
+                  Remember this workday
+                </button>
+                <button type="button" onClick={resetSavedWorkday}>
+                  Reset
+                </button>
+                {workdayPreferenceMessage ? (
+                  <span aria-live="polite">{workdayPreferenceMessage}</span>
+                ) : null}
+              </div>
+            </div>
+          </details>
+        </section>
+      ) : null}
 
-                <div className="sla-result-summary">
-                  <span>
-                    {parsedHours} business {parsedHours === 1 ? 'hour' : 'hours'}
-                  </span>
-                  <small>
-                    {formatTime12Hour(workdayStart)}–
-                    {formatTime12Hour(workdayEnd)} workday
-                  </small>
-                </div>
-
-                <p className="sla-result-note">
-                  {formatBusinessHoursExplanation(
-                    parsedStartDate,
-                    startTime,
-                    parsedHours,
-                    workdayStart,
-                    workdayEnd,
-                    holidayCalendar,
-                    result.date,
-                    result.time,
-                  )}
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="business_hours_deadline"
-                  rows={[
-                    {
-                      label: 'Start',
-                      value: `${formatPlainDate(parsedStartDate)} · ${formatTime12Hour(startTime)}`,
-                    },
-                    {
-                      label: 'Business hours added',
-                      value: String(parsedHours),
-                    },
-                    {
-                      label: 'Workday',
-                      value: `${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)}`,
-                    },
-                    {
-                      label: 'Holiday calendar',
-                      value: getHolidayCalendarOption(holidayCalendar).label,
-                    },
-                    ...(holidayCalendar !== 'none'
-                      ? [
-                          {
-                            label: 'Holidays skipped',
-                            value: formatSkippedHolidaySummary(
-                              result.skippedHolidays,
-                            ),
-                          },
-                        ]
-                      : []),
-                    {
-                      label: 'Deadline',
-                      value: `${formatPlainDate(result.date)} · ${formatTime12Hour(result.time)}`,
-                    },
-                  ]}
-                />
-
-                <ResultActions
-                  title={`${parsedHours}-business-hour deadline`}
-                  date={result.date}
-                  time={result.time}
-                  details={`${formatTime12Hour(result.time)} · ${formatTime12Hour(workdayStart)}–${formatTime12Hour(workdayEnd)} workday · ${getHolidayCalendarOption(holidayCalendar).shortLabel}`}
-                />
-              </>
-            ) : (
-              <p className="sla-editorial-empty">
-                Enter valid details to calculate the deadline.
-              </p>
-            )}
-          </section>
-        </div>
-      </section>
-
-      <section
-        className="sla-editorial-related"
-        aria-label="Related business timing tools"
-      >
+      <section className="sla-answer-related" aria-label="Related business timing tools">
         <div>
-          <p className="sla-section-eyebrow">Related timing tools</p>
+          <p className="sla-answer-section-eyebrow">Related timing tools</p>
           <h2>Need a different counting rule?</h2>
         </div>
 
@@ -19943,9 +19879,8 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
               onNavigate('/business-days-calculator')
             }}
           >
-            Business days calculator <span aria-hidden="true">→</span>
+            Business days calculator
           </a>
-
           <a
             href="/deadline-calculator"
             onClick={(event) => {
@@ -19953,9 +19888,8 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
               onNavigate('/deadline-calculator')
             }}
           >
-            Deadline calculator <span aria-hidden="true">→</span>
+            Deadline calculator
           </a>
-
           <a
             href="/notice-period-calculator"
             onClick={(event) => {
@@ -19963,14 +19897,14 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
               onNavigate('/notice-period-calculator')
             }}
           >
-            Notice period calculator <span aria-hidden="true">→</span>
+            Notice period calculator
           </a>
         </nav>
       </section>
 
-      <section className="sla-editorial-content" aria-label="Business-hour rules">
-        <div className="sla-content-heading">
-          <p className="sla-section-eyebrow">Business-hour rules</p>
+      <section className="sla-answer-content" aria-label="Business-hour rules">
+        <div className="sla-answer-content-heading">
+          <p className="sla-answer-section-eyebrow">Business-hour rules</p>
           <h2>Start, working window, deadline</h2>
         </div>
 
@@ -20024,221 +19958,170 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .sla-editorial-page {
-          --sla-navy: #112f53;
-          --sla-green: #2d7c67;
-          --sla-blue: #eef5f8;
-          --sla-warm: #f2ede4;
+        .sla-answer-page {
+          --sla-ink: #173453;
+          --sla-muted: #687b8e;
+          --sla-accent: #2d7b64;
+          --sla-field: #efe2c8;
+          --sla-field-soft: #f6eddc;
+          min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .sla-editorial-header {
-          width: min(100% - 32px, 1130px);
-          min-height: 70px;
-          margin: 0 auto 14px;
+        .sla-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+          border-bottom: 1px solid rgba(23, 52, 83, 0.12);
         }
 
-        .sla-editorial-brand {
+        .sla-answer-brand {
           display: inline-flex;
           align-items: center;
           text-decoration: none;
         }
 
-        .sla-editorial-brand img {
+        .sla-answer-brand img {
           display: block;
           width: 176px;
           height: auto;
         }
 
-        .sla-editorial-nav {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-        }
-
-        .sla-editorial-nav a {
-          color: #5a728d;
-          font-size: 0.9rem;
-          font-weight: 850;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .sla-editorial-hero,
-        .sla-editorial-workspace,
-        .sla-editorial-related,
-        .sla-editorial-content {
-          width: min(100% - 32px, 1130px);
+        .sla-answer-shell,
+        .sla-answer-actions,
+        .sla-answer-related,
+        .sla-answer-content {
+          width: min(100% - 32px, 1100px);
           margin-left: auto;
           margin-right: auto;
         }
 
-        .sla-editorial-image-wrap {
-          position: relative;
-          min-height: 470px;
-          overflow: hidden;
-          border: 1px solid rgba(17, 47, 83, 0.12);
-          border-radius: 28px;
-          background: #c9b393;
+        .sla-answer-shell {
+          margin-top: 22px;
         }
 
-        .sla-editorial-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
+        .sla-answer-hero {
+          padding: clamp(42px, 6vw, 68px) clamp(24px, 5vw, 58px) 34px;
+          border: 1px solid rgba(116, 82, 39, 0.13);
+          border-radius: 28px 28px 0 0;
+          background: var(--sla-field);
+          text-align: center;
         }
 
-        .sla-editorial-answer {
-          position: relative;
-          z-index: 1;
-          width: min(500px, calc(100% - 64px));
-          margin: 32px;
-          padding: 32px 34px 28px;
-          border: 1px solid rgba(255, 255, 255, 0.45);
-          border-radius: 24px;
-          background: rgba(250, 247, 239, 0.94);
-          box-shadow: 0 18px 52px rgba(11, 24, 39, 0.15);
-          backdrop-filter: blur(10px);
-        }
-
-        .sla-editorial-eyebrow,
-        .sla-section-eyebrow {
+        .sla-answer-eyebrow,
+        .sla-answer-section-eyebrow {
           margin: 0;
-          color: var(--sla-green);
-          font-size: 0.78rem;
+          color: var(--sla-accent);
+          font-size: 0.8rem;
           font-weight: 950;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .sla-editorial-answer h1 {
+        .sla-answer-hero h1 {
           margin: 10px 0 0;
-          color: var(--sla-navy);
-          font-size: clamp(2.65rem, 5vw, 4.5rem);
-          line-height: 0.97;
+          color: var(--sla-ink);
+          font-size: clamp(2.75rem, 5.8vw, 5rem);
+          line-height: 0.98;
           letter-spacing: -0.05em;
-          text-wrap: balance;
         }
 
-        .sla-editorial-primary-answer {
+        .sla-answer-date {
           display: grid;
-          gap: 4px;
-          margin-top: 22px;
-          padding-top: 18px;
-          border-top: 1px solid rgba(17, 47, 83, 0.11);
-        }
-
-        .sla-editorial-primary-answer span {
-          color: #687e91;
-          font-size: 0.95rem;
-          font-weight: 850;
-        }
-
-        .sla-editorial-primary-answer strong {
-          color: var(--sla-navy);
-          font-size: clamp(2.1rem, 4vw, 3.35rem);
-          line-height: 1;
-          letter-spacing: -0.045em;
-        }
-
-        .sla-editorial-primary-answer small {
-          color: #5e7489;
-          font-size: 1rem;
-          font-weight: 800;
-        }
-
-        .sla-editorial-time-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 14px;
-          margin-top: 18px;
-          padding: 13px 14px;
-          border-radius: 14px;
-          background: rgba(238, 245, 248, 0.92);
-        }
-
-        .sla-editorial-time-row span {
-          color: #667e91;
-          font-size: 0.78rem;
+          justify-items: center;
+          margin-top: 25px;
+          color: var(--sla-ink);
           font-weight: 900;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
         }
 
-        .sla-editorial-time-row b {
-          color: #24435f;
-          font-size: 1.05rem;
-        }
-
-        .sla-editorial-workspace {
-          margin-top: 22px;
-          padding: 30px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 26px;
-          background: #fffdf9;
-        }
-
-        .sla-editorial-heading h2,
-        .sla-editorial-related h2,
-        .sla-content-heading h2 {
-          margin: 6px 0 0;
-          color: var(--sla-navy);
-          font-size: clamp(2rem, 3.7vw, 3.15rem);
-          line-height: 1;
+        .sla-answer-weekday {
+          color: #3d657a;
+          font-size: clamp(2.4rem, 4.2vw, 3.9rem);
+          line-height: 0.98;
           letter-spacing: -0.04em;
-          text-wrap: balance;
         }
 
-        .sla-editorial-heading > p:last-child {
-          margin: 8px 0 0;
-          color: #6b7f92;
+        .sla-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.09em;
+          max-width: 100%;
+          margin-top: 6px;
+          font-size: clamp(3.55rem, 6vw, 5.8rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          white-space: nowrap;
         }
 
-        .sla-editorial-calculation-grid {
+        .sla-answer-month,
+        .sla-answer-day,
+        .sla-answer-comma,
+        .sla-answer-year {
+          display: inline;
+        }
+
+        .sla-answer-comma {
+          margin-left: -0.08em;
+        }
+
+        .sla-answer-time {
+          display: block;
+          width: fit-content;
+          margin: 20px auto 0;
+          padding: 9px 15px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.62);
+          color: #214b64;
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1;
+        }
+
+        .sla-answer-context,
+        .sla-answer-rule {
+          margin: 16px 0 0;
+          color: var(--sla-muted);
+          font-size: 0.96rem;
+          line-height: 1.5;
+        }
+
+        .sla-answer-rule {
+          margin-top: 7px;
+          font-size: 0.88rem;
+        }
+
+        .sla-answer-controls {
           display: grid;
-          grid-template-columns: minmax(310px, 0.74fr) minmax(0, 1.26fr);
-          gap: 16px;
-          margin-top: 22px;
+          grid-template-columns: minmax(0, 1.3fr) minmax(140px, 0.75fr) minmax(120px, 0.55fr) minmax(320px, 1.4fr);
+          gap: 12px;
+          align-items: end;
+          padding: 18px;
+          border: 1px solid rgba(116, 82, 39, 0.13);
+          border-top: 1px solid rgba(116, 82, 39, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--sla-field-soft);
         }
 
-        .sla-editorial-form {
-          display: grid;
-          gap: 14px;
-          align-content: start;
-          padding: 22px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 18px;
-          background: var(--sla-warm);
-        }
-
-        .sla-editorial-form label,
-        .sla-editorial-day {
+        .sla-answer-controls label {
           display: grid;
           gap: 7px;
         }
 
-        .sla-editorial-form label > span,
-        .sla-editorial-day > span,
-        .sla-editorial-day label > span {
-          color: #566f87;
+        .sla-answer-controls label > span,
+        .sla-answer-settings label > span {
+          color: #526a82;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 850;
         }
 
-        .sla-editorial-form input {
+        .sla-answer-controls input,
+        .sla-answer-settings input {
           width: 100%;
-          min-width: 0;
           min-height: 50px;
           padding: 10px 12px;
-          border: 1px solid rgba(17, 47, 83, 0.16);
+          border: 1px solid rgba(23, 52, 83, 0.14);
           border-radius: 11px;
           background: #fff;
           color: #17304d;
@@ -20246,26 +20129,20 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           font-size: 1rem;
         }
 
-        .sla-editorial-start-grid,
-        .sla-editorial-day > div {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
-        }
-
-        .sla-editorial-quick-picks {
+        .sla-answer-quick-picks {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 7px;
         }
 
-        .sla-editorial-quick-picks button,
-        .sla-editorial-workday-presets button {
-          min-height: 42px;
+        .sla-answer-quick-picks button,
+        .sla-answer-workday-presets button,
+        .sla-answer-preference-actions button {
+          min-height: 46px;
           padding: 8px 9px;
-          border: 1px solid rgba(17, 47, 83, 0.13);
+          border: 1px solid rgba(23, 52, 83, 0.13);
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.8);
+          background: rgba(255, 255, 255, 0.82);
           color: #4f6780;
           font: inherit;
           font-size: 0.8rem;
@@ -20273,559 +20150,295 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           cursor: pointer;
         }
 
-        .sla-editorial-quick-picks button.is-active,
-        .sla-editorial-workday-presets button.is-active {
-          border-color: rgba(45, 124, 103, 0.6);
-          background: #e8f4ef;
-          color: #1f6656;
-          box-shadow: inset 0 0 0 1px rgba(45, 124, 103, 0.18);
+        .sla-answer-quick-picks button.is-active,
+        .sla-answer-workday-presets button.is-active {
+          border-color: rgba(45, 123, 100, 0.58);
+          background: #e7f3ee;
+          color: #1f6655;
         }
 
-        .sla-editorial-default-note {
-          margin: -2px 0 0;
-          color: #6d8196;
-          font-size: 0.82rem;
-          line-height: 1.4;
-        }
-
-        .sla-editorial-advanced {
-          border-top: 1px solid rgba(17, 47, 83, 0.1);
-          padding-top: 6px;
-        }
-
-        .sla-editorial-advanced summary {
-          min-height: 42px;
-          display: flex;
-          align-items: center;
-          color: #526a82;
-          font-size: 0.88rem;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .sla-editorial-advanced-body {
-          display: grid;
-          gap: 12px;
-          padding-top: 8px;
-        }
-
-        .sla-editorial-workday-presets {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 7px;
-        }
-
-        .sla-editorial-preference-actions {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 7px;
-        }
-
-        .sla-editorial-preference-actions button {
-          min-height: 40px;
-          padding: 7px 10px;
-          border: 1px solid rgba(17, 47, 83, 0.16);
-          border-radius: 9px;
-          background: #fff;
-          color: #294766;
-          font: inherit;
-          font-size: 0.8rem;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .sla-editorial-preference-actions button.is-secondary {
-          color: #718398;
-        }
-
-        .sla-editorial-preference-actions span {
-          color: #61778d;
-          font-size: 0.82rem;
-          line-height: 1.4;
-        }
-
-        .sla-editorial-error {
+        .sla-answer-error {
+          grid-column: 1 / -1;
           margin: 0;
           color: #934a42;
-          font-size: 0.82rem;
+          font-size: 0.84rem;
           font-weight: 750;
-          line-height: 1.4;
         }
 
-        .sla-editorial-result {
-          min-width: 0;
-          padding: 30px 34px;
-          border-radius: 20px;
-          background: var(--sla-navy);
-          color: #f8f1e6;
-        }
-
-        .sla-result-kicker {
-          margin: 0;
-          color: #9fc6b4;
-          font-size: 0.76rem;
-          font-weight: 950;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-        }
-
-        .sla-result-date {
-          margin: 10px 0 0;
-          color: #fff8ec;
-          font-size: clamp(3.5rem, 7vw, 6.2rem);
-          font-weight: 850;
-          line-height: 0.92;
-          letter-spacing: -0.055em;
-          text-wrap: balance;
-        }
-
-        .sla-result-weekday {
-          margin: 10px 0 0;
-          color: #d5dfea;
-          font-size: 1.1rem;
-          font-weight: 800;
-        }
-
-        .sla-result-time-card {
-          display: grid;
-          gap: 3px;
-          margin-top: 18px;
-          padding: 14px 16px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.08);
-        }
-
-        .sla-result-time-card small {
-          color: #9fc6b4;
-          font-size: 0.75rem;
-          font-weight: 900;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-
-        .sla-result-time-card strong {
-          color: #fff8ec;
-          font-size: clamp(2rem, 4.5vw, 3rem);
-          line-height: 1;
-          letter-spacing: -0.035em;
-        }
-
-        .sla-result-summary {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 8px 12px;
-          margin-top: 18px;
-        }
-
-        .sla-result-summary span {
-          display: inline-flex;
-          align-items: center;
-          min-height: 30px;
-          padding: 5px 10px;
-          border: 1px solid rgba(223, 189, 122, 0.55);
-          border-radius: 999px;
-          background: #fff7e8;
-          color: #7b4f26;
-          font-size: 0.82rem;
-          font-weight: 900;
-        }
-
-        .sla-result-summary small,
-        .sla-result-note {
-          color: #c8d4df;
-        }
-
-        .sla-result-note {
-          max-width: 720px;
-          margin: 18px 0 0;
-          font-size: 0.95rem;
-          line-height: 1.52;
-        }
-
-        .sla-editorial-result .calculation-receipt {
-          margin-top: 18px;
-        }
-
-        .sla-editorial-result .result-actions {
-          margin-top: 14px;
-        }
-
-        .sla-editorial-empty {
-          margin: 0;
-          color: #c8d4df;
-        }
-
-        .sla-editorial-related {
-          margin-top: 22px;
-          padding: 24px 28px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 24px;
-          background: var(--sla-blue);
-        }
-
-        .sla-editorial-related nav {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 8px;
+        .sla-answer-actions {
           margin-top: 16px;
         }
 
-        .sla-editorial-related a {
+        .sla-answer-actions > .result-actions {
+          justify-content: center;
+        }
+
+        .sla-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(23, 52, 83, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .sla-answer-details summary {
+          min-height: 50px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          min-height: 58px;
-          padding: 12px 14px;
-          border: 1px solid rgba(17, 47, 83, 0.12);
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.82);
-          color: #24425e;
-          font-size: 0.88rem;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
           font-weight: 900;
-          text-decoration: none;
+          cursor: pointer;
         }
 
-        .sla-editorial-related a span {
-          color: var(--sla-green);
-          font-size: 1.05rem;
+        .sla-answer-detail-body,
+        .sla-answer-settings {
+          padding: 0 14px 16px;
         }
 
-        .sla-editorial-content {
-          margin-top: 38px;
+        .sla-answer-detail-body > p {
+          max-width: 760px;
+          margin: 0;
+          color: #61768a;
+          font-size: 0.95rem;
+          line-height: 1.58;
+        }
+
+        .sla-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
+        }
+
+        .sla-answer-settings {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 12px;
         }
 
-        .sla-content-heading {
+        .sla-answer-workday {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .sla-answer-workday label {
+          display: grid;
+          gap: 7px;
+        }
+
+        .sla-answer-workday-presets {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 7px;
+        }
+
+        .sla-answer-preference-actions {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .sla-answer-preference-actions span {
+          color: #61778d;
+          font-size: 0.84rem;
+        }
+
+        .sla-answer-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(23, 52, 83, 0.1);
+          border-radius: 22px;
+          background: #f2eee6;
+        }
+
+        .sla-answer-related h2,
+        .sla-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--sla-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+        }
+
+        .sla-answer-related nav {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .sla-answer-related a {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 13px;
+          border: 1px solid rgba(23, 52, 83, 0.11);
+          border-radius: 12px;
+          background: #fff;
+          color: #35536e;
+          font-size: 0.88rem;
+          font-weight: 850;
+          text-decoration: none;
+        }
+
+        .sla-answer-content {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 34px;
+        }
+
+        .sla-answer-content-heading {
           grid-column: 1 / -1;
-          margin-bottom: 4px;
+          margin-bottom: 3px;
         }
 
-        .sla-editorial-content article {
-          padding: 22px;
-          border: 1px solid rgba(17, 47, 83, 0.09);
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.72);
+        .sla-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(23, 52, 83, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
         }
 
-        .sla-editorial-content article:last-child {
+        .sla-answer-content article:last-child {
           grid-column: 1 / -1;
         }
 
-        .sla-editorial-content article h2 {
+        .sla-answer-content h2 {
           margin: 0;
-          color: var(--sla-navy);
+          color: var(--sla-ink);
           font-size: 1.08rem;
         }
 
-        .sla-editorial-content article p {
+        .sla-answer-content p {
           margin: 8px 0 0;
           color: #65798d;
           line-height: 1.55;
         }
 
         @media (max-width: 760px) {
-          .sla-editorial-header {
+          .sla-answer-header {
             width: min(100% - 24px, 680px);
-            min-height: 58px;
-            margin-bottom: 12px;
-            gap: 12px;
+            min-height: 76px;
           }
 
-          .sla-editorial-brand img {
+          .sla-answer-brand img {
             width: 154px;
           }
 
-          .sla-editorial-nav {
-            gap: 12px;
-          }
-
-          .sla-editorial-nav a {
-            font-size: 0.8rem;
-          }
-
-          .sla-editorial-home-link {
-            display: none;
-          }
-
-          .sla-editorial-hero,
-          .sla-editorial-workspace,
-          .sla-editorial-related,
-          .sla-editorial-content {
+          .sla-answer-shell,
+          .sla-answer-actions,
+          .sla-answer-related,
+          .sla-answer-content {
             width: min(100% - 24px, 680px);
           }
 
-          .sla-editorial-image-wrap {
-            min-height: 500px;
-            border-radius: 24px;
-          }
-
-          .sla-editorial-image {
-            object-position: 65% center;
-          }
-
-          .sla-editorial-answer {
-            position: absolute;
-            left: 16px;
-            right: 16px;
-            top: 16px;
-            width: auto;
-            margin: 0;
-            padding: 18px;
-            border-radius: 18px;
-          }
-
-          .sla-editorial-answer h1 {
-            font-size: clamp(2.05rem, 9.3vw, 2.85rem);
-          }
-
-          .sla-editorial-primary-answer {
+          .sla-answer-shell {
             margin-top: 14px;
-            padding-top: 12px;
           }
 
-          .sla-editorial-primary-answer strong {
-            font-size: clamp(1.95rem, 8.8vw, 2.6rem);
+          .sla-answer-hero {
+            padding: 28px 20px 26px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .sla-editorial-time-row {
-            margin-top: 13px;
-            padding: 11px 12px;
+          .sla-answer-hero h1 {
+            font-size: clamp(2.65rem, 12vw, 4rem);
           }
 
-          .sla-editorial-workspace {
-            margin-top: 14px;
-            padding: 22px 18px;
-            border-radius: 22px;
+          .sla-answer-date {
+            justify-items: start;
+            margin-top: 22px;
           }
 
-          .sla-editorial-heading h2,
-          .sla-editorial-related h2,
-          .sla-content-heading h2 {
-            font-size: clamp(1.9rem, 8.5vw, 2.55rem);
+          .sla-answer-weekday {
+            font-size: clamp(2.3rem, 10vw, 3.2rem);
           }
 
-          .sla-editorial-calculation-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 18px;
-          }
-
-          .sla-editorial-form {
-            padding: 18px;
-          }
-
-          .sla-editorial-start-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-
-          .sla-editorial-quick-picks {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .sla-editorial-result {
-            padding: 22px 18px 18px;
-          }
-
-          .sla-result-date {
-            font-size: clamp(2.9rem, 11.5vw, 4.2rem);
-          }
-
-          .sla-result-note {
-            font-size: 0.92rem;
-            line-height: 1.48;
-          }
-
-          .sla-editorial-result .result-actions {
+          .sla-answer-date-main {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            justify-items: start;
+            gap: 0;
+            font-size: clamp(3.05rem, 14vw, 4.6rem);
+            line-height: 0.9;
+            white-space: normal;
           }
 
-          .sla-editorial-result .result-actions button,
-          .sla-editorial-result .result-actions a {
-            width: 100%;
-            min-height: 46px;
-            padding: 9px 10px;
-            font-size: 0.82rem;
+          .sla-answer-month,
+          .sla-answer-day,
+          .sla-answer-year {
+            display: block;
           }
 
-          .sla-editorial-result .result-actions > :last-child {
+          .sla-answer-comma {
+            display: none;
+          }
+
+          .sla-answer-time {
+            margin-left: 0;
+            margin-right: 0;
+            border-radius: 12px;
+          }
+
+          .sla-answer-controls {
+            grid-template-columns: minmax(0, 1.2fr) minmax(105px, 0.72fr);
+            gap: 10px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
+          }
+
+          .sla-answer-controls > label:nth-child(3) {
             grid-column: 1 / -1;
           }
 
-          .sla-editorial-related {
-            margin-top: 14px;
-            padding: 20px 18px;
-            border-radius: 22px;
+          .sla-answer-quick-picks {
+            grid-column: 1 / -1;
           }
 
-          .sla-editorial-related nav {
+          .sla-answer-controls input,
+          .sla-answer-quick-picks button {
+            min-height: 46px;
+          }
+
+          .sla-answer-workday-presets {
             grid-template-columns: 1fr;
-            gap: 7px;
           }
 
-          .sla-editorial-content {
+          .sla-answer-related {
+            padding: 20px 18px;
+          }
+
+          .sla-answer-related nav {
+            grid-template-columns: 1fr;
+          }
+
+          .sla-answer-content {
             display: block;
             margin-top: 28px;
           }
 
-          .sla-content-heading {
+          .sla-answer-content-heading {
             margin-bottom: 8px;
           }
 
-          .sla-editorial-content article {
+          .sla-answer-content article {
             padding: 20px 2px;
             border: 0;
-            border-top: 1px solid rgba(17, 47, 83, 0.1);
+            border-top: 1px solid rgba(23, 52, 83, 0.1);
             border-radius: 0;
             background: transparent;
           }
 
-          .sla-editorial-content article h2 {
-            font-size: 1.08rem;
-            line-height: 1.3;
-          }
-
-          .sla-editorial-content article p {
+          .sla-answer-content p {
             font-size: 0.94rem;
             line-height: 1.52;
-          }
-
-          /* Mobile compactness pass: keep tap targets comfortable without stretched cards. */
-          .sla-editorial-workspace {
-            padding: 20px 16px;
-          }
-
-          .sla-editorial-form {
-            gap: 12px;
-            padding: 16px;
-          }
-
-          .sla-editorial-form input {
-            min-height: 46px;
-            padding: 8px 11px;
-          }
-
-          .sla-editorial-quick-picks {
-            gap: 6px;
-          }
-
-          .sla-editorial-quick-picks button,
-          .sla-editorial-workday-presets button {
-            min-height: 38px;
-            padding: 6px 8px;
-          }
-
-          .sla-editorial-default-note {
-            margin-top: -3px;
-            font-size: 0.8rem;
-            line-height: 1.35;
-          }
-
-          .sla-editorial-advanced summary {
-            min-height: 40px;
-          }
-
-          .sla-editorial-preference-actions button {
-            min-height: 38px;
-            padding: 6px 9px;
-          }
-
-          .sla-editorial-result {
-            padding: 20px 16px 16px;
-          }
-
-          .sla-result-time-card {
-            margin-top: 15px;
-            padding: 12px 14px;
-          }
-
-          .sla-result-summary {
-            margin-top: 15px;
-          }
-
-          .sla-result-note {
-            margin-top: 15px;
-          }
-
-          .sla-editorial-result .result-actions {
-            gap: 7px;
-          }
-
-          .sla-editorial-result .result-actions button,
-          .sla-editorial-result .result-actions a {
-            min-height: 42px;
-            padding: 7px 9px;
-          }
-
-          .sla-editorial-related {
-            padding: 18px 16px;
-          }
-
-          .sla-editorial-related nav {
-            gap: 6px;
-          }
-
-          .sla-editorial-related a {
-            min-height: 50px;
-            padding: 10px 12px;
-          }
-        }
-
-        @media (max-width: 430px) {
-          .sla-editorial-brand img {
-            width: 142px;
-          }
-
-          .sla-editorial-nav {
-            gap: 10px;
-          }
-
-          .sla-editorial-nav a {
-            font-size: 0.76rem;
-          }
-
-          .sla-editorial-image-wrap {
-            min-height: 470px;
-          }
-
-          .sla-editorial-answer {
-            left: 14px;
-            right: 14px;
-            top: 14px;
-            padding: 16px;
-          }
-
-          .sla-editorial-eyebrow {
-            font-size: 0.7rem;
-          }
-
-          .sla-editorial-time-row span {
-            font-size: 0.68rem;
-          }
-
-          .sla-editorial-time-row b {
-            font-size: 0.92rem;
-          }
-
-          .sla-editorial-start-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .sla-editorial-workday-presets {
-            grid-template-columns: 1fr;
           }
         }
       `}</style>
     </main>
   )
 }
-
 type StaticPageRoute = Extract<RouteName, 'about' | 'privacy' | 'terms' | 'contact'>
 
 type StaticPageProps = NavigationProps & {
