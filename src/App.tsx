@@ -3136,13 +3136,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
           ? holidayCalendarQueryValue(holidayCalendar)
           : null,
     })
-  }, [
-    startDate,
-    minimumDays,
-    maximumDays,
-    countMode,
-    holidayCalendar,
-  ])
+  }, [startDate, minimumDays, maximumDays, countMode, holidayCalendar])
 
   const rangeSummary =
     earliest && latest && parsedMin !== null && parsedMax !== null
@@ -3155,11 +3149,27 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
           } days`
       : ''
 
+  const formatShippingDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
+
   return (
-    <main className="page-shell shipping-range-page shipping-editorial-page">
-      <header className="shipping-editorial-header" aria-label="WhenIsDue navigation">
+    <main className="page-shell shipping-answer-page">
+      <header className="shipping-answer-header" aria-label="WhenIsDue navigation">
         <a
-          className="shipping-editorial-brand"
+          className="shipping-answer-brand"
           href="/"
           onClick={(event) => {
             event.preventDefault()
@@ -3169,145 +3179,213 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         >
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
-
-        <nav className="shipping-editorial-nav" aria-label="Main navigation">
-          <a
-            className="shipping-editorial-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
-      <section className="shipping-editorial-hero" aria-labelledby="shipping-title">
-        <div className="shipping-editorial-image-wrap">
-          <img
-            className="shipping-editorial-image"
-            src="/business-days-light-gap.webp"
-            alt="Warm architectural interior with a sequence of daylight bands interrupted by a wider shadow interval"
-          />
+      <section className="shipping-answer-shell" aria-labelledby="shipping-answer-title">
+        <div className="shipping-answer-hero">
+          <p className="shipping-answer-eyebrow">Delivery range calculator</p>
 
-          <div className="shipping-editorial-answer">
-            <p className="shipping-editorial-eyebrow">Delivery range calculator</p>
-            <h1 id="shipping-title">
-              When will {minimumDays || '3'}–{maximumDays || '5'}{' '}
-              {countMode === 'business' ? 'business' : 'calendar'} days arrive?
-            </h1>
+          {earliest && latest && parsedStart && parsedMin !== null && parsedMax !== null ? (
+            <>
+              <h1 id="shipping-answer-title">Estimated delivery</h1>
 
-            {earliest && latest ? (
-              <div className="shipping-editorial-range">
+              <div className="shipping-answer-range" aria-live="polite">
                 <div>
                   <span>Earliest</span>
-                  <strong>{formatPlainDate(earliest)}</strong>
-                  <small>{formatWeekday(earliest)}</small>
+                  <strong>{formatWeekday(earliest)},</strong>
+                  <b>{formatShippingDate(earliest)}</b>
                 </div>
-                <i aria-hidden="true">→</i>
-                <div>
-                  <span>Latest</span>
-                  <strong>{formatPlainDate(latest)}</strong>
-                  <small>{formatWeekday(latest)}</small>
-                </div>
+
+                {toDateKey(earliest) !== toDateKey(latest) ? (
+                  <>
+                    <i aria-hidden="true">to</i>
+                    <div>
+                      <span>Latest</span>
+                      <strong>{formatWeekday(latest)},</strong>
+                      <b>{formatShippingDate(latest)}</b>
+                    </div>
+                  </>
+                ) : null}
               </div>
-            ) : (
-              <p className="shipping-editorial-error">{validationMessage}</p>
-            )}
-          </div>
+
+              <p className="shipping-answer-context">
+                {rangeSummary} after {formatShippingDate(parsedStart)}
+              </p>
+
+              <p className="shipping-answer-rule">
+                {countMode === 'business'
+                  ? holidayCalendar === 'none'
+                    ? 'Weekends skipped · Public holidays still count'
+                    : `Weekends + ${
+                        getHolidayCalendarOption(holidayCalendar).shortLabel
+                      } holidays skipped`
+                  : 'Calendar days counted · Weekends included'}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 id="shipping-answer-title">When should it arrive?</h1>
+              <p className="shipping-answer-context">
+                Enter a valid ship date and delivery window below.
+              </p>
+            </>
+          )}
         </div>
+
+        <form
+          className="shipping-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            <span>Order or ship date</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Earliest</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              step="1"
+              value={minimumDays}
+              onChange={(event) => setMinimumDays(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Latest</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              step="1"
+              value={maximumDays}
+              onChange={(event) => setMaximumDays(event.target.value)}
+            />
+          </label>
+
+          <label>
+            <span>Count as</span>
+            <select
+              value={countMode}
+              onChange={(event) =>
+                setCountMode(event.target.value as 'business' | 'calendar')
+              }
+            >
+              <option value="business">Business days</option>
+              <option value="calendar">Calendar days</option>
+            </select>
+          </label>
+
+          <div
+            className="shipping-answer-quick-picks"
+            aria-label="Common delivery windows"
+          >
+            {[
+              ['3–5 days', '3', '5'],
+              ['5–7 days', '5', '7'],
+              ['7–10 days', '7', '10'],
+            ].map(([label, min, max]) => {
+              const active = minimumDays === min && maximumDays === max
+              return (
+                <button
+                  className={active ? 'is-active' : ''}
+                  type="button"
+                  key={label}
+                  aria-pressed={active}
+                  onClick={() => {
+                    setMinimumDays(min)
+                    setMaximumDays(max)
+                    trackWhenIsDueEvent('quick_pick', {
+                      context: 'shipping_delivery_range',
+                      value: label,
+                    })
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+
+          {validationMessage ? (
+            <p className="shipping-answer-error" role="status">
+              {validationMessage}
+            </p>
+          ) : null}
+        </form>
       </section>
 
-      <section className="shipping-editorial-workspace" aria-label="Shipping and delivery range calculator">
-        <div className="shipping-editorial-heading">
-          <p className="shipping-section-eyebrow">Your calculation</p>
-          <h2>Set the ship date and delivery window</h2>
-          <p>The range updates immediately.</p>
-        </div>
+      {earliest && latest && parsedStart && parsedMin !== null && parsedMax !== null ? (
+        <section className="shipping-answer-actions">
+          <ResultActions
+            title="Estimated delivery window"
+            date={latest}
+            details={`${formatShippingDate(earliest)} to ${formatShippingDate(latest)}`}
+            variant="return-window"
+          />
 
-        <div className="shipping-editorial-calculation-grid">
-          <form className="shipping-editorial-form" onSubmit={(event) => event.preventDefault()}>
-            <label className="field">
-              <span>Order or ship date</span>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
+          <details className="shipping-answer-details">
+            <summary>Why these dates?</summary>
+            <div className="shipping-answer-detail-body">
+              <p>
+                WhenIsDue counted {rangeSummary} forward from{' '}
+                {formatShippingDate(parsedStart)}.
+                {' '}
+                {countMode === 'business'
+                  ? holidayCalendar === 'none'
+                    ? 'Weekends were skipped and public holidays were treated like ordinary weekdays.'
+                    : `Weekends and ${
+                        getHolidayCalendarOption(holidayCalendar).shortLabel
+                      } holidays were skipped.`
+                  : 'Calendar days were counted, including weekends.'}
+              </p>
+
+              <CalculationReceipt
+                analyticsContext="shipping_delivery_range"
+                rows={[
+                  {
+                    label: 'Order / ship date',
+                    value: `${formatWeekday(parsedStart)}, ${formatPlainDate(parsedStart)}`,
+                  },
+                  {
+                    label: 'Delivery estimate',
+                    value: rangeSummary,
+                  },
+                  {
+                    label: 'Counting method',
+                    value: countMode === 'business' ? 'Business days' : 'Calendar days',
+                  },
+                  ...(countMode === 'business'
+                    ? [
+                        {
+                          label: 'Holiday calendar',
+                          value: getHolidayCalendarOption(holidayCalendar).label,
+                        },
+                      ]
+                    : []),
+                  {
+                    label: 'Earliest date',
+                    value: `${formatWeekday(earliest)}, ${formatPlainDate(earliest)}`,
+                  },
+                  {
+                    label: 'Latest date',
+                    value: `${formatWeekday(latest)}, ${formatPlainDate(latest)}`,
+                  },
+                ]}
               />
-            </label>
-
-            <div className="shipping-editorial-days-grid">
-              <label className="field">
-                <span>Earliest</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  step="1"
-                  value={minimumDays}
-                  onChange={(event) => setMinimumDays(event.target.value)}
-                />
-              </label>
-
-              <label className="field">
-                <span>Latest</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  step="1"
-                  value={maximumDays}
-                  onChange={(event) => setMaximumDays(event.target.value)}
-                />
-              </label>
             </div>
+          </details>
 
-            <fieldset className="shipping-editorial-mode">
-              <legend>Count as</legend>
-              <label>
-                <input
-                  type="radio"
-                  name="shipping-range-mode"
-                  value="business"
-                  checked={countMode === 'business'}
-                  onChange={() => setCountMode('business')}
-                />
-                <span>Business days</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="shipping-range-mode"
-                  value="calendar"
-                  checked={countMode === 'calendar'}
-                  onChange={() => setCountMode('calendar')}
-                />
-                <span>Calendar days</span>
-              </label>
-            </fieldset>
-
-            {countMode === 'business' ? (
-              <div className="shipping-editorial-calendar">
+          {countMode === 'business' ? (
+            <details className="shipping-answer-details">
+              <summary>Holiday settings</summary>
+              <div className="shipping-answer-detail-body">
                 <HolidayCalendarSelect
                   value={holidayCalendar}
                   onChange={(nextCalendar) => {
@@ -3320,149 +3398,61 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
                   compact
                 />
               </div>
-            ) : null}
+            </details>
+          ) : null}
+        </section>
+      ) : null}
 
-            <div className="shipping-editorial-quick-picks" aria-label="Common shipping windows">
-              {[
-                ['3–5', '3', '5'],
-                ['5–7', '5', '7'],
-                ['7–10', '7', '10'],
-              ].map(([label, min, max]) => {
-                const active = minimumDays === min && maximumDays === max
-                return (
-                  <button
-                    className={active ? 'is-active' : ''}
-                    type="button"
-                    key={label}
-                    aria-pressed={active}
-                    onClick={() => {
-                      setMinimumDays(min)
-                      setMaximumDays(max)
-                      trackWhenIsDueEvent('quick_pick', {
-                        context: 'shipping_delivery_range',
-                        value: label,
-                      })
-                    }}
-                  >
-                    {label} days
-                  </button>
-                )
-              })}
-            </div>
-          </form>
-
-          <section className="shipping-editorial-result" aria-live="polite">
-            <p className="shipping-result-kicker">Estimated delivery</p>
-
-            {earliest && latest ? (
-              <>
-                <div className="shipping-result-window">
-                  <div>
-                    <span>Earliest</span>
-                    <strong>{formatPlainDate(earliest)}</strong>
-                    <small>{formatWeekday(earliest)}</small>
-                  </div>
-                  <i aria-hidden="true">→</i>
-                  <div>
-                    <span>Latest</span>
-                    <strong>{formatPlainDate(latest)}</strong>
-                    <small>{formatWeekday(latest)}</small>
-                  </div>
-                </div>
-
-                <div className="shipping-result-summary">
-                  <span>{rangeSummary}</span>
-                  <small>
-                    after {formatPlainDate(parsedStart!)}
-                  </small>
-                </div>
-
-                <p className="shipping-result-note">
-                  {countMode === 'business'
-                    ? holidayCalendar === 'none'
-                      ? 'Weekends skipped. Public holidays still count as weekdays.'
-                      : `Weekends and ${
-                          getHolidayCalendarOption(holidayCalendar).shortLabel
-                        } holidays skipped.`
-                    : 'Calendar days counted, including weekends.'}
-                </p>
-
-                <CalculationReceipt
-                  analyticsContext="shipping_delivery_range"
-                  rows={[
-                    {
-                      label: 'Order / ship date',
-                      value: `${formatWeekday(parsedStart!)}, ${formatPlainDate(
-                        parsedStart!,
-                      )}`,
-                    },
-                    {
-                      label: 'Delivery estimate',
-                      value: rangeSummary,
-                    },
-                    {
-                      label: 'Counting method',
-                      value:
-                        countMode === 'business'
-                          ? 'Business days'
-                          : 'Calendar days',
-                    },
-                    ...(countMode === 'business'
-                      ? [
-                          {
-                            label: 'Holiday calendar',
-                            value:
-                              getHolidayCalendarOption(holidayCalendar).label,
-                          },
-                        ]
-                      : []),
-                    {
-                      label: 'Earliest date',
-                      value: `${formatWeekday(earliest)}, ${formatPlainDate(
-                        earliest,
-                      )}`,
-                    },
-                    {
-                      label: 'Latest date',
-                      value: `${formatWeekday(latest)}, ${formatPlainDate(
-                        latest,
-                      )}`,
-                    },
-                  ]}
-                />
-
-                <div className="shipping-range-actions shipping-editorial-actions">
-                  <ResultActions
-                    title="Estimated delivery window"
-                    date={latest}
-                    details={`${formatPlainDate(earliest)} to ${formatPlainDate(
-                      latest,
-                    )}`}
-                  />
-                </div>
-              </>
-            ) : (
-              <p className="shipping-range-error" role="status">
-                {validationMessage}
-              </p>
-            )}
-          </section>
+      <section className="shipping-answer-related" aria-label="Related date tools">
+        <div>
+          <p className="shipping-answer-section-eyebrow">Related answers</p>
+          <h2>Need another delivery or business-day date?</h2>
         </div>
+
+        <nav>
+          <a
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            Business days calculator
+          </a>
+          <a
+            href="/do-weekends-count-as-business-days"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/do-weekends-count-as-business-days')
+            }}
+          >
+            Do weekends count?
+          </a>
+          <a
+            href="/do-public-holidays-count-as-business-days"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/do-public-holidays-count-as-business-days')
+            }}
+          >
+            Do public holidays count?
+          </a>
+        </nav>
       </section>
 
-      <section className="shipping-editorial-content" aria-label="Shipping delivery range help">
-        <div className="shipping-content-heading">
-          <p className="shipping-section-eyebrow">Delivery-window rules</p>
-          <h2>What 3–5 business days actually means</h2>
+      <section className="shipping-answer-content" aria-label="Shipping delivery range help">
+        <div className="shipping-answer-content-heading">
+          <p className="shipping-answer-section-eyebrow">Delivery-window rules</p>
+          <h2>Ship date, delivery window, arrival range</h2>
         </div>
 
         <article>
           <h2>What does 3–5 business days mean?</h2>
           <p>
             It means the delivery estimate is a range, not one exact date.
-            The earliest date is three qualifying business days after the
-            order or ship date, and the latest date is five qualifying
-            business days after it.
+            The earliest date is three qualifying business days after the order
+            or ship date, and the latest date is five qualifying business days
+            after it.
           </p>
         </article>
 
@@ -3487,49 +3477,12 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         <article>
           <h2>Is this a carrier tracking estimate?</h2>
           <p>
-            No. This calculator only translates a stated delivery window
-            such as “3–5 business days” into actual dates. Carrier delays,
-            cut-off times, weather, handling time, and local delivery rules
-            can change the real arrival date.
+            No. This calculator only translates a stated delivery window such as
+            “3–5 business days” into dates. Carrier delays, cut-off times,
+            handling time, weather, and local delivery rules can change the real
+            arrival date.
           </p>
         </article>
-      </section>
-
-      <section className="shipping-editorial-related" aria-label="Related date tools">
-        <div>
-          <p className="shipping-section-eyebrow">Related answers</p>
-          <h2>Need a different kind of date?</h2>
-        </div>
-
-        <nav>
-          <a
-            href="/business-days-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/business-days-calculator')
-            }}
-          >
-            Business days calculator <span aria-hidden="true">→</span>
-          </a>
-          <a
-            href="/do-weekends-count-as-business-days"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/do-weekends-count-as-business-days')
-            }}
-          >
-            Do weekends count? <span aria-hidden="true">→</span>
-          </a>
-          <a
-            href="/do-public-holidays-count-as-business-days"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/do-public-holidays-count-as-business-days')
-            }}
-          >
-            Do public holidays count? <span aria-hidden="true">→</span>
-          </a>
-        </nav>
       </section>
 
       <SiteFooter
@@ -3538,214 +3491,171 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .shipping-editorial-page {
-          --shipping-navy: #17385f;
-          --shipping-deep: #112f53;
-          --shipping-green: #2d7c67;
-          --shipping-blue: #eef5f8;
+        .shipping-answer-page {
+          --shipping-ink: #153654;
+          --shipping-muted: #667b8e;
+          --shipping-accent: #2d7b64;
+          --shipping-field: #dfecef;
+          --shipping-field-soft: #edf4f5;
+          min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .shipping-editorial-header {
-          width: min(100% - 32px, 1130px);
-          min-height: 70px;
-          margin: 0 auto 14px;
+        .shipping-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
         }
 
-        .shipping-editorial-brand {
+        .shipping-answer-brand {
           display: inline-flex;
           align-items: center;
           text-decoration: none;
         }
 
-        .shipping-editorial-brand img {
+        .shipping-answer-brand img {
           display: block;
           width: 176px;
           height: auto;
         }
 
-        .shipping-editorial-nav {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-        }
-
-        .shipping-editorial-nav a {
-          color: #5a728d;
-          font-size: 0.9rem;
-          font-weight: 850;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .shipping-editorial-hero,
-        .shipping-editorial-workspace,
-        .shipping-editorial-content,
-        .shipping-editorial-related {
-          width: min(100% - 32px, 1130px);
+        .shipping-answer-shell,
+        .shipping-answer-actions,
+        .shipping-answer-related,
+        .shipping-answer-content {
+          width: min(100% - 32px, 1100px);
           margin-left: auto;
           margin-right: auto;
         }
 
-        .shipping-editorial-image-wrap {
-          position: relative;
-          min-height: 470px;
-          overflow: hidden;
-          border: 1px solid rgba(17, 47, 83, 0.12);
-          border-radius: 28px;
-          background: #d2c3aa;
+        .shipping-answer-shell {
+          margin-top: 22px;
         }
 
-        .shipping-editorial-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
+        .shipping-answer-hero {
+          padding: clamp(42px, 6vw, 66px) clamp(24px, 5vw, 58px) 34px;
+          border: 1px solid rgba(46, 88, 102, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--shipping-field);
+          text-align: center;
         }
 
-        .shipping-editorial-answer {
-          position: relative;
-          z-index: 1;
-          width: min(510px, calc(100% - 64px));
-          margin: 32px;
-          padding: 30px 32px 28px;
-          border-radius: 24px;
-          background: rgba(250, 247, 239, 0.94);
-          box-shadow: 0 18px 54px rgba(10, 26, 44, 0.15);
-          backdrop-filter: blur(10px);
-        }
-
-        .shipping-editorial-eyebrow,
-        .shipping-section-eyebrow {
+        .shipping-answer-eyebrow,
+        .shipping-answer-section-eyebrow {
           margin: 0;
-          color: var(--shipping-green);
-          font-size: 0.78rem;
+          color: var(--shipping-accent);
+          font-size: 0.8rem;
           font-weight: 950;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .shipping-editorial-answer h1 {
+        .shipping-answer-hero h1 {
           margin: 10px 0 0;
-          color: var(--shipping-deep);
-          font-size: clamp(2.45rem, 4.6vw, 4.2rem);
+          color: var(--shipping-ink);
+          font-size: clamp(2.8rem, 5.8vw, 5rem);
           line-height: 0.98;
-          letter-spacing: -0.045em;
-          text-wrap: balance;
+          letter-spacing: -0.05em;
         }
 
-        .shipping-editorial-range {
+        .shipping-answer-range {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+          gap: 18px;
           align-items: center;
-          gap: 14px;
-          margin-top: 24px;
-          padding-top: 20px;
-          border-top: 1px solid rgba(17, 47, 83, 0.12);
+          max-width: 880px;
+          margin: 28px auto 0;
         }
 
-        .shipping-editorial-range > div,
-        .shipping-result-window > div {
+        .shipping-answer-range > div {
           min-width: 0;
-          display: grid;
-          gap: 3px;
+          padding: 18px 20px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.58);
         }
 
-        .shipping-editorial-range span,
-        .shipping-result-window span {
-          color: #688095;
-          font-size: 0.76rem;
+        .shipping-answer-range span,
+        .shipping-answer-range strong,
+        .shipping-answer-range b {
+          display: block;
+        }
+
+        .shipping-answer-range span {
+          color: #607789;
+          font-size: 0.82rem;
           font-weight: 900;
+          text-transform: uppercase;
           letter-spacing: 0.08em;
+        }
+
+        .shipping-answer-range strong {
+          margin-top: 8px;
+          color: #3e687c;
+          font-size: clamp(1.6rem, 3vw, 2.5rem);
+          line-height: 1;
+        }
+
+        .shipping-answer-range b {
+          margin-top: 4px;
+          color: var(--shipping-ink);
+          font-size: clamp(2.1rem, 4.6vw, 4rem);
+          line-height: 0.95;
+          letter-spacing: -0.045em;
+        }
+
+        .shipping-answer-range i {
+          color: #758b99;
+          font-size: 0.88rem;
+          font-style: normal;
+          font-weight: 850;
           text-transform: uppercase;
         }
 
-        .shipping-editorial-range strong {
-          color: var(--shipping-deep);
-          font-size: clamp(1.65rem, 3vw, 2.5rem);
-          line-height: 1;
-          letter-spacing: -0.035em;
+        .shipping-answer-context,
+        .shipping-answer-rule {
+          margin: 18px 0 0;
+          color: var(--shipping-muted);
+          font-size: 0.96rem;
+          line-height: 1.5;
         }
 
-        .shipping-editorial-range small,
-        .shipping-result-window small {
-          color: #62768b;
-          font-size: 0.9rem;
-          font-weight: 750;
+        .shipping-answer-rule {
+          margin-top: 7px;
+          font-size: 0.86rem;
         }
 
-        .shipping-editorial-range i,
-        .shipping-result-window i {
-          color: #7890a4;
-          font-style: normal;
-          font-size: 1.2rem;
-        }
-
-        .shipping-editorial-workspace {
-          margin-top: 22px;
-          padding: 30px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 26px;
-          background: #fffdf9;
-        }
-
-        .shipping-editorial-heading h2,
-        .shipping-content-heading h2,
-        .shipping-editorial-related h2 {
-          margin: 6px 0 0;
-          color: var(--shipping-deep);
-          font-size: clamp(2rem, 3.7vw, 3.15rem);
-          line-height: 1;
-          letter-spacing: -0.04em;
-          text-wrap: balance;
-        }
-
-        .shipping-editorial-heading > p:last-child {
-          margin: 8px 0 0;
-          color: #6b7f92;
-        }
-
-        .shipping-editorial-calculation-grid {
+        .shipping-answer-controls {
           display: grid;
-          grid-template-columns: minmax(290px, 0.78fr) minmax(0, 1.22fr);
-          gap: 16px;
-          margin-top: 22px;
+          grid-template-columns: minmax(0, 1.2fr) minmax(100px, 0.45fr) minmax(100px, 0.45fr) minmax(170px, 0.72fr);
+          gap: 12px;
+          align-items: end;
+          padding: 18px;
+          border: 1px solid rgba(46, 88, 102, 0.12);
+          border-top: 1px solid rgba(46, 88, 102, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--shipping-field-soft);
         }
 
-        .shipping-editorial-form {
-          display: grid;
-          gap: 15px;
-          align-content: start;
-          padding: 22px;
-          border: 1px solid rgba(17, 47, 83, 0.1);
-          border-radius: 18px;
-          background: #f2efe8;
-        }
-
-        .shipping-editorial-form .field {
+        .shipping-answer-controls label {
           display: grid;
           gap: 7px;
         }
 
-        .shipping-editorial-form .field > span,
-        .shipping-editorial-mode legend {
-          color: #566f87;
+        .shipping-answer-controls label > span {
+          color: #526a82;
           font-size: 0.88rem;
-          font-weight: 900;
+          font-weight: 850;
         }
 
-        .shipping-editorial-form input[type='date'],
-        .shipping-editorial-form input[type='number'] {
+        .shipping-answer-controls input,
+        .shipping-answer-controls select {
           width: 100%;
           min-height: 50px;
           padding: 10px 12px;
-          border: 1px solid rgba(17, 47, 83, 0.16);
+          border: 1px solid rgba(21, 54, 84, 0.14);
           border-radius: 11px;
           background: #fff;
           color: #17304d;
@@ -3753,443 +3663,267 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
           font-size: 1rem;
         }
 
-        .shipping-editorial-days-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-        }
-
-        .shipping-editorial-mode {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
-          margin: 0;
-          padding: 0;
-          border: 0;
-        }
-
-        .shipping-editorial-mode legend {
+        .shipping-answer-quick-picks {
           grid-column: 1 / -1;
-          margin-bottom: 0;
-        }
-
-        .shipping-editorial-mode label {
-          position: relative;
-        }
-
-        .shipping-editorial-mode input {
-          position: absolute;
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        .shipping-editorial-mode span {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 42px;
-          padding: 8px;
-          border: 1px solid rgba(17, 47, 83, 0.13);
-          border-radius: 10px;
-          background: rgba(255,255,255,0.78);
-          color: #4e6680;
-          font-size: 0.82rem;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .shipping-editorial-mode input:checked + span {
-          border-color: rgba(45,124,103,0.6);
-          background: #e8f4ef;
-          color: #1f6656;
-          box-shadow: inset 0 0 0 1px rgba(45,124,103,0.2);
-        }
-
-        .shipping-editorial-quick-picks {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 7px;
         }
 
-        .shipping-editorial-quick-picks button {
-          min-height: 42px;
-          border: 1px solid rgba(17,47,83,0.13);
+        .shipping-answer-quick-picks button {
+          min-height: 46px;
+          padding: 8px 10px;
+          border: 1px solid rgba(21, 54, 84, 0.13);
           border-radius: 10px;
-          background: rgba(255,255,255,0.78);
-          color: #4e6680;
+          background: rgba(255, 255, 255, 0.82);
+          color: #4f6780;
           font: inherit;
-          font-size: 0.8rem;
+          font-size: 0.82rem;
           font-weight: 850;
           cursor: pointer;
         }
 
-        .shipping-editorial-quick-picks button.is-active {
-          border-color: rgba(45,124,103,0.6);
-          background: #e8f4ef;
-          color: #1f6656;
+        .shipping-answer-quick-picks button.is-active {
+          border-color: rgba(45, 123, 100, 0.58);
+          background: #e7f3ee;
+          color: #1f6655;
         }
 
-        .shipping-editorial-result {
-          min-width: 0;
-          padding: 30px 34px;
-          border-radius: 20px;
-          background: var(--shipping-deep);
-          color: #f8f1e6;
-        }
-
-        .shipping-result-kicker {
+        .shipping-answer-error {
+          grid-column: 1 / -1;
           margin: 0;
-          color: #9fc6b4;
-          font-size: 0.76rem;
-          font-weight: 950;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
+          color: #934a42;
+          font-size: 0.84rem;
+          font-weight: 750;
         }
 
-        .shipping-result-window {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-          align-items: center;
-          gap: 14px;
-          margin-top: 18px;
+        .shipping-answer-actions {
+          margin-top: 16px;
         }
 
-        .shipping-result-window strong {
-          color: #fff8ec;
-          font-size: clamp(2.4rem, 5.2vw, 4.7rem);
-          line-height: 0.94;
-          letter-spacing: -0.05em;
+        .shipping-answer-actions > .result-actions {
+          justify-content: center;
         }
 
-        .shipping-result-window span,
-        .shipping-result-window small,
-        .shipping-result-window i {
-          color: #c8d7e3;
+        .shipping-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
         }
 
-        .shipping-result-summary {
+        .shipping-answer-details summary {
+          min-height: 50px;
           display: flex;
-          flex-wrap: wrap;
           align-items: center;
-          gap: 8px 12px;
-          margin-top: 20px;
-        }
-
-        .shipping-result-summary span {
-          display: inline-flex;
-          align-items: center;
-          min-height: 30px;
-          padding: 5px 10px;
-          border: 1px solid rgba(223,189,122,0.55);
-          border-radius: 999px;
-          background: #fff7e8;
-          color: #7b4f26;
-          font-size: 0.82rem;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
           font-weight: 900;
+          cursor: pointer;
         }
 
-        .shipping-result-summary small {
-          color: #c8d4df;
-          font-size: 0.88rem;
+        .shipping-answer-detail-body {
+          padding: 0 14px 16px;
         }
 
-        .shipping-result-note {
-          margin: 18px 0 0;
-          color: #ced8e2;
+        .shipping-answer-detail-body > p {
+          max-width: 760px;
+          margin: 0;
+          color: #61768a;
           font-size: 0.95rem;
-          line-height: 1.5;
+          line-height: 1.58;
         }
 
-        .shipping-editorial-result .calculation-receipt {
-          margin-top: 18px;
+        .shipping-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
         }
 
-        .shipping-editorial-actions {
+        .shipping-answer-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 22px;
+          background: #edf4f5;
+        }
+
+        .shipping-answer-related h2,
+        .shipping-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--shipping-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+        }
+
+        .shipping-answer-related nav {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
           margin-top: 14px;
         }
 
-        .shipping-editorial-content {
-          margin-top: 38px;
+        .shipping-answer-related a {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 13px;
+          border: 1px solid rgba(21, 54, 84, 0.11);
+          border-radius: 12px;
+          background: #fff;
+          color: #35536e;
+          font-size: 0.88rem;
+          font-weight: 850;
+          text-decoration: none;
         }
 
-        .shipping-content-heading {
-          margin-bottom: 16px;
-        }
-
-        .shipping-editorial-content {
+        .shipping-answer-content {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 12px;
+          margin-top: 34px;
         }
 
-        .shipping-content-heading {
+        .shipping-answer-content-heading {
           grid-column: 1 / -1;
+          margin-bottom: 3px;
         }
 
-        .shipping-editorial-content article {
-          padding: 22px;
-          border: 1px solid rgba(17,47,83,0.09);
-          border-radius: 18px;
-          background: rgba(255,255,255,0.72);
+        .shipping-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(21, 54, 84, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
         }
 
-        .shipping-editorial-content article h2 {
+        .shipping-answer-content h2 {
           margin: 0;
-          color: var(--shipping-deep);
+          color: var(--shipping-ink);
           font-size: 1.08rem;
         }
 
-        .shipping-editorial-content article p {
+        .shipping-answer-content p {
           margin: 8px 0 0;
           color: #65798d;
           line-height: 1.55;
         }
 
-        .shipping-editorial-related {
-          margin-top: 22px;
-          padding: 24px 28px;
-          border: 1px solid rgba(17,47,83,0.1);
-          border-radius: 24px;
-          background: var(--shipping-blue);
-        }
-
-        .shipping-editorial-related nav {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 8px;
-          margin-top: 16px;
-        }
-
-        .shipping-editorial-related a {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          min-height: 58px;
-          padding: 12px 14px;
-          border: 1px solid rgba(17,47,83,0.12);
-          border-radius: 12px;
-          background: rgba(255,255,255,0.82);
-          color: #24425e;
-          font-size: 0.88rem;
-          font-weight: 900;
-          text-decoration: none;
-        }
-
-        .shipping-editorial-related a span {
-          color: var(--shipping-green);
-          font-size: 1.05rem;
-        }
-
         @media (max-width: 760px) {
-          .shipping-editorial-header {
+          .shipping-answer-header {
             width: min(100% - 24px, 680px);
-            min-height: 58px;
-            margin-bottom: 12px;
-            gap: 12px;
+            min-height: 76px;
           }
 
-          .shipping-editorial-brand img {
+          .shipping-answer-brand img {
             width: 154px;
           }
 
-          .shipping-editorial-nav {
-            gap: 12px;
-          }
-
-          .shipping-editorial-nav a {
-            font-size: 0.8rem;
-          }
-
-          .shipping-editorial-home-link {
-            display: none;
-          }
-
-          .shipping-editorial-hero,
-          .shipping-editorial-workspace,
-          .shipping-editorial-content,
-          .shipping-editorial-related {
+          .shipping-answer-shell,
+          .shipping-answer-actions,
+          .shipping-answer-related,
+          .shipping-answer-content {
             width: min(100% - 24px, 680px);
           }
 
-          .shipping-editorial-image-wrap {
-            min-height: 470px;
-            border-radius: 24px;
-          }
-
-          .shipping-editorial-image {
-            object-position: center;
-          }
-
-          .shipping-editorial-answer {
-            position: absolute;
-            left: 16px;
-            right: 16px;
-            bottom: 16px;
-            width: auto;
-            margin: 0;
-            padding: 18px;
-            border-radius: 18px;
-          }
-
-          .shipping-editorial-answer h1 {
-            font-size: clamp(2rem, 9vw, 2.75rem);
-          }
-
-          .shipping-editorial-range {
-            gap: 8px;
-            margin-top: 15px;
-            padding-top: 13px;
-          }
-
-          .shipping-editorial-range strong {
-            font-size: clamp(1.55rem, 7vw, 2.2rem);
-          }
-
-          .shipping-editorial-workspace {
+          .shipping-answer-shell {
             margin-top: 14px;
-            padding: 22px 18px;
-            border-radius: 22px;
           }
 
-          .shipping-editorial-heading h2,
-          .shipping-content-heading h2,
-          .shipping-editorial-related h2 {
-            font-size: clamp(1.9rem, 8.6vw, 2.6rem);
+          .shipping-answer-hero {
+            padding: 26px 20px 24px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .shipping-editorial-calculation-grid {
+          .shipping-answer-hero h1 {
+            font-size: clamp(2.5rem, 11vw, 3.7rem);
+          }
+
+          .shipping-answer-range {
             grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 18px;
+            gap: 10px;
+            margin-top: 20px;
           }
 
-          .shipping-editorial-form {
-            padding: 18px;
+          .shipping-answer-range > div {
+            padding: 15px 16px;
           }
 
-          .shipping-editorial-result {
-            padding: 22px 18px 18px;
+          .shipping-answer-range i {
+            display: none;
           }
 
-          .shipping-result-window {
-            gap: 8px;
-            margin-top: 15px;
+          .shipping-answer-range strong {
+            font-size: clamp(1.8rem, 8.5vw, 2.7rem);
           }
 
-          .shipping-result-window strong {
-            font-size: clamp(2rem, 9.5vw, 3.25rem);
+          .shipping-answer-range b {
+            font-size: clamp(2.25rem, 10.8vw, 3.45rem);
           }
 
-          .shipping-editorial-result .result-actions {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+          .shipping-answer-context {
+            margin-top: 14px;
+            font-size: 0.9rem;
           }
 
-          .shipping-editorial-result .result-actions button,
-          .shipping-editorial-result .result-actions a {
-            width: 100%;
-            min-height: 46px;
-            padding: 9px 10px;
-            font-size: 0.82rem;
+          .shipping-answer-controls {
+            grid-template-columns: minmax(0, 1.15fr) minmax(88px, 0.45fr) minmax(88px, 0.45fr);
+            gap: 9px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
           }
 
-          .shipping-editorial-result .result-actions > :last-child {
+          .shipping-answer-controls > label:first-child,
+          .shipping-answer-controls > label:nth-child(4) {
             grid-column: 1 / -1;
           }
 
-          .shipping-editorial-content {
+          .shipping-answer-quick-picks {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+
+          .shipping-answer-controls input,
+          .shipping-answer-controls select,
+          .shipping-answer-quick-picks button {
+            min-height: 46px;
+          }
+
+          .shipping-answer-related {
+            padding: 20px 18px;
+          }
+
+          .shipping-answer-related nav {
+            grid-template-columns: 1fr;
+          }
+
+          .shipping-answer-content {
             display: block;
             margin-top: 28px;
           }
 
-          .shipping-content-heading {
+          .shipping-answer-content-heading {
             margin-bottom: 8px;
           }
 
-          .shipping-editorial-content article {
+          .shipping-answer-content article {
             padding: 20px 2px;
             border: 0;
-            border-top: 1px solid rgba(17,47,83,0.1);
+            border-top: 1px solid rgba(21, 54, 84, 0.1);
             border-radius: 0;
             background: transparent;
           }
 
-          .shipping-editorial-content article h2 {
-            font-size: 1.08rem;
-            line-height: 1.3;
-          }
-
-          .shipping-editorial-content article p {
+          .shipping-answer-content p {
             font-size: 0.94rem;
             line-height: 1.52;
-          }
-
-          .shipping-editorial-related {
-            margin-top: 14px;
-            padding: 20px 18px;
-            border-radius: 22px;
-          }
-
-          .shipping-editorial-related nav {
-            grid-template-columns: 1fr;
-            gap: 7px;
-          }
-        }
-
-        @media (max-width: 430px) {
-          .shipping-editorial-brand img {
-            width: 142px;
-          }
-
-          .shipping-editorial-nav {
-            gap: 10px;
-          }
-
-          .shipping-editorial-nav a {
-            font-size: 0.76rem;
-          }
-
-          .shipping-editorial-image-wrap {
-            min-height: 440px;
-          }
-
-          .shipping-editorial-answer {
-            left: 14px;
-            right: 14px;
-            bottom: 14px;
-            padding: 16px;
-          }
-
-          .shipping-editorial-eyebrow {
-            font-size: 0.7rem;
-          }
-
-          .shipping-editorial-range small {
-            font-size: 0.76rem;
-          }
-
-          .shipping-editorial-days-grid {
-            gap: 8px;
-          }
-
-          .shipping-editorial-mode span,
-          .shipping-editorial-quick-picks button {
-            font-size: 0.76rem;
           }
         }
       `}</style>
     </main>
   )
 }
-
-
-type NoticePeriodUnit =
-  | 'calendar-days'
-  | 'business-days'
-  | 'weeks'
-  | 'months'
+type NoticePeriodUnit = 'calendar-days' | 'business-days' | 'weeks' | 'months'
 
 function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
   const [eventDate, setEventDate] = useState(() =>
@@ -7203,13 +6937,10 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
         }
 
         .payday-answer-caveat {
-          width: fit-content;
-          margin: 14px auto 0;
-          padding: 8px 12px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.58);
-          color: #667883;
-          font-size: 0.84rem;
+          margin: 10px 0 0;
+          color: #73848f;
+          font-size: 0.82rem;
+          line-height: 1.45;
         }
 
         .payday-answer-controls {
@@ -7467,10 +7198,6 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           .payday-answer-caveat {
             margin-left: 0;
             margin-right: 0;
-          }
-
-          .payday-answer-caveat {
-            border-radius: 12px;
           }
 
           .payday-answer-controls {
