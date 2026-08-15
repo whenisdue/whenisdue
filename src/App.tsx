@@ -2123,6 +2123,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
 
 function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
   const friday = parsePlainDate('2026-08-14')!
+
   const oneBusinessDay = calculateDeadlineByRule({
     triggerDate: friday,
     duration: 1,
@@ -2132,9 +2133,10 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
     holidayCalendar: 'none',
     endDayAdjustment: 'none',
   })
-  const threeCalendarDays = calculateDeadlineByRule({
+
+  const oneCalendarDay = calculateDeadlineByRule({
     triggerDate: friday,
-    duration: 3,
+    duration: 1,
     direction: 'after',
     unit: 'calendar-days',
     startDayConvention: 'exclude-trigger',
@@ -2146,81 +2148,79 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
     '/deadline-calculator?date=2026-08-14&days=1&unit=business-days&direction=after&startday=exclude-trigger'
 
   return (
-    <main className="page-shell weekends-business-guide-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+    <main className="page-shell weekends-zero-page">
+      <header className="weekends-zero-header" aria-label="WhenIsDue navigation">
+        <a
+          className="weekends-zero-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
 
-      <article className="weekends-business-guide-shell">
-        <header className="weekends-business-guide-hero">
-          <p className="friendly-eyebrow">Business-day guide</p>
+      <article className="weekends-zero-shell">
+        <header className="weekends-zero-hero">
+          <p className="weekends-zero-eyebrow">Business-day guide</p>
+
           <h1>Do weekends count as business days?</h1>
 
-          <div className="weekends-business-guide-answer">
-            <strong>No — not in the standard Monday–Friday business-day rule.</strong>
-            <p>
-              Saturdays and Sundays are skipped when a deadline is measured in
-              business days using a Monday–Friday workweek. Calendar days are
-              different: they count weekends unless the governing rule says
-              otherwise.
-            </p>
-          </div>
+          <strong className="weekends-zero-answer">Usually no.</strong>
 
-          <p className="weekends-business-guide-scope">
-            “Business day” can be defined differently by a contract, employer,
-            jurisdiction, market, or industry. Use the definition that applies
-            to your deadline.
+          <p className="weekends-zero-summary">
+            Saturday and Sunday are normally skipped when a deadline is stated
+            in business days.
+          </p>
+
+          <p className="weekends-zero-caveat">
+            If a contract, policy, law, employer, or other source defines
+            “business day” differently, use that definition.
           </p>
         </header>
 
         <section
-          className="weekends-business-guide-example"
-          aria-labelledby="weekends-business-guide-example-title"
+          className="weekends-zero-example"
+          aria-labelledby="weekends-zero-example-title"
         >
-          <div className="weekends-business-guide-example-heading">
-            <span>Worked example</span>
-            <h2 id="weekends-business-guide-example-title">
+          <div className="weekends-zero-example-heading">
+            <p className="weekends-zero-section-eyebrow">Quick example</p>
+            <h2 id="weekends-zero-example-title">
               Start on Friday, August 14, 2026
             </h2>
           </div>
 
-          <div className="weekends-business-guide-results">
-            <div>
-              <span>Add 1 business day</span>
+          <div className="weekends-zero-example-grid">
+            <article className="is-business">
+              <span>+ 1 business day</span>
               <strong>
                 {oneBusinessDay
-                  ? formatPlainDate(oneBusinessDay.answerDate)
+                  ? `${formatWeekday(oneBusinessDay.answerDate)}, ${formatPlainDate(
+                      oneBusinessDay.answerDate,
+                    )}`
                   : '—'}
               </strong>
-              <small>
-                {oneBusinessDay
-                  ? formatWeekday(oneBusinessDay.answerDate)
-                  : ''}
-              </small>
-              <p>
-                Saturday and Sunday are skipped, so the next standard business
-                day is Monday.
-              </p>
-            </div>
+              <p>Saturday and Sunday are skipped.</p>
+            </article>
 
-            <div>
-              <span>Add 3 calendar days</span>
+            <article>
+              <span>+ 1 calendar day</span>
               <strong>
-                {threeCalendarDays
-                  ? formatPlainDate(threeCalendarDays.answerDate)
+                {oneCalendarDay
+                  ? `${formatWeekday(oneCalendarDay.answerDate)}, ${formatPlainDate(
+                      oneCalendarDay.answerDate,
+                    )}`
                   : '—'}
               </strong>
-              <small>
-                {threeCalendarDays
-                  ? formatWeekday(threeCalendarDays.answerDate)
-                  : ''}
-              </small>
-              <p>
-                Calendar-day counting includes Saturday and Sunday.
-              </p>
-            </div>
+              <p>Calendar-day counting includes Saturday.</p>
+            </article>
           </div>
 
           <a
-            className="weekends-business-guide-cta"
+            className="weekends-zero-cta"
             href={calculatorPath}
             onClick={(event) => {
               event.preventDefault()
@@ -2230,69 +2230,70 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
               onNavigate(calculatorPath)
             }}
           >
-            Calculate your exact deadline →
+            Check your exact deadline
           </a>
         </section>
 
-        <section className="weekends-business-guide-content">
-          <article>
-            <h2>What counts as a business day?</h2>
-            <p>
-              In WhenIsDue’s standard business-day schedule, Monday through
-              Friday are working days and Saturday and Sunday are not. A
-              selected public-holiday calendar can exclude supported holidays
-              as well.
-            </p>
-          </article>
+        <section className="weekends-zero-details">
+          <details>
+            <summary>What counts as a business day?</summary>
+            <div>
+              <p>
+                In WhenIsDue’s standard business-day schedule, Monday through
+                Friday are working days and Saturday and Sunday are not.
+              </p>
+              <p>
+                A selected public-holiday calendar can exclude supported
+                holidays as well.
+              </p>
+            </div>
+          </details>
 
-          <article>
-            <h2>Do public holidays count?</h2>
-            <p>
-              Weekends and public holidays are separate rules. A calculator
-              can skip weekends while still counting a weekday public holiday
-              unless a holiday calendar or governing rule says to exclude it.
-            </p>
-            <p>
-              WhenIsDue therefore shows the holiday calendar used instead of
-              silently assuming that every public holiday should be removed.
-            </p>
-          </article>
+          <details>
+            <summary>Do public holidays count?</summary>
+            <div>
+              <p>
+                Weekends and public holidays are separate rules. A calculator
+                can skip weekends while still counting a weekday public holiday
+                unless a holiday calendar or governing rule says to exclude it.
+              </p>
+            </div>
+          </details>
 
-          <article>
-            <h2>What if the deadline itself lands on a weekend?</h2>
-            <p>
-              Do not automatically move it unless the rule that created the
-              deadline says to do so. Some instructions move a non-business
-              final date to the next business day, some use the previous
-              business day, and some leave the calendar date unchanged.
-            </p>
-          </article>
+          <details>
+            <summary>What if the deadline itself lands on a weekend?</summary>
+            <div>
+              <p>
+                Do not automatically move it unless the rule that created the
+                deadline says to do so. Some rules move the date forward, some
+                move it backward, and some leave the calendar date unchanged.
+              </p>
+            </div>
+          </details>
 
-          <article>
-            <h2>Business days vs calendar days</h2>
-            <dl>
-              <div>
-                <dt>Business days</dt>
-                <dd>
-                  Count only qualifying working days under the selected
-                  schedule and holiday rules.
-                </dd>
-              </div>
-              <div>
-                <dt>Calendar days</dt>
-                <dd>
-                  Count every date on the calendar, including Saturdays and
-                  Sundays, unless a separate final-day rule changes the result.
-                </dd>
-              </div>
-            </dl>
-          </article>
+          <details>
+            <summary>Business days vs calendar days</summary>
+            <div>
+              <p>
+                <strong>Business days</strong> count only qualifying working
+                days under the applicable schedule and holiday rules.
+              </p>
+              <p>
+                <strong>Calendar days</strong> count every date, including
+                Saturdays and Sundays, unless another rule changes the final
+                date.
+              </p>
+            </div>
+          </details>
         </section>
 
-        <section className="weekends-business-guide-related" aria-label="Related deadline guides and tools">
+        <section
+          className="weekends-zero-related"
+          aria-label="Related deadline guides and tools"
+        >
           <div>
-            <span>Related answers</span>
-            <h2>Make the counting rule explicit</h2>
+            <p className="weekends-zero-section-eyebrow">Related answers</p>
+            <h2>Need a different counting rule?</h2>
           </div>
 
           <nav>
@@ -2303,8 +2304,9 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
                 onNavigate('/do-public-holidays-count-as-business-days')
               }}
             >
-              Do public holidays count as business days?
+              Do public holidays count?
             </a>
+
             <a
               href="/does-the-start-date-count"
               onClick={(event) => {
@@ -2314,6 +2316,7 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             >
               Does the start date count?
             </a>
+
             <a
               href="/business-days-calculator"
               onClick={(event) => {
@@ -2323,6 +2326,7 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             >
               Business days calculator
             </a>
+
             <a
               href="/deadline-calculator"
               onClick={(event) => {
@@ -2342,255 +2346,318 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
       />
 
       <style>{`
-        .weekends-business-guide-page {
+        .weekends-zero-page {
+          --weekends-ink: #153654;
+          --weekends-muted: #667b8e;
+          --weekends-accent: #2d7b64;
+          --weekends-field: #edf0df;
           min-height: 100vh;
           background: #fffaf2;
         }
 
-        .weekends-business-guide-shell {
-          width: min(100% - 32px, 920px);
+        .weekends-zero-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
           margin: 0 auto;
-          padding: 36px 0 64px;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
         }
 
-        .weekends-business-guide-hero {
-          text-align: center;
+        .weekends-zero-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
         }
 
-        .weekends-business-guide-hero h1 {
-          margin: 6px 0 0;
-          color: #152d48;
-          font-size: clamp(2.35rem, 7vw, 4.6rem);
-          line-height: 1;
-          letter-spacing: -0.04em;
-        }
-
-        .weekends-business-guide-answer {
-          max-width: 760px;
-          margin: 22px auto 0;
-          padding: 22px;
-          border: 1px solid rgba(22, 49, 78, 0.09);
-          border-radius: 18px;
-          background: #fff;
-          text-align: left;
-        }
-
-        .weekends-business-guide-answer > strong {
+        .weekends-zero-brand img {
           display: block;
-          color: #17304d;
-          font-size: clamp(1.35rem, 3vw, 1.9rem);
-          line-height: 1.2;
+          width: 176px;
+          height: auto;
         }
 
-        .weekends-business-guide-answer p {
-          margin: 10px 0 0;
-          color: #526a82;
-          font-size: 1.02rem;
-          line-height: 1.65;
+        .weekends-zero-shell {
+          width: min(100% - 32px, 1100px);
+          margin: 22px auto 0;
         }
 
-        .weekends-business-guide-scope {
-          max-width: 700px;
-          margin: 12px auto 0;
-          color: #718197;
-          font-size: 0.94rem;
-          line-height: 1.5;
-        }
-
-        .weekends-business-guide-example {
-          margin-top: 28px;
-          padding: 20px;
-          border: 1px solid rgba(183, 121, 31, 0.16);
-          border-radius: 18px;
-          background: #fffdf8;
-        }
-
-        .weekends-business-guide-example-heading {
+        .weekends-zero-hero {
+          padding: clamp(38px, 5vw, 60px) clamp(24px, 6vw, 70px) 36px;
+          border: 1px solid rgba(79, 95, 48, 0.12);
+          border-radius: 28px;
+          background: var(--weekends-field);
           text-align: center;
         }
 
-        .weekends-business-guide-example-heading > span,
-        .weekends-business-guide-related > div > span {
-          color: #8a6a2c;
+        .weekends-zero-eyebrow,
+        .weekends-zero-section-eyebrow {
+          margin: 0;
+          color: var(--weekends-accent);
           font-size: 0.8rem;
-          font-weight: 900;
-          letter-spacing: 0.06em;
+          font-weight: 950;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .weekends-business-guide-example-heading h2,
-        .weekends-business-guide-related h2 {
-          margin: 5px 0 0;
-          color: #29435e;
-          font-size: 1.25rem;
+        .weekends-zero-hero h1 {
+          max-width: 900px;
+          margin: 10px auto 0;
+          color: var(--weekends-ink);
+          font-size: clamp(3rem, 6vw, 5.4rem);
+          line-height: 0.97;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
         }
 
-        .weekends-business-guide-results {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
-          margin-top: 16px;
-        }
-
-        .weekends-business-guide-results > div {
-          padding: 17px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
-          border-radius: 14px;
-          background: #fff;
-        }
-
-        .weekends-business-guide-results span {
+        .weekends-zero-answer {
           display: block;
-          color: #526a82;
-          font-size: 0.92rem;
+          margin-top: 28px;
+          color: var(--weekends-ink);
+          font-size: clamp(4rem, 10vw, 8.2rem);
+          font-weight: 950;
+          line-height: 0.88;
+          letter-spacing: -0.06em;
+        }
+
+        .weekends-zero-summary {
+          max-width: 760px;
+          margin: 22px auto 0;
+          color: #3f657b;
+          font-size: clamp(1.35rem, 2.6vw, 2rem);
           font-weight: 850;
+          line-height: 1.25;
         }
 
-        .weekends-business-guide-results strong {
-          display: block;
-          margin-top: 7px;
-          color: #17304d;
-          font-size: clamp(1.55rem, 3vw, 2.15rem);
-          line-height: 1.1;
-        }
-
-        .weekends-business-guide-results small {
-          display: block;
-          margin-top: 4px;
-          color: #6d8196;
-          font-size: 0.94rem;
-        }
-
-        .weekends-business-guide-results p {
-          margin: 10px 0 0;
-          color: #667c92;
+        .weekends-zero-caveat {
+          max-width: 720px;
+          margin: 15px auto 0;
+          color: var(--weekends-muted);
           font-size: 0.94rem;
           line-height: 1.5;
         }
 
-        .weekends-business-guide-cta {
+        .weekends-zero-example {
+          margin-top: 16px;
+          padding: 20px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 20px;
+          background: #f8f8f3;
+        }
+
+        .weekends-zero-example-heading {
+          text-align: center;
+        }
+
+        .weekends-zero-example-heading h2,
+        .weekends-zero-related h2 {
+          margin: 5px 0 0;
+          color: var(--weekends-ink);
+          font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+          line-height: 1.08;
+          letter-spacing: -0.03em;
+        }
+
+        .weekends-zero-example-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          max-width: 840px;
+          margin: 16px auto 0;
+        }
+
+        .weekends-zero-example-grid article {
+          padding: 17px 18px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 15px;
+          background: #fff;
+        }
+
+        .weekends-zero-example-grid article.is-business {
+          border-color: rgba(45, 123, 100, 0.26);
+          background: #e7f2ec;
+        }
+
+        .weekends-zero-example-grid span {
+          display: block;
+          color: #5d7287;
+          font-size: 0.8rem;
+          font-weight: 900;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .weekends-zero-example-grid strong {
+          display: block;
+          margin-top: 7px;
+          color: var(--weekends-ink);
+          font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+          line-height: 1.16;
+        }
+
+        .weekends-zero-example-grid p {
+          margin: 8px 0 0;
+          color: #667b8e;
+          font-size: 0.9rem;
+          line-height: 1.45;
+        }
+
+        .weekends-zero-cta {
           min-height: 48px;
           width: fit-content;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 18px auto 0;
-          padding: 9px 15px;
+          margin: 16px auto 0;
+          padding: 9px 16px;
           border-radius: 11px;
-          background: #173a63;
+          background: #267357;
           color: #fff;
-          font-weight: 850;
+          font-weight: 900;
           text-decoration: none;
         }
 
-        .weekends-business-guide-content {
-          display: grid;
-          gap: 14px;
-          margin-top: 24px;
-        }
-
-        .weekends-business-guide-content > article {
-          padding: 20px;
-          border: 1px solid rgba(22, 49, 78, 0.08);
-          border-radius: 16px;
-          background: rgba(255, 255, 255, 0.72);
-        }
-
-        .weekends-business-guide-content h2 {
-          margin: 0;
-          color: #29435e;
-          font-size: 1.2rem;
-        }
-
-        .weekends-business-guide-content p {
-          margin: 9px 0 0;
-          color: #5f748a;
-          font-size: 1rem;
-          line-height: 1.65;
-        }
-
-        .weekends-business-guide-content dl {
+        .weekends-zero-details {
           display: grid;
           gap: 10px;
-          margin: 14px 0 0;
+          margin-top: 16px;
         }
 
-        .weekends-business-guide-content dl > div {
-          padding: 13px 14px;
-          border: 1px solid rgba(22, 49, 78, 0.08);
+        .weekends-zero-details details {
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .weekends-zero-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .weekends-zero-details details > div {
+          padding: 0 14px 16px;
+        }
+
+        .weekends-zero-details p {
+          max-width: 780px;
+          margin: 0;
+          color: #61768a;
+          line-height: 1.58;
+        }
+
+        .weekends-zero-details p + p {
+          margin-top: 10px;
+        }
+
+        .weekends-zero-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 22px;
+          background: #eff2e6;
+        }
+
+        .weekends-zero-related nav {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .weekends-zero-related a {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 12px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
           border-radius: 12px;
           background: #fff;
-        }
-
-        .weekends-business-guide-content dt {
-          color: #29435e;
-          font-weight: 900;
-        }
-
-        .weekends-business-guide-content dd {
-          margin: 5px 0 0;
-          color: #667c92;
-          line-height: 1.55;
-        }
-
-        .weekends-business-guide-related {
-          margin-top: 24px;
-          padding: 20px 0 0;
-          border-top: 1px solid rgba(22, 49, 78, 0.1);
-        }
-
-        .weekends-business-guide-related nav {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 13px;
-        }
-
-        .weekends-business-guide-related a {
-          min-height: 44px;
-          display: inline-flex;
-          align-items: center;
-          padding: 8px 12px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
-          border-radius: 999px;
-          background: #fff;
-          color: #4f6a85;
-          font-size: 0.88rem;
+          color: #35536e;
+          font-size: 0.86rem;
           font-weight: 850;
+          text-align: center;
           text-decoration: none;
         }
 
-        @media (max-width: 720px) {
-          .weekends-business-guide-shell {
-            width: min(100% - 20px, 920px);
-            padding-top: 24px;
+        @media (max-width: 760px) {
+          .weekends-zero-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
           }
 
-          .weekends-business-guide-results {
-            grid-template-columns: 1fr;
+          .weekends-zero-brand img {
+            width: 154px;
           }
 
-          .weekends-business-guide-answer,
-          .weekends-business-guide-example,
-          .weekends-business-guide-content > article {
+          .weekends-zero-shell {
+            width: min(100% - 24px, 680px);
+            margin-top: 12px;
+          }
+
+          .weekends-zero-hero {
+            padding: 22px 20px 20px;
+            border-radius: 24px;
+            text-align: left;
+          }
+
+          .weekends-zero-hero h1 {
+            margin-top: 8px;
+            font-size: clamp(2.2rem, 10vw, 3.25rem);
+            line-height: 0.98;
+          }
+
+          .weekends-zero-answer {
+            margin-top: 20px;
+            font-size: clamp(4rem, 20vw, 6.3rem);
+          }
+
+          .weekends-zero-summary {
+            margin-top: 16px;
+            font-size: clamp(1.25rem, 5.8vw, 1.7rem);
+            line-height: 1.22;
+          }
+
+          .weekends-zero-caveat {
+            margin-top: 12px;
+            font-size: 0.86rem;
+            line-height: 1.45;
+          }
+
+          .weekends-zero-example {
             padding: 16px;
           }
 
-          .weekends-business-guide-related nav {
-            display: grid;
-            grid-template-columns: 1fr;
+          .weekends-zero-example-heading {
+            text-align: left;
           }
 
-          .weekends-business-guide-related a {
-            justify-content: center;
+          .weekends-zero-example-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+          }
+
+          .weekends-zero-cta {
+            width: 100%;
+          }
+
+          .weekends-zero-related {
+            padding: 18px;
+          }
+
+          .weekends-zero-related nav {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
     </main>
   )
 }
-
-
 function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
   const friday = parsePlainDate('2026-09-04')!
 
