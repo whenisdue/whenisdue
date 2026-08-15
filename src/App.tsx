@@ -622,84 +622,27 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             </p>
           </>
         ) : result && parsedTriggerDate && parsedDuration !== null ? (
-          <details className="deadline-answer-details">
-            <summary>Why this date?</summary>
-            <div className="deadline-answer-detail-body">
-              <p>{buildDeadlineExplanation(result, triggerKind)}</p>
-
-              <DeadlineFinalAdjustmentNotice answer={result} />
-
-              <CalculationReceipt
-                analyticsContext="deadline_rule_calculator"
-                rows={[
-                  {
-                    label: direction === 'before' ? 'Reference event' : 'Clock starts',
-                    value: triggerEvent
-                      ? `${triggerEvent.label} — ${formatPlainDate(parsedTriggerDate)}`
-                      : formatPlainDate(parsedTriggerDate),
-                  },
-                  {
-                    label: 'Direction',
-                    value:
-                      direction === 'after'
-                        ? 'Count forward from the start date'
-                        : 'Count backward from the start date',
-                  },
-                  {
-                    label: 'Duration',
-                    value: `${parsedDuration} ${
-                      unit === 'business-days'
-                        ? 'business days'
-                        : 'calendar days'
-                    }`,
-                  },
-                  ...(unit === 'business-days' && workingSchedule
-                    ? [
-                        {
-                          label: 'Working days',
-                          value: workingSchedule.label,
-                        },
-                      ]
-                    : []),
-                  {
-                    label: 'Start-day rule',
-                    value:
-                      startDayConvention === 'exclude-trigger'
-                        ? 'Start date excluded'
-                        : 'Start date included if qualifying',
-                  },
-                  {
-                    label: 'Holiday calendar',
-                    value:
-                      unit === 'business-days' || endDayAdjustment !== 'none'
-                        ? holidayOption.label
-                        : 'Not used',
-                  },
-                  {
-                    label: 'Final-day rule',
-                    value:
-                      endDayAdjustment === 'none'
-                        ? 'No adjustment'
-                        : endDayAdjustment === 'next-business-day'
-                          ? 'Move to next business day'
-                          : 'Move to previous business day',
-                  },
-                  ...(result.skippedDates.length > 0
-                    ? [
-                        {
-                          label: 'Skipped dates',
-                          value:
-                            result.skippedDates.length === 1
-                              ? '1 non-working day skipped'
-                              : `${result.skippedDates.length} non-working days skipped`,
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-              <DeadlineProvenanceDetails answer={result} />
-            </div>
-          </details>
+          <>
+            <h1>Your deadline is</h1>
+            <strong
+              className="deadline-answer-date"
+              aria-label={`${formatWeekday(result.answerDate)}, ${formatPlainDate(result.answerDate)}`}
+            >
+              <span className="deadline-answer-weekday">
+                {formatWeekday(result.answerDate)},
+              </span>
+              <span className="deadline-answer-date-main">
+                {formatPlainDate(result.answerDate)}
+              </span>
+            </strong>
+            <p className="deadline-answer-context">
+              {parsedDuration} {unit === 'business-days' ? 'business days' : 'calendar days'}{' '}
+              {direction === 'after' ? 'after' : 'before'} {formatPlainDate(parsedTriggerDate)}
+              {unit === 'business-days' && holidayCalendar !== 'none'
+                ? ` · ${holidayOption.shortLabel} holidays skipped`
+                : ''}
+            </p>
+          </>
         ) : (
           <>
             <h1>When is it due?</h1>
@@ -830,87 +773,75 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             )}
           </section>
         ) : result && parsedTriggerDate && parsedDuration !== null ? (
-          <section className="deadline-rule-answer" aria-live="polite">
-            <span>Due date</span>
-            <strong>{formatPlainDate(result.answerDate)}</strong>
-            <small>{formatWeekday(result.answerDate)}</small>
+          <details className="deadline-answer-details">
+            <summary>Why this date?</summary>
+            <div className="deadline-answer-detail-body">
+              <p>{buildDeadlineExplanation(result, triggerKind)}</p>
 
-            <p>
-              {result ? buildDeadlineExplanation(result, triggerKind) : null}
-            </p>
+              <DeadlineFinalAdjustmentNotice answer={result} />
 
-            <DeadlineFinalAdjustmentNotice answer={result} />
-
-            <CalculationReceipt
-              analyticsContext="deadline_rule_calculator"
-              rows={[
-                {
-                  label: direction === 'before' ? 'Reference event' : 'Clock starts',
-                  value: triggerEvent
-                    ? `${triggerEvent.label} — ${formatPlainDate(parsedTriggerDate)}`
-                    : formatPlainDate(parsedTriggerDate),
-                },
-                {
-                  label: 'Direction',
-                  value:
-                    direction === 'after'
-                      ? 'Count forward from the start date'
-                      : 'Count backward from the start date',
-                },
-                {
-                  label: 'Duration',
-                  value: `${parsedDuration} ${
-                    unit === 'business-days'
-                      ? 'business days'
-                      : 'calendar days'
-                  }`,
-                },
-                ...(unit === 'business-days' && workingSchedule
-                  ? [
-                      {
-                        label: 'Working days',
-                        value: workingSchedule.label,
-                      },
-                    ]
-                  : []),
-                {
-                  label: 'Start-day rule',
-                  value:
-                    startDayConvention === 'exclude-trigger'
-                      ? 'Start date excluded'
-                      : 'Start date included if qualifying',
-                },
-                {
-                  label: 'Holiday calendar',
-                  value:
-                    unit === 'business-days' || endDayAdjustment !== 'none'
-                      ? holidayOption.label
-                      : 'Not used',
-                },
-                {
-                  label: 'Final-day rule',
-                  value:
-                    endDayAdjustment === 'none'
-                      ? 'No adjustment'
-                      : endDayAdjustment === 'next-business-day'
-                        ? 'Move to next business day'
-                        : 'Move to previous business day',
-                },
-                ...(result.skippedDates.length > 0
-                  ? [
-                      {
+              <CalculationReceipt
+                analyticsContext="deadline_rule_calculator"
+                rows={[
+                  {
+                    label: direction === 'before' ? 'Reference event' : 'Clock starts',
+                    value: triggerEvent
+                      ? `${triggerEvent.label} — ${formatPlainDate(parsedTriggerDate)}`
+                      : formatPlainDate(parsedTriggerDate),
+                  },
+                  {
+                    label: 'Direction',
+                    value:
+                      direction === 'after'
+                        ? 'Count forward from the start date'
+                        : 'Count backward from the start date',
+                  },
+                  {
+                    label: 'Duration',
+                    value: `${parsedDuration} ${
+                      unit === 'business-days' ? 'business days' : 'calendar days'
+                    }`,
+                  },
+                  ...(unit === 'business-days' && workingSchedule
+                    ? [{ label: 'Working days', value: workingSchedule.label }]
+                    : []),
+                  {
+                    label: 'Start-day rule',
+                    value:
+                      startDayConvention === 'exclude-trigger'
+                        ? 'Start date excluded'
+                        : 'Start date included if qualifying',
+                  },
+                  {
+                    label: 'Holiday calendar',
+                    value:
+                      unit === 'business-days' || endDayAdjustment !== 'none'
+                        ? holidayOption.label
+                        : 'Not used',
+                  },
+                  {
+                    label: 'Final-day rule',
+                    value:
+                      endDayAdjustment === 'none'
+                        ? 'No adjustment'
+                        : endDayAdjustment === 'next-business-day'
+                          ? 'Move to next business day'
+                          : 'Move to previous business day',
+                  },
+                  ...(result.skippedDates.length > 0
+                    ? [{
                         label: 'Skipped dates',
                         value:
                           result.skippedDates.length === 1
                             ? '1 non-working day skipped'
                             : `${result.skippedDates.length} non-working days skipped`,
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-            {result ? <DeadlineProvenanceDetails answer={result} /> : null}
-          </section>
+                      }]
+                    : []),
+                ]}
+              />
+              <DeadlineProvenanceDetails answer={result} />
+            </div>
+          </details>
         ) : (
           <p className="deadline-rule-error" role="status">
             Enter a valid start date and a whole number of days.
@@ -980,22 +911,27 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           </section>
         ) : null}
 
-        {result &&
-        parsedDuration !== null &&
-        !startDayWordingUnspecified ? (
-          <SaveDeadlineRuleButton
-            triggerDateKey={triggerDate}
-            triggerKind={triggerKind}
-            duration={parsedDuration}
-            direction={direction}
-            unit={unit}
-            startDayConvention={startDayConvention}
-            holidayCalendar={holidayCalendar}
-            endDayAdjustment={endDayAdjustment}
-          />
-        ) : null}
+        <details className="deadline-rule-saved">
+          <summary>Save or reuse this setup</summary>
+          <div className="deadline-rule-saved-body">
+            {result &&
+            parsedDuration !== null &&
+            !startDayWordingUnspecified ? (
+              <SaveDeadlineRuleButton
+                triggerDateKey={triggerDate}
+                triggerKind={triggerKind}
+                duration={parsedDuration}
+                direction={direction}
+                unit={unit}
+                startDayConvention={startDayConvention}
+                holidayCalendar={holidayCalendar}
+                endDayAdjustment={endDayAdjustment}
+              />
+            ) : null}
 
-        <SavedDeadlineRulesView onUseRule={applySavedRule} />
+            <SavedDeadlineRulesView onUseRule={applySavedRule} />
+          </div>
+        </details>
 
         <details className="deadline-rule-advanced">
           <summary>Adjust the counting rules</summary>
@@ -1319,6 +1255,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         .deadline-answer-details,
+        .deadline-rule-saved,
         .deadline-rule-advanced {
           margin-top: 12px;
           border: 1px solid rgba(21, 53, 87, 0.1);
@@ -1327,6 +1264,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         .deadline-answer-details summary,
+        .deadline-rule-saved summary,
         .deadline-rule-advanced summary {
           min-height: 50px;
           display: flex;
@@ -1352,6 +1290,15 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
         .deadline-answer-detail-body .calculation-receipt {
           margin-top: 16px;
+        }
+
+        .deadline-rule-saved-body {
+          padding: 0 14px 14px;
+        }
+
+        .deadline-rule-saved-body .saved-deadline-rules,
+        .deadline-rule-saved-body .saved-deadline-rules-view {
+          margin-top: 12px;
         }
 
         .deadline-rule-compare {
@@ -1509,19 +1456,58 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           }
 
           .deadline-rule-essential {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: minmax(0, 1.35fr) minmax(100px, 0.65fr);
             gap: 10px;
             padding: 14px;
           }
 
+          .deadline-rule-essential label {
+            min-width: 0;
+          }
+
           .deadline-rule-essential label:first-child,
+          .deadline-rule-essential label:nth-child(2),
+          .deadline-rule-essential label:nth-child(3),
+          .deadline-rule-essential label:nth-child(4) {
+            grid-column: auto;
+          }
+
+          .deadline-rule-essential label:nth-child(3),
+          .deadline-rule-essential label:nth-child(4) {
+            grid-column: span 1;
+          }
+
+          .deadline-rule-essential label > span {
+            font-size: 0.78rem;
+          }
+
+          .deadline-rule-essential input,
+          .deadline-rule-essential select {
+            min-height: 46px;
+            padding: 8px 9px;
+            font-size: 0.88rem;
+          }
+
+          .deadline-rule-compare-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 430px) {
+          .deadline-rule-essential {
+            grid-template-columns: minmax(0, 1.25fr) minmax(92px, 0.75fr);
+            gap: 8px;
+            padding: 12px;
+          }
+
           .deadline-rule-essential label:nth-child(3),
           .deadline-rule-essential label:nth-child(4) {
             grid-column: 1 / -1;
           }
 
-          .deadline-rule-compare-grid {
-            grid-template-columns: 1fr;
+          .deadline-rule-essential input,
+          .deadline-rule-essential select {
+            min-height: 44px;
+            font-size: 0.86rem;
           }
         }
       `}</style>
