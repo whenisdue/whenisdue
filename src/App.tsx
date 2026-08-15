@@ -14151,17 +14151,6 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
                 <strong>{formatBetweenDate(parsedEndDate)}</strong>
               </p>
 
-              <p className="between-answer-rule">
-                Start date excluded · End date included
-              </p>
-
-              <p className="between-answer-calendar-rule">
-                {holidayCalendar === 'none'
-                  ? 'Weekends skipped · Public holidays still count'
-                  : `Weekends + ${
-                      getHolidayCalendarOption(holidayCalendar).shortLabel
-                    } holidays skipped`}
-              </p>
             </>
           ) : (
             <>
@@ -14432,7 +14421,7 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
 
         .between-answer-range {
           max-width: 820px;
-          margin: 18px auto 0;
+          margin: 14px auto 0;
           color: var(--between-muted);
           font-size: 1rem;
           line-height: 1.5;
@@ -14441,20 +14430,6 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
         .between-answer-range strong {
           color: #34516c;
           font-weight: 850;
-        }
-
-        .between-answer-rule,
-        .between-answer-calendar-rule {
-          margin: 15px 0 0;
-          color: #62788d;
-          font-size: 0.88rem;
-          font-weight: 800;
-        }
-
-        .between-answer-calendar-rule {
-          margin-top: 6px;
-          color: #7a8998;
-          font-size: 0.82rem;
         }
 
         .between-answer-question {
@@ -14618,7 +14593,7 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           }
 
           .between-answer-hero {
-            padding: 22px 20px 20px;
+            padding: 20px 20px 17px;
             border-radius: 24px 24px 0 0;
             text-align: left;
           }
@@ -14639,22 +14614,13 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           }
 
           .between-answer-range {
-            margin-top: 14px;
-            font-size: 0.92rem;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
           }
 
           .between-answer-range strong {
             display: inline;
-          }
-
-          .between-answer-rule {
-            margin-top: 12px;
-            font-size: 0.84rem;
-          }
-
-          .between-answer-calendar-rule {
-            font-size: 0.79rem;
-            line-height: 1.4;
           }
 
           .between-answer-question {
