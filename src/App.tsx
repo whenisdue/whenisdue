@@ -1067,6 +1067,43 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           background: #fffaf2;
         }
 
+        .deadline-rule-page .shipping-editorial-header {
+          width: min(100% - 32px, 1130px);
+          min-height: 70px;
+          margin: 0 auto 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          border-bottom: 1px solid rgba(17, 47, 83, 0.12);
+        }
+
+        .deadline-rule-page .shipping-editorial-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+        }
+
+        .deadline-rule-page .shipping-editorial-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .deadline-rule-page .shipping-editorial-nav {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+        }
+
+        .deadline-rule-page .shipping-editorial-nav a {
+          color: #5a728d;
+          font-size: 0.9rem;
+          font-weight: 850;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
         .deadline-editorial-hero {
           position: relative;
           width: min(100% - 24px, 1100px);
@@ -1426,6 +1463,29 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 720px) {
+          .deadline-rule-page .shipping-editorial-header {
+            width: min(100% - 24px, 680px);
+            min-height: 58px;
+            margin-bottom: 12px;
+            gap: 12px;
+          }
+
+          .deadline-rule-page .shipping-editorial-brand img {
+            width: 154px;
+          }
+
+          .deadline-rule-page .shipping-editorial-nav {
+            gap: 12px;
+          }
+
+          .deadline-rule-page .shipping-editorial-nav a {
+            font-size: 0.8rem;
+          }
+
+          .deadline-rule-page .shipping-editorial-home-link {
+            display: none;
+          }
+
           .deadline-editorial-hero {
             width: calc(100% - 28px);
             min-height: 660px;
