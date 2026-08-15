@@ -12106,9 +12106,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">◷</span>
               <div>
-                <p>Business days</p>
                 <h2>Add business days</h2>
-                <span>Skip weekends and optionally supported public holidays.</span>
               </div>
             </a>
             <a
@@ -12122,9 +12120,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">↔</span>
               <div>
-                <p>Date difference</p>
                 <h2>Business days between dates</h2>
-                <span>Count working days between two dates.</span>
               </div>
             </a>
             <a
@@ -12138,9 +12134,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">#</span>
               <div>
-                <p>Invoices</p>
                 <h2>Invoice due date</h2>
-                <span>Net 7, 15, 30, 45, 60, 90, and EOM.</span>
               </div>
             </a>
             <a
@@ -12154,9 +12148,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">↩</span>
               <div>
-                <p>Returns</p>
                 <h2>Return deadline</h2>
-                <span>Find the last day of a return window.</span>
               </div>
             </a>
             <a
@@ -12170,9 +12162,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">◇</span>
               <div>
-                <p>Subscriptions</p>
                 <h2>Free trial end date</h2>
-                <span>Find the trial end date and suggested reminder.</span>
               </div>
             </a>
             <a
@@ -12184,8 +12174,10 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
                 onNavigate('/deadline-calculator')
               }}
             >
-              <strong>Rule-aware deadline</strong>
-              <span>Choose how the deadline should be counted.</span>
+              <span className="intent-proof-icon" aria-hidden="true">±</span>
+              <div>
+                <h2>Deadline calculator</h2>
+              </div>
             </a>
 
             <a
@@ -12199,9 +12191,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">⏱</span>
               <div>
-                <p>SLA / response time</p>
                 <h2>Business-hours deadline</h2>
-                <span>Add working hours inside a business-day schedule.</span>
               </div>
             </a>
             <a
@@ -12215,9 +12205,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">$</span>
               <div>
-                <p>Pay schedule</p>
                 <h2>Next payday</h2>
-                <span>Weekly, biweekly, semimonthly, or monthly.</span>
               </div>
             </a>
             <a
@@ -12231,9 +12219,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">30</span>
               <div>
-                <p>Popular answer</p>
                 <h2>Net 30 due date</h2>
-                <span>Fast one-input answer for a common invoice term.</span>
               </div>
             </a>
             <a
@@ -12247,9 +12233,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">2%</span>
               <div>
-                <p>Invoice discount terms</p>
                 <h2>2/10 Net 30</h2>
-                <span>See the discount deadline and the final payment due date.</span>
               </div>
             </a>
 
@@ -12264,9 +12248,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">⇢</span>
               <div>
-                <p>Shipping</p>
                 <h2>Delivery date range</h2>
-                <span>Convert 3–5 business days into an earliest and latest date.</span>
               </div>
             </a>
             <a
@@ -12280,9 +12262,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">←</span>
               <div>
-                <p>Contracts & renewals</p>
                 <h2>Notice period</h2>
-                <span>Count backward to find the latest date to give notice.</span>
               </div>
             </a>
             <a
@@ -12296,9 +12276,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">↻</span>
               <div>
-                <p>Subscriptions</p>
                 <h2>Renewal & cancellation</h2>
-                <span>Find the next renewal date and optional cancellation deadline.</span>
               </div>
             </a>
           </div>
@@ -12659,8 +12637,8 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .calculator-hub-page .calculator-directory-header {
-          width: min(100% - 32px, 1100px);
-          min-height: 82px;
+          width: min(100% - 32px, 1240px);
+          min-height: 76px;
           margin: 0 auto;
           display: flex;
           align-items: center;
@@ -12675,16 +12653,41 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
 
         .calculator-hub-page .calculator-directory-brand img {
           display: block;
-          width: 176px;
+          width: 166px;
           height: auto;
         }
 
+        .calculator-hub-page .dual-intent-hero {
+          padding-bottom: 18px;
+        }
+
         .calculator-hub-page .utility-hub-hero {
-          display: grid !important;
+          width: min(100% - 32px, 1240px);
+          margin: 0 auto;
+          display: block !important;
+        }
+
+        .calculator-hub-page .dual-intent-copy {
+          max-width: none;
+          margin: 24px 0 16px;
+        }
+
+        .calculator-hub-page .dual-intent-copy h1 {
+          margin: 6px 0 0;
+          font-size: clamp(3.1rem, 5vw, 5rem);
+          line-height: 0.95;
+          letter-spacing: -0.05em;
+        }
+
+        .calculator-hub-page .dual-intent-copy .friendly-subtitle {
+          margin-top: 10px;
+          font-size: 1.08rem;
         }
 
         .calculator-hub-page .utility-directory-cards {
           display: grid !important;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 10px !important;
           visibility: visible !important;
           opacity: 1 !important;
           height: auto !important;
@@ -12692,14 +12695,70 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
         }
 
         .calculator-hub-page .utility-directory-cards .proof-calculator {
+          min-width: 0;
+          min-height: 104px !important;
           display: flex !important;
+          align-items: center;
+          gap: 11px;
+          padding: 14px !important;
+          border: 1px solid rgba(21, 54, 84, 0.12);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.88);
+          color: #153654;
+          text-decoration: none;
           visibility: visible !important;
           opacity: 1 !important;
+          box-shadow: none;
+          transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+        }
+
+        .calculator-hub-page .utility-directory-cards .proof-calculator:hover {
+          transform: translateY(-1px);
+          border-color: rgba(45, 123, 100, 0.34);
+          background: #fff;
+        }
+
+        .calculator-hub-page .utility-directory-cards .intent-proof-icon {
+          width: 42px;
+          height: 42px;
+          flex: 0 0 42px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          background: #f4f2e9;
+          color: #315a6d;
+          font-size: 1.15rem;
+          font-weight: 900;
+        }
+
+        .calculator-hub-page .utility-directory-cards .proof-calculator > div {
+          min-width: 0;
+        }
+
+        .calculator-hub-page .utility-directory-cards .proof-calculator h2 {
+          margin: 0;
+          color: #153654;
+          font-size: 0.98rem;
+          line-height: 1.18;
+          letter-spacing: -0.015em;
+          text-decoration: none;
+        }
+
+        .calculator-hub-page .utility-directory-cards .proof-calculator:focus-visible {
+          outline: 3px solid rgba(45, 123, 100, 0.28);
+          outline-offset: 2px;
         }
 
         /* The public calculator directory should not advertise VA Workspace. */
         .calculator-hub-page .workspace-showcase {
           display: none !important;
+        }
+
+        @media (max-width: 1100px) {
+          .calculator-hub-page .utility-directory-cards {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
         }
 
         @media (max-width: 760px) {
@@ -12713,24 +12772,55 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           }
 
           .calculator-hub-page .utility-hub-hero {
-            display: block !important;
+            width: min(100% - 24px, 680px);
           }
 
           .calculator-hub-page .dual-intent-copy {
-            margin-bottom: 14px;
+            margin: 18px 0 12px;
           }
 
           .calculator-hub-page .dual-intent-copy h1 {
-            margin-bottom: 8px;
+            font-size: clamp(2.7rem, 13vw, 4rem);
+          }
+
+          .calculator-hub-page .dual-intent-copy .friendly-subtitle {
+            margin-top: 8px;
+            font-size: 1rem;
           }
 
           .calculator-hub-page .utility-directory-cards {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
             gap: 8px !important;
           }
 
           .calculator-hub-page .utility-directory-cards .proof-calculator {
-            min-height: 82px !important;
+            min-height: 88px !important;
+            padding: 11px !important;
+            gap: 9px;
+            border-radius: 14px;
+          }
+
+          .calculator-hub-page .utility-directory-cards .intent-proof-icon {
+            width: 36px;
+            height: 36px;
+            flex-basis: 36px;
+            border-radius: 10px;
+            font-size: 1rem;
+          }
+
+          .calculator-hub-page .utility-directory-cards .proof-calculator h2 {
+            font-size: 0.86rem;
+            line-height: 1.16;
+          }
+        }
+
+        @media (max-width: 430px) {
+          .calculator-hub-page .utility-directory-cards {
+            grid-template-columns: 1fr !important;
+          }
+
+          .calculator-hub-page .utility-directory-cards .proof-calculator {
+            min-height: 72px !important;
           }
         }
       `}</style>
