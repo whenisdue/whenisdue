@@ -1443,6 +1443,25 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 720px) {
+          .business-answer-date-main {
+            display: grid;
+            justify-items: start;
+            gap: 0;
+            font-size: clamp(3rem, 13.5vw, 4.45rem);
+            line-height: 0.9;
+            white-space: normal;
+          }
+
+          .business-answer-month,
+          .business-answer-day,
+          .business-answer-year {
+            display: block;
+          }
+
+          .business-answer-comma {
+            display: none;
+          }
+
           .deadline-answer-header {
             width: min(100% - 24px, 680px);
             min-height: 76px;
@@ -12004,6 +12023,22 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
   const dueDate = businessCalculation?.date ?? null
   const canSave = Boolean(dueDate && title.trim() && !validationMessage)
 
+  const formatBusinessAnswerDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
+
   useEffect(() => {
     syncShareableQueryParams({
       start: startDate,
@@ -12044,12 +12079,6 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
     setStorageMessage('Saved to My due dates.')
   }
 
-  const primaryAnswerDate = calculateBusinessDaysWithCalendar(
-    today,
-    3,
-    holidayCalendar,
-  ).date
-
   return (
     <main className="page-shell business-page business-answer-first-page">
       <header className="business-answer-header" aria-label="WhenIsDue">
@@ -12069,18 +12098,60 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
       <section className="business-answer-shell" aria-labelledby="business-days-title">
         <div className="business-answer-hero">
           <p className="business-answer-eyebrow">Business days calculator</p>
-          <h1 id="business-days-title">
-            3 business days from today is
-          </h1>
-          <p className="business-answer-date">
-            <span className="business-answer-weekday">{formatWeekday(primaryAnswerDate)},</span>
-            <span className="business-answer-month-date">{formatPlainDate(primaryAnswerDate)}</span>
-          </p>
-          <p className="business-answer-rule">
-            {holidayCalendar === 'none'
-              ? 'Weekends are skipped. Public holidays still count as weekdays.'
-              : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays are skipped.`}
-          </p>
+
+          {dueDate && parsedStartDate && parsedBusinessDays !== null ? (
+            <>
+              <h1 id="business-days-title">
+                {parsedBusinessDays} {parsedBusinessDays === 1 ? 'business day' : 'business days'} from{' '}
+                {toDateKey(parsedStartDate) === toDateKey(today) ? 'today' : formatBusinessAnswerDate(parsedStartDate)} is
+              </h1>
+
+              <strong
+                className="business-answer-date"
+                aria-label={`${formatWeekday(dueDate)}, ${formatPlainDate(dueDate)}`}
+              >
+                <span className="business-answer-weekday">
+                  {formatWeekday(dueDate)},
+                </span>
+                <span className="business-answer-date-main" aria-hidden="true">
+                  <span className="business-answer-month">
+                    {
+                      [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December',
+                      ][dueDate.month - 1]
+                    }
+                  </span>
+                  <span className="business-answer-day">{dueDate.day}</span>
+                  <span className="business-answer-comma">,</span>
+                  <span className="business-answer-year">{dueDate.year}</span>
+                </span>
+              </strong>
+
+              <p className="business-answer-rule">
+                {holidayCalendar === 'none'
+                  ? 'Weekends skipped · Public holidays still count'
+                  : `Weekends + ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 id="business-days-title">When is it in business days?</h1>
+              <p className="business-answer-rule">
+                Enter a valid start date and number of business days below.
+              </p>
+            </>
+          )}
         </div>
 
         <form
@@ -12143,51 +12214,11 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             ))}
           </div>
 
-          <div className="business-answer-counting-status">
-            <span>Counting</span>
-            <strong>
-              {holidayCalendar === 'none'
-                ? 'Weekends skipped'
-                : `Weekends + ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`}
-            </strong>
-          </div>
-
-          <HolidayCalendarSelect
-            value={holidayCalendar}
-            onChange={(nextCalendar) => {
-              setHolidayCalendar(nextCalendar)
-              trackWhenIsDueEvent('holiday_calendar_changed', {
-                context: 'business_days',
-                value: nextCalendar,
-              })
-            }}
-            compact
-          />
-
           {validationMessage ? (
             <p className="business-answer-form-message">{validationMessage}</p>
           ) : null}
         </form>
       </section>
-
-      {dueDate && parsedBusinessDays !== null && parsedStartDate ? (
-        <section className="business-answer-live-result" aria-live="polite">
-          <p className="business-answer-live-label">Your answer</p>
-          <p className="business-answer-live-sentence">
-            {parsedBusinessDays} {parsedBusinessDays === 1 ? 'business day' : 'business days'} from{' '}
-            {toDateKey(parsedStartDate) === toDateKey(today) ? 'today' : formatPlainDate(parsedStartDate)} is
-          </p>
-          <p className="business-answer-live-date">
-            <strong>{formatWeekday(dueDate)},</strong>
-            <span>{formatPlainDate(dueDate)}</span>
-          </p>
-          <p className="business-answer-live-note">
-            {holidayCalendar === 'none'
-              ? 'Weekends are skipped. Public holidays are not removed.'
-              : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays are skipped.`}
-          </p>
-        </section>
-      ) : null}
 
       {dueDate && parsedBusinessDays !== null && parsedStartDate ? (
         <section className="business-answer-actions" aria-label="Business day result actions">
@@ -12242,6 +12273,28 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           ) : (
             <p>Enter a valid start date and number of business days.</p>
           )}
+        </details>
+
+        <details>
+          <summary>Holiday settings</summary>
+          <div className="business-answer-detail-body">
+            <HolidayCalendarSelect
+              value={holidayCalendar}
+              onChange={(nextCalendar) => {
+                setHolidayCalendar(nextCalendar)
+                trackWhenIsDueEvent('holiday_calendar_changed', {
+                  context: 'business_days',
+                  value: nextCalendar,
+                })
+              }}
+              compact
+            />
+            <p className="business-answer-holiday-note">
+              {holidayCalendar === 'none'
+                ? 'Weekends are skipped. Public holidays still count as weekdays.'
+                : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays are skipped.`}
+            </p>
+          </div>
         </details>
 
         <details>
@@ -12509,21 +12562,40 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .business-answer-date {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          gap: 0 0.22em;
+          display: grid;
+          justify-items: start;
           margin: 22px 0 0;
           color: var(--business-navy);
-          font-size: clamp(3.8rem, 8.8vw, 8.7rem);
           font-weight: 900;
-          line-height: 0.86;
-          letter-spacing: -0.065em;
         }
 
-        .business-answer-weekday,
-        .business-answer-month-date {
+        .business-answer-weekday {
+          color: #3e667d;
+          font-size: clamp(2.5rem, 4.4vw, 4rem);
+          line-height: 0.98;
+          letter-spacing: -0.04em;
+        }
+
+        .business-answer-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 0.09em;
+          margin-top: 6px;
+          font-size: clamp(3.7rem, 6.2vw, 6rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          white-space: nowrap;
+        }
+
+        .business-answer-month,
+        .business-answer-day,
+        .business-answer-comma,
+        .business-answer-year {
           display: inline;
+        }
+
+        .business-answer-comma {
+          margin-left: -0.08em;
         }
 
         .business-answer-rule {
@@ -12538,7 +12610,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) auto;
           align-items: end;
           gap: 14px;
-          padding: 24px clamp(24px, 5vw, 68px);
+          padding: 18px clamp(24px, 5vw, 68px);
           border-top: 1px solid rgba(18, 54, 93, 0.08);
           background: rgba(255, 255, 255, 0.32);
         }
@@ -12696,6 +12768,13 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           margin-top: 0;
           color: var(--business-muted);
           line-height: 1.6;
+        }
+
+        .business-answer-holiday-note {
+          margin: 10px 0 0;
+          color: var(--business-muted);
+          font-size: 0.9rem;
+          line-height: 1.5;
         }
 
         .business-answer-save {
