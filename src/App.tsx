@@ -16877,24 +16877,25 @@ function TwoTenNetThirtyPage({ onNavigate }: NavigationProps) {
           }
 
           .two-ten-answer-hero {
-            padding: 25px 20px 23px;
+            padding: 22px 18px 20px;
             border-radius: 24px 24px 0 0;
             text-align: left;
           }
 
           .two-ten-answer-hero h1 {
-            font-size: clamp(2.4rem, 10.8vw, 3.55rem);
+            font-size: clamp(2.15rem, 9.6vw, 3.2rem);
+            line-height: 0.96;
           }
 
           .two-ten-answer-grid {
             grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 8px;
+            margin-top: 16px;
           }
 
           .two-ten-answer-card {
             position: relative;
-            padding: 16px 16px 16px 20px;
+            padding: 13px 14px 13px 19px;
           }
 
           .two-ten-answer-card::before {
@@ -16913,15 +16914,21 @@ function TwoTenNetThirtyPage({ onNavigate }: NavigationProps) {
           }
 
           .two-ten-answer-card strong {
-            font-size: clamp(1.8rem, 8.5vw, 2.65rem);
+            font-size: clamp(1.55rem, 7.6vw, 2.3rem);
           }
 
           .two-ten-answer-card b {
-            font-size: clamp(2.25rem, 10.8vw, 3.45rem);
+            font-size: clamp(2rem, 9.6vw, 3.05rem);
+          }
+
+          .two-ten-answer-card small {
+            margin-top: 7px;
+            font-size: 0.76rem;
           }
 
           .two-ten-answer-context {
-            font-size: 0.88rem;
+            margin-top: 10px;
+            font-size: 0.84rem;
           }
 
           .two-ten-answer-controls {
