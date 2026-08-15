@@ -18742,7 +18742,9 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           --invoice-ink: #112c4d;
           --invoice-muted: #63778b;
           --invoice-accent: #2d7c67;
-          --invoice-paper: #f4ecdf;
+          --invoice-paper: #f1e4cf;
+          --invoice-answer-field: #ead9bb;
+          --invoice-answer-field-soft: #f3e7d4;
           min-height: 100vh;
           background: #fffaf2;
         }
@@ -18777,7 +18779,11 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         }
 
         .invoice-answer-hero {
-          padding: clamp(42px, 7vw, 76px) 0 30px;
+          margin-top: 22px;
+          padding: clamp(42px, 7vw, 72px) clamp(24px, 5vw, 58px) 34px;
+          border: 1px solid rgba(112, 82, 42, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--invoice-answer-field);
           text-align: center;
         }
 
@@ -18844,7 +18850,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         .invoice-answer-context,
         .invoice-answer-error {
           margin: 18px 0 0;
-          color: var(--invoice-muted);
+          color: #65758a;
           font-size: 0.95rem;
           line-height: 1.5;
         }
@@ -18855,9 +18861,10 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
         .invoice-answer-controls {
           padding: 18px;
-          border: 1px solid rgba(17, 44, 77, 0.1);
-          border-radius: 18px;
-          background: var(--invoice-paper);
+          border: 1px solid rgba(112, 82, 42, 0.12);
+          border-top: 1px solid rgba(112, 82, 42, 0.1);
+          border-radius: 0 0 28px 28px;
+          background: var(--invoice-answer-field-soft);
         }
 
         .invoice-answer-form {
@@ -18979,7 +18986,9 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-answer-hero {
-            padding: 30px 0 20px;
+            margin-top: 14px;
+            padding: 32px 18px 28px;
+            border-radius: 24px 24px 0 0;
             text-align: left;
           }
 
@@ -19026,7 +19035,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
           .invoice-answer-controls {
             padding: 14px;
-            border-radius: 14px;
+            border-radius: 0 0 24px 24px;
           }
 
           .invoice-answer-form {
