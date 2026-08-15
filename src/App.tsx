@@ -13097,9 +13097,12 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
       ? [...primaryCounts, ...extendedCounts]
       : [dayCount, ...primaryCounts, ...extendedCounts]
 
-    return orderedCounts.filter(
-      (value, index, values) => value !== dayCount && values.indexOf(value) === index,
-    ).slice(0, 4)
+    return orderedCounts
+      .filter(
+        (value, index, values) =>
+          value !== dayCount && values.indexOf(value) === index,
+      )
+      .slice(0, 4)
   }, [dayCount])
 
   const relatedAnswers = useMemo(
@@ -13115,119 +13118,177 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
     [relatedDayCounts, today, holidayCalendar],
   )
 
-  return (
-    <main className="page-shell three-business-days-page">
-      <section className="three-business-hero" aria-labelledby="business-days-from-today-title">
-        <div className="three-business-topbar">
-          <button
-            type="button"
-            className="three-business-brand"
-            onClick={() => onNavigate('/')}
-            aria-label="WhenIsDue home"
-          >
-            WhenIsDue
-          </button>
-          <button
-            type="button"
-            className="three-business-calculator-link"
-            onClick={() => onNavigate('/business-days-calculator')}
-          >
-            Business days calculator
-          </button>
-        </div>
+  const monthName = (date: PlainDate) =>
+    [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]
 
-        <div className="three-business-answer">
-          <h1 id="business-days-from-today-title" className="three-business-question">
+  return (
+    <main className="page-shell exact-business-page">
+      <header className="exact-business-header" aria-label="WhenIsDue navigation">
+        <a
+          className="exact-business-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
+
+      <section className="exact-business-shell" aria-labelledby="business-days-from-today-title">
+        <div className="exact-business-hero">
+          <p className="exact-business-eyebrow">
             {dayCount} business days from today
+          </p>
+
+          <h1 id="business-days-from-today-title">
+            {dayCount} {dayCount === 1 ? 'business day' : 'business days'} from today is
           </h1>
 
-          <p className="three-business-date" aria-label={`Answer: ${formatPlainDate(answerDate)}`}>
-            {formatPlainDate(answerDate)}
+          <strong
+            className="exact-business-date"
+            aria-label={`${formatWeekday(answerDate)}, ${formatPlainDate(answerDate)}`}
+          >
+            <span className="exact-business-weekday">
+              {formatWeekday(answerDate)},
+            </span>
+
+            <span className="exact-business-date-main" aria-hidden="true">
+              <span className="exact-business-month">{monthName(answerDate)}</span>
+              <span className="exact-business-day">{answerDate.day}</span>
+              <span className="exact-business-comma">,</span>
+              <span className="exact-business-year">{answerDate.year}</span>
+            </span>
+          </strong>
+
+          <p className="exact-business-context">
+            Today is {formatWeekday(today)}, {monthName(today)} {today.day}, {today.year}
           </p>
 
-          <p className="three-business-weekday">{formatWeekday(answerDate)}</p>
-
-          <p className="three-business-context">
-            Today: <strong>{formatWeekday(today)}, {formatPlainDate(today)}</strong>
-            <span aria-hidden="true"> · </span>
-            {getLocalTimeZoneName()}
-          </p>
-
-          <p className="three-business-rule">
+          <p className="exact-business-rule">
             {holidayCalendar === 'none'
-              ? 'Weekends skipped. Public holidays still count as weekdays.'
-              : `Weekends and ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped.`}
+              ? 'Weekends skipped · Public holidays still count'
+              : `Weekends + ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`}
           </p>
+        </div>
 
-          <HolidayCalendarSelect
-            value={holidayCalendar}
-            onChange={(nextCalendar) => {
-              setHolidayCalendar(nextCalendar)
-              trackWhenIsDueEvent('holiday_calendar_changed', {
-                context: 'business_days_from_today',
-                days: dayCount,
-                value: nextCalendar,
-              })
-            }}
-            compact
-          />
-
-          <p className="three-business-explanation">
-            {formatBusinessDayExplanation(
-              today,
-              dayCount,
-              answerDate,
-              holidayCalendar,
-            )}
-          </p>
-
-          <CalculationReceipt
-            analyticsContext="business_days_from_today"
-            rows={[
-              {
-                label: 'Today',
-                value: `${formatWeekday(today)}, ${formatPlainDate(today)}`,
-              },
-              {
-                label: 'Business days added',
-                value: String(dayCount),
-              },
-              {
-                label: 'Holiday calendar',
-                value: getHolidayCalendarOption(holidayCalendar).label,
-              },
-              {
-                label: 'Skipped holidays',
-                value: formatSkippedHolidaySummary(answerCalculation.skippedHolidays),
-              },
-              {
-                label: 'Result',
-                value: `${formatWeekday(answerDate)}, ${formatPlainDate(answerDate)}`,
-              },
-            ]}
+        <div className="exact-business-actions">
+          <ResultActions
+            title={`${dayCount} business days from today`}
+            date={answerDate}
+            details={
+              holidayCalendar === 'none'
+                ? 'Weekends skipped'
+                : `${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`
+            }
+            variant="return-window"
           />
         </div>
       </section>
 
-      <section className="three-business-more" aria-labelledby="three-business-more-title">
-        <h2 id="three-business-more-title">Other common answers</h2>
+      <section className="exact-business-options">
+        <details className="exact-business-details">
+          <summary>Holiday settings</summary>
+          <div className="exact-business-detail-body">
+            <HolidayCalendarSelect
+              value={holidayCalendar}
+              onChange={(nextCalendar) => {
+                setHolidayCalendar(nextCalendar)
+                trackWhenIsDueEvent('holiday_calendar_changed', {
+                  context: 'business_days_from_today',
+                  days: dayCount,
+                  value: nextCalendar,
+                })
+              }}
+              compact
+            />
+          </div>
+        </details>
 
-        <div className="three-business-related-grid">
+        <details className="exact-business-details">
+          <summary>Why this date?</summary>
+          <div className="exact-business-detail-body">
+            <p>
+              {formatBusinessDayExplanation(
+                today,
+                dayCount,
+                answerDate,
+                holidayCalendar,
+              )}
+            </p>
+
+            <CalculationReceipt
+              analyticsContext="business_days_from_today"
+              rows={[
+                {
+                  label: 'Today',
+                  value: `${formatWeekday(today)}, ${formatPlainDate(today)}`,
+                },
+                {
+                  label: 'Business days added',
+                  value: String(dayCount),
+                },
+                {
+                  label: 'Holiday calendar',
+                  value: getHolidayCalendarOption(holidayCalendar).label,
+                },
+                {
+                  label: 'Skipped holidays',
+                  value: formatSkippedHolidaySummary(
+                    answerCalculation.skippedHolidays,
+                  ),
+                },
+                {
+                  label: 'Result',
+                  value: `${formatWeekday(answerDate)}, ${formatPlainDate(answerDate)}`,
+                },
+              ]}
+            />
+          </div>
+        </details>
+      </section>
+
+      <section className="exact-business-related" aria-labelledby="exact-business-related-title">
+        <div>
+          <p className="exact-business-section-eyebrow">Other common answers</p>
+          <h2 id="exact-business-related-title">Need a different number?</h2>
+        </div>
+
+        <div className="exact-business-related-grid">
           {relatedAnswers.map(({ dayCount: relatedDayCount, date }) => (
             <button
               type="button"
-              className="three-business-related-card"
+              className="exact-business-related-card"
               key={relatedDayCount}
               onClick={() =>
                 onNavigate(
                   `/${relatedDayCount}-business-days-from-today${
-                    holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                    holidayCalendar === 'none'
+                      ? ''
+                      : `?calendar=${holidayCalendar}`
                   }`,
                 )
               }
             >
               <span>{relatedDayCount} business days</span>
-              <strong>{formatPlainDate(date)}</strong>
+              <strong>
+                {monthName(date)} {date.day}
+              </strong>
               <small>{formatWeekday(date)}</small>
             </button>
           ))}
@@ -13235,25 +13296,28 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
 
         <button
           type="button"
-          className="secondary-button three-business-custom-button"
+          className="exact-business-custom-button"
           onClick={() =>
             onNavigate(
               `/business-days-calculator${
-                holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
+                holidayCalendar === 'none'
+                  ? ''
+                  : `?calendar=${holidayCalendar}`
               }`,
             )
           }
         >
-          Different date or number
+          Choose another date or number
         </button>
       </section>
 
-      <section className="three-business-explainer" aria-label="About the calculation">
+      <section className="exact-business-content" aria-label="Business-day counting help">
         <article>
           <h2>How this date is calculated</h2>
           <p>
-            Monday through Friday count as business days. Saturdays and Sundays are skipped.
-            By default, public holidays still count as weekdays. Choose a supported holiday calendar above to skip known holidays too. Calendar coverage varies by country, so verify local rules when a deadline matters.
+            Monday through Friday count as business days. Saturdays and Sundays
+            are skipped. Public holidays count by default unless you choose a
+            supported holiday calendar.
           </p>
         </article>
       </section>
@@ -13264,270 +13328,344 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
       />
 
       <style>{`
-        .three-business-days-page {
+        .exact-business-page {
+          --exact-ink: #153654;
+          --exact-muted: #667b8e;
+          --exact-accent: #2d7b64;
+          --exact-field: #e4eef4;
           min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .three-business-hero {
-          width: min(100% - 32px, 1240px);
-          min-height: 82vh;
+        .exact-business-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
           margin: 0 auto;
           display: flex;
-          flex-direction: column;
-        }
-
-        .three-business-topbar {
-          min-height: 62px;
-          display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          border-bottom: 1px solid rgba(19, 38, 70, 0.1);
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
         }
 
-        .three-business-brand,
-        .three-business-calculator-link,
-        .three-business-related-card {
-          appearance: none;
-          border: 0;
-          background: transparent;
-          cursor: pointer;
-          font: inherit;
-        }
-
-        .three-business-brand,
-        .three-business-calculator-link {
-          padding: 0;
-          color: #667991;
-        }
-
-        .three-business-brand {
-          font-size: 0.88rem;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-        }
-
-        .three-business-calculator-link {
-          font-size: 0.8rem;
-          font-weight: 700;
-        }
-
-        .three-business-answer {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
+        .exact-business-brand {
+          display: inline-flex;
           align-items: center;
+          text-decoration: none;
+        }
+
+        .exact-business-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .exact-business-shell,
+        .exact-business-options,
+        .exact-business-related,
+        .exact-business-content {
+          width: min(100% - 32px, 1100px);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .exact-business-shell {
+          margin-top: 22px;
+        }
+
+        .exact-business-hero {
+          padding: clamp(34px, 4.8vw, 52px) clamp(24px, 5vw, 58px) 30px;
+          border: 1px solid rgba(46, 87, 110, 0.12);
+          border-radius: 28px;
+          background: var(--exact-field);
           text-align: center;
-          padding: 38px 16px 54px;
         }
 
-        .three-business-question {
-          margin: 0 0 12px;
-          font-size: clamp(1.25rem, 2.2vw, 2rem);
-          font-weight: 800;
-          color: #425b79;
-        }
-
-        .three-business-date {
+        .exact-business-eyebrow,
+        .exact-business-section-eyebrow {
           margin: 0;
-          max-width: 100%;
-          font-size: clamp(4rem, 8.2vw, 7.6rem);
+          color: var(--exact-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .exact-business-hero h1 {
+          margin: 10px 0 0;
+          color: var(--exact-ink);
+          font-size: clamp(2.7rem, 5.5vw, 4.8rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
+        }
+
+        .exact-business-date {
+          display: grid;
+          justify-items: center;
+          margin-top: 24px;
+          color: var(--exact-ink);
           font-weight: 900;
-          line-height: 0.94;
+        }
+
+        .exact-business-weekday {
+          color: #3e667d;
+          font-size: clamp(2.5rem, 4.4vw, 4rem);
+          line-height: 0.98;
+          letter-spacing: -0.04em;
+        }
+
+        .exact-business-date-main {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 0.09em;
+          margin-top: 6px;
+          font-size: clamp(3.7rem, 6.2vw, 6rem);
+          line-height: 0.92;
           letter-spacing: -0.055em;
-          color: #0c1931;
           white-space: nowrap;
         }
 
-        .three-business-weekday {
-          margin: 18px 0 0;
-          font-size: clamp(1.45rem, 3vw, 2.6rem);
-          color: #566a83;
+        .exact-business-comma {
+          margin-left: -0.08em;
         }
 
-        .three-business-context {
-          margin: 30px 0 0;
-          font-size: 0.9rem;
-          color: #64778e;
+        .exact-business-context {
+          margin: 17px 0 0;
+          color: var(--exact-muted);
+          font-size: 0.94rem;
         }
 
-        .three-business-explanation {
-          max-width: 660px;
-          margin: 14px auto 0;
-          color: #536b85;
-          font-size: 1rem;
-          line-height: 1.55;
-          text-align: center;
-        }
-
-        .three-business-rule {
+        .exact-business-rule {
           margin: 7px 0 0;
-          font-size: 0.76rem;
-          color: #8190a2;
+          color: #748596;
+          font-size: 0.84rem;
+          font-weight: 750;
         }
 
-        .three-business-more,
-        .three-business-explainer {
-          width: min(100% - 32px, 1040px);
-          margin: 0 auto;
+        .exact-business-actions {
+          margin-top: 10px;
         }
 
-        .three-business-more {
-          padding: 46px 0 56px;
-          border-top: 1px solid rgba(19, 38, 70, 0.1);
-        }
-
-        .three-business-more h2,
-        .three-business-explainer h2 {
-          margin: 0 0 16px;
-          font-size: 1.3rem;
-        }
-
-        .three-business-related-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 10px;
-        }
-
-        .three-business-related-card {
-          min-height: 98px;
-          padding: 14px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 10px;
-          background: #fff;
-          display: flex;
-          flex-direction: column;
+        .exact-business-actions > .result-actions {
           justify-content: center;
+        }
+
+        .exact-business-options {
+          margin-top: 12px;
+        }
+
+        .exact-business-details {
+          margin-top: 10px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .exact-business-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .exact-business-detail-body {
+          padding: 0 14px 16px;
+        }
+
+        .exact-business-detail-body > p {
+          margin: 0;
+          color: #61768a;
+          line-height: 1.58;
+        }
+
+        .exact-business-detail-body .calculation-receipt {
+          margin-top: 16px;
+        }
+
+        .exact-business-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 22px;
+          background: #edf3f6;
+        }
+
+        .exact-business-related h2 {
+          margin: 6px 0 0;
+          color: var(--exact-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+        }
+
+        .exact-business-related-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .exact-business-related-card,
+        .exact-business-custom-button {
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 12px;
+          background: #fff;
+          color: #35536e;
+          font: inherit;
+          cursor: pointer;
+        }
+
+        .exact-business-related-card {
+          min-height: 86px;
+          display: grid;
+          align-content: center;
+          gap: 3px;
+          padding: 10px 12px;
           text-align: left;
         }
 
-        .three-business-related-card:hover {
-          border-color: rgba(19, 38, 70, 0.22);
-        }
-
-        .three-business-related-card span {
-          font-size: 0.78rem;
+        .exact-business-related-card span {
+          font-size: 0.8rem;
           font-weight: 800;
-          color: #647991;
         }
 
-        .three-business-related-card strong {
-          margin-top: 4px;
-          font-size: 1.25rem;
-          color: #10213f;
+        .exact-business-related-card strong {
+          color: var(--exact-ink);
+          font-size: 1.2rem;
         }
 
-        .three-business-related-card small {
-          margin-top: 2px;
-          color: #718197;
+        .exact-business-related-card small {
+          color: #718396;
         }
 
-        .three-business-custom-button {
-          margin-top: 18px;
+        .exact-business-custom-button {
+          min-height: 48px;
+          margin-top: 10px;
+          padding: 10px 14px;
+          font-weight: 850;
         }
 
-        .three-business-explainer {
-          padding: 26px 0 52px;
+        .exact-business-content {
+          margin-top: 30px;
         }
 
-        .three-business-explainer article {
-          max-width: 760px;
+        .exact-business-content article {
+          padding: 20px 0;
+          border-top: 1px solid rgba(21, 54, 84, 0.1);
         }
 
-        .three-business-explainer p {
+        .exact-business-content h2 {
           margin: 0;
-          line-height: 1.65;
-          color: #5e7087;
+          color: var(--exact-ink);
+          font-size: 1.08rem;
+        }
+
+        .exact-business-content p {
+          max-width: 760px;
+          margin: 8px 0 0;
+          color: #65798d;
+          line-height: 1.55;
         }
 
         @media (max-width: 760px) {
-          .three-business-hero {
-            width: min(100% - 24px, 1240px);
-            min-height: 78vh;
+          .exact-business-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
           }
 
-          .three-business-topbar {
-            min-height: 52px;
+          .exact-business-brand img {
+            width: 154px;
           }
 
-          .three-business-calculator-link {
-            font-size: 0.72rem;
+          .exact-business-shell,
+          .exact-business-options,
+          .exact-business-related,
+          .exact-business-content {
+            width: min(100% - 24px, 680px);
           }
 
-          .three-business-answer {
-            padding: 28px 0 38px;
-          }
-
-          .three-business-question {
-            margin-bottom: 10px;
-            font-size: 1.08rem;
-          }
-
-          .three-business-date {
-            font-size: clamp(3.2rem, 15vw, 5rem);
-            line-height: 0.98;
-            white-space: normal;
-            text-wrap: balance;
-          }
-
-          .three-business-weekday {
+          .exact-business-shell {
             margin-top: 12px;
-            font-size: 1.55rem;
           }
 
-          .three-business-context {
-            margin-top: 24px;
-            font-size: 0.8rem;
+          .exact-business-hero {
+            padding: 22px 20px 18px;
+            border-radius: 24px;
+            text-align: left;
           }
 
-          .three-business-rule {
-            font-size: 0.7rem;
+          .exact-business-hero h1 {
+            margin-top: 8px;
+            font-size: clamp(2rem, 8.8vw, 2.85rem);
+            line-height: 1;
           }
 
-          .three-business-more,
-          .three-business-explainer {
-            width: min(100% - 24px, 1040px);
+          .exact-business-date {
+            justify-items: start;
+            margin-top: 16px;
           }
 
-          .three-business-related-grid {
-            grid-template-columns: 1fr;
-            gap: 6px;
+          .exact-business-weekday {
+            font-size: clamp(2rem, 8.8vw, 2.75rem);
           }
 
-          .three-business-related-card {
-            min-height: 62px;
+          .exact-business-date-main {
             display: grid;
-            grid-template-columns: 1fr auto;
-            grid-template-areas:
-              "label date"
-              "label weekday";
-            align-items: center;
-            padding: 9px 12px;
+            justify-items: start;
+            gap: 0;
+            margin-top: 4px;
+            font-size: clamp(2.7rem, 12.4vw, 4rem);
+            line-height: 0.9;
+            white-space: normal;
           }
 
-          .three-business-related-card span {
-            grid-area: label;
+          .exact-business-month,
+          .exact-business-day,
+          .exact-business-year {
+            display: block;
           }
 
-          .three-business-related-card strong {
-            grid-area: date;
-            margin: 0;
-            text-align: right;
-            font-size: 1.1rem;
+          .exact-business-comma {
+            display: none;
           }
 
-          .three-business-related-card small {
-            grid-area: weekday;
-            margin: 0;
-            text-align: right;
+          .exact-business-context {
+            margin-top: 14px;
+            font-size: 0.87rem;
+          }
+
+          .exact-business-rule {
+            margin-top: 6px;
+            font-size: 0.78rem;
+            line-height: 1.4;
+          }
+
+          .exact-business-actions {
+            margin-top: 8px;
+          }
+
+          .exact-business-related {
+            padding: 18px;
+          }
+
+          .exact-business-related-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .exact-business-related-card {
+            min-height: 76px;
+          }
+
+          .exact-business-content {
+            margin-top: 24px;
           }
         }
       `}</style>
     </main>
   )
 }
-
 
 type ResultActionsProps = {
   title: string
