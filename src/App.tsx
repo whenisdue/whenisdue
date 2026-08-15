@@ -15125,6 +15125,22 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
       !titleValidationMessage,
   )
 
+  const formatFreeTrialDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
+
   useEffect(() => {
     syncShareableQueryParams({ start: startDate, days: trialLength })
   }, [startDate, trialLength])
@@ -15224,12 +15240,12 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               </strong>
 
               <p className="free-trial-answer-context">
-                {parsedTrialLength}-day trial · Starts {formatPlainDate(parsedStartDate)}
+                {parsedTrialLength}-day trial · Starts {formatFreeTrialDate(parsedStartDate)}
               </p>
 
               {cancelByDate ? (
                 <p className="free-trial-answer-reminder">
-                  Suggested reminder: <strong>{formatWeekday(cancelByDate)}, {formatPlainDate(cancelByDate)}</strong>
+                  Suggested reminder: <strong>{formatWeekday(cancelByDate)}, {formatFreeTrialDate(cancelByDate)}</strong>
                 </p>
               ) : null}
             </>
@@ -15318,7 +15334,8 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           <ResultActions
             title="Free trial ends"
             date={trialEndDate}
-            details={`Suggested reminder: ${formatPlainDate(cancelByDate)}`}
+            details={`Suggested reminder: ${formatFreeTrialDate(cancelByDate)}`}
+            variant="return-window"
           />
 
           <details className="free-trial-answer-details">
@@ -15915,24 +15932,6 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           .free-trial-answer-controls input,
           .free-trial-answer-quick-picks button {
             min-height: 46px;
-          }
-
-          .free-trial-answer-actions > .result-actions {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-          }
-
-          .free-trial-answer-actions > .result-actions button,
-          .free-trial-answer-actions > .result-actions a {
-            width: 100%;
-            min-height: 46px;
-            padding: 9px 10px;
-            font-size: 0.82rem;
-          }
-
-          .free-trial-answer-actions > .result-actions > :last-child {
-            grid-column: 1 / -1;
           }
 
           .free-trial-answer-related {
