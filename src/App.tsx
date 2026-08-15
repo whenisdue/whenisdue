@@ -6272,35 +6272,76 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
     syncShareableQueryParams({ date: invoiceDate })
   }, [invoiceDate])
 
-  return (
-    <main className="page-shell net-thirty-vs-days-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+  const monthName = (date: PlainDate) =>
+    [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]
 
-      <section className="net-thirty-vs-days-shell">
-        <header className="net-thirty-vs-days-intro">
-          <p className="friendly-eyebrow">Invoice wording</p>
+  const formatAnswerDate = (date: PlainDate) =>
+    `${monthName(date)} ${date.day}, ${date.year}`
+
+  const datesMatch =
+    netThirtyDate &&
+    thirtyCalendarDaysDate &&
+    toDateKey(netThirtyDate) === toDateKey(thirtyCalendarDaysDate)
+
+  return (
+    <main className="page-shell net30-zero-page">
+      <header className="net30-zero-header" aria-label="WhenIsDue navigation">
+        <a
+          className="net30-zero-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
+
+      <article className="net30-zero-shell">
+        <header className="net30-zero-hero">
+          <p className="net30-zero-eyebrow">Invoice wording guide</p>
           <h1>Net 30 vs 30 days</h1>
-          <p>
-            They often produce the same date, but they are not always
-            interchangeable as payment terms.
+
+          <strong className="net30-zero-answer">
+            Usually the same date.
+          </strong>
+
+          <p className="net30-zero-summary">
+            But they do not mean the same thing.
+          </p>
+
+          <p className="net30-zero-explainer">
+            <strong>Net 30</strong> is a payment term.{' '}
+            <strong>30 days</strong> is just a length of time unless the source
+            tells you what it applies to.
           </p>
         </header>
 
-        <section className="net-thirty-vs-days-bam">
-          <strong>
-            Net 30 is a payment term. “30 days” is only a duration unless the
-            source defines more.
-          </strong>
-          <p>
-            In a simple invoice calculation, both may mean 30 calendar days
-            after the invoice date. But the trigger event, start-day rule,
-            weekend rule, holiday rule, or contract wording can change the
-            actual deadline.
-          </p>
-        </section>
+        <section className="net30-zero-compare" aria-labelledby="net30-zero-compare-title">
+          <div className="net30-zero-compare-heading">
+            <p className="net30-zero-section-eyebrow">Quick check</p>
+            <h2 id="net30-zero-compare-title">For this invoice date</h2>
+          </div>
 
-        <section className="net-thirty-vs-days-workspace">
-          <form onSubmit={(event) => event.preventDefault()}>
+          <form
+            className="net30-zero-date-control"
+            onSubmit={(event) => event.preventDefault()}
+          >
             <label>
               <span>Invoice date</span>
               <input
@@ -6308,158 +6349,465 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
                 min="1900-01-01"
                 max="2100-12-31"
                 value={invoiceDate}
-                onChange={(event) => setInvoiceDate(event.target.value)}
+                onChange={(event) => {
+                  setInvoiceDate(event.target.value)
+                  trackWhenIsDueEvent('date_changed', {
+                    context: 'net30_vs_30_days',
+                    value: event.target.value,
+                  })
+                }}
               />
             </label>
           </form>
 
-          <section className="net-thirty-vs-days-results" aria-live="polite">
-            {parsedInvoiceDate && netThirtyDate && thirtyCalendarDaysDate ? (
-              <>
-                <article>
-                  <small>Net 30</small>
-                  <strong>{formatPlainDate(netThirtyDate)}</strong>
-                  <b>{formatWeekday(netThirtyDate)}</b>
-                  <p>
-                    30 calendar days after the invoice date in WhenIsDue’s
-                    standard Net 30 calculation.
-                  </p>
-                </article>
+          {parsedInvoiceDate && netThirtyDate && thirtyCalendarDaysDate ? (
+            <div className="net30-zero-result-grid" aria-live="polite">
+              <article className="is-net30">
+                <span>Net 30</span>
+                <strong>{formatWeekday(netThirtyDate)},</strong>
+                <b>{formatAnswerDate(netThirtyDate)}</b>
+                <small>Payment term</small>
+              </article>
 
-                <article>
-                  <small>30 calendar days</small>
-                  <strong>{formatPlainDate(thirtyCalendarDaysDate)}</strong>
-                  <b>{formatWeekday(thirtyCalendarDaysDate)}</b>
-                  <p>30 calendar days after the same reference date.</p>
-                </article>
-              </>
-            ) : (
-              <p>Enter a valid invoice date.</p>
-            )}
-          </section>
+              <article>
+                <span>30 calendar days</span>
+                <strong>{formatWeekday(thirtyCalendarDaysDate)},</strong>
+                <b>{formatAnswerDate(thirtyCalendarDaysDate)}</b>
+                <small>Length of time</small>
+              </article>
+            </div>
+          ) : (
+            <p className="net30-zero-invalid">Enter a valid invoice date.</p>
+          )}
+
+          {datesMatch ? (
+            <p className="net30-zero-match">
+              Same date here. Different meaning.
+            </p>
+          ) : null}
         </section>
 
-        <section className="net-thirty-vs-days-copy">
-          <article>
-            <h2>When are they the same?</h2>
-            <p>
-              They match when “Net 30” means payment is due 30 calendar days
-              after the invoice date and no other rule adjusts the final date.
-            </p>
-          </article>
+        <section className="net30-zero-details">
+          <details>
+            <summary>When are they the same?</summary>
+            <div>
+              <p>
+                They match when Net 30 means 30 calendar days after the invoice
+                date and no other rule moves the final date.
+              </p>
+            </div>
+          </details>
 
-          <article>
-            <h2>Why can they differ?</h2>
-            <p>
-              A payment term can use a different starting event, such as
-              receipt of the invoice, acceptance of goods, or completion of
-              work. It can also include weekend, holiday, or other
-              contract-specific rules.
-            </p>
-          </article>
+          <details>
+            <summary>Why can they be different?</summary>
+            <div>
+              <p>
+                A payment term can start from a different event, such as receipt
+                of the invoice, acceptance of goods, or completion of work. It
+                can also include weekend, holiday, or contract-specific rules.
+              </p>
+            </div>
+          </details>
 
-          <article>
-            <h2>Does the invoice date count as day one?</h2>
-            <p>
-              In WhenIsDue’s standard Net 30 calculation, the invoice date is
-              treated as day zero and the due date is 30 calendar days later.
-              If the governing wording uses a different convention, follow
-              that wording.
-            </p>
-          </article>
-
-          <article>
-            <h2>What should you rely on?</h2>
-            <p>
-              Use the written invoice, contract, purchase order, or payment
-              policy. The source that created the obligation controls the real
-              deadline.
-            </p>
-          </article>
+          <details>
+            <summary>Does the invoice date count as day one?</summary>
+            <div>
+              <p>
+                In WhenIsDue’s standard Net 30 calculation, the invoice date is
+                day zero and the due date is 30 calendar days later.
+              </p>
+            </div>
+          </details>
         </section>
 
-        <nav className="net-thirty-vs-days-related" aria-label="Related invoice tools">
-          <a
-            href="/net-30-due-date"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/net-30-due-date')
-            }}
-          >
-            Net 30 due date
-          </a>
-          <a
-            href="/invoice-due-date-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/invoice-due-date-calculator')
-            }}
-          >
-            Invoice due date calculator
-          </a>
-          <a
-            href="/2-10-net-30-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/2-10-net-30-calculator')
-            }}
-          >
-            2/10 Net 30 calculator
-          </a>
-          <a
-            href="/does-the-start-date-count"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/does-the-start-date-count')
-            }}
-          >
-            Does the start date count?
-          </a>
-        </nav>
-      </section>
+        <section className="net30-zero-related" aria-label="Related invoice tools and guides">
+          <div>
+            <p className="net30-zero-section-eyebrow">Related</p>
+            <h2>Need the actual due date?</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/invoice-due-date-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/invoice-due-date-calculator')
+              }}
+            >
+              Invoice due date calculator
+            </a>
+
+            <a
+              href="/net-30-due-date"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/net-30-due-date')
+              }}
+            >
+              Net 30 due date
+            </a>
+
+            <a
+              href="/2-10-net-30-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/2-10-net-30-calculator')
+              }}
+            >
+              2/10 Net 30 calculator
+            </a>
+          </nav>
+        </section>
+      </article>
 
       <SiteFooter
         onNavigate={onNavigate}
-        planningNote="For planning only. Payment terms can define a different trigger event, counting convention, weekend or holiday rule, or final-day adjustment."
+        planningNote="For planning only. The invoice, contract, or policy controls the actual payment term."
       />
 
       <style>{`
-        .net-thirty-vs-days-page { min-height: 100vh; background: #fffaf2; }
-        .net-thirty-vs-days-shell { width: min(100% - 32px, 980px); margin: 0 auto; padding: 34px 0 64px; }
-        .net-thirty-vs-days-intro { text-align: center; }
-        .net-thirty-vs-days-intro h1 { margin: 6px 0 0; color: #152d48; font-size: clamp(2.35rem, 6vw, 4.4rem); line-height: 1; letter-spacing: -0.04em; }
-        .net-thirty-vs-days-intro > p:last-child { max-width: 700px; margin: 12px auto 0; color: #61788f; font-size: 1rem; line-height: 1.55; }
-        .net-thirty-vs-days-bam { max-width: 780px; margin: 22px auto 0; padding: 18px; border: 1px solid rgba(62,126,82,.14); border-radius: 14px; background: #f7fcf7; text-align: center; }
-        .net-thirty-vs-days-bam strong { display: block; color: #214b38; font-size: 1.12rem; line-height: 1.35; }
-        .net-thirty-vs-days-bam p { margin: 8px 0 0; color: #567162; font-size: .96rem; line-height: 1.55; }
-        .net-thirty-vs-days-workspace { display: grid; grid-template-columns: .7fr 1.3fr; gap: 14px; margin-top: 18px; }
-        .net-thirty-vs-days-workspace form, .net-thirty-vs-days-results { padding: 20px; border: 1px solid rgba(19,38,70,.09); border-radius: 18px; background: #fff; }
-        .net-thirty-vs-days-workspace form { align-self: stretch; display: flex; align-items: center; }
-        .net-thirty-vs-days-workspace label { width: 100%; display: grid; gap: 6px; color: #526a82; font-size: .9rem; font-weight: 850; }
-        .net-thirty-vs-days-workspace input { min-height: 48px; width: 100%; padding: 9px 11px; border: 1px solid rgba(19,38,70,.14); border-radius: 10px; background: #fff; color: #17304d; font: inherit; font-size: 1rem; }
-        .net-thirty-vs-days-results { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
-        .net-thirty-vs-days-results article { padding: 17px; border: 1px solid rgba(19,38,70,.09); border-radius: 13px; background: #fffdf9; text-align: center; }
-        .net-thirty-vs-days-results small { display: block; color: #72869a; font-size: .78rem; font-weight: 900; letter-spacing: .035em; text-transform: uppercase; }
-        .net-thirty-vs-days-results strong { display: block; margin-top: 7px; color: #10213f; font-size: clamp(1.55rem,3.2vw,2.35rem); line-height: 1.05; }
-        .net-thirty-vs-days-results b { display: block; margin-top: 5px; color: #667c92; font-size: .92rem; }
-        .net-thirty-vs-days-results p { margin: 9px 0 0; color: #667c92; font-size: .9rem; line-height: 1.5; }
-        .net-thirty-vs-days-copy { display: grid; gap: 12px; margin-top: 22px; }
-        .net-thirty-vs-days-copy article { padding: 18px; border: 1px solid rgba(19,38,70,.08); border-radius: 14px; background: rgba(255,255,255,.72); }
-        .net-thirty-vs-days-copy h2 { margin: 0; color: #29435e; font-size: 1.12rem; }
-        .net-thirty-vs-days-copy p { margin: 8px 0 0; color: #5f748a; font-size: .97rem; line-height: 1.6; }
-        .net-thirty-vs-days-related { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(19,38,70,.1); }
-        .net-thirty-vs-days-related a { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 12px; border: 1px solid rgba(19,38,70,.1); border-radius: 999px; background: #fff; color: #4f6a85; font-size: .86rem; font-weight: 850; text-decoration: none; }
+        .net30-zero-page {
+          --net30-ink: #153654;
+          --net30-muted: #667b8e;
+          --net30-accent: #2d7b64;
+          --net30-field: #f1e4d7;
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .net30-zero-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
+        }
+
+        .net30-zero-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .net30-zero-shell {
+          width: min(100% - 32px, 1100px);
+          margin: 22px auto 0;
+        }
+
+        .net30-zero-hero {
+          padding: clamp(38px, 5vw, 60px) clamp(24px, 6vw, 70px) 36px;
+          border: 1px solid rgba(118, 82, 50, 0.12);
+          border-radius: 28px;
+          background: var(--net30-field);
+          text-align: center;
+        }
+
+        .net30-zero-eyebrow,
+        .net30-zero-section-eyebrow {
+          margin: 0;
+          color: var(--net30-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .net30-zero-hero h1 {
+          margin: 10px 0 0;
+          color: var(--net30-ink);
+          font-size: clamp(3.2rem, 6vw, 5.4rem);
+          line-height: 0.97;
+          letter-spacing: -0.05em;
+        }
+
+        .net30-zero-answer {
+          display: block;
+          margin-top: 28px;
+          color: var(--net30-ink);
+          font-size: clamp(3.6rem, 7.5vw, 6.7rem);
+          font-weight: 950;
+          line-height: 0.9;
+          letter-spacing: -0.055em;
+        }
+
+        .net30-zero-summary {
+          margin: 17px 0 0;
+          color: #3f657b;
+          font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+          font-weight: 900;
+        }
+
+        .net30-zero-explainer {
+          max-width: 760px;
+          margin: 16px auto 0;
+          color: var(--net30-muted);
+          font-size: 0.98rem;
+          line-height: 1.55;
+        }
+
+        .net30-zero-explainer strong {
+          color: #35536e;
+        }
+
+        .net30-zero-compare {
+          margin-top: 16px;
+          padding: 20px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 20px;
+          background: #faf7f3;
+        }
+
+        .net30-zero-compare-heading {
+          text-align: center;
+        }
+
+        .net30-zero-compare-heading h2,
+        .net30-zero-related h2 {
+          margin: 5px 0 0;
+          color: var(--net30-ink);
+          font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+          line-height: 1.08;
+          letter-spacing: -0.03em;
+        }
+
+        .net30-zero-date-control {
+          width: min(100%, 420px);
+          margin: 16px auto 0;
+        }
+
+        .net30-zero-date-control label {
+          display: grid;
+          gap: 7px;
+        }
+
+        .net30-zero-date-control label > span {
+          color: #526a82;
+          font-size: 0.88rem;
+          font-weight: 850;
+        }
+
+        .net30-zero-date-control input {
+          width: 100%;
+          min-height: 50px;
+          padding: 10px 12px;
+          border: 1px solid rgba(21, 54, 84, 0.14);
+          border-radius: 11px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .net30-zero-result-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          max-width: 840px;
+          margin: 16px auto 0;
+        }
+
+        .net30-zero-result-grid article {
+          padding: 17px 18px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 15px;
+          background: #fff;
+        }
+
+        .net30-zero-result-grid article.is-net30 {
+          border-color: rgba(45, 123, 100, 0.26);
+          background: #e7f2ec;
+        }
+
+        .net30-zero-result-grid span,
+        .net30-zero-result-grid strong,
+        .net30-zero-result-grid b,
+        .net30-zero-result-grid small {
+          display: block;
+        }
+
+        .net30-zero-result-grid span {
+          color: #5d7287;
+          font-size: 0.8rem;
+          font-weight: 900;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .net30-zero-result-grid strong {
+          margin-top: 8px;
+          color: #3f657b;
+          font-size: clamp(1.45rem, 2.5vw, 2rem);
+          line-height: 1;
+        }
+
+        .net30-zero-result-grid b {
+          margin-top: 4px;
+          color: var(--net30-ink);
+          font-size: clamp(1.9rem, 3.8vw, 3rem);
+          line-height: 0.98;
+          letter-spacing: -0.04em;
+        }
+
+        .net30-zero-result-grid small {
+          margin-top: 8px;
+          color: #748596;
+          font-size: 0.82rem;
+        }
+
+        .net30-zero-match {
+          margin: 14px 0 0;
+          color: #35536e;
+          font-weight: 900;
+          text-align: center;
+        }
+
+        .net30-zero-invalid {
+          margin: 16px 0 0;
+          color: var(--net30-muted);
+          text-align: center;
+        }
+
+        .net30-zero-details {
+          display: grid;
+          gap: 10px;
+          margin-top: 16px;
+        }
+
+        .net30-zero-details details {
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .net30-zero-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .net30-zero-details details > div {
+          padding: 0 14px 16px;
+        }
+
+        .net30-zero-details p {
+          max-width: 780px;
+          margin: 0;
+          color: #61768a;
+          line-height: 1.58;
+        }
+
+        .net30-zero-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 22px;
+          background: #f5ede6;
+        }
+
+        .net30-zero-related nav {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .net30-zero-related a {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 12px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 12px;
+          background: #fff;
+          color: #35536e;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-align: center;
+          text-decoration: none;
+        }
+
         @media (max-width: 760px) {
-          .net-thirty-vs-days-shell { width: min(100% - 20px,980px); padding-top: 24px; }
-          .net-thirty-vs-days-workspace, .net-thirty-vs-days-results { grid-template-columns: 1fr; }
-          .net-thirty-vs-days-workspace form, .net-thirty-vs-days-results { padding: 16px; }
+          .net30-zero-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
+          }
+
+          .net30-zero-brand img {
+            width: 154px;
+          }
+
+          .net30-zero-shell {
+            width: min(100% - 24px, 680px);
+            margin-top: 12px;
+          }
+
+          .net30-zero-hero {
+            padding: 22px 20px 20px;
+            border-radius: 24px;
+            text-align: left;
+          }
+
+          .net30-zero-hero h1 {
+            margin-top: 8px;
+            font-size: clamp(2.5rem, 11vw, 3.5rem);
+          }
+
+          .net30-zero-answer {
+            margin-top: 20px;
+            font-size: clamp(3rem, 14vw, 4.8rem);
+            line-height: 0.92;
+          }
+
+          .net30-zero-summary {
+            margin-top: 14px;
+            font-size: clamp(1.25rem, 5.6vw, 1.7rem);
+          }
+
+          .net30-zero-explainer {
+            margin-top: 12px;
+            font-size: 0.88rem;
+          }
+
+          .net30-zero-compare {
+            padding: 16px;
+          }
+
+          .net30-zero-compare-heading {
+            text-align: left;
+          }
+
+          .net30-zero-date-control {
+            margin-top: 14px;
+          }
+
+          .net30-zero-result-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+          }
+
+          .net30-zero-result-grid b {
+            font-size: clamp(2rem, 9vw, 2.85rem);
+          }
+
+          .net30-zero-related {
+            padding: 18px;
+          }
+
+          .net30-zero-related nav {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </main>
   )
 }
-
-
 function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
   const [deadlineDate, setDeadlineDate] = useState(() =>
     getInitialDateQueryParam('date', '2026-08-15'),
