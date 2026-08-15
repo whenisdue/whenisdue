@@ -16446,11 +16446,8 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-answer-date {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          gap: 0.18em;
-          max-width: 1020px;
+          display: block;
+          max-width: 100%;
           margin-top: 22px;
           color: var(--return-ink);
           font-weight: 900;
@@ -16459,20 +16456,22 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-answer-weekday {
-          display: inline;
-          margin: 0;
+          display: block;
+          margin: 0 0 8px;
           color: var(--return-ink);
-          font-size: clamp(2.55rem, 5vw, 4.6rem);
+          font-size: clamp(2.5rem, 4.4vw, 4.25rem);
           font-weight: 900;
           line-height: 0.95;
           letter-spacing: -0.045em;
         }
 
         .return-answer-date-main {
-          display: inline-flex;
+          display: flex;
+          flex-wrap: wrap;
           align-items: baseline;
           gap: 0.08em;
-          font-size: clamp(3.6rem, 7.6vw, 7.1rem);
+          max-width: 100%;
+          font-size: clamp(3.45rem, 6.1vw, 5.85rem);
           line-height: 0.9;
         }
 
