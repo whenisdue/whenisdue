@@ -5756,224 +5756,505 @@ function SubscriptionRenewalCalculatorPage({
   )
 }
 function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
-  const [amount, setAmount] = useState(() =>
-    getInitialPositiveIntegerQueryParam('amount', '5', 365),
-  )
-  const [referenceDate, setReferenceDate] = useState(() =>
-    getInitialDateQueryParam(
-      'date',
-      toDateKey(addCalendarDays(getTodayPlainDate(new Date()), 10)),
-    ),
-  )
-  const [countMode, setCountMode] = useState<'calendar' | 'business'>(() =>
-    new URLSearchParams(window.location.search).get('unit') === 'business'
-      ? 'business'
-      : 'calendar',
-  )
-  const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
-    getInitialHolidayCalendarQueryParam,
-  )
+  const startDate = parsePlainDate('2026-08-10')!
 
-  const parsedAmount = parseInteger(amount)
-  const parsedDate = parsePlainDate(referenceDate)
+  const fiveCalendarDays = calculateDeadlineByRule({
+    triggerDate: startDate,
+    duration: 5,
+    direction: 'after',
+    unit: 'calendar-days',
+    startDayConvention: 'exclude-trigger',
+    holidayCalendar: 'none',
+    endDayAdjustment: 'none',
+  })
 
-  const beforeDate =
-    parsedAmount !== null && parsedDate
-      ? countMode === 'business'
-        ? calculateBusinessDaysWithCalendar(
-            parsedDate,
-            -parsedAmount,
-            holidayCalendar,
-          ).date
-        : addCalendarDays(parsedDate, -parsedAmount)
-      : null
-
-  const afterDate =
-    parsedAmount !== null && parsedDate
-      ? countMode === 'business'
-        ? calculateBusinessDaysWithCalendar(
-            parsedDate,
-            parsedAmount,
-            holidayCalendar,
-          ).date
-        : addCalendarDays(parsedDate, parsedAmount)
-      : null
-
-  useEffect(() => {
-    saveHolidayCalendar(holidayCalendar)
-  }, [holidayCalendar])
-
-  useEffect(() => {
-    syncShareableQueryParams({
-      amount,
-      date: referenceDate,
-      unit: countMode,
-      calendar:
-        countMode === 'business'
-          ? holidayCalendarQueryValue(holidayCalendar)
-          : null,
-    })
-  }, [amount, referenceDate, countMode, holidayCalendar])
+  const fiveCalendarDaysIncludingStart = calculateDeadlineByRule({
+    triggerDate: startDate,
+    duration: 5,
+    direction: 'after',
+    unit: 'calendar-days',
+    startDayConvention: 'include-if-qualifying',
+    holidayCalendar: 'none',
+    endDayAdjustment: 'none',
+  })
 
   return (
-    <main className="page-shell within-guide">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+    <main className="page-shell within-zero-page">
+      <header className="within-zero-header" aria-label="WhenIsDue navigation">
+        <a
+          className="within-zero-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
 
-      <section className="within-guide-shell">
-        <header>
-          <p className="friendly-eyebrow">Deadline wording</p>
-          <h1>What does “within X days” mean?</h1>
-          <p>
-            “Within” can be ambiguous by itself. The surrounding wording must
-            tell you whether to count before, after, or inside a stated window.
+      <article className="within-zero-shell">
+        <header className="within-zero-hero">
+          <p className="within-zero-eyebrow">Deadline wording guide</p>
+          <h1>What does “within 5 days” mean?</h1>
+          <strong className="within-zero-answer">It can be ambiguous.</strong>
+          <p className="within-zero-summary">
+            The key question is whether the start date counts as day one.
+          </p>
+          <p className="within-zero-caveat">
+            Use the wording in the contract, policy, law, or message that created
+            the deadline.
           </p>
         </header>
 
-        <section className="within-guide-bam">
-          <strong>Do not assume a direction from the word “within” alone.</strong>
-          <span>
-            “Within 5 days after receipt” counts forward. “5 days before
-            renewal” counts backward. “Within 5 days of July 1” may need
-            clarification.
-          </span>
-        </section>
-
-        <section className="within-guide-tool">
-          <form onSubmit={(event) => event.preventDefault()}>
-            <label>
-              <span>Number of days</span>
-              <input
-                type="number"
-                min="0"
-                max="365"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-              />
-            </label>
-            <label>
-              <span>Reference date</span>
-              <input
-                type="date"
-                value={referenceDate}
-                onChange={(event) => setReferenceDate(event.target.value)}
-              />
-            </label>
-            <label>
-              <span>Count as</span>
-              <select
-                value={countMode}
-                onChange={(event) =>
-                  setCountMode(event.target.value as 'calendar' | 'business')
-                }
-              >
-                <option value="calendar">Calendar days</option>
-                <option value="business">Business days</option>
-              </select>
-            </label>
-
-            {countMode === 'business' ? (
-              <HolidayCalendarSelect
-                value={holidayCalendar}
-                onChange={setHolidayCalendar}
-                compact
-              />
-            ) : null}
-          </form>
-
-          <div className="within-guide-results" aria-live="polite">
-            {beforeDate && afterDate && parsedDate && parsedAmount !== null ? (
-              <>
-                <article>
-                  <small>If it means before</small>
-                  <strong>{formatPlainDate(beforeDate)}</strong>
-                  <b>{formatWeekday(beforeDate)}</b>
-                </article>
-                <article>
-                  <small>If it means after</small>
-                  <strong>{formatPlainDate(afterDate)}</strong>
-                  <b>{formatWeekday(afterDate)}</b>
-                </article>
-              </>
-            ) : (
-              <p>Enter a valid date and number of days.</p>
-            )}
+        <section className="within-zero-example" aria-labelledby="within-zero-example-title">
+          <div className="within-zero-example-heading">
+            <p className="within-zero-section-eyebrow">Same wording, two results</p>
+            <h2 id="within-zero-example-title">
+              “Within 5 days of August 10, 2026”
+            </h2>
           </div>
+
+          <div className="within-zero-example-grid">
+            <article>
+              <span>Start date does not count</span>
+              <strong>
+                {fiveCalendarDays
+                  ? `${formatWeekday(fiveCalendarDays.answerDate)}, ${formatPlainDate(
+                      fiveCalendarDays.answerDate,
+                    )}`
+                  : '—'}
+              </strong>
+              <p>Counting starts on August 11.</p>
+            </article>
+
+            <article className="is-including-start">
+              <span>Start date counts as day 1</span>
+              <strong>
+                {fiveCalendarDaysIncludingStart
+                  ? `${formatWeekday(
+                      fiveCalendarDaysIncludingStart.answerDate,
+                    )}, ${formatPlainDate(
+                      fiveCalendarDaysIncludingStart.answerDate,
+                    )}`
+                  : '—'}
+              </strong>
+              <p>August 10 is day one.</p>
+            </article>
+          </div>
+
+          <a
+            className="within-zero-cta"
+            href="/deadline-calculator?date=2026-08-10&days=5&unit=calendar-days&direction=after"
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('authority_guide_calculator_click', {
+                guide: 'within_days',
+              })
+              onNavigate(
+                '/deadline-calculator?date=2026-08-10&days=5&unit=calendar-days&direction=after',
+              )
+            }}
+          >
+            Check your exact deadline
+          </a>
         </section>
 
-        <section className="within-guide-copy">
-          <article>
-            <h2>Does the starting day count?</h2>
-            <p>
-              That is a separate question. Some rules use day zero; others
-              include the triggering day. “Within” alone does not answer it.
-            </p>
-          </article>
-          <article>
-            <h2>Do weekends and holidays count?</h2>
-            <p>
-              Calendar days count them. Business or working days use the
-              applicable workweek and holiday rules.
-            </p>
-          </article>
-          <article>
-            <h2>When should you check the source?</h2>
-            <p>
-              Always when the wording comes from a contract, policy, law,
-              court rule, regulated notice, or another source that defines its
-              own counting method.
-            </p>
-          </article>
+        <section className="within-zero-details">
+          <details>
+            <summary>Does “within” include the start date?</summary>
+            <div>
+              <p>
+                Not always. Some rules treat the triggering date as day zero;
+                others count it as day one. The original wording controls.
+              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Does “within 5 days” mean calendar or business days?</summary>
+            <div>
+              <p>
+                If the wording only says “days,” it may mean calendar days, but
+                that is not universal. If it says “business days,” weekends are
+                normally skipped.
+              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>What if the last day falls on a weekend?</summary>
+            <div>
+              <p>
+                Do not move the date automatically unless the rule says to.
+                Some deadlines roll forward, some roll backward, and some stay
+                on the stated calendar date.
+              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Why can one day change the answer?</summary>
+            <div>
+              <p>
+                Because counting the start date as day one shifts every later
+                day in the sequence. On short deadlines, that one-day difference
+                can materially change the result.
+              </p>
+            </div>
+          </details>
         </section>
 
-        <nav className="within-guide-related">
-          <a href="/deadline-calculator" onClick={(e) => { e.preventDefault(); onNavigate('/deadline-calculator') }}>Deadline calculator</a>
-          <a href="/does-the-start-date-count" onClick={(e) => { e.preventDefault(); onNavigate('/does-the-start-date-count') }}>Does the start date count?</a>
-          <a href="/do-weekends-count-as-business-days" onClick={(e) => { e.preventDefault(); onNavigate('/do-weekends-count-as-business-days') }}>Do weekends count?</a>
-        </nav>
-      </section>
+        <section className="within-zero-related" aria-label="Related deadline wording guides">
+          <div>
+            <p className="within-zero-section-eyebrow">Related answers</p>
+            <h2>Need another counting rule?</h2>
+          </div>
+
+          <nav>
+            <a
+              href="/does-the-start-date-count"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/does-the-start-date-count')
+              }}
+            >
+              Does the start date count?
+            </a>
+
+            <a
+              href="/what-if-a-deadline-falls-on-a-weekend"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/what-if-a-deadline-falls-on-a-weekend')
+              }}
+            >
+              What if a deadline lands on a weekend?
+            </a>
+
+            <a
+              href="/deadline-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/deadline-calculator')
+              }}
+            >
+              Deadline calculator
+            </a>
+          </nav>
+        </section>
+      </article>
 
       <SiteFooter
         onNavigate={onNavigate}
-        planningNote="For planning only. The governing wording controls direction, start-day counting, weekends, holidays, service, receipt, and final-day rules."
+        planningNote="For planning only. The wording that created the deadline controls whether the start date, weekends, holidays, or end-date adjustments apply."
       />
 
       <style>{`
-        .within-guide { min-height:100vh; background:#fffaf2; }
-        .within-guide-shell { width:min(100% - 32px,980px); margin:0 auto; padding:34px 0 64px; }
-        .within-guide-shell > header { text-align:center; }
-        .within-guide-shell h1 { margin:6px 0 0; color:#152d48; font-size:clamp(2.35rem,6vw,4.4rem); line-height:1; letter-spacing:-.04em; }
-        .within-guide-shell > header > p:last-child { max-width:700px; margin:12px auto 0; color:#61788f; line-height:1.55; }
-        .within-guide-bam { max-width:760px; margin:22px auto 0; padding:18px; border:1px solid rgba(62,126,82,.14); border-radius:14px; background:#f7fcf7; text-align:center; }
-        .within-guide-bam strong,.within-guide-bam span { display:block; }
-        .within-guide-bam strong { color:#214b38; font-size:1.1rem; }
-        .within-guide-bam span { margin-top:8px; color:#567162; line-height:1.55; }
-        .within-guide-tool { display:grid; grid-template-columns:.85fr 1.15fr; gap:14px; margin-top:18px; }
-        .within-guide-tool form,.within-guide-results { padding:20px; border:1px solid rgba(19,38,70,.09); border-radius:18px; background:#fff; }
-        .within-guide-tool form { display:grid; gap:12px; align-content:start; }
-        .within-guide-tool label { display:grid; gap:6px; color:#526a82; font-size:.9rem; font-weight:850; }
-        .within-guide-tool input,.within-guide-tool select { min-height:48px; width:100%; padding:9px 11px; border:1px solid rgba(19,38,70,.14); border-radius:10px; background:#fff; color:#17304d; font:inherit; }
-        .within-guide-results { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-        .within-guide-results article { display:flex; flex-direction:column; justify-content:center; padding:16px; border:1px solid rgba(19,38,70,.09); border-radius:13px; background:#fffdf9; text-align:center; }
-        .within-guide-results small { color:#72869a; font-size:.78rem; font-weight:900; text-transform:uppercase; }
-        .within-guide-results strong { margin-top:7px; color:#10213f; font-size:clamp(1.55rem,3.2vw,2.35rem); line-height:1.05; }
-        .within-guide-results b { margin-top:5px; color:#667c92; font-size:.92rem; }
-        .within-guide-copy { display:grid; gap:12px; margin-top:22px; }
-        .within-guide-copy article { padding:18px; border:1px solid rgba(19,38,70,.08); border-radius:14px; background:rgba(255,255,255,.72); }
-        .within-guide-copy h2 { margin:0; color:#29435e; font-size:1.12rem; }
-        .within-guide-copy p { margin:8px 0 0; color:#5f748a; line-height:1.6; }
-        .within-guide-related { display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; padding-top:18px; border-top:1px solid rgba(19,38,70,.1); }
-        .within-guide-related a { min-height:44px; display:inline-flex; align-items:center; padding:8px 12px; border:1px solid rgba(19,38,70,.1); border-radius:999px; background:#fff; color:#4f6a85; font-size:.86rem; font-weight:850; text-decoration:none; }
-        @media (max-width:760px) {
-          .within-guide-shell { width:min(100% - 20px,980px); padding-top:24px; }
-          .within-guide-tool,.within-guide-results { grid-template-columns:1fr; }
-          .within-guide-tool form,.within-guide-results { padding:16px; }
+        .within-zero-page {
+          --within-ink: #153654;
+          --within-muted: #667b8e;
+          --within-accent: #2d7b64;
+          --within-field: #ece5f0;
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .within-zero-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
+        }
+
+        .within-zero-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .within-zero-shell {
+          width: min(100% - 32px, 1100px);
+          margin: 22px auto 0;
+        }
+
+        .within-zero-hero {
+          padding: clamp(38px, 5vw, 60px) clamp(24px, 6vw, 70px) 36px;
+          border: 1px solid rgba(89, 65, 105, 0.12);
+          border-radius: 28px;
+          background: var(--within-field);
+          text-align: center;
+        }
+
+        .within-zero-eyebrow,
+        .within-zero-section-eyebrow {
+          margin: 0;
+          color: var(--within-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .within-zero-hero h1 {
+          max-width: 900px;
+          margin: 10px auto 0;
+          color: var(--within-ink);
+          font-size: clamp(3rem, 6vw, 5.3rem);
+          line-height: 0.97;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .within-zero-answer {
+          display: block;
+          margin-top: 28px;
+          color: var(--within-ink);
+          font-size: clamp(3.7rem, 8vw, 7rem);
+          font-weight: 950;
+          line-height: 0.9;
+          letter-spacing: -0.055em;
+        }
+
+        .within-zero-summary {
+          max-width: 760px;
+          margin: 22px auto 0;
+          color: #3f657b;
+          font-size: clamp(1.35rem, 2.5vw, 1.95rem);
+          font-weight: 850;
+          line-height: 1.25;
+        }
+
+        .within-zero-caveat {
+          max-width: 720px;
+          margin: 14px auto 0;
+          color: var(--within-muted);
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .within-zero-example {
+          margin-top: 16px;
+          padding: 20px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 20px;
+          background: #faf8fb;
+        }
+
+        .within-zero-example-heading {
+          text-align: center;
+        }
+
+        .within-zero-example-heading h2,
+        .within-zero-related h2 {
+          margin: 5px 0 0;
+          color: var(--within-ink);
+          font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+          line-height: 1.08;
+          letter-spacing: -0.03em;
+        }
+
+        .within-zero-example-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          max-width: 840px;
+          margin: 16px auto 0;
+        }
+
+        .within-zero-example-grid article {
+          padding: 17px 18px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 15px;
+          background: #fff;
+        }
+
+        .within-zero-example-grid article.is-including-start {
+          border-color: rgba(45, 123, 100, 0.26);
+          background: #e7f2ec;
+        }
+
+        .within-zero-example-grid span {
+          display: block;
+          color: #5d7287;
+          font-size: 0.8rem;
+          font-weight: 900;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .within-zero-example-grid strong {
+          display: block;
+          margin-top: 7px;
+          color: var(--within-ink);
+          font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+          line-height: 1.16;
+        }
+
+        .within-zero-example-grid p {
+          margin: 8px 0 0;
+          color: #667b8e;
+          font-size: 0.9rem;
+          line-height: 1.45;
+        }
+
+        .within-zero-cta {
+          min-height: 48px;
+          width: fit-content;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 16px auto 0;
+          padding: 9px 16px;
+          border-radius: 11px;
+          background: #267357;
+          color: #fff;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        .within-zero-details {
+          display: grid;
+          gap: 10px;
+          margin-top: 16px;
+        }
+
+        .within-zero-details details {
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .within-zero-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .within-zero-details details > div {
+          padding: 0 14px 16px;
+        }
+
+        .within-zero-details p {
+          max-width: 780px;
+          margin: 0;
+          color: #61768a;
+          line-height: 1.58;
+        }
+
+        .within-zero-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 22px;
+          background: #f2edf5;
+        }
+
+        .within-zero-related nav {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .within-zero-related a {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 12px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 12px;
+          background: #fff;
+          color: #35536e;
+          font-size: 0.86rem;
+          font-weight: 850;
+          text-align: center;
+          text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+          .within-zero-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
+          }
+
+          .within-zero-brand img {
+            width: 154px;
+          }
+
+          .within-zero-shell {
+            width: min(100% - 24px, 680px);
+            margin-top: 12px;
+          }
+
+          .within-zero-hero {
+            padding: 22px 20px 20px;
+            border-radius: 24px;
+            text-align: left;
+          }
+
+          .within-zero-hero h1 {
+            margin-top: 8px;
+            font-size: clamp(2.2rem, 10vw, 3.2rem);
+            line-height: 0.98;
+          }
+
+          .within-zero-answer {
+            margin-top: 20px;
+            font-size: clamp(3.4rem, 16vw, 5.4rem);
+            line-height: 0.92;
+          }
+
+          .within-zero-summary {
+            margin-top: 16px;
+            font-size: clamp(1.2rem, 5.5vw, 1.62rem);
+            line-height: 1.22;
+          }
+
+          .within-zero-caveat {
+            margin-top: 12px;
+            font-size: 0.86rem;
+            line-height: 1.45;
+          }
+
+          .within-zero-example {
+            padding: 16px;
+          }
+
+          .within-zero-example-heading {
+            text-align: left;
+          }
+
+          .within-zero-example-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+          }
+
+          .within-zero-cta {
+            width: 100%;
+          }
+
+          .within-zero-related {
+            padding: 18px;
+          }
+
+          .within-zero-related nav {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </main>
   )
 }
-
-
 function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
   const [invoiceDate, setInvoiceDate] = useState(() =>
     getInitialDateQueryParam('date', todayInputValue()),
