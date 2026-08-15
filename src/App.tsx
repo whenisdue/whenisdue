@@ -16738,9 +16738,11 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         .return-answer-date-main {
           display: inline-flex;
+          flex-wrap: wrap;
           align-items: baseline;
           gap: 0.08em;
-          font-size: clamp(3.6rem, 7.6vw, 7.1rem);
+          max-width: 100%;
+          font-size: clamp(3.5rem, 6.25vw, 6.35rem);
           line-height: 0.9;
         }
 
