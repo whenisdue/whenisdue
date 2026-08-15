@@ -1615,16 +1615,15 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
           <div className="start-date-answer-primary">
             <strong>Usually no — unless the rule says to count it.</strong>
             <p>
-              If a deadline says <b>“5 business days after August 10”</b>,
-              August 10 is normally the reference date and counting starts
-              after it. If the rule says to count August 10 as day one, then
-              the start date counts when it qualifies.
+              If the wording says <b>“5 business days after August 10”</b>,
+              August 10 is the reference date and counting normally begins
+              with the next qualifying day.
             </p>
           </div>
 
           <p className="start-date-answer-context">
-            Wording such as “within 5 business days of August 10” can be
-            ambiguous. The original rule controls.
+            If the rule says August 10 is day one, count it instead. If the
+            wording is unclear, check the original rule.
           </p>
         </section>
 
@@ -2036,7 +2035,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
           }
 
           .start-date-answer-hero {
-            padding: 30px 20px 28px;
+            padding: 26px 20px 24px;
             border-radius: 24px;
             text-align: left;
           }
