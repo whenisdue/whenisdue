@@ -14024,7 +14024,9 @@ function CalculationReceipt({
 }
 
 function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
-  const [startDate, setStartDate] = useState(() => getInitialDateQueryParam('start', todayInputValue()))
+  const [startDate, setStartDate] = useState(() =>
+    getInitialDateQueryParam('start', todayInputValue()),
+  )
   const [endDate, setEndDate] = useState(() =>
     getInitialDateQueryParam(
       'end',
@@ -14034,6 +14036,7 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
   const [holidayCalendar, setHolidayCalendar] = useState<HolidayCalendarId>(
     getInitialHolidayCalendarQueryParam,
   )
+  const [copyMessage, setCopyMessage] = useState<string | null>(null)
 
   useEffect(() => {
     saveHolidayCalendar(holidayCalendar)
@@ -14059,286 +14062,649 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
     })
   }, [startDate, endDate, holidayCalendar])
 
+  const formatBetweenDate = (date: PlainDate) =>
+    `${[
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ][date.month - 1]} ${date.day}, ${date.year}`
+
+  async function copyBetweenResult() {
+    if (
+      businessDays === null ||
+      !parsedStartDate ||
+      !parsedEndDate
+    ) {
+      return
+    }
+
+    const resultText = `${businessDays} ${
+      businessDays === 1 ? 'business day' : 'business days'
+    } between ${formatBetweenDate(parsedStartDate)} and ${formatBetweenDate(
+      parsedEndDate,
+    )}`
+
+    try {
+      await navigator.clipboard.writeText(resultText)
+      setCopyMessage('Copied')
+      trackWhenIsDueEvent('result_copied', {
+        context: 'business_days_between',
+        value: businessDays,
+      })
+      window.setTimeout(() => setCopyMessage(null), 1800)
+    } catch {
+      setCopyMessage('Could not copy')
+      window.setTimeout(() => setCopyMessage(null), 1800)
+    }
+  }
+
   return (
-    <main className="page-shell business-between-page">
-      <section className="business-between-hero" aria-labelledby="business-between-title">
-        <IdentityRow onNavigate={onNavigate} showHomeLink />
+    <main className="page-shell between-answer-page">
+      <header className="between-answer-header" aria-label="WhenIsDue navigation">
+        <a
+          className="between-answer-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
 
-        <div className="business-between-answer">
-          <p className="business-between-kicker">Business days between dates</p>
+      <section
+        className="between-answer-shell"
+        aria-labelledby="business-between-title"
+      >
+        <div className="between-answer-hero">
+          <p className="between-answer-eyebrow">
+            Business days between dates
+          </p>
 
-          <div className="business-between-controls-card">
-            <div className="business-between-inputs">
-              <label>
-                <span>Start date</span>
-                <input
-                  type="date"
-                  min="1900-01-01"
-                  max="2100-12-31"
-                  value={startDate}
-                  onChange={(event) => {
-                    setStartDate(event.target.value)
-                    trackWhenIsDueEvent('date_changed', { context: 'business_days_between_start', value: event.target.value })
-                  }}
-                />
-              </label>
-
-              <label>
-                <span>End date</span>
-                <input
-                  type="date"
-                  min="1900-01-01"
-                  max="2100-12-31"
-                  value={endDate}
-                  onChange={(event) => {
-                    setEndDate(event.target.value)
-                    trackWhenIsDueEvent('date_changed', { context: 'business_days_between_end', value: event.target.value })
-                  }}
-                />
-              </label>
-            </div>
-
-            <HolidayCalendarSelect
-              value={holidayCalendar}
-              onChange={(nextCalendar) => {
-                setHolidayCalendar(nextCalendar)
-                trackWhenIsDueEvent('holiday_calendar_changed', {
-                  context: 'business_days_between',
-                  value: nextCalendar,
-                })
-              }}
-              compact
-            />
-          </div>
-
-          {businessDays !== null ? (
+          {businessDays !== null && parsedStartDate && parsedEndDate ? (
             <>
-              <h1 id="business-between-title" className="business-between-number">{businessDays}</h1>
-              <p className="business-between-label">
+              <p className="between-answer-intro">There are</p>
+
+              <h1 id="business-between-title" className="between-answer-number">
+                {businessDays}
+              </h1>
+
+              <p className="between-answer-unit">
                 {businessDays === 1 ? 'business day' : 'business days'}
               </p>
-              <p className="business-between-rule">
-                Start date excluded · End date included · Weekends skipped
+
+              <p className="between-answer-range">
+                between{' '}
+                <strong>{formatBetweenDate(parsedStartDate)}</strong>
+                {' and '}
+                <strong>{formatBetweenDate(parsedEndDate)}</strong>
               </p>
-              <p className="business-between-note">
+
+              <p className="between-answer-rule">
+                Start date excluded · End date included
+              </p>
+
+              <p className="between-answer-calendar-rule">
                 {holidayCalendar === 'none'
-                  ? 'Public holidays still count as weekdays.'
-                  : `${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays are excluded.`}
+                  ? 'Weekends skipped · Public holidays still count'
+                  : `Weekends + ${
+                      getHolidayCalendarOption(holidayCalendar).shortLabel
+                    } holidays skipped`}
               </p>
-              {parsedStartDate && parsedEndDate ? (
-                <CalculationReceipt
-                  analyticsContext="business_days_between"
-                  rows={[
-                    { label: 'Start date', value: `${formatWeekday(parsedStartDate)}, ${formatPlainDate(parsedStartDate)}` },
-                    { label: 'End date', value: `${formatWeekday(parsedEndDate)}, ${formatPlainDate(parsedEndDate)}` },
-                    { label: 'Counting rule', value: 'Start excluded · End included' },
-                    { label: 'Weekend rule', value: 'Saturday and Sunday skipped' },
-                    {
-                      label: 'Holiday calendar',
-                      value: getHolidayCalendarOption(holidayCalendar).label,
-                    },
-                    {
-                      label: 'Skipped holidays',
-                      value: formatSkippedHolidaySummary(
-                        businessDayCalculation?.skippedHolidays ?? [],
-                      ),
-                    },
-                    { label: 'Result', value: `${businessDays} ${businessDays === 1 ? 'business day' : 'business days'}` },
-                  ]}
-                />
-              ) : null}
             </>
           ) : (
-            <h1 id="business-between-title" className="business-between-number business-between-error">
-              Choose two valid dates
-            </h1>
+            <>
+              <h1 id="business-between-title" className="between-answer-question">
+                How many business days are between these dates?
+              </h1>
+              <p className="between-answer-range">
+                Choose two valid dates below.
+              </p>
+            </>
           )}
         </div>
+
+        <form
+          className="between-answer-controls"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            <span>Start date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={startDate}
+              onChange={(event) => {
+                setStartDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'business_days_between_start',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+
+          <label>
+            <span>End date</span>
+            <input
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              value={endDate}
+              onChange={(event) => {
+                setEndDate(event.target.value)
+                trackWhenIsDueEvent('date_changed', {
+                  context: 'business_days_between_end',
+                  value: event.target.value,
+                })
+              }}
+            />
+          </label>
+        </form>
       </section>
 
-      <section className="business-between-explanation">
-        <h2>How this count works</h2>
-        <p>
-          WhenIsDue counts weekdays after the earlier date through the later date. Saturdays and Sundays are skipped.
-          Public holidays still count by default, or you can choose a supported holiday calendar above to exclude known holidays.
-        </p>
+      {businessDays !== null && parsedStartDate && parsedEndDate ? (
+        <section className="between-answer-actions">
+          <button
+            className="between-answer-copy"
+            type="button"
+            onClick={copyBetweenResult}
+          >
+            {copyMessage ?? 'Copy result'}
+          </button>
+
+          <details className="between-answer-details">
+            <summary>Why this number?</summary>
+            <div className="between-answer-detail-body">
+              <p>
+                WhenIsDue counts qualifying weekdays after the start date
+                through the end date. The start date is excluded and the end
+                date is included.
+              </p>
+
+              <CalculationReceipt
+                analyticsContext="business_days_between"
+                rows={[
+                  {
+                    label: 'Start date',
+                    value: `${formatWeekday(
+                      parsedStartDate,
+                    )}, ${formatPlainDate(parsedStartDate)}`,
+                  },
+                  {
+                    label: 'End date',
+                    value: `${formatWeekday(
+                      parsedEndDate,
+                    )}, ${formatPlainDate(parsedEndDate)}`,
+                  },
+                  {
+                    label: 'Counting rule',
+                    value: 'Start excluded · End included',
+                  },
+                  {
+                    label: 'Weekend rule',
+                    value: 'Saturday and Sunday skipped',
+                  },
+                  {
+                    label: 'Holiday calendar',
+                    value: getHolidayCalendarOption(holidayCalendar).label,
+                  },
+                  {
+                    label: 'Skipped holidays',
+                    value: formatSkippedHolidaySummary(
+                      businessDayCalculation?.skippedHolidays ?? [],
+                    ),
+                  },
+                  {
+                    label: 'Result',
+                    value: `${businessDays} ${
+                      businessDays === 1 ? 'business day' : 'business days'
+                    }`,
+                  },
+                ]}
+              />
+            </div>
+          </details>
+
+          <details className="between-answer-details">
+            <summary>Holiday settings</summary>
+            <div className="between-answer-detail-body">
+              <HolidayCalendarSelect
+                value={holidayCalendar}
+                onChange={(nextCalendar) => {
+                  setHolidayCalendar(nextCalendar)
+                  trackWhenIsDueEvent('holiday_calendar_changed', {
+                    context: 'business_days_between',
+                    value: nextCalendar,
+                  })
+                }}
+                compact
+              />
+
+              <p className="between-answer-holiday-note">
+                {holidayCalendar === 'none'
+                  ? 'Weekends are skipped. Public holidays still count as weekdays.'
+                  : `Weekends and ${
+                      getHolidayCalendarOption(holidayCalendar).shortLabel
+                    } holidays are excluded.`}
+              </p>
+            </div>
+          </details>
+        </section>
+      ) : null}
+
+      <section className="between-answer-content" aria-label="Business-day counting help">
+        <div className="between-answer-content-heading">
+          <p className="between-answer-section-eyebrow">Counting rule</p>
+          <h2>Start excluded. End included.</h2>
+        </div>
+
+        <article>
+          <h2>How this count works</h2>
+          <p>
+            WhenIsDue counts qualifying weekdays after the start date through
+            the end date. Saturdays and Sundays are skipped.
+          </p>
+        </article>
+
+        <article>
+          <h2>Do public holidays count?</h2>
+          <p>
+            They count by default. Choose a supported holiday calendar when the
+            rule you are following excludes those holidays.
+          </p>
+        </article>
+
+        <article>
+          <h2>What if the dates are reversed?</h2>
+          <p>
+            The calculator uses the earlier date as the beginning of the range
+            and the later date as the end, so the result stays a positive count.
+          </p>
+        </article>
       </section>
 
-      <SiteFooter onNavigate={onNavigate} />
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. Contracts, policies, and laws can define whether start dates, end dates, weekends, or holidays count differently."
+      />
 
       <style>{`
-        .business-between-hero {
-          width: min(100% - 32px, 1240px);
-          min-height: 76vh;
-          margin: 0 auto;
-          display: flex;
-          flex-direction: column;
+        .between-answer-page {
+          --between-ink: #153654;
+          --between-muted: #667b8e;
+          --between-accent: #2d7b64;
+          --between-field: #e8e8f2;
+          --between-field-soft: #f2f2f8;
+          min-height: 100vh;
+          background: #fffaf2;
         }
 
-        .business-between-answer {
-          flex: 1;
+        .between-answer-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
+          margin: 0 auto;
           display: flex;
-          flex-direction: column;
           align-items: center;
-          justify-content: center;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
+        }
+
+        .between-answer-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+        }
+
+        .between-answer-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .between-answer-shell,
+        .between-answer-actions,
+        .between-answer-content {
+          width: min(100% - 32px, 1100px);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .between-answer-shell {
+          margin-top: 22px;
+        }
+
+        .between-answer-hero {
+          padding: clamp(34px, 4.8vw, 54px) clamp(24px, 5vw, 58px) 30px;
+          border: 1px solid rgba(67, 67, 112, 0.12);
+          border-radius: 28px 28px 0 0;
+          background: var(--between-field);
           text-align: center;
-          padding: 32px 12px 42px;
         }
 
-        .business-between-controls-card {
-          width: min(100%, 620px);
-          margin: 0 auto 22px;
-          padding: 16px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 16px;
-          background: #fff;
-        }
-
-        .business-between-kicker {
-          margin: 0 0 18px;
-          color: #526b87;
-          font-size: clamp(1.25rem, 2.5vw, 2rem);
-          font-weight: 900;
-        }
-
-        .business-between-inputs {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 26px;
-        }
-
-        .business-between-inputs label {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          color: #75879b;
-          font-size: 0.75rem;
-          font-weight: 800;
-          text-align: left;
-        }
-
-        .business-between-inputs input {
-          min-height: 42px;
-          padding: 7px 10px;
-          border: 1px solid rgba(19, 38, 70, 0.16);
-          border-radius: 8px;
-          background: #fff;
-          color: #1a314c;
-          font: inherit;
-          font-size: 0.88rem;
-        }
-
-        .business-between-number {
+        .between-answer-eyebrow,
+        .between-answer-section-eyebrow {
           margin: 0;
-          color: #0b1830;
-          font-size: clamp(7rem, 18vw, 14rem);
-          font-weight: 900;
-          line-height: 0.78;
-          letter-spacing: -0.06em;
+          color: var(--between-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
         }
 
-        .business-between-error {
-          font-size: clamp(2.2rem, 6vw, 4.5rem);
-          line-height: 1;
-        }
-
-        .business-between-label {
-          margin: 24px 0 0;
-          color: #536981;
-          font-size: clamp(1.6rem, 3vw, 2.5rem);
-        }
-
-        .business-between-rule {
+        .between-answer-intro {
           margin: 16px 0 0;
-          color: #60758e;
-          font-size: 0.82rem;
+          color: var(--between-ink);
+          font-size: clamp(2.1rem, 4vw, 3.5rem);
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: -0.04em;
+        }
+
+        .between-answer-number {
+          margin: 6px 0 0;
+          color: var(--between-ink);
+          font-size: clamp(7.5rem, 17vw, 13rem);
+          font-weight: 950;
+          line-height: 0.78;
+          letter-spacing: -0.07em;
+        }
+
+        .between-answer-unit {
+          margin: 18px 0 0;
+          color: #3f657b;
+          font-size: clamp(2rem, 4vw, 3.4rem);
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: -0.035em;
+        }
+
+        .between-answer-range {
+          max-width: 820px;
+          margin: 18px auto 0;
+          color: var(--between-muted);
+          font-size: 1rem;
+          line-height: 1.5;
+        }
+
+        .between-answer-range strong {
+          color: #34516c;
+          font-weight: 850;
+        }
+
+        .between-answer-rule,
+        .between-answer-calendar-rule {
+          margin: 15px 0 0;
+          color: #62788d;
+          font-size: 0.88rem;
           font-weight: 800;
         }
 
-        .business-between-note {
-          margin: 7px 0 0;
-          color: #8894a3;
-          font-size: 0.75rem;
+        .between-answer-calendar-rule {
+          margin-top: 6px;
+          color: #7a8998;
+          font-size: 0.82rem;
         }
 
-        .business-between-explanation {
-          width: min(100% - 32px, 860px);
+        .between-answer-question {
+          max-width: 760px;
+          margin: 14px auto 0;
+          color: var(--between-ink);
+          font-size: clamp(2.6rem, 5.5vw, 4.7rem);
+          line-height: 0.98;
+          letter-spacing: -0.05em;
+        }
+
+        .between-answer-controls {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          padding: 15px 18px;
+          border: 1px solid rgba(67, 67, 112, 0.12);
+          border-top: 1px solid rgba(67, 67, 112, 0.08);
+          border-radius: 0 0 28px 28px;
+          background: var(--between-field-soft);
+        }
+
+        .between-answer-controls label {
+          display: grid;
+          gap: 7px;
+        }
+
+        .between-answer-controls label > span {
+          color: #526a82;
+          font-size: 0.88rem;
+          font-weight: 850;
+        }
+
+        .between-answer-controls input {
+          width: 100%;
+          min-height: 50px;
+          padding: 10px 12px;
+          border: 1px solid rgba(21, 54, 84, 0.14);
+          border-radius: 11px;
+          background: #fff;
+          color: #17304d;
+          font: inherit;
+          font-size: 1rem;
+        }
+
+        .between-answer-actions {
+          margin-top: 10px;
+        }
+
+        .between-answer-copy {
+          display: block;
+          width: min(100%, 330px);
+          min-height: 48px;
           margin: 0 auto;
-          padding: 36px 0 58px;
-          border-top: 1px solid rgba(19, 38, 70, 0.1);
+          border: 1px solid #267357;
+          border-radius: 10px;
+          background: #267357;
+          color: #fff;
+          font: inherit;
+          font-size: 0.92rem;
+          font-weight: 900;
+          cursor: pointer;
         }
 
-        .business-between-explanation h2 {
+        .between-answer-details {
+          margin-top: 12px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .between-answer-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .between-answer-detail-body {
+          padding: 0 14px 16px;
+        }
+
+        .between-answer-detail-body > p,
+        .between-answer-holiday-note {
+          max-width: 760px;
           margin: 0;
-          color: #18304c;
-          font-size: 1.25rem;
+          color: #61768a;
+          font-size: 0.95rem;
+          line-height: 1.58;
         }
 
-        .business-between-explanation p {
-          color: #60748a;
-          line-height: 1.65;
+        .between-answer-holiday-note {
+          margin-top: 10px;
+        }
+
+        .between-answer-detail-body .calculation-receipt {
+          margin-top: 16px;
+        }
+
+        .between-answer-content {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 34px;
+        }
+
+        .between-answer-content-heading {
+          grid-column: 1 / -1;
+          margin-bottom: 3px;
+        }
+
+        .between-answer-content-heading h2 {
+          margin: 6px 0 0;
+          color: var(--between-ink);
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+        }
+
+        .between-answer-content article {
+          padding: 21px;
+          border: 1px solid rgba(21, 54, 84, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.7);
+        }
+
+        .between-answer-content h2 {
+          margin: 0;
+          color: var(--between-ink);
+          font-size: 1.08rem;
+        }
+
+        .between-answer-content p {
+          margin: 8px 0 0;
+          color: #65798d;
+          line-height: 1.55;
         }
 
         @media (max-width: 760px) {
-          .business-between-hero {
-            width: min(100% - 24px, 1240px);
-            min-height: 72vh;
+          .between-answer-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
           }
 
-          .business-between-answer {
-            justify-content: flex-start;
-            padding: 22px 0 30px;
+          .between-answer-brand img {
+            width: 154px;
           }
 
-          .business-between-kicker {
-            margin-bottom: 14px;
-            font-size: 1.35rem;
+          .between-answer-shell,
+          .between-answer-actions,
+          .between-answer-content {
+            width: min(100% - 24px, 680px);
           }
 
-          .business-between-controls-card {
-            margin-bottom: 16px;
-            padding: 13px;
+          .between-answer-shell {
+            margin-top: 12px;
           }
 
-          .business-between-inputs {
-            width: 100%;
-            flex-direction: column;
-            margin-bottom: 20px;
+          .between-answer-hero {
+            padding: 22px 20px 20px;
+            border-radius: 24px 24px 0 0;
+            text-align: left;
           }
 
-          .business-between-inputs label {
-            width: 100%;
+          .between-answer-intro {
+            margin-top: 12px;
+            font-size: clamp(1.8rem, 8.2vw, 2.5rem);
           }
 
-          .business-between-number {
-            font-size: clamp(5.4rem, 29vw, 7.8rem);
+          .between-answer-number {
+            margin-top: 4px;
+            font-size: clamp(6.2rem, 28vw, 8.5rem);
           }
 
-          .business-between-label {
+          .between-answer-unit {
+            margin-top: 12px;
+            font-size: clamp(1.8rem, 8.4vw, 2.65rem);
+          }
+
+          .between-answer-range {
             margin-top: 14px;
-            font-size: 1.6rem;
+            font-size: 0.92rem;
           }
 
-          .business-between-rule {
-            margin-top: 11px;
-            font-size: 0.94rem;
-            line-height: 1.45;
+          .between-answer-range strong {
+            display: inline;
           }
 
-          .business-between-note {
+          .between-answer-rule {
+            margin-top: 12px;
+            font-size: 0.84rem;
+          }
+
+          .between-answer-calendar-rule {
+            font-size: 0.79rem;
+            line-height: 1.4;
+          }
+
+          .between-answer-question {
+            margin-top: 10px;
+            font-size: clamp(2.2rem, 10vw, 3.25rem);
+          }
+
+          .between-answer-controls {
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+            padding: 14px;
+            border-radius: 0 0 24px 24px;
+          }
+
+          .between-answer-controls input {
+            min-height: 46px;
+            padding: 8px 9px;
             font-size: 0.9rem;
-            line-height: 1.45;
           }
 
-          .business-between-explanation {
-            width: min(100% - 24px, 860px);
+          .between-answer-copy {
+            width: 100%;
+          }
+
+          .between-answer-content {
+            display: block;
+            margin-top: 28px;
+          }
+
+          .between-answer-content-heading {
+            margin-bottom: 8px;
+          }
+
+          .between-answer-content article {
+            padding: 20px 2px;
+            border: 0;
+            border-top: 1px solid rgba(21, 54, 84, 0.1);
+            border-radius: 0;
+            background: transparent;
+          }
+
+          .between-answer-content p {
+            font-size: 0.94rem;
+            line-height: 1.52;
           }
         }
       `}</style>
     </main>
   )
 }
-
 function FreeTrialPage({ onNavigate }: NavigationProps) {
   const [startDate, setStartDate] = useState(() =>
     getInitialDateQueryParam('start', todayInputValue()),
