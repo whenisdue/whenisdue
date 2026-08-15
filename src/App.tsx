@@ -2659,10 +2659,9 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
   )
 }
 function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
-  const friday = parsePlainDate('2026-09-04')!
-
-  const withoutHolidayCalendar = calculateDeadlineByRule({
-    triggerDate: friday,
+  const monday = parsePlainDate('2026-09-07')!
+  const noHolidayCalendar = calculateDeadlineByRule({
+    triggerDate: monday,
     duration: 1,
     direction: 'after',
     unit: 'business-days',
@@ -2670,9 +2669,8 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
     holidayCalendar: 'none',
     endDayAdjustment: 'none',
   })
-
-  const withUsFederalHolidays = calculateDeadlineByRule({
-    triggerDate: friday,
+  const usHolidayCalendar = calculateDeadlineByRule({
+    triggerDate: monday,
     duration: 1,
     direction: 'after',
     unit: 'business-days',
@@ -2681,172 +2679,115 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
     endDayAdjustment: 'none',
   })
 
-  const calculatorPath =
-    '/deadline-calculator?date=2026-09-04&days=1&unit=business-days&direction=after&startday=exclude-trigger&calendar=us'
-
   return (
-    <main className="page-shell public-holidays-business-guide-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+    <main className="page-shell holidays-zero-page">
+      <header className="holidays-zero-header" aria-label="WhenIsDue navigation">
+        <a
+          className="holidays-zero-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
 
-      <article className="public-holidays-business-guide-shell">
-        <header className="public-holidays-business-guide-hero">
-          <p className="friendly-eyebrow">Business-day guide</p>
+      <article className="holidays-zero-shell">
+        <header className="holidays-zero-hero">
+          <p className="holidays-zero-eyebrow">Business-day guide</p>
           <h1>Do public holidays count as business days?</h1>
-
-          <div className="public-holidays-business-guide-answer">
-            <strong>Sometimes — it depends on the rule and holiday calendar being used.</strong>
-            <p>
-              A weekday public holiday can either count or be skipped. If your
-              deadline says to exclude public holidays, use the applicable
-              holiday calendar. If it only says “business days” and does not
-              define holidays, check the source that created the deadline
-              instead of assuming.
-            </p>
-          </div>
-
-          <p className="public-holidays-business-guide-scope">
-            Holiday coverage varies by country, state, province, territory,
-            employer, and proclamation. The governing rule controls.
+          <strong className="holidays-zero-answer">It depends.</strong>
+          <p className="holidays-zero-summary">
+            A weekday public holiday counts unless the rule or calendar you are
+            using says to exclude it.
           </p>
         </header>
 
-        <section
-          className="public-holidays-business-guide-example"
-          aria-labelledby="public-holidays-business-guide-example-title"
-        >
-          <div className="public-holidays-business-guide-example-heading">
-            <span>Worked example</span>
-            <h2 id="public-holidays-business-guide-example-title">
-              Start Friday, September 4, 2026 + 1 business day
-            </h2>
-            <p>
-              Monday, September 7, 2026 is US Labor Day.
-            </p>
+        <section className="holidays-zero-example" aria-labelledby="holidays-example-title">
+          <div className="holidays-zero-example-heading">
+            <p className="holidays-zero-section-eyebrow">Quick example</p>
+            <h2 id="holidays-example-title">One business day after Labor Day</h2>
           </div>
 
-          <div className="public-holidays-business-guide-results">
-            <div>
-              <span>Weekends only</span>
+          <div className="holidays-zero-example-grid">
+            <article>
+              <span>No holiday calendar</span>
               <strong>
-                {withoutHolidayCalendar
-                  ? formatPlainDate(withoutHolidayCalendar.answerDate)
+                {noHolidayCalendar
+                  ? `${formatWeekday(noHolidayCalendar.answerDate)}, ${formatPlainDate(noHolidayCalendar.answerDate)}`
                   : '—'}
               </strong>
-              <small>
-                {withoutHolidayCalendar
-                  ? formatWeekday(withoutHolidayCalendar.answerDate)
-                  : ''}
-              </small>
-              <p>
-                Monday is a weekday, so it counts when no public-holiday
-                exclusions are applied.
-              </p>
-            </div>
+              <p>The holiday itself is treated like an ordinary weekday.</p>
+            </article>
 
-            <div>
+            <article className="is-holiday-aware">
               <span>US federal holidays excluded</span>
               <strong>
-                {withUsFederalHolidays
-                  ? formatPlainDate(withUsFederalHolidays.answerDate)
+                {usHolidayCalendar
+                  ? `${formatWeekday(usHolidayCalendar.answerDate)}, ${formatPlainDate(usHolidayCalendar.answerDate)}`
                   : '—'}
               </strong>
-              <small>
-                {withUsFederalHolidays
-                  ? formatWeekday(withUsFederalHolidays.answerDate)
-                  : ''}
-              </small>
-              <p>
-                Labor Day is skipped, so the next qualifying business day is
-                Tuesday.
-              </p>
-            </div>
+              <p>The holiday is skipped under the selected calendar.</p>
+            </article>
           </div>
 
           <a
-            className="public-holidays-business-guide-cta"
-            href={calculatorPath}
+            className="holidays-zero-cta"
+            href="/business-days-calculator?calendar=us"
             onClick={(event) => {
               event.preventDefault()
               trackWhenIsDueEvent('authority_guide_calculator_click', {
                 guide: 'public_holidays_business_days',
               })
-              onNavigate(calculatorPath)
+              onNavigate('/business-days-calculator?calendar=us')
             }}
           >
-            Calculate with your holiday calendar →
+            Check your exact date
           </a>
         </section>
 
-        <section className="public-holidays-business-guide-content">
-          <article>
-            <h2>Why “business day” is not always enough</h2>
-            <p>
-              Monday through Friday is only the working-week part of the rule.
-              Holidays are a separate question. A weekday can be Monday through
-              Friday and still be excluded because it is a recognized public
-              holiday under the applicable calendar.
-            </p>
-          </article>
+        <section className="holidays-zero-details">
+          <details>
+            <summary>When should a holiday be excluded?</summary>
+            <div>
+              <p>
+                Exclude it when the contract, policy, law, employer, carrier,
+                court, or other governing source defines that holiday as a
+                non-business day.
+              </p>
+            </div>
+          </details>
 
-          <article>
-            <h2>Which holiday calendar should you use?</h2>
-            <p>
-              Use the calendar named by the contract, policy, law, employer, or
-              organization that created the deadline. Do not substitute a
-              different national or local calendar just because the date looks
-              like a holiday where you live.
-            </p>
-          </article>
+          <details>
+            <summary>What if the rule only says “business days”?</summary>
+            <div>
+              <p>
+                The safest approach is to use the business-day definition that
+                applies to that rule. Different organizations and jurisdictions
+                can recognize different holidays.
+              </p>
+            </div>
+          </details>
 
-          <article>
-            <h2>What WhenIsDue supports</h2>
-            <p>
-              WhenIsDue can optionally exclude supported holidays for the US,
-              England &amp; Wales, Canada, Australia, and the Philippines.
-              Coverage is deliberately labeled because local, provincial,
-              state, territory, company-specific, and proclamation-based
-              closures can differ.
-            </p>
-          </article>
-
-          <article>
-            <h2>What if the final date itself is a holiday?</h2>
-            <p>
-              That is a separate final-day rule. Some instructions move the
-              deadline to the next business day, some move it to the previous
-              business day, and some do not move it at all. WhenIsDue keeps
-              that adjustment separate so the calculation does not silently
-              invent a policy.
-            </p>
-          </article>
-
-          <article>
-            <h2>Quick rule of thumb</h2>
-            <dl>
-              <div>
-                <dt>The rule explicitly excludes public holidays</dt>
-                <dd>
-                  Use the applicable holiday calendar and skip those dates.
-                </dd>
-              </div>
-              <div>
-                <dt>The rule says only “business days”</dt>
-                <dd>
-                  Check how that term is defined before assuming holidays are
-                  excluded.
-                </dd>
-              </div>
-            </dl>
-          </article>
+          <details>
+            <summary>Are weekends and holidays the same rule?</summary>
+            <div>
+              <p>
+                No. Weekends are normally excluded under a Monday–Friday
+                business schedule. Holidays require a separate holiday rule or
+                calendar.
+              </p>
+            </div>
+          </details>
         </section>
 
-        <section
-          className="public-holidays-business-guide-related"
-          aria-label="Related deadline guides and tools"
-        >
+        <section className="holidays-zero-related" aria-label="Related business-day answers">
           <div>
-            <span>Related answers</span>
-            <h2>Make each counting rule explicit</h2>
+            <p className="holidays-zero-section-eyebrow">Related answers</p>
+            <h2>Need another counting rule?</h2>
           </div>
 
           <nav>
@@ -2857,7 +2798,7 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
                 onNavigate('/do-weekends-count-as-business-days')
               }}
             >
-              Do weekends count as business days?
+              Do weekends count?
             </a>
             <a
               href="/does-the-start-date-count"
@@ -2877,280 +2818,304 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             >
               Business days calculator
             </a>
-            <a
-              href="/deadline-calculator"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/deadline-calculator')
-              }}
-            >
-              Deadline calculator
-            </a>
           </nav>
         </section>
       </article>
 
       <SiteFooter
         onNavigate={onNavigate}
-        planningNote="For planning only. Check the holiday calendar and final-day rule that apply to your deadline."
+        planningNote="For planning only. Use the holiday definition and calendar that actually govern your deadline."
       />
 
       <style>{`
-        .public-holidays-business-guide-page {
+        .holidays-zero-page {
+          --holidays-ink: #153654;
+          --holidays-muted: #667b8e;
+          --holidays-accent: #2d7b64;
+          --holidays-field: #f2ead8;
           min-height: 100vh;
           background: #fffaf2;
         }
 
-        .public-holidays-business-guide-shell {
-          width: min(100% - 32px, 920px);
+        .holidays-zero-header {
+          width: min(100% - 32px, 1100px);
+          min-height: 82px;
           margin: 0 auto;
-          padding: 36px 0 64px;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
         }
 
-        .public-holidays-business-guide-hero {
-          text-align: center;
-        }
-
-        .public-holidays-business-guide-hero h1 {
-          margin: 6px 0 0;
-          color: #152d48;
-          font-size: clamp(2.35rem, 7vw, 4.6rem);
-          line-height: 1;
-          letter-spacing: -0.04em;
-        }
-
-        .public-holidays-business-guide-answer {
-          max-width: 760px;
-          margin: 22px auto 0;
-          padding: 22px;
-          border: 1px solid rgba(22, 49, 78, 0.09);
-          border-radius: 18px;
-          background: #fff;
-          text-align: left;
-        }
-
-        .public-holidays-business-guide-answer > strong {
+        .holidays-zero-brand img {
           display: block;
-          color: #17304d;
-          font-size: clamp(1.35rem, 3vw, 1.9rem);
-          line-height: 1.2;
+          width: 176px;
+          height: auto;
         }
 
-        .public-holidays-business-guide-answer p {
-          margin: 10px 0 0;
-          color: #526a82;
-          font-size: 1.02rem;
-          line-height: 1.65;
+        .holidays-zero-shell {
+          width: min(100% - 32px, 1100px);
+          margin: 22px auto 0;
         }
 
-        .public-holidays-business-guide-scope {
-          max-width: 700px;
-          margin: 12px auto 0;
-          color: #718197;
-          font-size: 0.94rem;
-          line-height: 1.5;
-        }
-
-        .public-holidays-business-guide-example {
-          margin-top: 28px;
-          padding: 20px;
-          border: 1px solid rgba(183, 121, 31, 0.16);
-          border-radius: 18px;
-          background: #fffdf8;
-        }
-
-        .public-holidays-business-guide-example-heading {
+        .holidays-zero-hero {
+          padding: clamp(38px, 5vw, 60px) clamp(24px, 6vw, 70px) 36px;
+          border: 1px solid rgba(120, 92, 44, 0.12);
+          border-radius: 28px;
+          background: var(--holidays-field);
           text-align: center;
         }
 
-        .public-holidays-business-guide-example-heading > span,
-        .public-holidays-business-guide-related > div > span {
-          color: #8a6a2c;
+        .holidays-zero-eyebrow,
+        .holidays-zero-section-eyebrow {
+          margin: 0;
+          color: var(--holidays-accent);
           font-size: 0.8rem;
-          font-weight: 900;
-          letter-spacing: 0.06em;
+          font-weight: 950;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .public-holidays-business-guide-example-heading h2,
-        .public-holidays-business-guide-related h2 {
+        .holidays-zero-hero h1 {
+          max-width: 900px;
+          margin: 10px auto 0;
+          color: var(--holidays-ink);
+          font-size: clamp(3rem, 6vw, 5.3rem);
+          line-height: 0.97;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .holidays-zero-answer {
+          display: block;
+          margin-top: 28px;
+          color: var(--holidays-ink);
+          font-size: clamp(4rem, 9vw, 7.6rem);
+          font-weight: 950;
+          line-height: 0.88;
+          letter-spacing: -0.06em;
+        }
+
+        .holidays-zero-summary {
+          max-width: 760px;
+          margin: 22px auto 0;
+          color: #3f657b;
+          font-size: clamp(1.35rem, 2.5vw, 1.95rem);
+          font-weight: 850;
+          line-height: 1.25;
+        }
+
+        .holidays-zero-example {
+          margin-top: 16px;
+          padding: 20px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 20px;
+          background: #faf8f1;
+        }
+
+        .holidays-zero-example-heading {
+          text-align: center;
+        }
+
+        .holidays-zero-example-heading h2,
+        .holidays-zero-related h2 {
           margin: 5px 0 0;
-          color: #29435e;
-          font-size: 1.25rem;
+          color: var(--holidays-ink);
+          font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+          line-height: 1.08;
+          letter-spacing: -0.03em;
         }
 
-        .public-holidays-business-guide-example-heading p {
-          margin: 6px 0 0;
-          color: #718197;
-          font-size: 0.94rem;
-        }
-
-        .public-holidays-business-guide-results {
+        .holidays-zero-example-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
-          margin-top: 16px;
+          gap: 10px;
+          max-width: 840px;
+          margin: 16px auto 0;
         }
 
-        .public-holidays-business-guide-results > div {
-          padding: 17px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
-          border-radius: 14px;
+        .holidays-zero-example-grid article {
+          padding: 17px 18px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 15px;
           background: #fff;
         }
 
-        .public-holidays-business-guide-results span {
-          display: block;
-          color: #526a82;
-          font-size: 0.92rem;
-          font-weight: 850;
+        .holidays-zero-example-grid article.is-holiday-aware {
+          border-color: rgba(45, 123, 100, 0.26);
+          background: #e7f2ec;
         }
 
-        .public-holidays-business-guide-results strong {
+        .holidays-zero-example-grid span {
+          display: block;
+          color: #5d7287;
+          font-size: 0.8rem;
+          font-weight: 900;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .holidays-zero-example-grid strong {
           display: block;
           margin-top: 7px;
-          color: #17304d;
-          font-size: clamp(1.55rem, 3vw, 2.15rem);
-          line-height: 1.1;
+          color: var(--holidays-ink);
+          font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+          line-height: 1.16;
         }
 
-        .public-holidays-business-guide-results small {
-          display: block;
-          margin-top: 4px;
-          color: #6d8196;
-          font-size: 0.94rem;
+        .holidays-zero-example-grid p {
+          margin: 8px 0 0;
+          color: #667b8e;
+          font-size: 0.9rem;
+          line-height: 1.45;
         }
 
-        .public-holidays-business-guide-results p {
-          margin: 10px 0 0;
-          color: #667c92;
-          font-size: 0.94rem;
-          line-height: 1.5;
-        }
-
-        .public-holidays-business-guide-cta {
+        .holidays-zero-cta {
           min-height: 48px;
           width: fit-content;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 18px auto 0;
-          padding: 9px 15px;
+          margin: 16px auto 0;
+          padding: 9px 16px;
           border-radius: 11px;
-          background: #173a63;
+          background: #267357;
           color: #fff;
-          font-weight: 850;
+          font-weight: 900;
           text-decoration: none;
         }
 
-        .public-holidays-business-guide-content {
-          display: grid;
-          gap: 14px;
-          margin-top: 24px;
-        }
-
-        .public-holidays-business-guide-content > article {
-          padding: 20px;
-          border: 1px solid rgba(22, 49, 78, 0.08);
-          border-radius: 16px;
-          background: rgba(255, 255, 255, 0.72);
-        }
-
-        .public-holidays-business-guide-content h2 {
-          margin: 0;
-          color: #29435e;
-          font-size: 1.2rem;
-        }
-
-        .public-holidays-business-guide-content p {
-          margin: 9px 0 0;
-          color: #5f748a;
-          font-size: 1rem;
-          line-height: 1.65;
-        }
-
-        .public-holidays-business-guide-content dl {
+        .holidays-zero-details {
           display: grid;
           gap: 10px;
-          margin: 14px 0 0;
+          margin-top: 16px;
         }
 
-        .public-holidays-business-guide-content dl > div {
-          padding: 13px 14px;
-          border: 1px solid rgba(22, 49, 78, 0.08);
+        .holidays-zero-details details {
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.74);
+        }
+
+        .holidays-zero-details summary {
+          min-height: 50px;
+          display: flex;
+          align-items: center;
+          padding: 10px 14px;
+          color: #34516d;
+          font-size: 0.98rem;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .holidays-zero-details details > div {
+          padding: 0 14px 16px;
+        }
+
+        .holidays-zero-details p {
+          max-width: 780px;
+          margin: 0;
+          color: #61768a;
+          line-height: 1.58;
+        }
+
+        .holidays-zero-related {
+          margin-top: 28px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 22px;
+          background: #f4efe3;
+        }
+
+        .holidays-zero-related nav {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .holidays-zero-related a {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 12px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
           border-radius: 12px;
           background: #fff;
-        }
-
-        .public-holidays-business-guide-content dt {
-          color: #29435e;
-          font-weight: 900;
-        }
-
-        .public-holidays-business-guide-content dd {
-          margin: 5px 0 0;
-          color: #667c92;
-          line-height: 1.55;
-        }
-
-        .public-holidays-business-guide-related {
-          margin-top: 24px;
-          padding: 20px 0 0;
-          border-top: 1px solid rgba(22, 49, 78, 0.1);
-        }
-
-        .public-holidays-business-guide-related nav {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 13px;
-        }
-
-        .public-holidays-business-guide-related a {
-          min-height: 44px;
-          display: inline-flex;
-          align-items: center;
-          padding: 8px 12px;
-          border: 1px solid rgba(22, 49, 78, 0.1);
-          border-radius: 999px;
-          background: #fff;
-          color: #4f6a85;
-          font-size: 0.88rem;
+          color: #35536e;
+          font-size: 0.86rem;
           font-weight: 850;
+          text-align: center;
           text-decoration: none;
         }
 
-        @media (max-width: 720px) {
-          .public-holidays-business-guide-shell {
-            width: min(100% - 20px, 920px);
-            padding-top: 24px;
+        @media (max-width: 760px) {
+          .holidays-zero-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
           }
 
-          .public-holidays-business-guide-results {
-            grid-template-columns: 1fr;
+          .holidays-zero-brand img {
+            width: 154px;
           }
 
-          .public-holidays-business-guide-answer,
-          .public-holidays-business-guide-example,
-          .public-holidays-business-guide-content > article {
+          .holidays-zero-shell {
+            width: min(100% - 24px, 680px);
+            margin-top: 12px;
+          }
+
+          .holidays-zero-hero {
+            padding: 22px 20px 20px;
+            border-radius: 24px;
+            text-align: left;
+          }
+
+          .holidays-zero-hero h1 {
+            margin-top: 8px;
+            font-size: clamp(2.2rem, 10vw, 3.2rem);
+            line-height: 0.98;
+          }
+
+          .holidays-zero-answer {
+            margin-top: 20px;
+            font-size: clamp(3.7rem, 18vw, 5.8rem);
+          }
+
+          .holidays-zero-summary {
+            margin-top: 16px;
+            font-size: clamp(1.2rem, 5.5vw, 1.62rem);
+            line-height: 1.22;
+          }
+
+          .holidays-zero-example {
             padding: 16px;
           }
 
-          .public-holidays-business-guide-related nav {
-            display: grid;
-            grid-template-columns: 1fr;
+          .holidays-zero-example-heading {
+            text-align: left;
           }
 
-          .public-holidays-business-guide-related a {
-            justify-content: center;
+          .holidays-zero-example-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+          }
+
+          .holidays-zero-cta {
+            width: 100%;
+          }
+
+          .holidays-zero-related {
+            padding: 18px;
+          }
+
+          .holidays-zero-related nav {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
     </main>
   )
 }
-
-
 function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
   const [startDate, setStartDate] = useState(() =>
     getInitialDateQueryParam('start', todayInputValue()),
