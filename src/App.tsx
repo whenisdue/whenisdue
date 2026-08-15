@@ -12887,30 +12887,54 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-answer-hero {
-            padding: 28px 24px 24px;
+            min-width: 0;
+            overflow: hidden;
+            padding: 26px 20px 22px;
           }
 
           .business-answer-hero h1 {
             max-width: 100%;
             margin-top: 10px;
-            font-size: clamp(2rem, 9.3vw, 3rem);
-            line-height: 1.02;
+            font-size: clamp(1.9rem, 8.7vw, 2.8rem);
+            line-height: 1;
+            overflow-wrap: anywhere;
           }
 
           .business-answer-date {
-            display: block;
-            margin-top: 22px;
-            font-size: clamp(3.25rem, 15vw, 5.2rem);
-            line-height: 0.88;
+            display: grid;
+            justify-items: start;
+            max-width: 100%;
+            margin-top: 20px;
           }
 
-          .business-answer-weekday,
-          .business-answer-month-date {
+          .business-answer-weekday {
             display: block;
+            max-width: 100%;
+            font-size: clamp(2.15rem, 9.5vw, 3rem);
+            line-height: 0.98;
           }
 
-          .business-answer-month-date {
-            margin-top: 4px;
+          .business-answer-date-main {
+            display: grid;
+            justify-items: start;
+            max-width: 100%;
+            gap: 0;
+            margin-top: 5px;
+            font-size: clamp(2.85rem, 13vw, 4.2rem);
+            line-height: 0.9;
+            letter-spacing: -0.055em;
+            white-space: normal;
+          }
+
+          .business-answer-month,
+          .business-answer-day,
+          .business-answer-year {
+            display: block;
+            max-width: 100%;
+          }
+
+          .business-answer-comma {
+            display: none;
           }
 
           .business-answer-rule {
