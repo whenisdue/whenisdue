@@ -5798,9 +5798,9 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
         <header className="within-zero-hero">
           <p className="within-zero-eyebrow">Deadline wording guide</p>
           <h1>What does “within 5 days” mean?</h1>
-          <strong className="within-zero-answer">It can be ambiguous.</strong>
+          <strong className="within-zero-answer">It depends.</strong>
           <p className="within-zero-summary">
-            The key question is whether the start date counts as day one.
+            Does the start date count as day one? That changes the answer.
           </p>
           <p className="within-zero-caveat">
             Use the wording in the contract, policy, law, or message that created
