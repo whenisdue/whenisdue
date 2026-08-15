@@ -5224,11 +5224,7 @@ function SubscriptionRenewalCalculatorPage({
                     {formatSubscriptionDate(cancellationDeadline)}
                   </strong>
                 </p>
-              ) : (
-                <p className="subscription-answer-reminder">
-                  No advance cancellation notice applied
-                </p>
-              )}
+              ) : null}
             </>
           ) : (
             <>
@@ -5829,29 +5825,30 @@ function SubscriptionRenewalCalculatorPage({
           }
 
           .subscription-answer-hero {
-            padding: 28px 20px 26px;
+            padding: 24px 20px 22px;
             border-radius: 24px 24px 0 0;
             text-align: left;
           }
 
           .subscription-answer-hero h1 {
-            font-size: clamp(2.65rem, 12vw, 4rem);
+            font-size: clamp(2.4rem, 10.8vw, 3.55rem);
+            line-height: 0.97;
           }
 
           .subscription-answer-date {
             justify-items: start;
-            margin-top: 22px;
+            margin-top: 18px;
           }
 
           .subscription-answer-weekday {
-            font-size: clamp(2.3rem, 10vw, 3.2rem);
+            font-size: clamp(2.05rem, 9vw, 2.85rem);
           }
 
           .subscription-answer-date-main {
             display: grid;
             justify-items: start;
             gap: 0;
-            font-size: clamp(3.05rem, 14vw, 4.6rem);
+            font-size: clamp(2.75rem, 12.7vw, 4.15rem);
             line-height: 0.9;
             white-space: normal;
           }
@@ -5870,6 +5867,11 @@ function SubscriptionRenewalCalculatorPage({
           .subscription-answer-reminder {
             margin-left: 0;
             margin-right: 0;
+          }
+
+          .subscription-answer-context {
+            margin-top: 14px;
+            font-size: 0.9rem;
           }
 
           .subscription-answer-reminder {
