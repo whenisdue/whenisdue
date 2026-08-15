@@ -16384,36 +16384,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           <img src="/whenisdue-logo.png" alt="WhenIsDue" />
         </a>
 
-        <nav className="return-answer-nav" aria-label="Main navigation">
-          <a
-            className="return-answer-home-link"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="/calculators"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/calculators')
-            }}
-          >
-            Calculators
-          </a>
-          <a
-            href="/workspace"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/workspace')
-            }}
-          >
-            VA Workspace
-          </a>
-        </nav>
       </header>
 
       <section
@@ -16610,6 +16580,27 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         </p>
       </section>
 
+      <nav className="return-answer-bottom-nav" aria-label="More WhenIsDue tools">
+        <a
+          href="/calculators"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/calculators')
+          }}
+        >
+          Calculators
+        </a>
+        <a
+          href="/workspace"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/workspace')
+          }}
+        >
+          Workspace
+        </a>
+      </nav>
+
       <SiteFooter
         onNavigate={onNavigate}
         planningNote="For planning only. The retailer's written return policy controls the actual return deadline."
@@ -16632,7 +16623,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           margin: 0 auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: flex-start;
           gap: 20px;
           border-bottom: 1px solid rgba(17, 51, 86, 0.11);
         }
@@ -16891,6 +16882,27 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         .return-policy-note strong {
           color: #6f4d16;
+        }
+
+        .return-answer-bottom-nav {
+          width: min(100% - 32px, 930px);
+          margin: 18px auto 0;
+          padding-top: 16px;
+          border-top: 1px solid rgba(17, 51, 86, 0.1);
+          display: flex;
+          justify-content: center;
+          gap: 22px;
+        }
+
+        .return-answer-bottom-nav a {
+          color: #667b8f;
+          font-size: 0.88rem;
+          font-weight: 800;
+          text-decoration: none;
+        }
+
+        .return-answer-bottom-nav a:hover {
+          color: var(--return-ink);
         }
 
         @media (max-width: 860px) {
