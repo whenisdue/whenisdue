@@ -5729,3 +5729,43 @@ textarea:focus-visible {
     justify-self: start;
   }
 }
+
+.next-payday-monthly-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.next-payday-monthly-option > span {
+  color: #526a82;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.next-payday-monthly-option button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(19, 38, 70, 0.14);
+  border-radius: 12px;
+  background: #fff;
+  color: #24425f;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.next-payday-monthly-option button.is-active {
+  border-color: rgba(47, 135, 110, 0.45);
+  background: #e8f4ef;
+  color: #1f6b58;
+}
+
+@media (max-width: 640px) {
+  .next-payday-monthly-option {
+    justify-content: space-between;
+  }
+
+  .next-payday-monthly-option button {
+    min-width: 120px;
+  }
+}

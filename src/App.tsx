@@ -7332,23 +7332,19 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
             />
           </label>
 
-          <label>
-            <span>Pay schedule</span>
-            <select
-              value={schedule}
-              onChange={(event) => {
-                const next = event.target.value as PaySchedule
-                setSchedule(next)
-                trackWhenIsDueEvent('pay_schedule_changed', { value: next })
+          <div className="next-payday-monthly-option">
+            <span>Other schedule</span>
+            <button
+              type="button"
+              className={schedule === 'monthly' ? 'is-active' : ''}
+              onClick={() => {
+                setSchedule('monthly')
+                trackWhenIsDueEvent('pay_schedule_changed', { value: 'monthly' })
               }}
             >
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Biweekly · every 2 weeks</option>
-              <option value="semimonthly-1-15">Semimonthly · 1st and 15th</option>
-              <option value="semimonthly-15-last">Semimonthly · 15th and last day</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </label>
+              Monthly
+            </button>
+          </div>
 
           <div className="payday-answer-quick-picks" aria-label="Common pay schedules">
             {[
@@ -18541,24 +18537,6 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                   trackWhenIsDueEvent('date_changed', { context: 'invoice_due_date', value: event.target.value })
                 }}
               />
-            </label>
-
-            <label className="field value-field">
-              <span>Payment terms</span>
-              <select
-                value={invoiceTerm}
-                onChange={(event) => {
-                  const nextTerm = event.target.value as InvoiceTerm
-                  setInvoiceTerm(nextTerm)
-                  trackWhenIsDueEvent('term_changed', { context: 'invoice_due_date', value: nextTerm })
-                }}
-              >
-                {invoiceTerms.map((term) => (
-                  <option value={term} key={term}>
-                    {invoiceTermLabels[term]}
-                  </option>
-                ))}
-              </select>
             </label>
 
             <div className="invoice-term-presets" aria-label="Quick payment term choices">
