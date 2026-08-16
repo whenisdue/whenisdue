@@ -145,7 +145,7 @@ function extractDate(query: string, todayKey: string): ExtractedDate {
   }
 
   const numericDate = normalized.match(
-    /\b(\d{1,2})[/-](\d{1,2})(?:[/-](20\d{2}|\d{2}))?\b/,
+    /\b(\d{1,2})\/(\d{1,2})(?:\/(20\d{2}|\d{2}))?\b/,
   )
 
   if (numericDate) {
