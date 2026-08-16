@@ -582,19 +582,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell deadline-rule-page">
-      <header className="deadline-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="deadline-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="deadline-answer-hero" aria-label="Deadline calculator answer">
         <p className="deadline-answer-eyebrow">Deadline calculator</p>
@@ -3218,19 +3206,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell shipping-answer-page">
-      <header className="shipping-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="shipping-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="shipping-answer-shell" aria-labelledby="shipping-answer-title">
         <div className="shipping-answer-hero">
@@ -4100,19 +4076,7 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell notice-answer-page">
-      <header className="notice-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="notice-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section
         className="notice-answer-shell"
@@ -4957,22 +4921,7 @@ function SubscriptionRenewalCalculatorPage({
 
   return (
     <main className="page-shell subscription-answer-page">
-      <header
-        className="subscription-answer-header"
-        aria-label="WhenIsDue navigation"
-      >
-        <a
-          className="subscription-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section
         className="subscription-answer-shell"
@@ -7304,19 +7253,7 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell payday-answer-page">
-      <header className="payday-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="payday-answer-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="payday-answer-shell" aria-labelledby="payday-answer-title">
         <div className="payday-answer-hero">
@@ -13090,19 +13027,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell business-page business-answer-first-page">
-      <header className="business-answer-header" aria-label="WhenIsDue">
-        <a
-          className="business-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="business-answer-shell" aria-labelledby="business-days-title">
         <div className="business-answer-hero">
@@ -15256,19 +15181,7 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell between-answer-page">
-      <header className="between-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="between-answer-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section
         className="between-answer-shell"
@@ -15904,19 +15817,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell free-trial-answer-page">
-      <header className="free-trial-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="free-trial-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section
         className="free-trial-answer-shell"
@@ -16772,23 +16673,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell return-window-page return-answer-first-page">
-      <header
-        className="return-answer-header"
-        aria-label="WhenIsDue navigation"
-      >
-        <a
-          className="return-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section
         className="return-answer-hero"
@@ -17926,19 +17811,7 @@ function TwoTenNetThirtyPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell two-ten-answer-page">
-      <header className="two-ten-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="two-ten-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="two-ten-answer-shell" aria-labelledby="two-ten-answer-title">
         <div className="two-ten-answer-hero">
@@ -18626,19 +18499,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell invoice-due-date-page invoice-answer-first-page">
-      <header className="invoice-answer-header" aria-label="WhenIsDue">
-        <a
-          className="invoice-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="invoice-answer-hero" aria-labelledby="invoice-due-date-title" aria-live="polite">
         <p className="invoice-answer-eyebrow">Invoice due date</p>
@@ -19946,27 +19807,7 @@ function InvoiceTermPage({ dayCount, term, onNavigate }: InvoiceTermPageProps) {
   return (
     <main className="page-shell net-term-page">
       <section className="net-term-hero" aria-labelledby={`net-${dayCount}-title`}>
-        <header className="net-term-header">
-          <a
-            className="net-term-brand"
-            href="/"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            WhenIsDue
-          </a>
-          <a
-            href="/invoice-due-date-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/invoice-due-date-calculator')
-            }}
-          >
-            Invoice calculator
-          </a>
-        </header>
+        <CalculatorPageHeader onNavigate={onNavigate} />
 
         <div className="net-term-answer">
           <p className="net-term-kicker">Net {dayCount} due date</p>
@@ -20487,19 +20328,7 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell sla-answer-page">
-      <header className="sla-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="sla-answer-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="sla-answer-shell" aria-labelledby="sla-answer-title">
         <div className="sla-answer-hero">
@@ -21470,6 +21299,35 @@ function NotFoundPage({ onNavigate }: NavigationProps) {
 
       <SiteFooter onNavigate={onNavigate} />
     </main>
+  )
+}
+
+function CalculatorPageHeader({ onNavigate }: NavigationProps) {
+  return (
+    <header className="calculator-page-header" aria-label="WhenIsDue navigation">
+      <a
+        className="calculator-page-brand"
+        href="/"
+        onClick={(event) => {
+          event.preventDefault()
+          onNavigate('/')
+        }}
+        aria-label="WhenIsDue home"
+      >
+        <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+      </a>
+
+      <a
+        className="calculator-page-all-link"
+        href="/calculators"
+        onClick={(event) => {
+          event.preventDefault()
+          onNavigate('/calculators')
+        }}
+      >
+        All calculators
+      </a>
+    </header>
   )
 }
 
