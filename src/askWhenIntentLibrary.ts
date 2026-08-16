@@ -12,6 +12,8 @@ function normalize(value: string) {
     .toLowerCase()
     .replace(/[–—]/g, '-')
     .replace(/&/g, ' and ')
+    .replace(/\be[.\s-]*o[.\s-]*m\b/g, 'eom')
+    .replace(/\b([a-z])\s*[.\-]\s*([a-z])\s*[.\-]\s*([a-z])\b/g, '$1$2$3')
     .replace(/[^\p{L}\p{N}\s/+-]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -147,6 +149,13 @@ const intents: AskWhenIntentDefinition[] = [
       'count weekdays only',
       'office days',
       'banking days',
+      'banking day',
+      'biz days',
+      'biz day',
+      'bizdays',
+      'wdays',
+      'workdays',
+      'workday',
     ],
     fragments: [
       'bus',
@@ -214,6 +223,8 @@ const intents: AskWhenIntentDefinition[] = [
       'when does return window end',
       'store return',
       'purchase return',
+      'rturn',
+      'rturn deadline',
     ],
     fragments: [
       'ret',
@@ -254,7 +265,7 @@ const intents: AskWhenIntentDefinition[] = [
       'trial deadline',
     ],
     fragments: ['tri', 'tria', 'trial', 'expir', 'free t'],
-    typoWords: ['trial', 'expire', 'expires'],
+    typoWords: ['trial', 'expire', 'expires', 'tirla', 'trila', 'trail'],
     suggestions: [
       'when does my free trial end',
       '30 day free trial',
@@ -427,6 +438,13 @@ const intents: AskWhenIntentDefinition[] = [
       'package arrive',
       'parcel arrive',
       'package delivery',
+      'arrvl',
+      'arrival estimate',
+      'delivery lead time',
+      'shipping lead time',
+      'lead time delivery',
+      'shipped today',
+      'we shipped this today',
     ],
     fragments: [
       'shi',
@@ -440,7 +458,7 @@ const intents: AskWhenIntentDefinition[] = [
       'pack',
       'parcel',
     ],
-    typoWords: ['shipping', 'delivery', 'arrival', 'package'],
+    typoWords: ['shipping', 'delivery', 'arrival', 'package', 'arrvl', 'delviery'],
     suggestions: [
       '3-5 business days shipping',
       'delivery date range from a ship date',
@@ -471,6 +489,9 @@ const intents: AskWhenIntentDefinition[] = [
       'notice to vacate',
       'vacate notice',
       'lease notice',
+      'last work day after notice',
+      'last working date',
+      'resignation effective date',
     ],
     fragments: [
       'not',
@@ -565,6 +586,10 @@ const intents: AskWhenIntentDefinition[] = [
       'renewal deadline',
       'subscription expires',
       'membership expires',
+      'cancel before next billing',
+      'next billing date subscription',
+      'next billing date',
+      'billing renewal',
     ],
     fragments: [
       'ren',
@@ -605,7 +630,7 @@ const intents: AskWhenIntentDefinition[] = [
       'next business day',
     ],
     fragments: ['wee', 'weeke', 'weekend', 'sat', 'sund', 'mon'],
-    typoWords: ['weekend', 'saturday', 'sunday'],
+    typoWords: ['weekend', 'saturday', 'sunday', 'wekend', 'wekends'],
     suggestions: [
       'what if a deadline falls on a weekend',
       'do weekends count as business days',
@@ -709,6 +734,8 @@ const intents: AskWhenIntentDefinition[] = [
       'response deadline',
       'support deadline',
       'ticket due',
+      'end of business day',
+      'turn around time',
       'turnaround time',
       'tat',
       'cob',
@@ -788,6 +815,10 @@ const intents: AskWhenIntentDefinition[] = [
       'lead time',
       'maturity date',
       'payment maturity',
+      'last possible date',
+      'how long left',
+      'closing day',
+      'final deadline',
     ],
     fragments: ['dead', 'due', 'cut', 'by w', 'final d', 'target'],
     typoWords: ['deadline', 'cutoff'],
@@ -839,14 +870,12 @@ function numericSuggestions(query: string) {
   }
 
   if (
-    normalized.includes('shipping') ||
-    normalized.includes('delivery') ||
-    normalized.includes('arrive')
+    /\b(ship|ships|shipped|shipping|delivery|deliver|arrive|arrival|eta|package|parcel)\b/.test(
+      normalized,
+    )
   ) {
     return [
-      normalized.includes('-')
-        ? normalized
-        : `${amount} day delivery range`,
+      `${amount} business day shipping estimate`,
       'delivery date range from a ship date',
       'when should my order arrive',
       'delivery range in business days',
@@ -854,7 +883,7 @@ function numericSuggestions(query: string) {
   }
 
   const calendarFromToday = new RegExp(
-    `^${amount}\\s+(?:calendar\\s+)?days?\\s+from\\s+today$`,
+    `^${amount}\\s+(?:calendar\\s+)?days?\\s+(?:from\\s+today|starting\\s+now|from\\s+now)$`,
   )
   const calendarAfterDate = new RegExp(
     `^${amount}\\s+(?:calendar\\s+)?days?\\s+after(?:\\s+a)?\\s+date$`,
@@ -906,10 +935,26 @@ function numericSuggestions(query: string) {
   }
 
   if (
+    /\b(?:business|working|office)\s+(?:hours?|hrs?)\b/.test(normalized) ||
+    /\b(?:sla|tat)\b/.test(normalized)
+  ) {
+    return [
+      'deadline in working hours',
+      'business-hours deadline',
+      'SLA deadline in business hours',
+    ]
+  }
+
+  if (
     normalized.includes('business') ||
     normalized.includes('working day') ||
     normalized.includes('work day') ||
-    normalized.includes('weekday')
+    normalized.includes('weekday') ||
+    normalized.includes('banking day') ||
+    normalized.includes('biz day') ||
+    normalized.includes('bizdays') ||
+    normalized.includes('workday') ||
+    normalized.includes('wdays')
   ) {
     if (
       normalized.includes('before') ||
@@ -968,10 +1013,40 @@ function numericSuggestions(query: string) {
   return []
 }
 
+function shortFragmentSuggestions(query: string) {
+  const normalized = normalize(query)
+
+  const map: Record<string, string[]> = {
+    r: ['30 day return window', 'when does my subscription renew'],
+    re: ['30 day return window', 'when does my subscription renew'],
+    t: ['when does my free trial end'],
+    tr: ['when does my free trial end'],
+    i: ['invoice due date from Net terms'],
+    in: ['invoice due date from Net terms'],
+    n: ['Net 30 due date', '30 day notice period'],
+    ne: ['Net 30 due date'],
+    s: ['3-5 business days shipping', 'when does my subscription renew'],
+    sh: ['3-5 business days shipping'],
+    d: ['deadline after a date', 'delivery date range from a ship date'],
+    de: ['deadline after a date', 'delivery date range from a ship date'],
+    p: ['when is my next payday', 'invoice due date from Net terms'],
+    pa: ['when is my next payday', 'invoice due date from Net terms'],
+    w: ['5 business days from today', 'what if a deadline falls on a weekend'],
+    wo: ['5 business days from today'],
+    h: ['do public holidays count as business days'],
+    ho: ['do public holidays count as business days'],
+  }
+
+  return map[normalized] ?? []
+}
+
 function fallbackSuggestions(query: string) {
   const normalized = normalize(query)
 
   if (!normalized) return []
+
+  const short = shortFragmentSuggestions(normalized)
+  if (short.length) return short
 
   if (normalized === 'pay') {
     return [
@@ -1119,6 +1194,15 @@ export function analyzeAskWhenSuggestions(
     }
   }
 
+  const shortSuggestions = shortFragmentSuggestions(normalizedQuery)
+  if (shortSuggestions.length) {
+    return {
+      mode: 'ambiguous',
+      label: normalizedQuery,
+      suggestions: shortSuggestions.slice(0, 4),
+    }
+  }
+
   const numeric = numericSuggestions(normalizedQuery)
 
   const scored = intents
@@ -1158,10 +1242,10 @@ export function analyzeAskWhenSuggestions(
       if (
         intent.id === 'business-days' &&
         (
-          /\b(?:business|buisness|busines|busniess|working|work)\s+days?\b/.test(
+          /\b(?:business|buisness|busines|busniess|working|wrkng|work|banking|biz)\s+days?\b/.test(
             normalizedQuery,
           ) ||
-          /\bweekdays?\b/.test(normalizedQuery)
+          /\b(?:weekdays?|workdays?|bizdays|wdays)\b/.test(normalizedQuery)
         )
       ) {
         contextBonus += 64
@@ -1196,6 +1280,33 @@ export function analyzeAskWhenSuggestions(
         /\b(weekend|weekends|wekends|saturday|sunday)\b/.test(normalizedQuery)
       ) {
         contextBonus += 30
+      }
+
+      if (
+        intent.id === 'shipping' &&
+        /\b(ship|ships|shipped|shipping|delivery|deliver|arrive|arrival|eta|package|parcel|lead time)\b/.test(
+          normalizedQuery,
+        )
+      ) {
+        contextBonus += 60
+      }
+
+      if (
+        intent.id === 'renewal' &&
+        /\b(subscription|renew|renews|renewal|membership|next billing|billing date|auto renew)\b/.test(
+          normalizedQuery,
+        )
+      ) {
+        contextBonus += 58
+      }
+
+      if (
+        intent.id === 'notice' &&
+        /\b(notice|resign|resignation|termination|vacate|last working|last work)\b/.test(
+          normalizedQuery,
+        )
+      ) {
+        contextBonus += 54
       }
 
       if (
