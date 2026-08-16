@@ -7332,26 +7332,13 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
             />
           </label>
 
-          <div className="next-payday-monthly-option">
-            <span>Other schedule</span>
-            <button
-              type="button"
-              className={schedule === 'monthly' ? 'is-active' : ''}
-              onClick={() => {
-                setSchedule('monthly')
-                trackWhenIsDueEvent('pay_schedule_changed', { value: 'monthly' })
-              }}
-            >
-              Monthly
-            </button>
-          </div>
-
           <div className="payday-answer-quick-picks" aria-label="Common pay schedules">
             {[
               ['Weekly', 'weekly'],
               ['Every 2 weeks', 'biweekly'],
               ['1st & 15th', 'semimonthly-1-15'],
               ['15th & last', 'semimonthly-15-last'],
+              ['Monthly', 'monthly'],
             ].map(([label, value]) => (
               <button
                 type="button"

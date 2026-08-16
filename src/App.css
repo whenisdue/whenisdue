@@ -5769,3 +5769,9 @@ textarea:focus-visible {
     min-width: 120px;
   }
 }
+
+@media (max-width: 640px) {
+  .payday-answer-quick-picks button:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
