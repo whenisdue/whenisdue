@@ -2574,6 +2574,16 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 760px) {
+          .ask-when-suggestion-grid {
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(3, 44px);
+            min-height: 148px;
+          }
+
+          .ask-when-suggestion-grid button:nth-child(4) {
+            display: none;
+          }
+
           .weekends-zero-header {
             width: min(100% - 24px, 680px);
             min-height: 76px;
@@ -8984,31 +8994,269 @@ function resolveAskWhenQuery(
   return null
 }
 
+type AskWhenAssistState = {
+  query: string
+  suggestions: string[]
+  committedLabel: string | null
+  committedDescription: string | null
+}
+
+type AskWhenSuggestionRequest = {
+  id: number
+  text: string
+}
+
 type AskWhenBoxProps = NavigationProps & {
   holidayCalendar: HolidayCalendarId
   today: PlainDate
+  onAssistChange?: (state: AskWhenAssistState) => void
+  suggestionRequest?: AskWhenSuggestionRequest | null
+  onSuggestionApplied?: () => void
 }
 
-function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
+function AskWhenBox({
+  onNavigate,
+  holidayCalendar,
+  today,
+  onAssistChange,
+  suggestionRequest,
+  onSuggestionApplied,
+}: AskWhenBoxProps) {
   const [query, setQuery] = useState(
     () => new URLSearchParams(window.location.search).get('q') ?? '',
   )
   const [submittedWithoutMatch, setSubmittedWithoutMatch] = useState(false)
+  const [hasCommittedQuery, setHasCommittedQuery] = useState(false)
+  const [isAskInputFocused, setIsAskInputFocused] = useState(false)
+  const [demoIndex, setDemoIndex] = useState(0)
+  const [demoText, setDemoText] = useState('')
+  const [demoPhase, setDemoPhase] = useState<'typing' | 'pause' | 'erasing'>('typing')
+
+  const demoQueries = useMemo(
+    () => [
+      '5 business days after August 10',
+      'Net 30 from August 16',
+      '30 day return from today',
+      'shipping says 3–5 business days',
+      'when does my free trial end',
+    ],
+    [],
+  )
+
+  useEffect(() => {
+    if (query || isAskInputFocused) return
+
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+
+    if (prefersReducedMotion) {
+      setDemoText(demoQueries[demoIndex])
+      return
+    }
+
+    const currentDemo = demoQueries[demoIndex]
+    let delay = 46
+
+    if (demoPhase === 'typing') {
+      if (demoText.length < currentDemo.length) {
+        delay = 46
+      } else {
+        delay = 1500
+      }
+    } else if (demoPhase === 'pause') {
+      delay = 1500
+    } else {
+      delay = demoText.length > 0 ? 24 : 320
+    }
+
+    const timer = window.setTimeout(() => {
+      if (demoPhase === 'typing') {
+        if (demoText.length < currentDemo.length) {
+          setDemoText(currentDemo.slice(0, demoText.length + 1))
+        } else {
+          setDemoPhase('pause')
+        }
+        return
+      }
+
+      if (demoPhase === 'pause') {
+        setDemoPhase('erasing')
+        return
+      }
+
+      if (demoText.length > 0) {
+        setDemoText(demoText.slice(0, -1))
+        return
+      }
+
+      setDemoIndex((current) => (current + 1) % demoQueries.length)
+      setDemoPhase('typing')
+    }, delay)
+
+    return () => window.clearTimeout(timer)
+  }, [
+    demoIndex,
+    demoPhase,
+    demoQueries,
+    demoText,
+    isAskInputFocused,
+    query,
+  ])
+
   const match = useMemo(
     () => resolveAskWhenQuery(query, holidayCalendar, today),
     [query, holidayCalendar, today],
   )
 
+  useEffect(() => {
+    if (!suggestionRequest) return
+
+    setQuery(suggestionRequest.text)
+    setSubmittedWithoutMatch(false)
+    setHasCommittedQuery(false)
+    onSuggestionApplied?.()
+  }, [suggestionRequest, onSuggestionApplied])
+
   const examples = [
     'what is 3 business days from today',
-    '5 business days after 2026-08-10',
+    '5 business days after August 10',
     '3-5 business days shipping',
     'Net 30 due date',
     '30 day return',
   ]
 
+  const contextualSuggestions = useMemo(() => {
+    const normalized = normalizeAskWhenQuery(query)
+    if (!normalized) return []
+
+    const suggestions: string[] = []
+    const add = (...items: string[]) => {
+      for (const item of items) {
+        if (!suggestions.includes(item)) suggestions.push(item)
+      }
+    }
+
+    const has = (...terms: string[]) =>
+      terms.some((term) => normalized.includes(term))
+
+    const amount = normalized.match(/\b(\d+)\b/)?.[1] ?? null
+    const bareNumber = /^\d+$/.test(normalized)
+    const numberPlusDayFragment = /^\d+\s+d(?:a(?:y(?:s)?)?)?$/.test(normalized)
+
+    if (amount && (bareNumber || numberPlusDayFragment)) {
+      add(
+        `${amount} days from today`,
+        `${amount} day return window`,
+        `Net ${amount} invoice`,
+        `${amount} day notice period`,
+      )
+    }
+
+    if (has('business', 'working day', 'weekday')) {
+      const businessAmount = amount ?? '5'
+      add(
+        `${businessAmount} business days from today`,
+        `${businessAmount} business days after a date`,
+        `${businessAmount} business days before a date`,
+      )
+    }
+
+    if (has('return', 'refund')) {
+      add(
+        `${amount ?? '30'} day return window`,
+        'return deadline from a purchase date',
+        'return deadline from today',
+      )
+    }
+
+    if (has('net', 'invoice', 'payment due')) {
+      add(
+        'Net 30 due date',
+        'invoice due date from Net terms',
+        '2/10 Net 30',
+        'Net 30 vs 30 days',
+      )
+    }
+
+    if (has('ship', 'shipping', 'delivery', 'arrive')) {
+      add(
+        '3-5 business days shipping',
+        'delivery date range from a ship date',
+        'when should my order arrive',
+      )
+    }
+
+    if (has('trial', 'free trial')) {
+      add(
+        'when does my free trial end',
+        `${amount ?? '30'} day free trial`,
+        'trial end date from a start date',
+      )
+    }
+
+    if (has('notice', 'resign', 'resignation', 'cancel before')) {
+      add(
+        `${amount ?? '30'} day notice period`,
+        'when should I give notice',
+        'notice deadline before a date',
+      )
+    }
+
+    if (has('payday', 'pay day', 'salary', 'pay date', 'biweekly')) {
+      add(
+        'when is my next payday',
+        'next payday every 2 weeks',
+        'next payday twice a month',
+      )
+    }
+
+    if (has('renew', 'renewal', 'subscription')) {
+      add(
+        'when does my subscription renew',
+        'cancel before renewal',
+        'next renewal date',
+      )
+    }
+
+    const startsWithTypedText = suggestions.filter((suggestion) =>
+      normalizeAskWhenQuery(suggestion).startsWith(normalized),
+    )
+    const remaining = suggestions.filter(
+      (suggestion) => !startsWithTypedText.includes(suggestion),
+    )
+
+    return [...startsWithTypedText, ...remaining].slice(0, 4)
+  }, [query])
+
+  const suggestionItems =
+    query.trim().length > 0 ? contextualSuggestions : examples
+
+  const stableSuggestionItems = Array.from({ length: 4 }, (_, index) =>
+    suggestionItems[index] ?? '',
+  )
+
+  useEffect(() => {
+    onAssistChange?.({
+      query,
+      suggestions: contextualSuggestions,
+      committedLabel:
+        hasCommittedQuery && match ? match.label : null,
+      committedDescription:
+        hasCommittedQuery && match ? match.description : null,
+    })
+  }, [
+    contextualSuggestions,
+    hasCommittedQuery,
+    match,
+    onAssistChange,
+    query,
+  ])
+
   function submitQuery() {
     if (!query.trim()) return
+
+    setHasCommittedQuery(true)
 
     if (!match) {
       setSubmittedWithoutMatch(true)
@@ -9046,8 +9294,8 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
     <section className="ask-when-box" aria-labelledby="ask-when-title">
       <div className="ask-when-heading">
         <span>Ask WhenIsDue</span>
-        <h2 id="ask-when-title">What date do you need?</h2>
-        <p>Type a date or deadline question in plain English.</p>
+        <h2 id="ask-when-title">What do you need to know?</h2>
+        <p>Type it however you'd say it.</p>
       </div>
 
       <form
@@ -9060,17 +9308,20 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
         <input
           type="text"
           value={query}
+          onFocus={() => setIsAskInputFocused(true)}
+          onBlur={() => setIsAskInputFocused(false)}
           onChange={(event) => {
             setQuery(event.target.value)
             setSubmittedWithoutMatch(false)
+            setHasCommittedQuery(false)
           }}
-          placeholder="Try: 10 business days from today"
-          aria-label="Ask a date or deadline question"
+          placeholder={demoText}
+          aria-label="Ask WhenIsDue what you need to know"
           autoComplete="off"
         />
       </form>
 
-      {query.trim() && (match || submittedWithoutMatch) ? (
+      {hasCommittedQuery && query.trim() && (match || submittedWithoutMatch) ? (
         match?.path ? (
           <a
             className="ask-when-preview has-match is-link"
@@ -9116,17 +9367,32 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
         )
       ) : null}
 
-      <div className="ask-when-examples" aria-label="Ask WhenIsDue examples">
-        {examples.map((example) => (
+      <div
+        className={`ask-when-examples ask-when-suggestion-grid ${
+          query.trim() ? 'is-reserved' : ''
+        }`}
+        aria-label={query.trim() ? undefined : 'Ask WhenIsDue examples'}
+        aria-hidden={query.trim() ? true : undefined}
+      >
+        {stableSuggestionItems.map((suggestion, index) => (
           <button
             type="button"
-            key={example}
+            key={`ask-when-suggestion-${index}`}
+            className={suggestion ? '' : 'is-empty'}
+            aria-hidden={query.trim() || !suggestion ? true : undefined}
+            tabIndex={query.trim() || !suggestion ? -1 : 0}
+            onMouseDown={(event) => event.preventDefault()}
             onClick={() => {
-              setQuery(example)
-              trackWhenIsDueEvent('ask_when_example_clicked', { query: example })
+              if (!suggestion || query.trim()) return
+              setQuery(suggestion)
+              setSubmittedWithoutMatch(false)
+              setHasCommittedQuery(false)
+              trackWhenIsDueEvent('ask_when_example_clicked', {
+                query: suggestion,
+              })
             }}
           >
-            {example}
+            {suggestion || 'Suggestion'}
           </button>
         ))}
       </div>
@@ -9262,6 +9528,40 @@ function AskWhenBox({ onNavigate, holidayCalendar, today }: AskWhenBoxProps) {
           justify-content: center;
           gap: 7px;
           margin-top: 12px;
+        }
+
+        .ask-when-examples.is-contextual button {
+          border-color: rgba(130, 179, 158, 0.38);
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .ask-when-suggestion-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-rows: repeat(2, 44px);
+          gap: 8px;
+          min-height: 96px;
+          align-content: start;
+        }
+
+        .ask-when-suggestion-grid button {
+          width: 100%;
+          min-width: 0;
+          height: 44px;
+          justify-content: flex-start;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .ask-when-suggestion-grid button.is-empty {
+          visibility: hidden;
+          pointer-events: none;
+        }
+
+        .ask-when-suggestion-grid.is-reserved {
+          visibility: hidden;
+          pointer-events: none;
         }
 
         .ask-when-examples button {
@@ -9681,6 +9981,21 @@ function HomePage({ onNavigate }: NavigationProps) {
     readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
   )
   const [isMobileTaskListExpanded, setIsMobileTaskListExpanded] = useState(false)
+  const [askAssist, setAskAssist] = useState<AskWhenAssistState>({
+    query: '',
+    suggestions: [],
+    committedLabel: null,
+    committedDescription: null,
+  })
+  const [askSuggestionRequest, setAskSuggestionRequest] =
+    useState<AskWhenSuggestionRequest | null>(null)
+  const [askSuggestionRequestId, setAskSuggestionRequestId] = useState(0)
+
+  function applyAskSuggestion(text: string) {
+    const nextId = askSuggestionRequestId + 1
+    setAskSuggestionRequestId(nextId)
+    setAskSuggestionRequest({ id: nextId, text })
+  }
 
   const recentOnlyCalculations = useMemo(
     () => {
@@ -9767,22 +10082,77 @@ function HomePage({ onNavigate }: NavigationProps) {
               onNavigate={onNavigate}
               holidayCalendar={holidayCalendar}
               today={today}
+              onAssistChange={setAskAssist}
+              suggestionRequest={askSuggestionRequest}
+              onSuggestionApplied={() => setAskSuggestionRequest(null)}
             />
           </div>
 
-          <figure className="date-home-editorial-art">
-            <img
-              src="/homepage-editorial.webp"
-              alt="A parcel, envelope, folded document, and paper slip arranged on a warm stone surface."
-              decoding="async"
-              fetchPriority="high"
-            />
-            <figcaption className="date-home-today-card" aria-hidden="true">
-              <span>Today</span>
-              <strong>{formatPlainDate(today)}</strong>
-              <small>{formatWeekday(today)}</small>
-            </figcaption>
-          </figure>
+          <aside
+            className={`date-home-intent-panel ${
+              askAssist.query.trim() ? 'is-listening' : 'is-idle'
+            }`}
+            aria-live="polite"
+            aria-label="WhenIsDue suggestions"
+          >
+            {!askAssist.query.trim() ? (
+              <div className="date-home-intent-idle">
+                <span>Today</span>
+                <strong>{formatPlainDate(today)}</strong>
+                <small>{formatWeekday(today)}</small>
+              </div>
+            ) : askAssist.committedLabel ? (
+              <div className="date-home-intent-committed">
+                <span>WhenIsDue understood</span>
+                <strong>{askAssist.committedLabel}</strong>
+                {askAssist.committedDescription ? (
+                  <p>{askAssist.committedDescription}</p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="date-home-intent-listening">
+                <span>You might mean</span>
+                <strong className="date-home-intent-query">
+                  {askAssist.query}
+                </strong>
+
+                <div className="date-home-intent-options">
+                  {Array.from({ length: 4 }, (_, index) => {
+                    const suggestion = askAssist.suggestions[index] ?? ''
+                    return (
+                      <button
+                        type="button"
+                        key={`intent-panel-option-${index}`}
+                        className={suggestion ? '' : 'is-empty'}
+                        aria-hidden={suggestion ? undefined : true}
+                        tabIndex={suggestion ? 0 : -1}
+                        onClick={() => {
+                          if (!suggestion) return
+                          applyAskSuggestion(suggestion)
+                          trackWhenIsDueEvent('ask_when_suggestion_clicked', {
+                            query: suggestion,
+                            surface: 'intent_panel',
+                          })
+                        }}
+                      >
+                        {suggestion || 'Suggestion'}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {askAssist.suggestions.length === 0 ? (
+                  <p className="date-home-intent-quiet">
+                    Keep typing — I won't interrupt.
+                  </p>
+                ) : (
+                  <p className="date-home-intent-quiet">
+                    Keep typing, or choose one.
+                  </p>
+                )}
+              </div>
+            )}
+          </aside>
         </div>
       </section>
 
@@ -9924,68 +10294,135 @@ function HomePage({ onNavigate }: NavigationProps) {
           color: #fffaf2;
         }
 
-        .date-home-editorial-art {
-          position: relative;
+        .date-home-intent-panel {
           min-width: 0;
           min-height: 590px;
-          margin: 0;
-          overflow: hidden;
-          background: #d9c6aa;
+          display: grid;
+          place-items: center;
+          padding: clamp(34px, 5vw, 62px);
+          background: #e5ddd0;
+          color: #102f52;
         }
 
-        .date-home-editorial-art img {
-          display: block;
-          width: 100%;
-          height: 100%;
-          min-height: 590px;
-          object-fit: cover;
-          object-position: 50% center;
+        .date-home-intent-idle,
+        .date-home-intent-listening,
+        .date-home-intent-committed {
+          width: min(100%, 520px);
         }
 
-        .date-home-editorial-art .date-home-today-card {
-          position: absolute;
-          left: 50%;
-          top: 52%;
-          width: min(72%, 430px);
-          padding: 20px 24px 22px;
-          border: 1px solid rgba(19, 38, 70, 0.08);
-          border-radius: 18px;
-          background: rgba(255, 250, 242, 0.56);
-          box-shadow: 0 18px 42px rgba(19, 38, 70, 0.14);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
+        .date-home-intent-idle {
           text-align: center;
-          transform: translate(-50%, -50%);
         }
 
-        .date-home-editorial-art .date-home-today-card span,
-        .date-home-editorial-art .date-home-today-card strong,
-        .date-home-editorial-art .date-home-today-card small {
+        .date-home-intent-idle span,
+        .date-home-intent-listening > span,
+        .date-home-intent-committed > span {
           display: block;
-        }
-
-        .date-home-editorial-art .date-home-today-card span {
-          color: #246b52;
-          font-size: 0.7rem;
+          color: #267158;
+          font-size: 0.78rem;
           font-weight: 950;
-          letter-spacing: 0.11em;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
         }
 
-        .date-home-editorial-art .date-home-today-card strong {
-          margin-top: 7px;
-          color: #10213f;
-          font-size: clamp(2rem, 3.6vw, 3.35rem);
+        .date-home-intent-idle strong {
+          display: block;
+          margin-top: 12px;
+          color: #102f52;
+          font-size: clamp(3rem, 5vw, 5rem);
+          line-height: 0.92;
+          letter-spacing: -0.055em;
+          text-wrap: balance;
+        }
+
+        .date-home-intent-idle small {
+          display: block;
+          margin-top: 10px;
+          color: #61778d;
+          font-size: 1rem;
+          font-weight: 850;
+        }
+
+        .date-home-intent-listening > span,
+        .date-home-intent-committed > span {
+          text-align: left;
+        }
+
+        .date-home-intent-query {
+          display: block;
+          min-height: 76px;
+          margin-top: 12px;
+          overflow: hidden;
+          color: #102f52;
+          font-size: clamp(2.2rem, 3.8vw, 3.7rem);
           line-height: 0.98;
+          letter-spacing: -0.045em;
+          text-wrap: balance;
+        }
+
+        .date-home-intent-options {
+          display: grid;
+          grid-template-columns: 1fr;
+          grid-template-rows: repeat(4, 58px);
+          gap: 9px;
+          min-height: 259px;
+          margin-top: 24px;
+        }
+
+        .date-home-intent-options button {
+          width: 100%;
+          min-width: 0;
+          min-height: 58px;
+          display: flex;
+          align-items: center;
+          padding: 10px 16px;
+          border: 1px solid rgba(16, 47, 82, 0.11);
+          border-radius: 14px;
+          background: rgba(255, 250, 242, 0.72);
+          color: #284866;
+          font: inherit;
+          font-size: 0.97rem;
+          font-weight: 850;
+          line-height: 1.22;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .date-home-intent-options button:hover {
+          border-color: rgba(38, 113, 88, 0.34);
+          background: rgba(255, 250, 242, 0.96);
+          color: #173d5f;
+        }
+
+        .date-home-intent-options button.is-empty {
+          visibility: hidden;
+          pointer-events: none;
+        }
+
+        .date-home-intent-quiet {
+          min-height: 22px;
+          margin: 14px 0 0;
+          color: #728398;
+          font-size: 0.9rem;
+          line-height: 1.45;
+        }
+
+        .date-home-intent-committed strong {
+          display: block;
+          margin-top: 12px;
+          color: #102f52;
+          font-size: clamp(2.6rem, 4.4vw, 4.4rem);
+          line-height: 0.95;
           letter-spacing: -0.05em;
           text-wrap: balance;
         }
 
-        .date-home-editorial-art .date-home-today-card small {
-          margin-top: 7px;
-          color: #60758d;
-          font-size: 0.9rem;
-          font-weight: 850;
+        .date-home-intent-committed p {
+          max-width: 460px;
+          margin: 16px 0 0;
+          color: #60758a;
+          font-size: 1rem;
+          line-height: 1.55;
         }
 
         @media (max-width: 760px) {
@@ -10068,36 +10505,46 @@ function HomePage({ onNavigate }: NavigationProps) {
             display: none;
           }
 
-          .date-home-editorial-art {
-            min-height: 0;
+          .date-home-intent-panel {
+            min-height: 330px;
+            padding: 18px 15px 20px;
           }
 
-          .date-home-editorial-art img {
-            min-height: 0;
-            height: 172px;
-            object-position: 44% center;
+          .date-home-intent-idle strong {
+            margin-top: 6px;
+            font-size: clamp(2rem, 10vw, 2.75rem);
           }
 
-          .date-home-editorial-art .date-home-today-card {
-            left: 50%;
-            top: 49%;
-            width: min(82%, 310px);
-            padding: 11px 14px 13px;
-            border-radius: 14px;
+          .date-home-intent-idle small {
+            margin-top: 6px;
+            font-size: 0.82rem;
           }
 
-          .date-home-editorial-art .date-home-today-card span {
-            font-size: 0.6rem;
+          .date-home-intent-query {
+            min-height: 50px;
+            margin-top: 7px;
+            font-size: clamp(1.6rem, 7.5vw, 2.2rem);
           }
 
-          .date-home-editorial-art .date-home-today-card strong {
-            margin-top: 5px;
-            font-size: clamp(1.5rem, 7.6vw, 2rem);
+          .date-home-intent-options {
+            grid-template-rows: repeat(3, 50px);
+            min-height: 166px;
+            margin-top: 14px;
           }
 
-          .date-home-editorial-art .date-home-today-card small {
-            margin-top: 5px;
-            font-size: 0.76rem;
+          .date-home-intent-options button {
+            min-height: 50px;
+            padding: 8px 12px;
+            font-size: 0.86rem;
+          }
+
+          .date-home-intent-options button:nth-child(4) {
+            display: none;
+          }
+
+          .date-home-intent-quiet {
+            margin-top: 9px;
+            font-size: 0.8rem;
           }
         }
       `}</style>
