@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { analyzeAskWhenSuggestions } from './askWhenIntentLibrary'
+import { resolveAskWhenCompletion } from './askWhenCompletion'
 import './App.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
 import { DeadlineFinalAdjustmentNotice } from './DeadlineFinalAdjustmentNotice.tsx'
@@ -9007,6 +9008,7 @@ type AskWhenAssistState = {
 type AskWhenSuggestionRequest = {
   id: number
   text: string
+  originalQuery: string
 }
 
 type AskWhenBoxProps = NavigationProps & {
@@ -9030,6 +9032,11 @@ function AskWhenBox({
   )
   const [submittedWithoutMatch, setSubmittedWithoutMatch] = useState(false)
   const [hasCommittedQuery, setHasCommittedQuery] = useState(false)
+  const [completionPrompt, setCompletionPrompt] = useState<{
+    label: string
+    description: string
+  } | null>(null)
+  const [completionSuggestion, setCompletionSuggestion] = useState<string | undefined>(undefined)
   const [isAskInputFocused, setIsAskInputFocused] = useState(false)
   const [demoIndex, setDemoIndex] = useState(0)
   const [demoText, setDemoText] = useState('')
@@ -9115,11 +9122,51 @@ function AskWhenBox({
   useEffect(() => {
     if (!suggestionRequest) return
 
-    setQuery(suggestionRequest.text)
+    const originalQuery = suggestionRequest.originalQuery.trim()
+    const completion = resolveAskWhenCompletion(
+      originalQuery,
+      toDateKey(today),
+      suggestionRequest.text,
+    )
+
     setSubmittedWithoutMatch(false)
+
+    if (completion.kind === 'navigate') {
+      trackWhenIsDueEvent('ask_when_completion_navigated', {
+        query: originalQuery,
+        suggestion: suggestionRequest.text,
+        destination: completion.path,
+        surface: 'intent_panel',
+      })
+      onSuggestionApplied?.()
+      onNavigate(completion.path)
+      return
+    }
+
+    if (completion.kind === 'missing') {
+      setQuery(originalQuery)
+      setCompletionSuggestion(suggestionRequest.text)
+      setCompletionPrompt({
+        label: completion.prompt,
+        description: completion.description,
+      })
+      setHasCommittedQuery(true)
+      trackWhenIsDueEvent('ask_when_completion_missing_fact', {
+        query: originalQuery,
+        suggestion: suggestionRequest.text,
+        prompt: completion.prompt,
+      })
+      onSuggestionApplied?.()
+      return
+    }
+
+    // Fallback for suggestion families that are not completion-enabled yet.
+    setQuery(suggestionRequest.text)
+    setCompletionSuggestion(undefined)
+    setCompletionPrompt(null)
     setHasCommittedQuery(false)
     onSuggestionApplied?.()
-  }, [suggestionRequest, onSuggestionApplied])
+  }, [suggestionRequest, onSuggestionApplied, onNavigate, today])
 
   const examples = [
     'what is 3 business days from today',
@@ -9150,11 +9197,16 @@ function AskWhenBox({
       suggestionMode: suggestionAnalysis.mode,
       suggestionLabel: suggestionAnalysis.label,
       committedLabel:
-        hasCommittedQuery && match ? match.label : null,
+        hasCommittedQuery
+          ? completionPrompt?.label ?? match?.label ?? null
+          : null,
       committedDescription:
-        hasCommittedQuery && match ? match.description : null,
+        hasCommittedQuery
+          ? completionPrompt?.description ?? match?.description ?? null
+          : null,
     })
   }, [
+    completionPrompt,
     contextualSuggestions,
     hasCommittedQuery,
     match,
@@ -9165,14 +9217,63 @@ function AskWhenBox({
   ])
 
   function submitQuery() {
-    if (!query.trim()) return
+    const trimmedQuery = query.trim()
+    if (!trimmedQuery) return
+
+    const completion = resolveAskWhenCompletion(
+      trimmedQuery,
+      toDateKey(today),
+      completionSuggestion,
+    )
+
+    if (completion.kind === 'navigate') {
+      setSubmittedWithoutMatch(false)
+      setCompletionPrompt(null)
+      setHasCommittedQuery(false)
+      trackWhenIsDueEvent('ask_when_completion_navigated', {
+        query: trimmedQuery,
+        normalized_query: normalizeAskWhenQuery(trimmedQuery),
+        destination: completion.path,
+        surface: 'enter',
+      })
+      onNavigate(completion.path)
+      return
+    }
+
+    if (completion.kind === 'missing') {
+      setSubmittedWithoutMatch(false)
+      setCompletionPrompt({
+        label: completion.prompt,
+        description: completion.description,
+      })
+      setHasCommittedQuery(true)
+      trackWhenIsDueEvent('ask_when_completion_missing_fact', {
+        query: trimmedQuery,
+        prompt: completion.prompt,
+        surface: 'enter',
+      })
+      return
+    }
+
+    // Do not turn a genuinely ambiguous phrase into a false confident answer.
+    // The live choices already visible in the intent panel are the next step.
+    if (suggestionAnalysis.mode === 'ambiguous') {
+      setSubmittedWithoutMatch(false)
+      setCompletionPrompt(null)
+      setHasCommittedQuery(false)
+      trackWhenIsDueEvent('ask_when_ambiguous_enter', {
+        query: trimmedQuery,
+      })
+      return
+    }
 
     setHasCommittedQuery(true)
+    setCompletionPrompt(null)
 
     if (!match) {
       setSubmittedWithoutMatch(true)
       trackWhenIsDueEvent('ask_when_unrecognized', {
-        query: query.trim(),
+        query: trimmedQuery,
       })
       return
     }
@@ -9185,8 +9286,8 @@ function AskWhenBox({
           ? 'ask_when_rule_clarification'
           : 'ask_when_direct_answer',
         {
-          query: query.trim(),
-          normalized_query: normalizeAskWhenQuery(query),
+          query: trimmedQuery,
+          normalized_query: normalizeAskWhenQuery(trimmedQuery),
           answer: match.label,
         },
       )
@@ -9194,8 +9295,8 @@ function AskWhenBox({
     }
 
     trackWhenIsDueEvent('ask_when_submitted', {
-      query: query.trim(),
-      normalized_query: normalizeAskWhenQuery(query),
+      query: trimmedQuery,
+      normalized_query: normalizeAskWhenQuery(trimmedQuery),
       destination: match.path,
     })
     onNavigate(match.path)
@@ -9224,7 +9325,11 @@ function AskWhenBox({
           onChange={(event) => {
             setQuery(event.target.value)
             setSubmittedWithoutMatch(false)
+            setCompletionPrompt(null)
             setHasCommittedQuery(false)
+            if (!event.target.value.trim()) {
+              setCompletionSuggestion(undefined)
+            }
           }}
           placeholder={demoText}
           aria-label="Ask WhenIsDue what you need to know"
@@ -9907,7 +10012,11 @@ function HomePage({ onNavigate }: NavigationProps) {
   function applyAskSuggestion(text: string) {
     const nextId = askSuggestionRequestId + 1
     setAskSuggestionRequestId(nextId)
-    setAskSuggestionRequest({ id: nextId, text })
+    setAskSuggestionRequest({
+      id: nextId,
+      text,
+      originalQuery: askAssist.query,
+    })
   }
 
   const recentOnlyCalculations = useMemo(

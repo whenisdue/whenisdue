@@ -1498,7 +1498,8 @@ export function analyzeAskWhenSuggestions(
       'due',
       'maturity',
     ]).has(normalizedQuery) ||
-    /^\d+$/.test(normalizedQuery)
+    /^\d+$/.test(normalizedQuery) ||
+    /^\d{1,3}\s+days?$/.test(normalizedQuery)
 
   const exactOrClearPhrase =
     top.phraseScore >= 120 &&
