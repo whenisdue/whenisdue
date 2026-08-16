@@ -12140,7 +12140,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">#</span>
               <div>
                 <h2>Invoice due date</h2>
-                <p className="calculator-card-description">Add working days while skipping weekends and optional holidays.</p>
+                <p className="calculator-card-description">Find an invoice due date from Net terms or EOM.</p>
               </div>
             </a>
             <a
