@@ -6837,32 +6837,36 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
   }, [deadlineDate, holidayCalendar])
 
   return (
-    <main className="page-shell weekend-deadline-guide-page">
+    <main className="page-shell weekend-zero-page">
       <IdentityRow onNavigate={onNavigate} showHomeLink />
 
-      <section className="weekend-deadline-guide-shell">
-        <header className="weekend-deadline-guide-intro">
-          <p className="friendly-eyebrow">Deadline interpretation</p>
+      <section className="weekend-zero-shell">
+        <section className="weekend-zero-hero">
+          <p className="weekend-zero-eyebrow">WEEKEND DEADLINE GUIDE</p>
           <h1>What if a deadline falls on a weekend?</h1>
-          <p>
-            Sometimes the deadline moves to the next business day. Sometimes
-            it does not. The rule that created the deadline decides.
-          </p>
-        </header>
 
-        <section className="weekend-deadline-guide-bam">
-          <strong>
-            Do not automatically assume “Saturday means Monday.”
+          <strong className="weekend-zero-answer">
+            Often, it moves to the next business day.
           </strong>
-          <p>
-            Many rules extend a deadline that lands on a weekend or holiday to
-            the next business day, but that is not universal. Contracts,
-            policies, court rules, and laws can define the final-day rule
-            differently.
+
+          <p className="weekend-zero-caveat">
+            But only if the rule that created the deadline says it should.
           </p>
         </section>
 
-        <section className="weekend-deadline-guide-workspace">
+        <section className="weekend-zero-check" aria-label="Check a weekend deadline">
+          <div className="weekend-zero-result" aria-live="polite">
+            {parsedDeadlineDate && nextBusinessDay ? (
+              <>
+                <span>If your rule says “next business day”</span>
+                <strong>{formatWeekday(nextBusinessDay)},</strong>
+                <b>{formatPlainDate(nextBusinessDay)}</b>
+              </>
+            ) : (
+              <strong>Enter a valid deadline date.</strong>
+            )}
+          </div>
+
           <form onSubmit={(event) => event.preventDefault()}>
             <label>
               <span>Deadline date</span>
@@ -6887,64 +6891,42 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
               compact
             />
           </form>
-
-          <section className="weekend-deadline-guide-result" aria-live="polite">
-            {parsedDeadlineDate && nextBusinessDay ? (
-              <>
-                <span>If the rule says “next business day”</span>
-                <strong>{formatPlainDate(nextBusinessDay)}</strong>
-                <b>{formatWeekday(nextBusinessDay)}</b>
-                <p>
-                  Starting from {formatPlainDate(parsedDeadlineDate)}, WhenIsDue
-                  moves forward to the next qualifying business day under the
-                  selected calendar.
-                </p>
-              </>
-            ) : (
-              <p>Enter a valid deadline date.</p>
-            )}
-          </section>
         </section>
 
-        <section className="weekend-deadline-guide-copy">
-          <article>
-            <h2>When does a weekend deadline usually move?</h2>
+        <details className="weekend-zero-details">
+          <summary>When does it move?</summary>
+          <div>
             <p>
-              It moves when the governing rule explicitly says the final day
-              must be a business day, working day, or non-holiday, or when that
-              rule provides a next-business-day adjustment.
+              A weekend deadline usually moves when the governing rule says the
+              final day must be a business day, working day, or non-holiday, or
+              when it specifically provides a next-business-day adjustment.
             </p>
-          </article>
+          </div>
+        </details>
 
-          <article>
-            <h2>When might it stay on Saturday or Sunday?</h2>
+        <details className="weekend-zero-details">
+          <summary>When might it stay on Saturday or Sunday?</summary>
+          <div>
             <p>
-              A contract or policy may simply say “30 calendar days” or give a
-              fixed date without any weekend extension. In that case, you
-              should not add Monday unless the source says to.
+              If the source gives a fixed date or simply says a number of
+              calendar days without a weekend-extension rule, do not assume
+              Monday automatically replaces the stated date.
             </p>
-          </article>
+          </div>
+        </details>
 
-          <article>
-            <h2>What about public holidays?</h2>
+        <details className="weekend-zero-details">
+          <summary>What about public holidays?</summary>
+          <div>
             <p>
-              The same issue applies. Some rules move a final date that lands
-              on a recognized holiday; others do not. The applicable holiday
-              calendar also matters.
+              The same principle applies. Some rules move a deadline that lands
+              on a recognized holiday and some do not. The applicable holiday
+              calendar can also change the next qualifying business day.
             </p>
-          </article>
+          </div>
+        </details>
 
-          <article>
-            <h2>What if the wording is unclear?</h2>
-            <p>
-              Use the deadline calculator to compare the stated rule with a
-              next-business-day adjustment. If the deadline comes from a legal
-              or regulated source, check the source definition before acting.
-            </p>
-          </article>
-        </section>
-
-        <nav className="weekend-deadline-guide-related" aria-label="Related deadline guides">
+        <nav className="weekend-zero-related" aria-label="Related deadline guides">
           <a
             href="/deadline-calculator"
             onClick={(event) => {
@@ -6952,7 +6934,7 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
               onNavigate('/deadline-calculator')
             }}
           >
-            Deadline calculator
+            Check your exact deadline
           </a>
 
           <a
@@ -6964,237 +6946,251 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
           >
             Do weekends count as business days?
           </a>
-
-          <a
-            href="/do-public-holidays-count-as-business-days"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/do-public-holidays-count-as-business-days')
-            }}
-          >
-            Do public holidays count?
-          </a>
-
-          <a
-            href="/does-the-start-date-count"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/does-the-start-date-count')
-            }}
-          >
-            Does the start date count?
-          </a>
         </nav>
       </section>
 
       <SiteFooter
         onNavigate={onNavigate}
-        planningNote="For planning only. The governing contract, policy, law, court rule, or other source controls whether a weekend or holiday deadline moves."
+        planningNote="For planning only. The contract, policy, law, court rule, or other source controls whether a weekend or holiday deadline moves."
       />
 
       <style>{`
-        .weekend-deadline-guide-page {
+        .weekend-zero-page {
           min-height: 100vh;
           background: #fffaf2;
         }
 
-        .weekend-deadline-guide-shell {
+        .weekend-zero-shell {
           width: min(100% - 32px, 980px);
           margin: 0 auto;
-          padding: 34px 0 64px;
+          padding: 22px 0 64px;
         }
 
-        .weekend-deadline-guide-intro {
+        .weekend-zero-hero {
+          padding: clamp(34px, 6vw, 66px);
+          border: 1px solid rgba(21, 54, 84, 0.10);
+          border-radius: 26px;
+          background: #f3ecdc;
           text-align: center;
         }
 
-        .weekend-deadline-guide-intro h1 {
-          margin: 6px 0 0;
-          color: #152d48;
-          font-size: clamp(2.35rem, 6vw, 4.4rem);
-          line-height: 1;
-          letter-spacing: -0.04em;
+        .weekend-zero-eyebrow {
+          margin: 0;
+          color: #26806b;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.18em;
         }
 
-        .weekend-deadline-guide-intro > p:last-child {
-          max-width: 720px;
-          margin: 12px auto 0;
-          color: #61788f;
-          font-size: 1rem;
-          line-height: 1.55;
+        .weekend-zero-hero h1 {
+          max-width: 820px;
+          margin: 14px auto 0;
+          color: #153654;
+          font-size: clamp(2.35rem, 6.2vw, 4.7rem);
+          line-height: 0.98;
+          letter-spacing: -0.045em;
         }
 
-        .weekend-deadline-guide-bam {
-          max-width: 780px;
-          margin: 22px auto 0;
-          padding: 18px;
-          border: 1px solid rgba(183, 121, 31, 0.15);
-          border-radius: 14px;
-          background: #fffdf8;
-          text-align: center;
-        }
-
-        .weekend-deadline-guide-bam strong {
+        .weekend-zero-answer {
           display: block;
-          color: #6c5220;
-          font-size: 1.12rem;
+          max-width: 760px;
+          margin: 34px auto 0;
+          color: #153654;
+          font-size: clamp(2.5rem, 7vw, 5.35rem);
+          line-height: 0.94;
+          letter-spacing: -0.055em;
+        }
+
+        .weekend-zero-caveat {
+          max-width: 680px;
+          margin: 22px auto 0;
+          color: #4f6d7e;
+          font-size: clamp(1.05rem, 2vw, 1.3rem);
+          font-weight: 750;
           line-height: 1.35;
         }
 
-        .weekend-deadline-guide-bam p {
-          margin: 8px 0 0;
-          color: #786b4d;
-          font-size: 0.96rem;
-          line-height: 1.55;
-        }
-
-        .weekend-deadline-guide-workspace {
+        .weekend-zero-check {
           display: grid;
-          grid-template-columns: 0.8fr 1.2fr;
-          gap: 14px;
-          margin-top: 18px;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 12px;
+          margin-top: 14px;
         }
 
-        .weekend-deadline-guide-workspace form,
-        .weekend-deadline-guide-result {
-          padding: 20px;
-          border: 1px solid rgba(19, 38, 70, 0.09);
-          border-radius: 18px;
+        .weekend-zero-result,
+        .weekend-zero-check form {
+          min-width: 0;
+          padding: 22px;
+          border: 1px solid rgba(21, 54, 84, 0.10);
+          border-radius: 20px;
           background: #fff;
         }
 
-        .weekend-deadline-guide-workspace form {
-          display: grid;
-          gap: 14px;
-          align-content: center;
-        }
-
-        .weekend-deadline-guide-workspace label {
-          display: grid;
-          gap: 6px;
-          color: #526a82;
-          font-size: 0.9rem;
-          font-weight: 850;
-        }
-
-        .weekend-deadline-guide-workspace input {
-          min-height: 48px;
-          width: 100%;
-          padding: 9px 11px;
-          border: 1px solid rgba(19, 38, 70, 0.14);
-          border-radius: 10px;
-          background: #fff;
-          color: #17304d;
-          font: inherit;
-          font-size: 1rem;
-        }
-
-        .weekend-deadline-guide-result {
+        .weekend-zero-result {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          text-align: center;
         }
 
-        .weekend-deadline-guide-result > span {
-          color: #71869b;
+        .weekend-zero-result > span {
+          color: #60778b;
           font-size: 0.82rem;
-          font-weight: 900;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
+          font-weight: 850;
+          letter-spacing: 0.03em;
         }
 
-        .weekend-deadline-guide-result > strong {
+        .weekend-zero-result > strong {
           margin-top: 8px;
-          color: #10213f;
-          font-size: clamp(2rem, 4.5vw, 3.25rem);
+          color: #3f7289;
+          font-size: clamp(1.7rem, 4vw, 2.75rem);
+          line-height: 1;
+        }
+
+        .weekend-zero-result > b {
+          margin-top: 3px;
+          color: #153654;
+          font-size: clamp(2rem, 5vw, 3.25rem);
           line-height: 1;
           letter-spacing: -0.035em;
         }
 
-        .weekend-deadline-guide-result > b {
-          margin-top: 6px;
-          color: #637a91;
-          font-size: 1rem;
+        .weekend-zero-check form {
+          display: grid;
+          gap: 12px;
+          align-content: center;
         }
 
-        .weekend-deadline-guide-result > p {
-          max-width: 640px;
-          margin: 12px auto 0;
-          color: #5f748a;
-          font-size: 0.94rem;
+        .weekend-zero-check label {
+          display: grid;
+          gap: 6px;
+        }
+
+        .weekend-zero-check label > span {
+          color: #4f6880;
+          font-size: 0.86rem;
+          font-weight: 800;
+        }
+
+        .weekend-zero-check input,
+        .weekend-zero-check select {
+          width: 100%;
+          min-height: 48px;
+        }
+
+        .weekend-zero-details {
+          margin-top: 10px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 16px;
+          background: #fff;
+        }
+
+        .weekend-zero-details summary {
+          cursor: pointer;
+          padding: 17px 18px;
+          color: #153654;
+          font-size: 1rem;
+          font-weight: 850;
+        }
+
+        .weekend-zero-details div {
+          padding: 0 18px 18px;
+        }
+
+        .weekend-zero-details p {
+          max-width: 760px;
+          margin: 0;
+          color: #62788d;
+          font-size: 0.96rem;
           line-height: 1.55;
         }
 
-        .weekend-deadline-guide-copy {
+        .weekend-zero-related {
           display: grid;
-          gap: 12px;
-          margin-top: 22px;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-top: 16px;
         }
 
-        .weekend-deadline-guide-copy article {
-          padding: 18px;
-          border: 1px solid rgba(19, 38, 70, 0.08);
+        .weekend-zero-related a {
+          display: grid;
+          place-items: center;
+          min-height: 52px;
+          padding: 12px 16px;
+          border: 1px solid rgba(21, 54, 84, 0.12);
           border-radius: 14px;
-          background: rgba(255, 255, 255, 0.72);
-        }
-
-        .weekend-deadline-guide-copy h2 {
-          margin: 0;
-          color: #29435e;
-          font-size: 1.12rem;
-        }
-
-        .weekend-deadline-guide-copy p {
-          margin: 8px 0 0;
-          color: #5f748a;
-          font-size: 0.97rem;
-          line-height: 1.6;
-        }
-
-        .weekend-deadline-guide-related {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 24px;
-          padding-top: 18px;
-          border-top: 1px solid rgba(19, 38, 70, 0.1);
-        }
-
-        .weekend-deadline-guide-related a {
-          min-height: 44px;
-          display: inline-flex;
-          align-items: center;
-          padding: 8px 12px;
-          border: 1px solid rgba(19, 38, 70, 0.1);
-          border-radius: 999px;
           background: #fff;
-          color: #4f6a85;
-          font-size: 0.86rem;
-          font-weight: 850;
+          color: #153654;
+          font-weight: 800;
+          text-align: center;
           text-decoration: none;
         }
 
-        @media (max-width: 760px) {
-          .weekend-deadline-guide-shell {
-            width: min(100% - 20px, 980px);
-            padding-top: 24px;
+        .weekend-zero-related a:first-child {
+          border-color: #277e65;
+          background: #277e65;
+          color: #fff;
+        }
+
+        @media (max-width: 720px) {
+          .weekend-zero-shell {
+            width: min(100% - 24px, 980px);
+            padding-top: 14px;
           }
 
-          .weekend-deadline-guide-workspace {
+          .weekend-zero-hero {
+            padding: 28px 24px 32px;
+            border-radius: 24px;
+            text-align: left;
+          }
+
+          .weekend-zero-eyebrow {
+            font-size: 0.72rem;
+          }
+
+          .weekend-zero-hero h1 {
+            margin-top: 12px;
+            font-size: clamp(2.45rem, 11vw, 3.5rem);
+          }
+
+          .weekend-zero-answer {
+            margin-top: 30px;
+            font-size: clamp(3rem, 15vw, 4.5rem);
+          }
+
+          .weekend-zero-caveat {
+            margin-top: 20px;
+            font-size: 1.08rem;
+          }
+
+          .weekend-zero-check {
             grid-template-columns: 1fr;
+            gap: 10px;
           }
 
-          .weekend-deadline-guide-workspace form,
-          .weekend-deadline-guide-result {
-            padding: 16px;
+          .weekend-zero-result {
+            order: 1;
+          }
+
+          .weekend-zero-check form {
+            order: 2;
+          }
+
+          .weekend-zero-result > strong {
+            font-size: 2rem;
+          }
+
+          .weekend-zero-result > b {
+            font-size: clamp(2.2rem, 10vw, 3rem);
+          }
+
+          .weekend-zero-related {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
     </main>
   )
 }
-
 
 function NextPaydayPage({ onNavigate }: NavigationProps) {
   const [knownPayday, setKnownPayday] = useState(() =>
