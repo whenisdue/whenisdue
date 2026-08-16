@@ -100,7 +100,7 @@ function typoWordScore(query: string, typoWords: string[]) {
         distance === 2 &&
         Math.max(word.length, normalizedTarget.length) >= 7
       ) {
-        best = Math.max(best, 54)
+        best = Math.max(best, 70)
       }
     }
   }
@@ -289,6 +289,11 @@ const intents: AskWhenIntentDefinition[] = [
       'customer payment',
       'accounts receivable',
       'ar due date',
+      'payment maturity',
+      'payment maturity date',
+      'invoice maturity',
+      'invoice maturity date',
+      'maturity date payment',
     ],
     fragments: [
       'inv',
@@ -512,6 +517,13 @@ const intents: AskWhenIntentDefinition[] = [
       '1st and 15th',
       '15th and last',
       'monthly payday',
+      'what day do i get paid next',
+      'when do i get paid next',
+      'when do i get paid',
+      'what day do i get paid',
+      'get paid next',
+      'next salary',
+      'next paycheck',
     ],
     fragments: [
       'pay',
@@ -697,6 +709,12 @@ const intents: AskWhenIntentDefinition[] = [
       'response deadline',
       'support deadline',
       'ticket due',
+      'turnaround time',
+      'tat',
+      'cob',
+      'eod',
+      'end of day',
+      'close of business',
     ],
     fragments: [
       'sla',
@@ -706,6 +724,12 @@ const intents: AskWhenIntentDefinition[] = [
       'response',
       'support',
       'ticket',
+      'turnaround',
+      'tat',
+      'cob',
+      'eod',
+      'end of d',
+      'close of b',
     ],
     typoWords: ['business', 'working', 'response'],
     suggestions: [
@@ -758,6 +782,12 @@ const intents: AskWhenIntentDefinition[] = [
       'final date',
       'target date',
       'due by',
+      'closing date',
+      'time limit',
+      'grace period',
+      'lead time',
+      'maturity date',
+      'payment maturity',
     ],
     fragments: ['dead', 'due', 'cut', 'by w', 'final d', 'target'],
     typoWords: ['deadline', 'cutoff'],
@@ -798,6 +828,64 @@ function numericSuggestions(query: string) {
   const amount = normalized.match(/\b(\d+)\b/)?.[1]
 
   if (!amount) return []
+
+  // Intent-specific numeric wording must outrank generic business-day guesses.
+  if (normalized.includes('within')) {
+    return [
+      `what does within ${amount} days mean`,
+      `within ${amount} business days`,
+      'does the start date count',
+    ]
+  }
+
+  if (
+    normalized.includes('shipping') ||
+    normalized.includes('delivery') ||
+    normalized.includes('arrive')
+  ) {
+    return [
+      normalized.includes('-')
+        ? normalized
+        : `${amount} day delivery range`,
+      'delivery date range from a ship date',
+      'when should my order arrive',
+      'delivery range in business days',
+    ]
+  }
+
+  const calendarFromToday = new RegExp(
+    `^${amount}\\s+(?:calendar\\s+)?days?\\s+from\\s+today$`,
+  )
+  const calendarAfterDate = new RegExp(
+    `^${amount}\\s+(?:calendar\\s+)?days?\\s+after(?:\\s+a)?\\s+date$`,
+  )
+  const calendarBeforeDate = new RegExp(
+    `^${amount}\\s+(?:calendar\\s+)?days?\\s+before(?:\\s+a)?\\s+date$`,
+  )
+
+  if (calendarFromToday.test(normalized)) {
+    return [
+      `${amount} days from today`,
+      `${amount} days after a date`,
+      `${amount} days before a date`,
+    ]
+  }
+
+  if (calendarAfterDate.test(normalized)) {
+    return [
+      `${amount} days after a date`,
+      `${amount} days from today`,
+      `${amount} days before a date`,
+    ]
+  }
+
+  if (calendarBeforeDate.test(normalized)) {
+    return [
+      `${amount} days before a date`,
+      `${amount} days from today`,
+      `${amount} days after a date`,
+    ]
+  }
 
   if (/^\d+$/.test(normalized)) {
     return [
@@ -877,14 +965,6 @@ function numericSuggestions(query: string) {
     ]
   }
 
-  if (normalized.includes('within')) {
-    return [
-      `what does within ${amount} days mean`,
-      `within ${amount} business days`,
-      'does the start date count',
-    ]
-  }
-
   return []
 }
 
@@ -892,6 +972,15 @@ function fallbackSuggestions(query: string) {
   const normalized = normalize(query)
 
   if (!normalized) return []
+
+  if (normalized === 'pay') {
+    return [
+      'when is my next payday',
+      'invoice due date from Net terms',
+      'Net 30 due date',
+      'deadline after a date',
+    ]
+  }
 
   // Keep broad fallbacks aligned to WhenIsDue's real product areas.
   if (
@@ -1064,9 +1153,70 @@ export function analyzeAskWhenSuggestions(
       const directNormalizedMatch =
         directPhraseMatch || directFragmentMatch
 
+      let contextBonus = 0
+
+      if (
+        intent.id === 'business-days' &&
+        (
+          /\b(?:business|buisness|busines|busniess|working|work)\s+days?\b/.test(
+            normalizedQuery,
+          ) ||
+          /\bweekdays?\b/.test(normalizedQuery)
+        )
+      ) {
+        contextBonus += 64
+      }
+
+      if (
+        intent.id === 'business-hours' &&
+        /\b(hours?|sla|tat|cob|eod|turnaround|response|support|ticket)\b/.test(
+          normalizedQuery,
+        )
+      ) {
+        contextBonus += 48
+      }
+
+      if (
+        intent.id === 'invoice-net' &&
+        /\b(payment|invoice|billing|bill)\b/.test(normalizedQuery) &&
+        /\b(maturity|due|terms?)\b/.test(normalizedQuery)
+      ) {
+        contextBonus += 46
+      }
+
+      if (
+        intent.id === 'payday' &&
+        /\b(get paid|paid next|paycheck|salary|wages?)\b/.test(normalizedQuery)
+      ) {
+        contextBonus += 40
+      }
+
+      if (
+        intent.id === 'weekend' &&
+        /\b(weekend|weekends|wekends|saturday|sunday)\b/.test(normalizedQuery)
+      ) {
+        contextBonus += 30
+      }
+
+      if (
+        intent.id === 'calendar-days' &&
+        /\bcalendar days?\b/.test(normalizedQuery)
+      ) {
+        contextBonus += 36
+      }
+
+      if (
+        intent.id === 'holidays' &&
+        /\b(?:holiday|holidays|bank holiday|public holiday|federal holiday)\b/.test(
+          normalizedQuery,
+        )
+      ) {
+        contextBonus += 72
+      }
+
       return {
         intent,
-        score: strongestScore + (intent.priority ?? 0),
+        score: strongestScore + (intent.priority ?? 0) + contextBonus,
         phraseScore: strongestPhraseScore,
         typoScore,
         typoCorrection,
@@ -1098,6 +1248,23 @@ export function analyzeAskWhenSuggestions(
   const second = scored[1]
   const scoreGap = second ? top.score - second.score : 999
 
+  const forceAmbiguous = new Set([
+    'end',
+    'ends',
+    'ending',
+    'pay',
+    'last',
+    'last day',
+    'date',
+    'days',
+    'period',
+    'cancel',
+    'expire',
+    'expires',
+    'work',
+    'month',
+  ]).has(normalizedQuery)
+
   const exactOrClearPhrase =
     top.phraseScore >= 120 &&
     (!second || scoreGap >= 12 || top.phraseScore >= 160)
@@ -1128,6 +1295,17 @@ export function analyzeAskWhenSuggestions(
       mode: 'typo',
       label: corrected,
       suggestions,
+    }
+  }
+
+  if (forceAmbiguous) {
+    return {
+      mode: 'ambiguous',
+      label: normalizedQuery,
+      suggestions:
+        normalizedQuery === 'pay'
+          ? fallbackSuggestions(normalizedQuery)
+          : suggestions,
     }
   }
 
