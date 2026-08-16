@@ -8742,9 +8742,12 @@ function resolveAskWhenQuery(
       }
     }
 
+    const explicitlyUsesWithin = /\bwithin\b/.test(query)
+
     if (
       deadlineInterpretation.classification === 'ambiguous' &&
-      deadlineInterpretation.triggerDate
+      deadlineInterpretation.triggerDate &&
+      explicitlyUsesWithin
     ) {
       const query = new URLSearchParams({
         date: toDateKey(deadlineInterpretation.triggerDate),
@@ -8772,7 +8775,13 @@ function resolveAskWhenQuery(
     }
 
     if (
-      deadlineInterpretation.classification === 'resolved' &&
+      (
+        deadlineInterpretation.classification === 'resolved' ||
+        (
+          deadlineInterpretation.classification === 'ambiguous' &&
+          !explicitlyUsesWithin
+        )
+      ) &&
       deadlineInterpretation.answer &&
       deadlineInterpretation.triggerDate
     ) {
