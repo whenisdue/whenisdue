@@ -9333,7 +9333,7 @@ function AskWhenBox({
           }}
           placeholder={
             isAskInputFocused && !query
-              ? '5 business days after August 10'
+              ? 'e.g. 5 business days after August 10'
               : demoText
           }
           aria-label="Ask WhenIsDue what you need to know"
@@ -10495,15 +10495,16 @@ function HomePage({ onNavigate }: NavigationProps) {
           .date-home-editorial-hero {
             display: block;
             min-height: 0;
+            height: auto;
             margin-top: 10px;
             border-radius: 20px;
           }
 
           .date-home-editorial-copy {
+            display: block;
             height: auto;
             min-height: 0;
-            justify-content: flex-start;
-            padding: 16px 15px 12px;
+            padding: 16px 15px 10px;
           }
 
           .date-home-editorial-today {
@@ -10550,6 +10551,47 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           .date-home-editorial-hero .ask-when-examples button:nth-child(n + 4) {
             display: none;
+          }
+
+          /* Mobile keyboard mode: keep the input anchored and let the
+             intent choices peek into the visual viewport immediately below it. */
+          .date-home-editorial-hero:has(.ask-when-form input:focus)
+            .date-home-editorial-copy {
+            padding-top: 10px;
+            padding-bottom: 8px;
+          }
+
+          .date-home-editorial-hero:has(.ask-when-form input:focus)
+            .date-home-editorial-today {
+            display: none;
+          }
+
+          .date-home-editorial-hero:has(.ask-when-form input:focus)
+            .ask-when-heading > span {
+            display: none;
+          }
+
+          .date-home-editorial-hero:has(.ask-when-form input:focus)
+            .ask-when-heading h2 {
+            max-width: 310px;
+            font-size: clamp(1.9rem, 8.8vw, 2.45rem);
+            line-height: 0.94;
+          }
+
+          .date-home-editorial-hero:has(.ask-when-form input:focus)
+            .ask-when-heading p {
+            margin-top: 5px;
+            font-size: 0.82rem;
+          }
+
+          .date-home-editorial-hero:has(.ask-when-form input:focus)
+            .ask-when-form {
+            margin-top: 9px;
+          }
+
+          .date-home-editorial-hero:has(.ask-when-form input:focus)
+            .date-home-intent-panel {
+            padding-top: 10px;
           }
 
           .date-home-intent-panel {
