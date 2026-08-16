@@ -1743,7 +1743,6 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
           <nav>
             <a
               href="/deadline-calculator"
-              data-description="Count forward or backward using custom deadline rules."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/deadline-calculator')
@@ -1771,7 +1770,6 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
             </a>
             <a
               href="/business-days-calculator"
-              data-description="Add working days while skipping weekends and optional holidays."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/business-days-calculator')
@@ -5217,7 +5215,6 @@ function SubscriptionRenewalCalculatorPage({
         <nav>
           <a
             href="/free-trial-calculator"
-              data-description="Find when a free trial ends."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/free-trial-calculator')
@@ -5227,7 +5224,6 @@ function SubscriptionRenewalCalculatorPage({
           </a>
           <a
             href="/notice-period-calculator"
-              data-description="Count backward to find when notice is due."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/notice-period-calculator')
@@ -6433,7 +6429,6 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
           <nav>
             <a
               href="/invoice-due-date-calculator"
-              data-description="Find an invoice due date from Net terms or EOM."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/invoice-due-date-calculator')
@@ -6444,7 +6439,6 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
 
             <a
               href="/net-30-due-date"
-              data-description="Get the due date for a Net 30 invoice."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/net-30-due-date')
@@ -6455,7 +6449,6 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
 
             <a
               href="/2-10-net-30-calculator"
-              data-description="See the discount deadline and full-payment due date."
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/2-10-net-30-calculator')
@@ -10314,7 +10307,6 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           <a
             href="/return-window-calculator"
-              data-description="Find the last day of a return window."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/return-window-calculator')
@@ -10352,7 +10344,6 @@ function HomePage({ onNavigate }: NavigationProps) {
           <a
             className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href="/next-payday-calculator"
-              data-description="Find the next date in a pay schedule."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/next-payday-calculator')
@@ -10417,7 +10408,6 @@ function HomePage({ onNavigate }: NavigationProps) {
           <a
             className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
             href="/shipping-delivery-range-calculator"
-              data-description="Turn a delivery estimate into earliest and latest dates."
             onClick={(event) => {
               event.preventDefault()
               onNavigate('/shipping-delivery-range-calculator')
@@ -12108,6 +12098,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/business-days-calculator"
+              data-description="Add working days while skipping weekends and optional holidays."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/business-days-calculator' })
@@ -12137,6 +12128,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/invoice-due-date-calculator"
+              data-description="Find an invoice due date from Net terms or EOM."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/invoice-due-date-calculator' })
@@ -12151,6 +12143,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/return-window-calculator"
+              data-description="Find the last day of a return window."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/return-window-calculator' })
@@ -12165,6 +12158,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/free-trial-calculator"
+              data-description="Find when a free trial ends."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/free-trial-calculator' })
@@ -12179,6 +12173,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/deadline-calculator"
+              data-description="Count forward or backward using custom deadline rules."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/deadline-calculator' })
@@ -12209,6 +12204,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/next-payday-calculator"
+              data-description="Find the next date in a pay schedule."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/next-payday-calculator' })
@@ -12223,6 +12219,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/net-30-due-date"
+              data-description="Get the due date for a Net 30 invoice."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/net-30-due-date' })
@@ -12237,6 +12234,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/2-10-net-30-calculator"
+              data-description="See the discount deadline and full-payment due date."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/2-10-net-30-calculator' })
@@ -12252,6 +12250,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/shipping-delivery-range-calculator"
+              data-description="Turn a delivery estimate into earliest and latest dates."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/shipping-delivery-range-calculator' })
@@ -12266,6 +12265,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/notice-period-calculator"
+              data-description="Count backward to find when notice is due."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/notice-period-calculator' })
@@ -12763,12 +12763,12 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           outline-offset: 2px;
         }
 
-        .calculator-hub-page .utility-directory-cards .proof-calculator {
+        /* Desktop: explain a calculator only when the user asks by hovering/focusing. */
+        .calculator-hub-page .utility-directory-cards .proof-calculator[data-description] {
           position: relative;
         }
 
-        /* Desktop: description appears only on hover or keyboard focus. */
-        .calculator-hub-page .utility-directory-cards .proof-calculator::after {
+        .calculator-hub-page .utility-directory-cards .proof-calculator[data-description]::after {
           content: attr(data-description);
           position: absolute;
           left: 50%;
@@ -12791,8 +12791,8 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           transition: opacity 120ms ease, transform 120ms ease;
         }
 
-        .calculator-hub-page .utility-directory-cards .proof-calculator:hover::after,
-        .calculator-hub-page .utility-directory-cards .proof-calculator:focus-visible::after {
+        .calculator-hub-page .utility-directory-cards .proof-calculator[data-description]:hover::after,
+        .calculator-hub-page .utility-directory-cards .proof-calculator[data-description]:focus-visible::after {
           opacity: 1;
           transform: translate(-50%, 0);
         }
@@ -12860,19 +12860,18 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             line-height: 1.16;
           }
 
-          /* Touch screens have no reliable hover. Show the explanation directly. */
-          .calculator-hub-page .utility-directory-cards .proof-calculator {
+          /* Touch: no hover dependency. The explanation is simply visible. */
+          .calculator-hub-page .utility-directory-cards .proof-calculator[data-description] {
             align-items: flex-start;
           }
 
-          .calculator-hub-page .utility-directory-cards .proof-calculator > div {
+          .calculator-hub-page .utility-directory-cards .proof-calculator[data-description] > div {
             display: grid;
             gap: 4px;
           }
 
-          .calculator-hub-page .utility-directory-cards .proof-calculator::after {
+          .calculator-hub-page .utility-directory-cards .proof-calculator[data-description]::after {
             position: static;
-            grid-column: auto;
             width: auto;
             max-width: none;
             margin: 4px 0 0;
