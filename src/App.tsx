@@ -6825,6 +6825,23 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
       ).date
     : null
 
+  const nextBusinessDayMonth = nextBusinessDay
+    ? [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ][nextBusinessDay.month - 1]
+    : ''
+
   useEffect(() => {
     saveHolidayCalendar(holidayCalendar)
   }, [holidayCalendar])
@@ -6872,7 +6889,9 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
               <>
                 <span>If your rule says “next business day”</span>
                 <strong>{formatWeekday(nextBusinessDay)},</strong>
-                <b>{formatPlainDate(nextBusinessDay)}</b>
+                <b>
+                  {nextBusinessDayMonth} {nextBusinessDay.day}, {nextBusinessDay.year}
+                </b>
               </>
             ) : (
               <strong>Enter a valid deadline date.</strong>
@@ -7192,17 +7211,20 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
 
           .weekend-zero-hero h1 {
             margin-top: 12px;
-            font-size: clamp(2.45rem, 11vw, 3.5rem);
+            font-size: clamp(2.15rem, 9.4vw, 3rem);
+            line-height: 0.98;
           }
 
           .weekend-zero-answer {
-            margin-top: 30px;
-            font-size: clamp(3rem, 15vw, 4.5rem);
+            margin-top: 26px;
+            font-size: clamp(2.65rem, 12.2vw, 3.85rem);
+            line-height: 0.94;
           }
 
           .weekend-zero-caveat {
-            margin-top: 20px;
-            font-size: 1.08rem;
+            margin-top: 18px;
+            font-size: 1.02rem;
+            line-height: 1.32;
           }
 
           .weekend-zero-check {
