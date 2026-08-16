@@ -12879,6 +12879,12 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           }
 
           /* Touch: every calculator stays visible, and the explanation sits below the name. */
+          .calculator-hub-page .dual-intent-proof.utility-directory-cards > a.intent-proof-card.proof-calculator {
+            display: grid !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+
           .calculator-hub-page .utility-directory-cards .proof-calculator,
           .calculator-hub-page .utility-directory-cards .proof-calculator[data-description] {
             display: grid !important;
