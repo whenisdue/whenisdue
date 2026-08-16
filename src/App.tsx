@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { analyzeAskWhenSuggestions } from './askWhenIntentLibrary'
 import './App.css'
 import VaWorkspacePage from './va/VaWorkspacePage'
 import { DeadlineFinalAdjustmentNotice } from './DeadlineFinalAdjustmentNotice.tsx'
@@ -8997,6 +8998,8 @@ function resolveAskWhenQuery(
 type AskWhenAssistState = {
   query: string
   suggestions: string[]
+  suggestionMode: 'recognized' | 'typo' | 'ambiguous' | 'fallback'
+  suggestionLabel: string
   committedLabel: string | null
   committedDescription: string | null
 }
@@ -9126,108 +9129,12 @@ function AskWhenBox({
     '30 day return',
   ]
 
-  const contextualSuggestions = useMemo(() => {
-    const normalized = normalizeAskWhenQuery(query)
-    if (!normalized) return []
+  const suggestionAnalysis = useMemo(
+    () => analyzeAskWhenSuggestions(query),
+    [query],
+  )
 
-    const suggestions: string[] = []
-    const add = (...items: string[]) => {
-      for (const item of items) {
-        if (!suggestions.includes(item)) suggestions.push(item)
-      }
-    }
-
-    const has = (...terms: string[]) =>
-      terms.some((term) => normalized.includes(term))
-
-    const amount = normalized.match(/\b(\d+)\b/)?.[1] ?? null
-    const bareNumber = /^\d+$/.test(normalized)
-    const numberPlusDayFragment = /^\d+\s+d(?:a(?:y(?:s)?)?)?$/.test(normalized)
-
-    if (amount && (bareNumber || numberPlusDayFragment)) {
-      add(
-        `${amount} days from today`,
-        `${amount} day return window`,
-        `Net ${amount} invoice`,
-        `${amount} day notice period`,
-      )
-    }
-
-    if (has('business', 'working day', 'weekday')) {
-      const businessAmount = amount ?? '5'
-      add(
-        `${businessAmount} business days from today`,
-        `${businessAmount} business days after a date`,
-        `${businessAmount} business days before a date`,
-      )
-    }
-
-    if (has('return', 'refund')) {
-      add(
-        `${amount ?? '30'} day return window`,
-        'return deadline from a purchase date',
-        'return deadline from today',
-      )
-    }
-
-    if (has('net', 'invoice', 'payment due')) {
-      add(
-        'Net 30 due date',
-        'invoice due date from Net terms',
-        '2/10 Net 30',
-        'Net 30 vs 30 days',
-      )
-    }
-
-    if (has('ship', 'shipping', 'delivery', 'arrive')) {
-      add(
-        '3-5 business days shipping',
-        'delivery date range from a ship date',
-        'when should my order arrive',
-      )
-    }
-
-    if (has('trial', 'free trial')) {
-      add(
-        'when does my free trial end',
-        `${amount ?? '30'} day free trial`,
-        'trial end date from a start date',
-      )
-    }
-
-    if (has('notice', 'resign', 'resignation', 'cancel before')) {
-      add(
-        `${amount ?? '30'} day notice period`,
-        'when should I give notice',
-        'notice deadline before a date',
-      )
-    }
-
-    if (has('payday', 'pay day', 'salary', 'pay date', 'biweekly')) {
-      add(
-        'when is my next payday',
-        'next payday every 2 weeks',
-        'next payday twice a month',
-      )
-    }
-
-    if (has('renew', 'renewal', 'subscription')) {
-      add(
-        'when does my subscription renew',
-        'cancel before renewal',
-        'next renewal date',
-      )
-    }
-
-    const startsWithTypedText = suggestions.filter((suggestion) =>
-      normalizeAskWhenQuery(suggestion).startsWith(normalized),
-    )
-    const remaining = suggestions.filter(
-      (suggestion) => !startsWithTypedText.includes(suggestion),
-    )
-
-    return [...startsWithTypedText, ...remaining].slice(0, 4)
-  }, [query])
+  const contextualSuggestions = suggestionAnalysis.suggestions
 
   const suggestionItems =
     query.trim().length > 0 ? contextualSuggestions : examples
@@ -9240,6 +9147,8 @@ function AskWhenBox({
     onAssistChange?.({
       query,
       suggestions: contextualSuggestions,
+      suggestionMode: suggestionAnalysis.mode,
+      suggestionLabel: suggestionAnalysis.label,
       committedLabel:
         hasCommittedQuery && match ? match.label : null,
       committedDescription:
@@ -9251,6 +9160,8 @@ function AskWhenBox({
     match,
     onAssistChange,
     query,
+    suggestionAnalysis.label,
+    suggestionAnalysis.mode,
   ])
 
   function submitQuery() {
@@ -9984,6 +9895,8 @@ function HomePage({ onNavigate }: NavigationProps) {
   const [askAssist, setAskAssist] = useState<AskWhenAssistState>({
     query: '',
     suggestions: [],
+    suggestionMode: 'fallback',
+    suggestionLabel: '',
     committedLabel: null,
     committedDescription: null,
   })
@@ -10111,9 +10024,20 @@ function HomePage({ onNavigate }: NavigationProps) {
               </div>
             ) : (
               <div className="date-home-intent-listening">
-                <span>You might mean</span>
+                <span>
+                  {askAssist.suggestionMode === 'typo' ||
+                  askAssist.suggestionMode === 'ambiguous'
+                    ? 'You might mean'
+                    : askAssist.suggestionMode === 'fallback'
+                      ? 'Try one of these'
+                      : 'WhenIsDue understands'}
+                </span>
                 <strong className="date-home-intent-query">
-                  {askAssist.query}
+                  {askAssist.suggestionMode === 'typo'
+                    ? askAssist.suggestionLabel
+                    : askAssist.suggestionMode === 'recognized'
+                      ? askAssist.suggestionLabel
+                      : askAssist.query}
                 </strong>
 
                 <div className="date-home-intent-options">
