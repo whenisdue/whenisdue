@@ -9826,15 +9826,6 @@ function HomePage({ onNavigate }: NavigationProps) {
             >
               Calculators
             </a>
-            <a
-              href="/workspace"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/workspace')
-              }}
-            >
-              VA Workspace
-            </a>
           </nav>
         </header>
 
@@ -10747,22 +10738,6 @@ function HomePage({ onNavigate }: NavigationProps) {
           `}</style>
         </section>
       ) : null}
-
-      <section className="date-home-secondary" aria-label="WhenIsDue workspace">
-        <div>
-          <span>Need to keep track of deadlines?</span>
-          <strong>VA Workspace is still here.</strong>
-        </div>
-        <a
-          href="/workspace"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/workspace')
-          }}
-        >
-          Open workspace
-        </a>
-      </section>
 
       <SiteFooter onNavigate={onNavigate} />
 
