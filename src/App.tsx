@@ -6838,7 +6838,19 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell weekend-zero-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+      <header className="weekend-zero-header" aria-label="WhenIsDue navigation">
+        <a
+          className="weekend-zero-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
 
       <section className="weekend-zero-shell">
         <section className="weekend-zero-hero">
@@ -6958,6 +6970,27 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
         .weekend-zero-page {
           min-height: 100vh;
           background: #fffaf2;
+        }
+
+        .weekend-zero-header {
+          width: min(100% - 32px, 980px);
+          margin: 0 auto;
+          padding: 28px 0 18px;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.10);
+        }
+
+        .weekend-zero-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+        }
+
+        .weekend-zero-brand img {
+          display: block;
+          width: auto;
+          height: 40px;
+          max-width: 190px;
+          object-fit: contain;
         }
 
         .weekend-zero-shell {
@@ -7132,6 +7165,16 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
         }
 
         @media (max-width: 720px) {
+          .weekend-zero-header {
+            width: min(100% - 24px, 980px);
+            padding: 26px 0 18px;
+          }
+
+          .weekend-zero-brand img {
+            height: 44px;
+            max-width: 210px;
+          }
+
           .weekend-zero-shell {
             width: min(100% - 24px, 980px);
             padding-top: 14px;
@@ -21870,7 +21913,7 @@ function SiteFooter({
         </a>
       </div>
       <p>
-        Calculator dates are saved in this browser only. VA Workspace records are stored in the signed-in account and can be exported through Backup and restore.
+        Calculator dates are saved in this browser only.
       </p>
       <p>
         {planningNote}
