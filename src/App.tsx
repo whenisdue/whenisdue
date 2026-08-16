@@ -12140,7 +12140,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">#</span>
               <div>
                 <h2>Invoice due date</h2>
-                <p className="calculator-card-description">Find an invoice due date from Net terms or EOM.</p>
+                <p className="calculator-card-description">Add working days while skipping weekends and optional holidays.</p>
               </div>
             </a>
             <a
@@ -12916,15 +12916,22 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             content: none !important;
           }
 
+          .calculator-hub-page .utility-directory-cards .proof-calculator h2 {
+            color: #163a5f;
+            font-weight: 800;
+          }
+
           .calculator-hub-page .utility-directory-cards .calculator-card-description {
             display: block;
             grid-column: 2;
             grid-row: 2;
             margin: 0;
-            color: #667b8e;
+            color: #6f8192;
             font-size: 0.74rem;
             font-weight: 650;
-            line-height: 1.3;
+            line-height: 1.32;
+            text-transform: none;
+            letter-spacing: 0;
           }
         }
 
