@@ -55,6 +55,15 @@ function pad2(value: number) {
   return String(value).padStart(2, '0')
 }
 
+function shiftDateKey(value: string, days: number) {
+  if (!isValidDateKey(value)) return null
+
+  const [year, month, day] = value.split('-').map(Number)
+  const shifted = new Date(Date.UTC(year, month - 1, day + days))
+
+  return `${shifted.getUTCFullYear()}-${pad2(shifted.getUTCMonth() + 1)}-${pad2(shifted.getUTCDate())}`
+}
+
 function isValidDateKey(value: string) {
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (!match) return false
@@ -71,36 +80,103 @@ function isValidDateKey(value: string) {
   )
 }
 
-function extractDateKey(query: string, todayKey: string) {
+type ExtractedDate =
+  | { kind: 'date'; key: string }
+  | { kind: 'ambiguous-numeric'; raw: string; first: number; second: number }
+  | { kind: 'none' }
+
+function monthName(month: number) {
+  const names = [
+    '',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ]
+
+  return names[month] ?? `month ${month}`
+}
+
+function extractDate(query: string, todayKey: string): ExtractedDate {
   const normalized = normalize(query)
 
   if (/\btoday\b/.test(normalized) && isValidDateKey(todayKey)) {
-    return todayKey
+    return { kind: 'date', key: todayKey }
+  }
+
+  if (/\byesterday\b/.test(normalized)) {
+    const key = shiftDateKey(todayKey, -1)
+    return key ? { kind: 'date', key } : { kind: 'none' }
+  }
+
+  if (/\btomorrow\b/.test(normalized)) {
+    const key = shiftDateKey(todayKey, 1)
+    return key ? { kind: 'date', key } : { kind: 'none' }
   }
 
   const iso = normalized.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/)
   if (iso) {
     const key = `${iso[1]}-${pad2(Number(iso[2]))}-${pad2(Number(iso[3]))}`
-    return isValidDateKey(key) ? key : null
+    return isValidDateKey(key) ? { kind: 'date', key } : { kind: 'none' }
   }
 
   const monthPattern = Object.keys(MONTHS)
     .sort((a, b) => b.length - a.length)
     .join('|')
+
   const monthDate = normalized.match(
     new RegExp(`\\b(${monthPattern})\\s+(\\d{1,2})(?:\\s*,?\\s*(20\\d{2}))?\\b`, 'i'),
   )
 
   if (monthDate) {
-    const todayYear = Number(todayKey.slice(0, 4))
-    const year = monthDate[3] ? Number(monthDate[3]) : todayYear
+    const year = monthDate[3] ? Number(monthDate[3]) : Number(todayKey.slice(0, 4))
     const month = MONTHS[monthDate[1].toLowerCase()]
     const day = Number(monthDate[2])
     const key = `${year}-${pad2(month)}-${pad2(day)}`
-    return isValidDateKey(key) ? key : null
+    return isValidDateKey(key) ? { kind: 'date', key } : { kind: 'none' }
   }
 
-  return null
+  const numericDate = normalized.match(
+    /\b(\d{1,2})[/-](\d{1,2})(?:[/-](20\d{2}|\d{2}))?\b/,
+  )
+
+  if (numericDate) {
+    const first = Number(numericDate[1])
+    const second = Number(numericDate[2])
+    const rawYear = numericDate[3]
+    const year = rawYear
+      ? Number(rawYear.length === 2 ? `20${rawYear}` : rawYear)
+      : Number(todayKey.slice(0, 4))
+
+    if (first > 12 && second <= 12) {
+      const key = `${year}-${pad2(second)}-${pad2(first)}`
+      return isValidDateKey(key) ? { kind: 'date', key } : { kind: 'none' }
+    }
+
+    if (second > 12 && first <= 12) {
+      const key = `${year}-${pad2(first)}-${pad2(second)}`
+      return isValidDateKey(key) ? { kind: 'date', key } : { kind: 'none' }
+    }
+
+    if (first >= 1 && first <= 12 && second >= 1 && second <= 12) {
+      return {
+        kind: 'ambiguous-numeric',
+        raw: numericDate[0],
+        first,
+        second,
+      }
+    }
+  }
+
+  return { kind: 'none' }
 }
 
 function extractBusinessDays(query: string) {
@@ -208,7 +284,12 @@ export function resolveAskWhenCompletion(
   if (!original) return { kind: 'none' }
 
   const intent = chooseIntent(original, chosenSuggestion)
-  const dateKey = extractDateKey(original, todayKey)
+  const extractedDate = extractDate(original, todayKey)
+  const dateKey = extractedDate.kind === 'date' ? extractedDate.key : null
+  const numericDatePrompt =
+    extractedDate.kind === 'ambiguous-numeric'
+      ? `Does ${extractedDate.raw} mean ${monthName(extractedDate.first)} ${extractedDate.second}, or ${monthName(extractedDate.second)} ${extractedDate.first}? Type the date with the month name.`
+      : null
 
   if (intent === 'invoice') {
     const term = extractNetTerm(original)
@@ -217,6 +298,14 @@ export function resolveAskWhenCompletion(
       return missing(
         'What are the payment terms?',
         'For example: Net 30, Net 45, or EOM.',
+        original,
+      )
+    }
+
+    if (numericDatePrompt) {
+      return missing(
+        numericDatePrompt,
+        `I kept Net ${term}.`,
         original,
       )
     }
@@ -251,6 +340,14 @@ export function resolveAskWhenCompletion(
       )
     }
 
+    if (numericDatePrompt) {
+      return missing(
+        numericDatePrompt,
+        `I kept ${days} business ${days === 1 ? 'day' : 'days'}.`,
+        original,
+      )
+    }
+
     if (!dateKey) {
       return missing(
         'What date should I start from?',
@@ -277,6 +374,14 @@ export function resolveAskWhenCompletion(
       return missing(
         'How long is the return window?',
         'For example: 14 days or 30 days.',
+        original,
+      )
+    }
+
+    if (numericDatePrompt) {
+      return missing(
+        numericDatePrompt,
+        `I kept the ${days}-day return window.`,
         original,
       )
     }
@@ -311,6 +416,14 @@ export function resolveAskWhenCompletion(
       )
     }
 
+    if (numericDatePrompt) {
+      return missing(
+        numericDatePrompt,
+        `I kept the ${days}-day trial length.`,
+        original,
+      )
+    }
+
     if (!dateKey) {
       return missing(
         'When did the trial start?',
@@ -341,6 +454,14 @@ export function resolveAskWhenCompletion(
       )
     }
 
+    if (numericDatePrompt) {
+      return missing(
+        numericDatePrompt,
+        `I kept the ${range.min}–${range.max} ${range.mode} day range.`,
+        original,
+      )
+    }
+
     if (!dateKey) {
       return missing(
         'What date was it shipped?',
@@ -351,7 +472,7 @@ export function resolveAskWhenCompletion(
 
     return {
       kind: 'navigate',
-      path: buildPath('/shipping-delivery-range', {
+      path: buildPath('/shipping-delivery-range-calculator', {
         start: dateKey,
         min: range.min,
         max: range.max,

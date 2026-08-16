@@ -9037,6 +9037,10 @@ function AskWhenBox({
     description: string
   } | null>(null)
   const [completionSuggestion, setCompletionSuggestion] = useState<string | undefined>(undefined)
+  const [pendingCompletionContext, setPendingCompletionContext] = useState<{
+    originalQuery: string
+    suggestion?: string
+  } | null>(null)
   const [isAskInputFocused, setIsAskInputFocused] = useState(false)
   const [demoIndex, setDemoIndex] = useState(0)
   const [demoText, setDemoText] = useState('')
@@ -9138,7 +9142,9 @@ function AskWhenBox({
         destination: completion.path,
         surface: 'intent_panel',
       })
+      setPendingCompletionContext(null)
       onSuggestionApplied?.()
+      setPendingCompletionContext(null)
       onNavigate(completion.path)
       return
     }
@@ -9146,6 +9152,10 @@ function AskWhenBox({
     if (completion.kind === 'missing') {
       setQuery(originalQuery)
       setCompletionSuggestion(suggestionRequest.text)
+      setPendingCompletionContext({
+        originalQuery,
+        suggestion: suggestionRequest.text,
+      })
       setCompletionPrompt({
         label: completion.prompt,
         description: completion.description,
@@ -9220,10 +9230,25 @@ function AskWhenBox({
     const trimmedQuery = query.trim()
     if (!trimmedQuery) return
 
+    const normalizedCurrent = normalizeAskWhenQuery(trimmedQuery)
+    const normalizedOriginal = pendingCompletionContext
+      ? normalizeAskWhenQuery(pendingCompletionContext.originalQuery)
+      : ''
+
+    const completionQuery =
+      pendingCompletionContext &&
+      normalizedCurrent !== normalizedOriginal &&
+      !normalizedCurrent.includes(normalizedOriginal)
+        ? `${pendingCompletionContext.originalQuery} ${trimmedQuery}`.trim()
+        : trimmedQuery
+
+    const activeSuggestion =
+      pendingCompletionContext?.suggestion ?? completionSuggestion
+
     const completion = resolveAskWhenCompletion(
-      trimmedQuery,
+      completionQuery,
       toDateKey(today),
-      completionSuggestion,
+      activeSuggestion,
     )
 
     if (completion.kind === 'navigate') {
@@ -9231,8 +9256,8 @@ function AskWhenBox({
       setCompletionPrompt(null)
       setHasCommittedQuery(false)
       trackWhenIsDueEvent('ask_when_completion_navigated', {
-        query: trimmedQuery,
-        normalized_query: normalizeAskWhenQuery(trimmedQuery),
+        query: completionQuery,
+        normalized_query: normalizeAskWhenQuery(completionQuery),
         destination: completion.path,
         surface: 'enter',
       })
@@ -9246,9 +9271,13 @@ function AskWhenBox({
         label: completion.prompt,
         description: completion.description,
       })
+      setPendingCompletionContext({
+        originalQuery: completionQuery,
+        suggestion: activeSuggestion,
+      })
       setHasCommittedQuery(true)
       trackWhenIsDueEvent('ask_when_completion_missing_fact', {
-        query: trimmedQuery,
+        query: completionQuery,
         prompt: completion.prompt,
         surface: 'enter',
       })
@@ -9327,7 +9356,7 @@ function AskWhenBox({
             setSubmittedWithoutMatch(false)
             setCompletionPrompt(null)
             setHasCommittedQuery(false)
-            if (!event.target.value.trim()) {
+            if (!event.target.value.trim() && !pendingCompletionContext) {
               setCompletionSuggestion(undefined)
             }
           }}
