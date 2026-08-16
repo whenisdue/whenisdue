@@ -2647,9 +2647,9 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
   )
 }
 function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
-  const monday = parsePlainDate('2026-09-07')!
+  const friday = parsePlainDate('2026-09-04')!
   const noHolidayCalendar = calculateDeadlineByRule({
-    triggerDate: monday,
+    triggerDate: friday,
     duration: 1,
     direction: 'after',
     unit: 'business-days',
@@ -2658,7 +2658,7 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
     endDayAdjustment: 'none',
   })
   const usHolidayCalendar = calculateDeadlineByRule({
-    triggerDate: monday,
+    triggerDate: friday,
     duration: 1,
     direction: 'after',
     unit: 'business-days',
@@ -2697,7 +2697,9 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
         <section className="holidays-zero-example" aria-labelledby="holidays-example-title">
           <div className="holidays-zero-example-heading">
             <p className="holidays-zero-section-eyebrow">Quick example</p>
-            <h2 id="holidays-example-title">One business day after Labor Day</h2>
+            <h2 id="holidays-example-title">
+              Start Friday, September 4 + 1 business day
+            </h2>
           </div>
 
           <div className="holidays-zero-example-grid">
