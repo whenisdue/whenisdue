@@ -12108,6 +12108,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">◷</span>
               <div>
                 <h2>Add business days</h2>
+                <p className="calculator-card-description">Add working days while skipping weekends and optional holidays.</p>
               </div>
             </a>
             <a
@@ -12123,6 +12124,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">↔</span>
               <div>
                 <h2>Business days between dates</h2>
+                <p className="calculator-card-description">Count working days between two dates.</p>
               </div>
             </a>
             <a
@@ -12138,6 +12140,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">#</span>
               <div>
                 <h2>Invoice due date</h2>
+                <p className="calculator-card-description">Find an invoice due date from Net terms or EOM.</p>
               </div>
             </a>
             <a
@@ -12153,6 +12156,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">↩</span>
               <div>
                 <h2>Return deadline</h2>
+                <p className="calculator-card-description">Find the last day of a return window.</p>
               </div>
             </a>
             <a
@@ -12168,6 +12172,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">◇</span>
               <div>
                 <h2>Free trial end date</h2>
+                <p className="calculator-card-description">Find when a free trial ends.</p>
               </div>
             </a>
             <a
@@ -12183,6 +12188,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">±</span>
               <div>
                 <h2>Deadline calculator</h2>
+                <p className="calculator-card-description">Count forward or backward using custom deadline rules.</p>
               </div>
             </a>
 
@@ -12199,6 +12205,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">⏱</span>
               <div>
                 <h2>Business-hours deadline</h2>
+                <p className="calculator-card-description">Add working hours inside a business-day schedule.</p>
               </div>
             </a>
             <a
@@ -12214,6 +12221,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">$</span>
               <div>
                 <h2>Next payday</h2>
+                <p className="calculator-card-description">Find the next date in a pay schedule.</p>
               </div>
             </a>
             <a
@@ -12229,6 +12237,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">30</span>
               <div>
                 <h2>Net 30 due date</h2>
+                <p className="calculator-card-description">Get the due date for a Net 30 invoice.</p>
               </div>
             </a>
             <a
@@ -12244,6 +12253,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">2%</span>
               <div>
                 <h2>2/10 Net 30</h2>
+                <p className="calculator-card-description">See the discount deadline and full-payment due date.</p>
               </div>
             </a>
 
@@ -12260,6 +12270,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">⇢</span>
               <div>
                 <h2>Delivery date range</h2>
+                <p className="calculator-card-description">Turn a delivery estimate into earliest and latest dates.</p>
               </div>
             </a>
             <a
@@ -12275,6 +12286,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">←</span>
               <div>
                 <h2>Notice period</h2>
+                <p className="calculator-card-description">Count backward to find when notice is due.</p>
               </div>
             </a>
             <a
@@ -12290,6 +12302,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span className="intent-proof-icon" aria-hidden="true">↻</span>
               <div>
                 <h2>Renewal & cancellation</h2>
+                <p className="calculator-card-description">Find the next renewal and optional cancellation deadline.</p>
               </div>
             </a>
           </div>
@@ -12758,6 +12771,11 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           text-decoration: none;
         }
 
+        .calculator-hub-page .utility-directory-cards .calculator-card-description {
+          display: none;
+          margin: 0;
+        }
+
         .calculator-hub-page .utility-directory-cards .proof-calculator:focus-visible {
           outline: 3px solid rgba(45, 123, 100, 0.28);
           outline-offset: 2px;
@@ -12894,22 +12912,19 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
           }
 
           .calculator-hub-page .utility-directory-cards .proof-calculator[data-description]::after {
+            display: none !important;
+            content: none !important;
+          }
+
+          .calculator-hub-page .utility-directory-cards .calculator-card-description {
+            display: block;
             grid-column: 2;
             grid-row: 2;
-            position: static;
-            width: auto;
-            max-width: none;
             margin: 0;
-            padding: 0;
-            border-radius: 0;
-            background: transparent;
             color: #667b8e;
             font-size: 0.74rem;
             font-weight: 650;
             line-height: 1.3;
-            box-shadow: none;
-            opacity: 1;
-            transform: none;
           }
         }
 
