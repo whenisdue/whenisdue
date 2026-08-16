@@ -41,6 +41,10 @@ function tokenOverlapScore(query: string, phrase: string) {
   return overlap / queryTokens.size
 }
 
+const manualTypoAliases: Record<string, string> = {
+  tirla: 'trial',
+}
+
 function isSingleAdjacentTransposition(a: string, b: string) {
   if (a.length !== b.length || a === b) return false
 
@@ -89,6 +93,14 @@ function typoWordScore(query: string, typoWords: string[]) {
 
   for (const word of words) {
     if (word.length < 4) continue
+
+    const manualCorrection = manualTypoAliases[word]
+    if (
+      manualCorrection &&
+      typoWords.some((target) => normalize(target) === manualCorrection)
+    ) {
+      best = Math.max(best, 82)
+    }
 
     for (const target of typoWords) {
       const normalizedTarget = normalize(target)
@@ -223,8 +235,6 @@ const intents: AskWhenIntentDefinition[] = [
       'when does return window end',
       'store return',
       'purchase return',
-      'rturn',
-      'rturn deadline',
     ],
     fragments: [
       'ret',
@@ -265,7 +275,7 @@ const intents: AskWhenIntentDefinition[] = [
       'trial deadline',
     ],
     fragments: ['tri', 'tria', 'trial', 'expir', 'free t'],
-    typoWords: ['trial', 'expire', 'expires', 'tirla', 'trila', 'trail'],
+    typoWords: ['trial', 'expire', 'expires'],
     suggestions: [
       'when does my free trial end',
       '30 day free trial',
@@ -305,6 +315,10 @@ const intents: AskWhenIntentDefinition[] = [
       'invoice maturity',
       'invoice maturity date',
       'maturity date payment',
+      'pmt due',
+      'pymt due',
+      'pmt',
+      'pymt',
     ],
     fragments: [
       'inv',
@@ -438,7 +452,6 @@ const intents: AskWhenIntentDefinition[] = [
       'package arrive',
       'parcel arrive',
       'package delivery',
-      'arrvl',
       'arrival estimate',
       'delivery lead time',
       'shipping lead time',
@@ -458,7 +471,7 @@ const intents: AskWhenIntentDefinition[] = [
       'pack',
       'parcel',
     ],
-    typoWords: ['shipping', 'delivery', 'arrival', 'package', 'arrvl', 'delviery'],
+    typoWords: ['shipping', 'delivery', 'arrival', 'package'],
     suggestions: [
       '3-5 business days shipping',
       'delivery date range from a ship date',
@@ -545,6 +558,13 @@ const intents: AskWhenIntentDefinition[] = [
       'get paid next',
       'next salary',
       'next paycheck',
+      'paid every other friday next date',
+      'every other friday',
+      'get paid every other friday',
+      'salary crediting date',
+      'salary release date',
+      'payroll cut off',
+      'payroll cutoff',
     ],
     fragments: [
       'pay',
@@ -556,7 +576,7 @@ const intents: AskWhenIntentDefinition[] = [
       'semi',
       'fort',
     ],
-    typoWords: ['payday', 'salary', 'biweekly', 'semimonthly'],
+    typoWords: ['payday', 'salary', 'biweekly', 'semimonthly', 'fortnightly'],
     suggestions: [
       'when is my next payday',
       'next payday every 2 weeks',
@@ -590,6 +610,11 @@ const intents: AskWhenIntentDefinition[] = [
       'next billing date subscription',
       'next billing date',
       'billing renewal',
+      'cancel so i dont get charged',
+      'cancel so i do not get charged',
+      'cancel before charge',
+      'cancel before charged',
+      'before next billing',
     ],
     fragments: [
       'ren',
@@ -630,7 +655,7 @@ const intents: AskWhenIntentDefinition[] = [
       'next business day',
     ],
     fragments: ['wee', 'weeke', 'weekend', 'sat', 'sund', 'mon'],
-    typoWords: ['weekend', 'saturday', 'sunday', 'wekend', 'wekends'],
+    typoWords: ['weekend', 'weekends', 'saturday', 'sunday'],
     suggestions: [
       'what if a deadline falls on a weekend',
       'do weekends count as business days',
@@ -819,6 +844,12 @@ const intents: AskWhenIntentDefinition[] = [
       'how long left',
       'closing day',
       'final deadline',
+      'no later than',
+      'not later than',
+      'on or before',
+      'final submission date',
+      'valid until',
+      'effective date',
     ],
     fragments: ['dead', 'due', 'cut', 'by w', 'final d', 'target'],
     typoWords: ['deadline', 'cutoff'],
@@ -854,6 +885,19 @@ const intents: AskWhenIntentDefinition[] = [
   },
 ]
 
+
+const canonicalIntentWords = new Set(
+  intents.flatMap((intent) =>
+    [
+      ...intent.phrases,
+      ...(intent.fragments ?? []),
+    ]
+      .flatMap((value) => normalize(value).split(' '))
+      .filter((word) => word.length >= 4),
+  ),
+)
+
+
 function numericSuggestions(query: string) {
   const normalized = normalize(query)
   const amount = normalized.match(/\b(\d+)\b/)?.[1]
@@ -861,6 +905,43 @@ function numericSuggestions(query: string) {
   if (!amount) return []
 
   // Intent-specific numeric wording must outrank generic business-day guesses.
+  if (
+    normalized.includes('within') &&
+    /\b(?:business|working|office)\s+(?:hours?|hrs?)\b/.test(normalized)
+  ) {
+    return [
+      'deadline in working hours',
+      'business-hours deadline',
+      'SLA deadline in business hours',
+    ]
+  }
+
+  if (
+    normalized.includes('within') &&
+    /\b(return|returns|refund|purchase|bought)\b/.test(normalized)
+  ) {
+    return [
+      `${amount} day return window`,
+      'return deadline from a purchase date',
+      'return deadline from today',
+      `what does within ${amount} days mean`,
+    ]
+  }
+
+  if (
+    normalized.includes('within') &&
+    /\b(ship|ships|shipped|shipping|delivery|deliver|arrive|arrival|eta|package|parcel)\b/.test(
+      normalized,
+    )
+  ) {
+    return [
+      `${amount} business day shipping estimate`,
+      'delivery date range from a ship date',
+      'when should my order arrive',
+      `what does within ${amount} days mean`,
+    ]
+  }
+
   if (normalized.includes('within')) {
     return [
       `what does within ${amount} days mean`,
@@ -946,15 +1027,18 @@ function numericSuggestions(query: string) {
   }
 
   if (
-    normalized.includes('business') ||
-    normalized.includes('working day') ||
-    normalized.includes('work day') ||
-    normalized.includes('weekday') ||
-    normalized.includes('banking day') ||
-    normalized.includes('biz day') ||
-    normalized.includes('bizdays') ||
-    normalized.includes('workday') ||
-    normalized.includes('wdays')
+    !normalized.includes('notice') &&
+    (
+      normalized.includes('business') ||
+      normalized.includes('working day') ||
+      normalized.includes('work day') ||
+      normalized.includes('weekday') ||
+      normalized.includes('banking day') ||
+      normalized.includes('biz day') ||
+      normalized.includes('bizdays') ||
+      normalized.includes('workday') ||
+      normalized.includes('wdays')
+    )
   ) {
     if (
       normalized.includes('before') ||
@@ -986,7 +1070,12 @@ function numericSuggestions(query: string) {
     ]
   }
 
-  if (normalized.includes('return') || normalized.includes('refund')) {
+  if (
+    normalized.includes('return') ||
+    normalized.includes('refund') ||
+    normalized.includes('purchase') ||
+    normalized.includes('bought')
+  ) {
     return [
       `${amount} day return window`,
       'return deadline from a purchase date',
@@ -1160,6 +1249,17 @@ function bestTypoCorrection(query: string, intent: AskWhenIntentDefinition) {
 
   for (const word of words) {
     if (word.length < 4) continue
+    if (canonicalIntentWords.has(word)) continue
+
+    const manualCorrection = manualTypoAliases[word]
+    if (
+      manualCorrection &&
+      (intent.typoWords ?? []).some(
+        (target) => normalize(target) === manualCorrection,
+      )
+    ) {
+      return { corrected: manualCorrection, distance: 1 }
+    }
 
     for (const target of intent.typoWords ?? []) {
       const normalizedTarget = normalize(target)
@@ -1270,9 +1370,11 @@ export function analyzeAskWhenSuggestions(
 
       if (
         intent.id === 'payday' &&
-        /\b(get paid|paid next|paycheck|salary|wages?)\b/.test(normalizedQuery)
+        /\b(get paid|paid next|paid every|paycheck|salary|wages?|payroll|every other friday)\b/.test(
+          normalizedQuery,
+        )
       ) {
-        contextBonus += 40
+        contextBonus += 56
       }
 
       if (
@@ -1280,6 +1382,15 @@ export function analyzeAskWhenSuggestions(
         /\b(weekend|weekends|wekends|saturday|sunday)\b/.test(normalizedQuery)
       ) {
         contextBonus += 30
+      }
+
+      if (
+        intent.id === 'returns' &&
+        /\b(return|returns|refund|purchase|bought|send back)\b/.test(
+          normalizedQuery,
+        )
+      ) {
+        contextBonus += 68
       }
 
       if (
@@ -1359,53 +1470,75 @@ export function analyzeAskWhenSuggestions(
   const second = scored[1]
   const scoreGap = second ? top.score - second.score : 999
 
-  const forceAmbiguous = new Set([
-    'end',
-    'ends',
-    'ending',
-    'pay',
-    'last',
-    'last day',
-    'date',
-    'days',
-    'period',
-    'cancel',
-    'expire',
-    'expires',
-    'work',
-    'month',
-  ]).has(normalizedQuery)
+  const typoCandidate = scored
+    .filter(
+      (item) =>
+        Boolean(item.typoCorrection) &&
+        item.typoScore >= 54 &&
+        !item.directNormalizedMatch,
+    )
+    .sort((a, b) => b.typoScore - a.typoScore || b.score - a.score)[0]
+
+  const forceAmbiguous =
+    new Set([
+      'end',
+      'ends',
+      'ending',
+      'pay',
+      'last',
+      'last day',
+      'date',
+      'days',
+      'period',
+      'cancel',
+      'expire',
+      'expires',
+      'work',
+      'month',
+      'due',
+      'maturity',
+    ]).has(normalizedQuery) ||
+    /^\d+$/.test(normalizedQuery)
 
   const exactOrClearPhrase =
     top.phraseScore >= 120 &&
     (!second || scoreGap >= 12 || top.phraseScore >= 160)
 
-  const likelyTypo =
-    Boolean(top.typoCorrection) &&
-    top.typoScore >= 54 &&
-    !top.directNormalizedMatch
-
-  if (likelyTypo && top.typoCorrection) {
+  if (typoCandidate?.typoCorrection) {
     const corrected =
-      top.intent.id === 'free-trial' && top.typoCorrection.corrected === 'trial'
+      typoCandidate.intent.id === 'free-trial' &&
+      typoCandidate.typoCorrection.corrected === 'trial'
         ? 'Trial'
-        : top.intent.id === 'invoice-net' && top.typoCorrection.corrected === 'invoice'
+        : typoCandidate.intent.id === 'invoice-net' &&
+            typoCandidate.typoCorrection.corrected === 'invoice'
           ? 'Invoice'
-          : top.intent.id === 'shipping' && top.typoCorrection.corrected === 'delivery'
+          : typoCandidate.intent.id === 'shipping' &&
+              typoCandidate.typoCorrection.corrected === 'delivery'
             ? 'Delivery'
-            : top.intent.id === 'renewal' && top.typoCorrection.corrected === 'renewal'
+            : typoCandidate.intent.id === 'renewal' &&
+                typoCandidate.typoCorrection.corrected === 'renewal'
               ? 'Renewal'
-              : top.intent.id === 'notice' && top.typoCorrection.corrected === 'notice'
+              : typoCandidate.intent.id === 'notice' &&
+                  typoCandidate.typoCorrection.corrected === 'notice'
                 ? 'Notice'
-                : top.intent.id === 'returns' && top.typoCorrection.corrected === 'return'
+                : typoCandidate.intent.id === 'returns' &&
+                    typoCandidate.typoCorrection.corrected === 'return'
                   ? 'Return'
-                  : top.typoCorrection.corrected.charAt(0).toUpperCase() +
-                    top.typoCorrection.corrected.slice(1)
+                  : typoCandidate.typoCorrection.corrected.charAt(0).toUpperCase() +
+                    typoCandidate.typoCorrection.corrected.slice(1)
+
+    const typoSuggestions =
+      typoCandidate.intent.id === top.intent.id
+        ? suggestions
+        : unique([
+            ...typoCandidate.intent.suggestions,
+            ...suggestions,
+          ]).slice(0, 4)
 
     return {
       mode: 'typo',
       label: corrected,
-      suggestions,
+      suggestions: typoSuggestions,
     }
   }
 
@@ -1416,7 +1549,9 @@ export function analyzeAskWhenSuggestions(
       suggestions:
         normalizedQuery === 'pay'
           ? fallbackSuggestions(normalizedQuery)
-          : suggestions,
+          : /^\d+$/.test(normalizedQuery) && numeric.length
+            ? numeric
+            : suggestions,
     }
   }
 

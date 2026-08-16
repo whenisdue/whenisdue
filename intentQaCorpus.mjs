@@ -6216,5 +6216,1600 @@ export const intentQaCorpus = [
       "business-hours",
       "deadline"
     ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "boss said net 30 from aug 16",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "client invoice aug 5 net45",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "when do i chase payment net 30",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "need due date invoice 8/1 net 30",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "payment terms say eom",
+    "expectedAny": [
+      "end of month",
+      "invoice"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "return bought yesterday 30 days",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "customer bought aug 1 return 14 days",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "when does 30 day return run out",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "trial started monday 14 days",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "free trial started aug 10 30 days",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "need to cancel before trial charges",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "subscription renews every month next date",
+    "expectedAny": [
+      "renew",
+      "subscription"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "cancel before monthly renewal",
+    "expectedAny": [
+      "renew",
+      "subscription"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "shipping says 3 to 5 working days",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "order shipped friday 5 business days",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "eta from aug 10 plus 7 workdays",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "30 days notice if resign today",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "last working day with 30 days notice",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "lease says 60 day notice",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "paid every other friday next date",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "salary every 15th and 30th next",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "payroll is fortnightly when next",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "deadline friday eod",
+    "expectedAny": [
+      "business-hours",
+      "deadline"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "client says cob tomorrow",
+    "expectedAny": [
+      "business-hours",
+      "deadline"
+    ]
+  },
+  {
+    "category": "assistant-natural",
+    "query": "sla 8 business hours from 3pm",
+    "expectedAny": [
+      "business-hours",
+      "sla"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "within 5 days of receipt",
+    "expectedAny": [
+      "within",
+      "start date"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "within five business days after receipt",
+    "expectedAny": [
+      "within",
+      "business days"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "no later than 30 days after purchase",
+    "expectedAny": [
+      "deadline",
+      "return"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "not later than 10 business days",
+    "expectedAny": [
+      "business days",
+      "deadline"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "on or before the 15th",
+    "expectedAny": [
+      "deadline"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "due within thirty calendar days",
+    "expectedAny": [
+      "within",
+      "days"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "payment due 30 days from invoice date",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "payment due at end of month",
+    "expectedAny": [
+      "end of month",
+      "invoice"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "notice must be given 30 days in advance",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "cancel at least 7 days before renewal",
+    "expectedAny": [
+      "renew",
+      "subscription"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "return within 14 days of delivery",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "trial expires 30 days after activation",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "delivery within 3-5 working days",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "contract-wording",
+    "query": "response required within 4 business hours",
+    "expectedAny": [
+      "business-hours",
+      "sla"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "net30 8/16",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "net45 16 aug",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "30d return 8/1",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "14d trial 8/10",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "5bd after 8/10",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "10wd from 8/1",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "3-5bd shipping 8/12",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "30d notice 8/16",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "renew 9/1 cancel 7d before",
+    "expectedAny": [
+      "renew",
+      "subscription"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "eod 8/20",
+    "expectedAny": [
+      "business-hours",
+      "deadline"
+    ]
+  },
+  {
+    "category": "date-shorthand",
+    "query": "cob fri 8/21",
+    "expectedAny": [
+      "business-hours",
+      "deadline"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "5 banking days from today",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "7 working days from date",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "fortnight salary next date",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "salary crediting date",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "salary release date",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "payroll cut off",
+    "expectedAny": [
+      "payday",
+      "deadline"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "bank holiday counted?",
+    "expectedAny": [
+      "holiday"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "public holiday excluded?",
+    "expectedAny": [
+      "holiday"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "month end billing",
+    "expectedAny": [
+      "end of month",
+      "invoice"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "month-end settlement date",
+    "expectedAny": [
+      "invoice",
+      "end of month"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "invoice maturity date",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "payment maturity date",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "last working date after resignation",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "resignation effective after 30 days",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "notice serving period",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "turnaround time 24 working hours",
+    "expectedAny": [
+      "business-hours",
+      "deadline"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "tat 2 working days",
+    "expectedAny": [
+      "business-hours",
+      "deadline"
+    ]
+  },
+  {
+    "category": "international-v3",
+    "query": "close of play friday",
+    "expectedAny": [
+      "business-hours",
+      "deadline"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "uh when is 30 days from today",
+    "expectedAny": [
+      "days"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "so like 5 business days after monday",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "what date would net 30 be if invoice is today",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "if i got it yesterday and i have 30 days to return it",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "when does my 14 day trial finish if i started today",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "when should i cancel so i dont get charged",
+    "expectedAny": [
+      "trial",
+      "renew"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "if it shipped today when should it get here",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "i have to give 30 days notice when is my last day",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "i get paid every two weeks what is next payday",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "if deadline is sunday what date should i use",
+    "expectedAny": [
+      "weekend",
+      "deadline"
+    ]
+  },
+  {
+    "category": "spoken-v3",
+    "query": "does holiday count in five business days",
+    "expectedAny": [
+      "holiday",
+      "business days"
+    ]
+  },
+  {
+    "category": "typo-v3",
+    "query": "inovice",
+    "expectedAny": [
+      "invoice"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "invioce",
+    "expectedAny": [
+      "invoice"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "inovice due",
+    "expectedAny": [
+      "invoice"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "paymet due",
+    "expectedAny": [
+      "invoice"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "payemnt terms",
+    "expectedAny": [
+      "invoice"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "retunr window",
+    "expectedAny": [
+      "return"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "retun deadline",
+    "expectedAny": [
+      "return"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "refnud",
+    "expectedAny": [
+      "return",
+      "refund"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "trila end",
+    "expectedAny": [
+      "trial"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "tirla end",
+    "expectedAny": [
+      "trial"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "subscrption",
+    "expectedAny": [
+      "subscription",
+      "renew"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "subscrpition renewal",
+    "expectedAny": [
+      "subscription",
+      "renew"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "renweal",
+    "expectedAny": [
+      "renew"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "delievry",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "delvry",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "shippng",
+    "expectedAny": [
+      "shipping"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "busniess day",
+    "expectedAny": [
+      "business days"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "busines day",
+    "expectedAny": [
+      "business days"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "workng days",
+    "expectedAny": [
+      "business days"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "weknd",
+    "expectedAny": [
+      "weekend"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "holidy",
+    "expectedAny": [
+      "holiday"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "notcie period",
+    "expectedAny": [
+      "notice"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "resigantion",
+    "expectedAny": [
+      "notice"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "paydy next",
+    "expectedAny": [
+      "payday"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "fortnigthly pay",
+    "expectedAny": [
+      "payday"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "deadlien",
+    "expectedAny": [
+      "deadline"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "withn 5 business days",
+    "expectedAny": [
+      "within"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "typo-v3",
+    "query": "calandar days",
+    "expectedAny": [
+      "days"
+    ],
+    "expectedMode": "typo"
+  },
+  {
+    "category": "abbreviations",
+    "query": "bdays",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "bday count",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "bizdays",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "wdays",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "cal days",
+    "expectedAny": [
+      "days"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "inv due",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "pmt due",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "pymt due",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "ar due",
+    "expectedAny": [
+      "invoice"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "eom",
+    "expectedAny": [
+      "end of month"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "eod",
+    "expectedAny": [
+      "business-hours"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "cob",
+    "expectedAny": [
+      "business-hours"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "tat",
+    "expectedAny": [
+      "business-hours"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "sla",
+    "expectedAny": [
+      "business-hours",
+      "sla"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "eta",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "abbreviations",
+    "query": "rma return",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "30",
+    "expectedAny": [
+      "days",
+      "return",
+      "invoice",
+      "notice"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "15",
+    "expectedAny": [
+      "days",
+      "invoice",
+      "payday"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "end",
+    "expectedAny": [
+      "invoice",
+      "trial",
+      "return",
+      "subscription"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "pay",
+    "expectedAny": [
+      "payday",
+      "invoice"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "cancel",
+    "expectedAny": [
+      "renew",
+      "trial",
+      "notice"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "last day",
+    "expectedAny": [
+      "deadline",
+      "return",
+      "trial",
+      "notice"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "period",
+    "expectedAny": [
+      "notice",
+      "trial",
+      "return",
+      "deadline"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "due",
+    "expectedAny": [
+      "deadline",
+      "invoice"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "ambiguous-v3",
+    "query": "maturity",
+    "expectedAny": [
+      "invoice",
+      "deadline"
+    ],
+    "expectedMode": "ambiguous"
+  },
+  {
+    "category": "messy-v3",
+    "query": "net-30",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "net30",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "2/10net30",
+    "expectedAny": [
+      "2/10 net 30"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "e.o.m.",
+    "expectedAny": [
+      "end of month"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "E O M",
+    "expectedAny": [
+      "end of month"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "5-business-days",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "5bd",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "3–5 business days shipping",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "30-day-return",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "14-day-trial",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "30-day-notice",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "messy-v3",
+    "query": "next-payday",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "grace period end",
+    "expectedAny": [
+      "deadline"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "time limit 30 days",
+    "expectedAny": [
+      "deadline"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "cutoff date",
+    "expectedAny": [
+      "deadline"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "closing date",
+    "expectedAny": [
+      "deadline"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "final submission date",
+    "expectedAny": [
+      "deadline"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "expiration date",
+    "expectedAny": [
+      "deadline",
+      "trial",
+      "subscription"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "valid until",
+    "expectedAny": [
+      "deadline"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "effective date",
+    "expectedAny": [
+      "deadline",
+      "notice"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "commencement date plus 30 days",
+    "expectedAny": [
+      "deadline",
+      "days"
+    ]
+  },
+  {
+    "category": "policy-language",
+    "query": "within 30 days from effective date",
+    "expectedAny": [
+      "within",
+      "deadline"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date pls",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date please",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date asap",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date urgent",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date quickly",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date for client",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date for boss",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "net 30 due date thanks",
+    "expectedAny": [
+      "invoice",
+      "net 30"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline pls",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline please",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline asap",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline urgent",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline quickly",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline for client",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline for boss",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "return deadline thanks",
+    "expectedAny": [
+      "return"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end pls",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end please",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end asap",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end urgent",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end quickly",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end for client",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end for boss",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "trial end thanks",
+    "expectedAny": [
+      "trial"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday pls",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday please",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday asap",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday urgent",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday quickly",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday for client",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday for boss",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "next payday thanks",
+    "expectedAny": [
+      "payday"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta pls",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta please",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta asap",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta urgent",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta quickly",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta for client",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta for boss",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "delivery eta thanks",
+    "expectedAny": [
+      "shipping",
+      "delivery"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice pls",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice please",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice asap",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice urgent",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice quickly",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice for client",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice for boss",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "30 day notice thanks",
+    "expectedAny": [
+      "notice"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days pls",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days please",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days asap",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days urgent",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days quickly",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days for client",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days for boss",
+    "expectedAny": [
+      "business days"
+    ]
+  },
+  {
+    "category": "modifier-noise",
+    "query": "5 business days thanks",
+    "expectedAny": [
+      "business days"
+    ]
   }
 ];
