@@ -12860,21 +12860,46 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             line-height: 1.16;
           }
 
-          /* Touch: no hover dependency. The explanation is simply visible. */
+          /* Touch: every calculator stays visible, and the explanation sits below the name. */
+          .calculator-hub-page .utility-directory-cards .proof-calculator,
           .calculator-hub-page .utility-directory-cards .proof-calculator[data-description] {
-            align-items: flex-start;
+            display: grid !important;
+            grid-template-columns: 36px minmax(0, 1fr);
+            grid-template-rows: auto auto;
+            column-gap: 10px;
+            row-gap: 4px;
+            align-items: start;
+            position: relative !important;
+            inset: auto !important;
+            width: auto !important;
+            max-width: none !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            clip: auto !important;
+            clip-path: none !important;
           }
 
-          .calculator-hub-page .utility-directory-cards .proof-calculator[data-description] > div {
-            display: grid;
-            gap: 4px;
+          .calculator-hub-page .utility-directory-cards .proof-calculator .intent-proof-icon {
+            grid-column: 1;
+            grid-row: 1 / span 2;
+          }
+
+          .calculator-hub-page .utility-directory-cards .proof-calculator > div {
+            grid-column: 2;
+            grid-row: 1;
+            min-width: 0;
           }
 
           .calculator-hub-page .utility-directory-cards .proof-calculator[data-description]::after {
+            grid-column: 2;
+            grid-row: 2;
             position: static;
             width: auto;
             max-width: none;
-            margin: 4px 0 0;
+            margin: 0;
             padding: 0;
             border-radius: 0;
             background: transparent;
