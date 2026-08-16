@@ -10205,6 +10205,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           min-height: 590px;
           margin-top: 22px;
           overflow: hidden;
+          overflow-anchor: none;
           border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 26px;
           background: #17304d;
@@ -10289,6 +10290,7 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .date-home-editorial-hero .ask-when-form input {
           min-height: 60px;
+          scroll-margin-top: 12px;
           border: 0;
           background: #fffdf8;
           box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
@@ -10330,8 +10332,10 @@ function HomePage({ onNavigate }: NavigationProps) {
         .date-home-intent-panel {
           min-width: 0;
           min-height: 590px;
+          height: 590px;
           display: grid;
           place-items: center;
+          overflow: hidden;
           padding: clamp(34px, 5vw, 62px);
           background: #e5ddd0;
           color: #102f52;
@@ -10382,10 +10386,13 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-intent-query {
-          display: block;
+          display: -webkit-box;
+          height: 76px;
           min-height: 76px;
           margin-top: 12px;
           overflow: hidden;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
           color: #102f52;
           font-size: clamp(2.2rem, 3.8vw, 3.7rem);
           line-height: 0.98;
@@ -10489,7 +10496,9 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-editorial-copy {
-            padding: 16px 15px 14px;
+            min-height: 0;
+            justify-content: flex-start;
+            padding: 16px 15px 18px;
           }
 
           .date-home-editorial-today {
@@ -10539,8 +10548,21 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-intent-panel {
-            min-height: 330px;
-            padding: 18px 15px 20px;
+            min-height: 286px;
+            height: 286px;
+            place-items: start stretch;
+            padding: 15px 15px 16px;
+            overflow: hidden;
+          }
+
+          .date-home-intent-idle,
+          .date-home-intent-listening,
+          .date-home-intent-committed {
+            width: 100%;
+          }
+
+          .date-home-intent-listening {
+            min-height: 255px;
           }
 
           .date-home-intent-idle strong {
@@ -10554,21 +10576,27 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-intent-query {
+            height: 50px;
             min-height: 50px;
             margin-top: 7px;
             font-size: clamp(1.6rem, 7.5vw, 2.2rem);
+            line-height: 1;
+            -webkit-line-clamp: 2;
           }
 
           .date-home-intent-options {
-            grid-template-rows: repeat(3, 50px);
-            min-height: 166px;
-            margin-top: 14px;
+            grid-template-rows: repeat(3, 46px);
+            gap: 7px;
+            min-height: 152px;
+            height: 152px;
+            margin-top: 10px;
           }
 
           .date-home-intent-options button {
-            min-height: 50px;
-            padding: 8px 12px;
-            font-size: 0.86rem;
+            min-height: 46px;
+            padding: 7px 11px;
+            font-size: 0.84rem;
+            line-height: 1.18;
           }
 
           .date-home-intent-options button:nth-child(4) {
@@ -10576,8 +10604,20 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-intent-quiet {
-            margin-top: 9px;
-            font-size: 0.8rem;
+            min-height: 18px;
+            margin-top: 7px;
+            font-size: 0.78rem;
+            line-height: 1.3;
+          }
+
+          .date-home-intent-committed strong {
+            font-size: clamp(2rem, 10vw, 2.8rem);
+          }
+
+          .date-home-intent-committed p {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
           }
         }
       `}</style>
