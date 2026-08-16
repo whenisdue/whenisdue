@@ -9331,7 +9331,11 @@ function AskWhenBox({
               setCompletionSuggestion(undefined)
             }
           }}
-          placeholder={demoText}
+          placeholder={
+            isAskInputFocused && !query
+              ? '5 business days after August 10'
+              : demoText
+          }
           aria-label="Ask WhenIsDue what you need to know"
           autoComplete="off"
         />
@@ -10489,16 +10493,17 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-editorial-hero {
-            grid-template-columns: 1fr;
+            display: block;
             min-height: 0;
             margin-top: 10px;
             border-radius: 20px;
           }
 
           .date-home-editorial-copy {
+            height: auto;
             min-height: 0;
             justify-content: flex-start;
-            padding: 16px 15px 18px;
+            padding: 16px 15px 12px;
           }
 
           .date-home-editorial-today {
@@ -10548,10 +10553,10 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-intent-panel {
-            min-height: 286px;
-            height: 286px;
+            min-height: 272px;
+            height: 272px;
             place-items: start stretch;
-            padding: 15px 15px 16px;
+            padding: 12px 15px 14px;
             overflow: hidden;
           }
 
@@ -10562,7 +10567,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-intent-listening {
-            min-height: 255px;
+            min-height: 245px;
           }
 
           .date-home-intent-idle strong {
