@@ -14359,9 +14359,9 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
           .business-answer-hero {
             min-width: 0;
-            height: 356px;
+            height: 320px;
             overflow: hidden;
-            padding: 22px 20px 18px;
+            padding: 22px 20px 16px;
           }
 
           .business-answer-hero h1 {
