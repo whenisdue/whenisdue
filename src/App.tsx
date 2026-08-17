@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { analyzeAskWhenSuggestions } from './askWhenIntentLibrary'
 import { resolveAskWhenCompletion } from './askWhenCompletion'
 import './App.css'
@@ -9042,6 +9042,7 @@ function AskWhenBox({
     suggestion?: string
   } | null>(null)
   const [isAskInputFocused, setIsAskInputFocused] = useState(false)
+  const askInputRef = useRef<HTMLInputElement | null>(null)
   const [demoIndex, setDemoIndex] = useState(0)
   const [demoText, setDemoText] = useState('')
   const [demoPhase, setDemoPhase] = useState<'typing' | 'pause' | 'erasing'>('typing')
@@ -9118,6 +9119,38 @@ function AskWhenBox({
     query,
   ])
 
+  const missingFactPlaceholder = useMemo(() => {
+    const prompt = completionPrompt?.label.toLowerCase() ?? ''
+
+    if (!prompt) return ''
+
+    if (prompt.includes('invoice date')) return 'Type the invoice date'
+    if (prompt.includes('purchase date')) return 'Type the purchase date'
+    if (prompt.includes('trial start')) return 'Type the trial start date'
+    if (prompt.includes('date was it shipped')) return 'Type the ship date'
+    if (prompt.includes('date should i start')) return 'Type the start date'
+    if (prompt.includes('payment terms')) return 'e.g. Net 30'
+    if (prompt.includes('how many business days')) return 'e.g. 5 business days'
+    if (prompt.includes('return window')) return 'e.g. 30 days'
+    if (prompt.includes('how long is the trial')) return 'e.g. 14 days'
+    if (prompt.includes('delivery range')) return 'e.g. 3–5 business days'
+    if (prompt.includes('type the date with the month name')) {
+      return 'e.g. August 5'
+    }
+
+    return 'Type the missing information'
+  }, [completionPrompt])
+
+  useEffect(() => {
+    if (!completionPrompt || !pendingCompletionContext) return
+
+    const frame = window.requestAnimationFrame(() => {
+      askInputRef.current?.focus()
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [completionPrompt, pendingCompletionContext])
+
   const match = useMemo(
     () => resolveAskWhenQuery(query, holidayCalendar, today),
     [query, holidayCalendar, today],
@@ -9150,7 +9183,7 @@ function AskWhenBox({
     }
 
     if (completion.kind === 'missing') {
-      setQuery(originalQuery)
+      setQuery('')
       setCompletionSuggestion(suggestionRequest.text)
       setPendingCompletionContext({
         originalQuery,
@@ -9275,6 +9308,7 @@ function AskWhenBox({
         originalQuery: completionQuery,
         suggestion: activeSuggestion,
       })
+      setQuery('')
       setHasCommittedQuery(true)
       trackWhenIsDueEvent('ask_when_completion_missing_fact', {
         query: completionQuery,
@@ -9347,6 +9381,7 @@ function AskWhenBox({
         }}
       >
         <input
+          ref={askInputRef}
           type="text"
           value={query}
           onFocus={() => setIsAskInputFocused(true)}
@@ -9354,23 +9389,32 @@ function AskWhenBox({
           onChange={(event) => {
             setQuery(event.target.value)
             setSubmittedWithoutMatch(false)
-            setCompletionPrompt(null)
-            setHasCommittedQuery(false)
+
+            if (!pendingCompletionContext) {
+              setCompletionPrompt(null)
+              setHasCommittedQuery(false)
+            }
+
             if (!event.target.value.trim() && !pendingCompletionContext) {
               setCompletionSuggestion(undefined)
             }
           }}
           placeholder={
-            isAskInputFocused && !query
-              ? 'e.g. 5 business days after August 10'
-              : demoText
+            completionPrompt && pendingCompletionContext
+              ? missingFactPlaceholder
+              : isAskInputFocused && !query
+                ? 'e.g. 5 business days after August 10'
+                : demoText
           }
           aria-label="Ask WhenIsDue what you need to know"
           autoComplete="off"
         />
       </form>
 
-      {hasCommittedQuery && query.trim() && (match || submittedWithoutMatch) ? (
+      {!completionPrompt &&
+      hasCommittedQuery &&
+      query.trim() &&
+      (match || submittedWithoutMatch) ? (
         match?.path ? (
           <a
             className="ask-when-preview has-match is-link"
@@ -9416,35 +9460,37 @@ function AskWhenBox({
         )
       ) : null}
 
-      <div
-        className={`ask-when-examples ask-when-suggestion-grid ${
-          query.trim() ? 'is-reserved' : ''
-        }`}
-        aria-label={query.trim() ? undefined : 'Ask WhenIsDue examples'}
-        aria-hidden={query.trim() ? true : undefined}
-      >
-        {stableSuggestionItems.map((suggestion, index) => (
-          <button
-            type="button"
-            key={`ask-when-suggestion-${index}`}
-            className={suggestion ? '' : 'is-empty'}
-            aria-hidden={query.trim() || !suggestion ? true : undefined}
-            tabIndex={query.trim() || !suggestion ? -1 : 0}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => {
-              if (!suggestion || query.trim()) return
-              setQuery(suggestion)
-              setSubmittedWithoutMatch(false)
-              setHasCommittedQuery(false)
-              trackWhenIsDueEvent('ask_when_example_clicked', {
-                query: suggestion,
-              })
-            }}
-          >
-            {suggestion || 'Suggestion'}
-          </button>
-        ))}
-      </div>
+      {!completionPrompt ? (
+        <div
+          className={`ask-when-examples ask-when-suggestion-grid ${
+            query.trim() ? 'is-reserved' : ''
+          }`}
+          aria-label={query.trim() ? undefined : 'Ask WhenIsDue examples'}
+          aria-hidden={query.trim() ? true : undefined}
+        >
+          {stableSuggestionItems.map((suggestion, index) => (
+            <button
+              type="button"
+              key={`ask-when-suggestion-${index}`}
+              className={suggestion ? '' : 'is-empty'}
+              aria-hidden={query.trim() || !suggestion ? true : undefined}
+              tabIndex={query.trim() || !suggestion ? -1 : 0}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                if (!suggestion || query.trim()) return
+                setQuery(suggestion)
+                setSubmittedWithoutMatch(false)
+                setHasCommittedQuery(false)
+                trackWhenIsDueEvent('ask_when_example_clicked', {
+                  query: suggestion,
+                })
+              }}
+            >
+              {suggestion || 'Suggestion'}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <style>{`
         .ask-when-box {
@@ -10145,24 +10191,26 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           <aside
             className={`date-home-intent-panel ${
-              askAssist.query.trim() ? 'is-listening' : 'is-idle'
+              askAssist.committedLabel || askAssist.query.trim()
+                ? 'is-listening'
+                : 'is-idle'
             }`}
             aria-live="polite"
             aria-label="WhenIsDue suggestions"
           >
-            {!askAssist.query.trim() ? (
-              <div className="date-home-intent-idle">
-                <span>Today</span>
-                <strong>{formatPlainDate(today)}</strong>
-                <small>{formatWeekday(today)}</small>
-              </div>
-            ) : askAssist.committedLabel ? (
+            {askAssist.committedLabel ? (
               <div className="date-home-intent-committed">
                 <span>WhenIsDue understood</span>
                 <strong>{askAssist.committedLabel}</strong>
                 {askAssist.committedDescription ? (
                   <p>{askAssist.committedDescription}</p>
                 ) : null}
+              </div>
+            ) : !askAssist.query.trim() ? (
+              <div className="date-home-intent-idle">
+                <span>Today</span>
+                <strong>{formatPlainDate(today)}</strong>
+                <small>{formatWeekday(today)}</small>
               </div>
             ) : (
               <div className="date-home-intent-listening">
