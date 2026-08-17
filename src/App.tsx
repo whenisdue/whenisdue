@@ -9367,10 +9367,16 @@ function AskWhenBox({
 
   return (
     <section className="ask-when-box" aria-labelledby="ask-when-title">
-      <div className="ask-when-heading">
-        <span>Ask WhenIsDue</span>
-        <h2 id="ask-when-title">What do you need to know?</h2>
-        <p>Type it however you'd say it.</p>
+      <div className={`ask-when-heading ${completionPrompt ? 'is-missing-fact' : ''}`}>
+        <span>{completionPrompt ? 'One more thing' : 'Ask WhenIsDue'}</span>
+        <h2 id="ask-when-title">
+          {completionPrompt ? completionPrompt.label : 'What do you need to know?'}
+        </h2>
+        <p>
+          {completionPrompt
+            ? completionPrompt.description
+            : "Type it however you'd say it."}
+        </p>
       </div>
 
       <form
@@ -9529,6 +9535,30 @@ function AskWhenBox({
           color: #6d8094;
           font-size: 1rem;
           line-height: 1.55;
+        }
+
+        .ask-when-heading.is-missing-fact {
+          text-align: left;
+        }
+
+        .ask-when-heading.is-missing-fact > span {
+          margin-bottom: 7px;
+        }
+
+        .ask-when-heading.is-missing-fact h2 {
+          max-width: 680px;
+          font-size: clamp(2rem, 3.8vw, 3rem);
+          line-height: 0.98;
+        }
+
+        .ask-when-heading.is-missing-fact p {
+          margin: 8px 0 0;
+          max-width: 620px;
+          line-height: 1.42;
+        }
+
+        .ask-when-heading.is-missing-fact + .ask-when-form {
+          margin-top: 13px;
         }
 
         .ask-when-form {
@@ -10199,9 +10229,9 @@ function HomePage({ onNavigate }: NavigationProps) {
             aria-label="WhenIsDue suggestions"
           >
             {askAssist.committedLabel ? (
-              <div className="date-home-intent-committed">
-                <span>WhenIsDue understood</span>
-                <strong>{askAssist.committedLabel}</strong>
+              <div className="date-home-intent-committed is-missing-fact">
+                <span>WhenIsDue remembers</span>
+                <strong>Your earlier details are saved</strong>
                 {askAssist.committedDescription ? (
                   <p>{askAssist.committedDescription}</p>
                 ) : null}
@@ -10546,6 +10576,16 @@ function HomePage({ onNavigate }: NavigationProps) {
           line-height: 1.55;
         }
 
+        .date-home-intent-committed.is-missing-fact strong {
+          max-width: 430px;
+          font-size: clamp(2rem, 3.8vw, 3.2rem);
+          line-height: 0.98;
+        }
+
+        .date-home-intent-committed.is-missing-fact p {
+          margin-top: 12px;
+        }
+
         @media (max-width: 760px) {
           .date-home-editorial-shell {
             width: calc(100% - 18px);
@@ -10653,6 +10693,22 @@ function HomePage({ onNavigate }: NavigationProps) {
             max-width: 310px;
             font-size: clamp(1.9rem, 8.8vw, 2.45rem);
             line-height: 0.94;
+          }
+
+          .ask-when-heading.is-missing-fact h2 {
+            max-width: 100%;
+            font-size: clamp(1.8rem, 8.2vw, 2.35rem);
+            line-height: 0.98;
+          }
+
+          .ask-when-heading.is-missing-fact p {
+            margin-top: 6px;
+            font-size: 0.88rem;
+            line-height: 1.35;
+          }
+
+          .ask-when-heading.is-missing-fact + .ask-when-form {
+            margin-top: 10px;
           }
 
           .date-home-editorial-hero:has(.ask-when-form input:focus)
