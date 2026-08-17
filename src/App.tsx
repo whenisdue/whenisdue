@@ -14000,8 +14000,9 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .business-answer-hero {
-          min-height: 438px;
+          height: 510px;
           box-sizing: border-box;
+          overflow: hidden;
           padding: clamp(34px, 5vw, 68px) clamp(32px, 5vw, 68px) clamp(28px, 4vw, 48px);
         }
 
@@ -14358,7 +14359,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
           .business-answer-hero {
             min-width: 0;
-            min-height: 388px;
+            height: 430px;
             overflow: hidden;
             padding: 22px 20px 18px;
           }
