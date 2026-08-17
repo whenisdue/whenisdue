@@ -8923,7 +8923,7 @@ function resolveAskWhenQuery(
   ) {
     return {
       label: 'Business-hours deadline',
-      description: 'Add working hours inside a business-day schedule.',
+      description: 'Add working hours inside a workday schedule.',
       path: `/business-hours-deadline-calculator${calendarOnlySuffix}`,
     }
   }
@@ -12596,9 +12596,9 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
               <span aria-hidden="true">◷</span>
               Date and deadline tools
             </p>
-            <h1 id="homepage-title" tabIndex={-1}>Choose a calculator.</h1>
+            <h1 id="homepage-title" tabIndex={-1}>What do you need to find?</h1>
             <p className="friendly-subtitle">
-              Pick what you need. Get the answer.
+              Pick the question closest to yours.
             </p>
           </div>
 
@@ -12606,7 +12606,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/business-days-calculator"
-              data-description="Add working days while skipping weekends and optional holidays."
+              data-description="Add business days to a date while skipping weekends and optional holidays."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/business-days-calculator' })
@@ -12615,14 +12615,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">◷</span>
               <div>
-                <h2>Add business days</h2>
+                <h2>What date is it after business days?</h2>
                 <p className="calculator-card-description">Add working days while skipping weekends and optional holidays.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/business-days-between-dates"
-              data-description="Count working days between two dates."
+              data-description="Count the business days between two dates."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/business-days-between-dates' })
@@ -12631,14 +12631,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">↔</span>
               <div>
-                <h2>Business days between dates</h2>
+                <h2>How many business days are between two dates?</h2>
                 <p className="calculator-card-description">Count working days between two dates.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/invoice-due-date-calculator"
-              data-description="Find an invoice due date from Net terms or EOM."
+              data-description="Use the invoice date and payment terms such as Net 30 or EOM."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/invoice-due-date-calculator' })
@@ -12647,14 +12647,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">#</span>
               <div>
-                <h2>Invoice due date</h2>
+                <h2>When is an invoice due?</h2>
                 <p className="calculator-card-description">Find an invoice due date from Net terms or EOM.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/return-window-calculator"
-              data-description="Find the last day of a return window."
+              data-description="Use the purchase or delivery date and the return window."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/return-window-calculator' })
@@ -12663,14 +12663,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">↩</span>
               <div>
-                <h2>Return deadline</h2>
+                <h2>What is the last day to return it?</h2>
                 <p className="calculator-card-description">Find the last day of a return window.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/free-trial-calculator"
-              data-description="Find when a free trial ends."
+              data-description="Use the start date and trial length."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/free-trial-calculator' })
@@ -12679,14 +12679,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">◇</span>
               <div>
-                <h2>Free trial end date</h2>
+                <h2>When does a free trial end?</h2>
                 <p className="calculator-card-description">Find when a free trial ends.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/deadline-calculator"
-              data-description="Count forward or backward using custom deadline rules."
+              data-description="Use this when you need custom counting rules."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/deadline-calculator' })
@@ -12695,7 +12695,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">±</span>
               <div>
-                <h2>Deadline calculator</h2>
+                <h2>Add or subtract days from a date</h2>
                 <p className="calculator-card-description">Count forward or backward using custom deadline rules.</p>
               </div>
             </a>
@@ -12712,14 +12712,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">⏱</span>
               <div>
-                <h2>Business-hours deadline</h2>
+                <h2>When is a deadline after work hours?</h2>
                 <p className="calculator-card-description">Add working hours inside a business-day schedule.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/next-payday-calculator"
-              data-description="Find the next date in a pay schedule."
+              data-description="Weekly, every two weeks, twice a month, or monthly."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/next-payday-calculator' })
@@ -12728,14 +12728,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">$</span>
               <div>
-                <h2>Next payday</h2>
+                <h2>When is my next payday?</h2>
                 <p className="calculator-card-description">Find the next date in a pay schedule.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/net-30-due-date"
-              data-description="Get the due date for a Net 30 invoice."
+              data-description="Add 30 calendar days to the invoice date."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/net-30-due-date' })
@@ -12744,14 +12744,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">30</span>
               <div>
-                <h2>Net 30 due date</h2>
+                <h2>When is a Net 30 invoice due?</h2>
                 <p className="calculator-card-description">Get the due date for a Net 30 invoice.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/2-10-net-30-calculator"
-              data-description="See the discount deadline and full-payment due date."
+              data-description="For invoices using 2/10 Net 30 terms."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/2-10-net-30-calculator' })
@@ -12760,7 +12760,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">2%</span>
               <div>
-                <h2>2/10 Net 30</h2>
+                <h2>When are the discount and payment due?</h2>
                 <p className="calculator-card-description">See the discount deadline and full-payment due date.</p>
               </div>
             </a>
@@ -12768,7 +12768,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             <a
               className="intent-proof-card proof-calculator"
               href="/shipping-delivery-range-calculator"
-              data-description="Turn a delivery estimate into earliest and latest dates."
+              data-description="Turn a 3–5 day estimate into earliest and latest dates."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/shipping-delivery-range-calculator' })
@@ -12777,14 +12777,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">⇢</span>
               <div>
-                <h2>Delivery date range</h2>
+                <h2>When should a delivery arrive?</h2>
                 <p className="calculator-card-description">Turn a delivery estimate into earliest and latest dates.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/notice-period-calculator"
-              data-description="Count backward to find when notice is due."
+              data-description="Use the required notice period to find the date."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/notice-period-calculator' })
@@ -12793,14 +12793,14 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">←</span>
               <div>
-                <h2>Notice period</h2>
+                <h2>When should I give notice?</h2>
                 <p className="calculator-card-description">Count backward to find when notice is due.</p>
               </div>
             </a>
             <a
               className="intent-proof-card proof-calculator"
               href="/subscription-renewal-calculator"
-              data-description="Find the next renewal and optional cancellation deadline."
+              data-description="Find the next renewal and, if needed, when to cancel."
               onClick={(event) => {
                 event.preventDefault()
                 trackWhenIsDueEvent('calculator_directory_click', { path: '/subscription-renewal-calculator' })
@@ -12809,7 +12809,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             >
               <span className="intent-proof-icon" aria-hidden="true">↻</span>
               <div>
-                <h2>Renewal & cancellation</h2>
+                <h2>When does a subscription renew?</h2>
                 <p className="calculator-card-description">Find the next renewal and optional cancellation deadline.</p>
               </div>
             </a>
