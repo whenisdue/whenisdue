@@ -15328,7 +15328,12 @@ function ResultActions({
   }, [title])
 
   useEffect(() => {
-    if (message !== 'Copied.') {
+    if (
+      message !== 'Copied.' &&
+      message !== 'Link copied.' &&
+      message !== 'Shared.' &&
+      message !== 'Calendar file created.'
+    ) {
       return
     }
 
@@ -15496,7 +15501,13 @@ function ResultActions({
                 >
                   {isFavorite ? 'Favorited ✓' : 'Favorite'}
                 </button>
-                <button type="button" onClick={copyExactLink}>Copy link</button>
+                <button
+                  type="button"
+                  className={message === 'Link copied.' ? 'is-action-confirmed' : ''}
+                  onClick={copyExactLink}
+                >
+                  {message === 'Link copied.' ? 'Link copied ✓' : 'Copy link'}
+                </button>
                 <button type="button" onClick={shareAnswer}>Share</button>
               </div>
             </details>
@@ -15511,8 +15522,21 @@ function ResultActions({
             >
               {isFavorite ? 'Favorited' : 'Favorite'}
             </button>
-            <button type="button" onClick={copyAnswer}>Copy result</button>
-            <button type="button" onClick={copyExactLink}>Copy link</button>
+            <button
+              type="button"
+              className={message === 'Copied.' ? 'is-action-confirmed' : ''}
+              onClick={copyAnswer}
+              aria-label={message === 'Copied.' ? 'Result copied' : 'Copy result'}
+            >
+              {message === 'Copied.' ? 'Copied ✓' : 'Copy result'}
+            </button>
+            <button
+              type="button"
+              className={message === 'Link copied.' ? 'is-action-confirmed' : ''}
+              onClick={copyExactLink}
+            >
+              {message === 'Link copied.' ? 'Link copied ✓' : 'Copy link'}
+            </button>
             <button type="button" onClick={shareAnswer}>Share</button>
             <button type="button" onClick={addToCalendar}>Add to calendar</button>
           </>
@@ -15574,6 +15598,13 @@ function ResultActions({
           border-color: rgba(36, 107, 82, 0.34);
           background: #eaf5ef;
           color: #1f5e48;
+        }
+
+        .result-actions button.is-action-confirmed {
+          border-color: rgba(36, 107, 82, 0.5);
+          background: #e5f3ec;
+          color: #1f5e48;
+          box-shadow: 0 0 0 3px rgba(36, 107, 82, 0.08);
         }
 
         .result-actions span {
