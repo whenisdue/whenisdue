@@ -13672,9 +13672,14 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
             ))}
           </div>
 
-          {validationMessage ? (
-            <p className="business-answer-form-message">{validationMessage}</p>
-          ) : null}
+          <p
+            className={`business-answer-form-message ${
+              validationMessage ? 'is-visible' : 'is-reserved'
+            }`}
+            aria-live="polite"
+          >
+            {validationMessage ?? ' '}
+          </p>
         </form>
       </section>
 
@@ -13995,6 +14000,8 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         }
 
         .business-answer-hero {
+          min-height: 438px;
+          box-sizing: border-box;
           padding: clamp(34px, 5vw, 68px) clamp(32px, 5vw, 68px) clamp(28px, 4vw, 48px);
         }
 
@@ -14147,9 +14154,14 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
         .business-answer-form-message {
           grid-column: 1 / -1;
+          min-height: 1.25em;
           margin: 0;
           color: #9c4e35;
           font-weight: 700;
+        }
+
+        .business-answer-form-message.is-reserved {
+          visibility: hidden;
         }
 
         .business-answer-live-result {
@@ -14346,6 +14358,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
           .business-answer-hero {
             min-width: 0;
+            min-height: 388px;
             overflow: hidden;
             padding: 22px 20px 18px;
           }
