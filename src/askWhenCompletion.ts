@@ -212,20 +212,35 @@ function extractNetTerm(query: string) {
 
 function extractShippingRange(query: string) {
   const normalized = normalize(query)
-  const match = normalized.match(
+
+  const rangeMatch = normalized.match(
     /\b(\d{1,3})\s*(?:-|to)\s*(\d{1,3})\s*(?:(business|working|work|calendar)\s*)?days?\b/,
   )
 
-  if (!match) return null
+  if (rangeMatch) {
+    const min = Number(rangeMatch[1])
+    const max = Number(rangeMatch[2])
+    if (min > max) return null
 
-  const min = Number(match[1])
-  const max = Number(match[2])
-  if (min > max) return null
+    return {
+      min,
+      max,
+      mode: rangeMatch[3] === 'calendar' ? 'calendar' : 'business',
+    } as const
+  }
+
+  const singleMatch = normalized.match(
+    /\b(\d{1,3})\s*(?:(business|working|work|calendar)\s*)days?\b/,
+  )
+
+  if (!singleMatch) return null
+
+  const days = Number(singleMatch[1])
 
   return {
-    min,
-    max,
-    mode: match[3] === 'calendar' ? 'calendar' : 'business',
+    min: days,
+    max: days,
+    mode: singleMatch[2] === 'calendar' ? 'calendar' : 'business',
   } as const
 }
 

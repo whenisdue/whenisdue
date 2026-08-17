@@ -181,5 +181,11 @@ export const completionQaCorpus = [
     "expectedKind": "navigate",
     "expectedPathContains": "/shipping-delivery-range-calculator",
     "suggestion": "delivery date range from a ship date"
+  },
+  {
+    "category": "shipping-complete",
+    "query": "shipped yesterday should arrive in 5 business days",
+    "expectedKind": "navigate",
+    "expectedPathContains": "/shipping-delivery-range-calculator"
   }
 ];
