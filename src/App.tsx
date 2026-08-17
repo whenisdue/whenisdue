@@ -15233,7 +15233,7 @@ function ResultActions({
 
   async function shareAnswer() {
     if (!navigator.share) {
-      await copyAnswer()
+      await copyExactLink()
       return
     }
 
@@ -15246,9 +15246,23 @@ function ResultActions({
       setMessage('Shared.')
       recordRecentCalculation(title, date, details)
       trackWhenIsDueEvent('share_result', { title, result_date: toDateKey(date), status: 'success' })
-    } catch {
-      setMessage('Share cancelled or unavailable.')
-      trackWhenIsDueEvent('share_result', { title, result_date: toDateKey(date), status: 'cancelled_or_failed' })
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setMessage('Share cancelled.')
+        trackWhenIsDueEvent('share_result', {
+          title,
+          result_date: toDateKey(date),
+          status: 'cancelled',
+        })
+        return
+      }
+
+      trackWhenIsDueEvent('share_result', {
+        title,
+        result_date: toDateKey(date),
+        status: 'fallback_to_link',
+      })
+      await copyExactLink()
     }
   }
 
@@ -19141,9 +19155,15 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                 min="1900-01-01"
                 max="2100-12-31"
                 value={invoiceDate}
+                onInput={(event) => {
+                  setInvoiceDate(event.currentTarget.value)
+                }}
                 onChange={(event) => {
-                  setInvoiceDate(event.target.value)
-                  trackWhenIsDueEvent('date_changed', { context: 'invoice_due_date', value: event.target.value })
+                  setInvoiceDate(event.currentTarget.value)
+                  trackWhenIsDueEvent('date_changed', {
+                    context: 'invoice_due_date',
+                    value: event.currentTarget.value,
+                  })
                 }}
               />
             </label>
@@ -19165,59 +19185,78 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
               ))}
             </div>
 
-            {validationMessage ? <p className="form-message">{validationMessage}</p> : null}
+            <p className="invoice-term-rule-cue">
+              Net 7–90 use calendar days · EOM = end of month
+            </p>
+
+            <p
+              className={`form-message invoice-answer-validation ${
+                validationMessage ? 'is-visible' : 'is-reserved'
+              }`}
+              aria-live="polite"
+            >
+              {validationMessage ?? ' '}
+            </p>
         </form>
       </section>
 
-      {invoiceDueDate && parsedInvoiceDate ? (
-        <section className="invoice-answer-support" aria-label="Invoice due date actions and details">
-          <ResultActions
-            title="Invoice due date"
-            date={invoiceDueDate}
-            details={invoiceTermLabels[invoiceTerm]}
-          />
+      <section
+        className={`invoice-answer-support ${
+          invoiceDueDate && parsedInvoiceDate ? '' : 'is-reserved'
+        }`}
+        aria-label="Invoice due date actions and details"
+        aria-hidden={invoiceDueDate && parsedInvoiceDate ? undefined : true}
+      >
+        {invoiceDueDate && parsedInvoiceDate ? (
+          <>
+            <ResultActions
+              title="Invoice due date"
+              date={invoiceDueDate}
+              details={invoiceTermLabels[invoiceTerm]}
+            />
 
-          <details className="invoice-answer-detail-card">
-            <summary>Why this date?</summary>
-            <div className="invoice-answer-detail-body">
-              <p>{formatInvoiceTermExplanation(parsedInvoiceDate, invoiceTerm, invoiceDueDate)}</p>
-              <CalculationReceipt
-                analyticsContext="invoice_due_date"
-                rows={[
-                  { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate)}, ${formatPlainDate(parsedInvoiceDate)}` },
-                  { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
-                  {
-                    label: 'Counting rule',
-                    value: invoiceTerm === 'eom'
-                      ? 'Last calendar day of the invoice month'
-                      : `${calendarDaysFromInvoice} calendar ${calendarDaysFromInvoice === 1 ? 'day' : 'days'} after invoice date`,
-                  },
-                  { label: 'Due date', value: `${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}` },
-                ]}
-              />
-            </div>
-          </details>
-
-          <details className="invoice-answer-detail-card">
-            <summary>Save this date</summary>
-            <div className="invoice-answer-detail-body business-save">
-              <label className="field title-field">
-                <span>Title</span>
-                <input
-                  maxLength={titleMaxLength}
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
+            <details className="invoice-answer-detail-card">
+              <summary>Why this date?</summary>
+              <div className="invoice-answer-detail-body">
+                <p>{formatInvoiceTermExplanation(parsedInvoiceDate, invoiceTerm, invoiceDueDate)}</p>
+                <CalculationReceipt
+                  analyticsContext="invoice_due_date"
+                  rows={[
+                    { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate)}, ${formatPlainDate(parsedInvoiceDate)}` },
+                    { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
+                    {
+                      label: 'Counting rule',
+                      value: invoiceTerm === 'eom'
+                        ? 'Last calendar day of the invoice month'
+                        : `${calendarDaysFromInvoice} calendar ${calendarDaysFromInvoice === 1 ? 'day' : 'days'} after invoice date`,
+                    },
+                    { label: 'Due date', value: `${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}` },
+                  ]}
                 />
-                {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-              </label>
-              <button className="primary-button" type="button" disabled={!canSave} onClick={saveInvoiceDeadline}>
-                Save to My due dates
-              </button>
-              {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-            </div>
-          </details>
-        </section>
-      ) : null}
+              </div>
+            </details>
+
+            <details className="invoice-answer-detail-card">
+              <summary>Save this date</summary>
+              <div className="invoice-answer-detail-body business-save">
+                <label className="field title-field">
+                  <span>Title</span>
+                  <input
+                    maxLength={titleMaxLength}
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                  />
+                  {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+                </label>
+                <button className="primary-button" type="button" disabled={!canSave} onClick={saveInvoiceDeadline}>
+                  Save to My due dates
+                </button>
+                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+              </div>
+            </details>
+          </>
+        ) : null}
+      </section>
 
       <section className="invoice-term-links" aria-label="Exact invoice term pages">
         <div>
@@ -20069,6 +20108,9 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         }
 
         .invoice-answer-hero {
+          height: 430px;
+          box-sizing: border-box;
+          overflow: hidden;
           margin-top: 22px;
           padding: clamp(42px, 7vw, 72px) clamp(24px, 5vw, 58px) 34px;
           border: 1px solid rgba(112, 82, 42, 0.12);
@@ -20201,15 +20243,35 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           font-size: 0.78rem;
         }
 
+        .invoice-term-rule-cue {
+          grid-column: 1 / -1;
+          margin: 0;
+          color: #64798d;
+          font-size: 0.8rem;
+          font-weight: 750;
+          line-height: 1.35;
+        }
+
         .invoice-answer-form .form-message {
           grid-column: 1 / -1;
+          min-height: 1.25em;
           margin: 0;
         }
 
+        .invoice-answer-validation.is-reserved {
+          visibility: hidden;
+        }
+
         .invoice-answer-support {
+          min-height: 154px;
           display: grid;
           gap: 10px;
           margin-top: 18px;
+        }
+
+        .invoice-answer-support.is-reserved {
+          visibility: hidden;
+          pointer-events: none;
         }
 
         .invoice-answer-support .result-actions {
@@ -20276,8 +20338,9 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-answer-hero {
+            height: 348px;
             margin-top: 14px;
-            padding: 32px 18px 28px;
+            padding: 28px 18px 22px;
             border-radius: 24px 24px 0 0;
             text-align: left;
           }
@@ -20299,23 +20362,25 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-answer-date-main {
-            display: grid;
-            justify-items: start;
-            gap: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0 0.1em;
             margin-top: 0;
-            font-size: clamp(3.1rem, 15vw, 5rem);
-            line-height: 0.88;
+            font-size: clamp(2.55rem, 11.2vw, 3.55rem);
+            line-height: 0.92;
             white-space: normal;
           }
 
           .invoice-answer-month,
           .invoice-answer-day,
+          .invoice-answer-comma,
           .invoice-answer-year {
-            display: block;
+            display: inline;
           }
 
           .invoice-answer-comma {
-            display: none;
+            margin-left: -0.08em;
           }
 
           .invoice-answer-context {
@@ -20344,7 +20409,12 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-answer-support {
+            min-height: 206px;
             margin-top: 14px;
+          }
+
+          .invoice-term-rule-cue {
+            font-size: 0.76rem;
           }
 
           .invoice-answer-support .result-actions {
