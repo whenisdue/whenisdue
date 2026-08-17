@@ -14359,7 +14359,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
           .business-answer-hero {
             min-width: 0;
-            height: 430px;
+            height: 356px;
             overflow: hidden;
             padding: 22px 20px 18px;
           }
@@ -14387,26 +14387,28 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           }
 
           .business-answer-date-main {
-            display: grid;
-            justify-items: start;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
             max-width: 100%;
-            gap: 0;
+            gap: 0 0.1em;
             margin-top: 4px;
-            font-size: clamp(2.55rem, 11.7vw, 3.8rem);
-            line-height: 0.9;
-            letter-spacing: -0.052em;
+            font-size: clamp(2.35rem, 10.2vw, 3.15rem);
+            line-height: 0.92;
+            letter-spacing: -0.05em;
             white-space: normal;
           }
 
           .business-answer-month,
           .business-answer-day,
+          .business-answer-comma,
           .business-answer-year {
-            display: block;
+            display: inline;
             max-width: 100%;
           }
 
           .business-answer-comma {
-            display: none;
+            margin-left: -0.08em;
           }
 
           .business-answer-rule {
