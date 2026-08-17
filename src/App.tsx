@@ -650,7 +650,9 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
               </span>
             </strong>
             <p className="deadline-answer-context">
-              {parsedDuration} {unit === 'business-days' ? 'business days' : 'calendar days'}{' '}
+              {parsedDuration}{' '}
+              {unit === 'business-days' ? 'business' : 'calendar'}{' '}
+              {parsedDuration === 1 ? 'day' : 'days'}{' '}
               {direction === 'after' ? 'after' : 'before'} {formatPlainDate(parsedTriggerDate)}
               {unit === 'business-days' && holidayCalendar !== 'none'
                 ? ` · ${holidayOption.shortLabel} holidays skipped`
@@ -813,8 +815,8 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
                   {
                     label: 'Duration',
                     value: `${parsedDuration} ${
-                      unit === 'business-days' ? 'business days' : 'calendar days'
-                    }`,
+                      unit === 'business-days' ? 'business' : 'calendar'
+                    } ${parsedDuration === 1 ? 'day' : 'days'}`,
                   },
                   ...(unit === 'business-days' && workingSchedule
                     ? [{ label: 'Working days', value: workingSchedule.label }]
@@ -1467,47 +1469,55 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           }
 
           .deadline-answer-hero {
-            margin-top: 14px;
-            padding: 28px 20px 26px;
+            margin-top: 10px;
+            padding: 20px 18px 18px;
             border-radius: 24px 24px 0 0;
             text-align: left;
           }
 
           .deadline-answer-hero h1 {
-            font-size: clamp(2.65rem, 12vw, 4rem);
+            margin-top: 6px;
+            font-size: clamp(2.15rem, 9.5vw, 3rem);
+            line-height: 0.98;
           }
 
           .deadline-answer-date {
             justify-items: start;
-            margin-top: 22px;
+            margin-top: 14px;
           }
 
           .deadline-answer-weekday {
-            font-size: clamp(2.3rem, 10vw, 3.2rem);
+            font-size: clamp(1.7rem, 7.5vw, 2.35rem);
+            line-height: 1;
           }
 
           .deadline-answer-date-main {
-            display: grid;
-            justify-items: start;
-            gap: 0;
-            font-size: clamp(3.05rem, 14vw, 4.6rem);
-            line-height: 0.9;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: flex-start;
+            gap: 0 0.09em;
+            margin-top: 4px;
+            font-size: clamp(2.25rem, 10.5vw, 3.2rem);
+            line-height: 0.92;
             white-space: normal;
           }
 
           .deadline-answer-month,
           .deadline-answer-day,
+          .deadline-answer-comma,
           .deadline-answer-year {
-            display: block;
+            display: inline;
           }
 
           .deadline-answer-comma {
-            display: none;
+            margin-left: -0.08em;
           }
 
           .deadline-answer-context {
-            margin-left: 0;
-            margin-right: 0;
+            margin: 12px 0 0;
+            font-size: 0.86rem;
+            line-height: 1.4;
           }
 
           .deadline-answer-ambiguity {
@@ -1515,14 +1525,14 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           }
 
           .deadline-rule-shell {
-            padding: 16px 16px 34px;
+            padding: 12px 12px 30px;
             border-radius: 0 0 24px 24px;
           }
 
           .deadline-rule-essential {
-            grid-template-columns: minmax(0, 1.35fr) minmax(100px, 0.65fr);
-            gap: 10px;
-            padding: 14px;
+            grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+            gap: 8px;
+            padding: 10px;
           }
 
           .deadline-rule-essential label {
@@ -1542,14 +1552,14 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           }
 
           .deadline-rule-essential label > span {
-            font-size: 0.78rem;
+            font-size: 0.74rem;
           }
 
           .deadline-rule-essential input,
           .deadline-rule-essential select {
-            min-height: 46px;
-            padding: 8px 9px;
-            font-size: 0.88rem;
+            min-height: 44px;
+            padding: 7px 8px;
+            font-size: 0.84rem;
           }
 
           .deadline-rule-compare-grid {
@@ -1558,20 +1568,20 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         }
         @media (max-width: 430px) {
           .deadline-rule-essential {
-            grid-template-columns: minmax(0, 1.25fr) minmax(92px, 0.75fr);
+            grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
             gap: 8px;
-            padding: 12px;
+            padding: 10px;
           }
 
           .deadline-rule-essential label:nth-child(3),
           .deadline-rule-essential label:nth-child(4) {
-            grid-column: 1 / -1;
+            grid-column: auto;
           }
 
           .deadline-rule-essential input,
           .deadline-rule-essential select {
             min-height: 44px;
-            font-size: 0.86rem;
+            font-size: 0.82rem;
           }
         }
       `}</style>
