@@ -10105,7 +10105,6 @@ function HomePage({ onNavigate }: NavigationProps) {
   const [favoriteCalculations, setFavoriteCalculations] = useState<SavedCalculation[]>(() =>
     readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY),
   )
-  const [isMobileTaskListExpanded, setIsMobileTaskListExpanded] = useState(false)
   const [askAssist, setAskAssist] = useState<AskWhenAssistState>({
     query: '',
     suggestions: [],
@@ -10821,7 +10820,7 @@ function HomePage({ onNavigate }: NavigationProps) {
               )
             }}
           >
-            Different date or number
+            Use a different date or number
           </a>
         </div>
 
@@ -10962,164 +10961,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         `}</style>
       </section>
 
-      <section className="date-home-tools" aria-labelledby="date-home-tools-title">
-        <div className="date-home-tools-heading">
-          <span className="date-home-chapter-label">Choose by task</span>
-          <h2 id="date-home-tools-title">What do you need to know?</h2>
-          <p>Pick the question closest to what you are trying to figure out.</p>
-        </div>
-
-        <div className="date-home-tool-grid">
-          <a
-            href={`/business-days-calculator${
-              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-            }`}
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate(
-                `/business-days-calculator${
-                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-                }`,
-              )
-            }}
-          >
-            <span>Business days</span>
-            <strong>When is it due?</strong>
-            <small>Skip weekends and find the exact date.</small>
-          </a>
-
-          <a
-            href="/return-window-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/return-window-calculator')
-            }}
-          >
-            <span>Returns</span>
-            <strong>Last day to return</strong>
-            <small>Calculate from the purchase or delivery date.</small>
-          </a>
-
-          <a
-            href="/invoice-due-date-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/invoice-due-date-calculator')
-            }}
-          >
-            <span>Invoices</span>
-            <strong>Invoice due date</strong>
-            <small>Net 7, Net 15, Net 30, Net 45, and more.</small>
-          </a>
-
-          <a
-            href="/free-trial-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/free-trial-calculator')
-            }}
-          >
-            <span>Subscriptions</span>
-            <strong>When does my trial end?</strong>
-            <small>Find the end date before renewal.</small>
-          </a>
-
-          <a
-            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
-            href="/next-payday-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/next-payday-calculator')
-            }}
-          >
-            <span>Pay schedule</span>
-            <strong>When is my next payday?</strong>
-            <small>Weekly, biweekly, semimonthly, or monthly.</small>
-          </a>
-
-          <a
-            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
-            href={`/business-hours-deadline-calculator${
-              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-            }`}
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate(
-                `/business-hours-deadline-calculator${
-                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-                }`,
-              )
-            }}
-          >
-            <span>SLA / response time</span>
-            <strong>Add business hours</strong>
-            <small>Calculate a deadline inside a workday schedule.</small>
-          </a>
-
-          <a
-            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
-            href={`/business-days-between-dates${
-              holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-            }`}
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate(
-                `/business-days-between-dates${
-                  holidayCalendar === 'none' ? '' : `?calendar=${holidayCalendar}`
-                }`,
-              )
-            }}
-          >
-            <span>Date difference</span>
-            <strong>Business days between dates</strong>
-            <small>Count weekdays between two dates instantly.</small>
-          </a>
-
-          <a
-            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
-            href="/net-30-due-date"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/net-30-due-date')
-            }}
-          >
-            <span>Invoices</span>
-            <strong>Net 30 due date</strong>
-            <small>Enter an invoice date and get the due date immediately.</small>
-          </a>
-
-          <a
-            className={`date-home-tool-secondary ${isMobileTaskListExpanded ? 'is-expanded' : ''}`}
-            href="/shipping-delivery-range-calculator"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/shipping-delivery-range-calculator')
-            }}
-          >
-            <span>Shipping</span>
-            <strong>Delivery date range</strong>
-            <small>Turn 3–5 business days into earliest and latest dates.</small>
-          </a>
-        </div>
-
-        <button
-          type="button"
-          className="date-home-tool-toggle"
-          aria-expanded={isMobileTaskListExpanded}
-          onClick={() => {
-            const nextExpanded = !isMobileTaskListExpanded
-            setIsMobileTaskListExpanded(nextExpanded)
-            trackWhenIsDueEvent('homepage_task_list_toggled', {
-              expanded: nextExpanded,
-            })
-          }}
-        >
-          {isMobileTaskListExpanded ? 'Show fewer tasks ↑' : 'Show more tasks ↓'}
-        </button>
-      </section>
-
-
-      <HomepageQuestionMap onNavigate={onNavigate} />
+            <HomepageQuestionMap onNavigate={onNavigate} />
 
       <DeadlineCountingGuideLinks onNavigate={onNavigate} />
 
@@ -11477,8 +11319,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           background: rgba(255, 255, 255, 0.66);
         }
 
-        .date-home-business,
-        .date-home-tools {
+        .date-home-business {
           width: min(100% - 32px, 1120px);
           margin-left: auto;
           margin-right: auto;
