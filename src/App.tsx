@@ -10961,9 +10961,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         `}</style>
       </section>
 
-            <HomepageQuestionMap onNavigate={onNavigate} />
-
-      <DeadlineCountingGuideLinks onNavigate={onNavigate} />
+      <HomepageQuestionMap onNavigate={onNavigate} />
 
       {(favoriteCalculations.length > 0 || recentOnlyCalculations.length > 0) ? (
         <section className="date-home-saved" aria-labelledby="date-home-saved-title">
