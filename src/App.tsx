@@ -15186,7 +15186,6 @@ function ResultActions({
     if (
       message !== 'Copied.' &&
       message !== 'Link copied.' &&
-      message !== 'Share link copied.' &&
       message !== 'Shared.' &&
       message !== 'Calendar file created.'
     ) {
@@ -15200,18 +15199,15 @@ function ResultActions({
     return () => window.clearTimeout(timeoutId)
   }, [message])
 
-  async function copyExactLinkWithMessage(
-    successMessage: 'Link copied.' | 'Share link copied.',
-  ) {
+  async function copyExactLink() {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      setMessage(successMessage)
+      setMessage('Link copied.')
       recordRecentCalculation(title, date, details)
       trackWhenIsDueEvent('copy_exact_link', {
         title,
         result_date: toDateKey(date),
         status: 'success',
-        context: successMessage === 'Share link copied.' ? 'share_fallback' : 'copy_link',
       })
     } catch {
       setMessage('Link copy is not available in this browser.')
@@ -15221,10 +15217,6 @@ function ResultActions({
         status: 'failed',
       })
     }
-  }
-
-  async function copyExactLink() {
-    await copyExactLinkWithMessage('Link copied.')
   }
 
   async function copyAnswer() {
@@ -15241,7 +15233,12 @@ function ResultActions({
 
   async function shareAnswer() {
     if (!navigator.share) {
-      await copyExactLinkWithMessage('Share link copied.')
+      await copyExactLink()
+      trackWhenIsDueEvent('share_result', {
+        title,
+        result_date: toDateKey(date),
+        status: 'fallback_link_copied',
+      })
       return
     }
 
@@ -15265,12 +15262,12 @@ function ResultActions({
         return
       }
 
+      await copyExactLink()
       trackWhenIsDueEvent('share_result', {
         title,
         result_date: toDateKey(date),
-        status: 'fallback_to_link',
+        status: 'fallback_link_copied',
       })
-      await copyExactLinkWithMessage('Share link copied.')
     }
   }
 
@@ -15391,18 +15388,10 @@ function ResultActions({
                 </button>
                 <button
                   type="button"
-                  className={
-                    message === 'Shared.' || message === 'Share link copied.'
-                      ? 'is-action-confirmed'
-                      : ''
-                  }
+                  className={message === 'Shared.' ? 'is-action-confirmed' : ''}
                   onClick={shareAnswer}
                 >
-                  {message === 'Shared.'
-                    ? 'Shared ✓'
-                    : message === 'Share link copied.'
-                      ? 'Link copied ✓'
-                      : 'Share'}
+                  {message === 'Shared.' ? 'Shared ✓' : 'Share'}
                 </button>
               </div>
             </details>
@@ -15434,18 +15423,10 @@ function ResultActions({
             </button>
             <button
               type="button"
-              className={
-                message === 'Shared.' || message === 'Share link copied.'
-                  ? 'is-action-confirmed'
-                  : ''
-              }
+              className={message === 'Shared.' ? 'is-action-confirmed' : ''}
               onClick={shareAnswer}
             >
-              {message === 'Shared.'
-                ? 'Shared ✓'
-                : message === 'Share link copied.'
-                  ? 'Link copied ✓'
-                  : 'Share'}
+              {message === 'Shared.' ? 'Shared ✓' : 'Share'}
             </button>
             <button
               type="button"
@@ -15464,7 +15445,6 @@ function ResultActions({
         {message &&
         message !== 'Copied.' &&
         message !== 'Link copied.' &&
-        message !== 'Share link copied.' &&
         message !== 'Shared.' &&
         message !== 'Calendar file created.' ? (
           <span aria-live="polite">{message}</span>
@@ -15474,9 +15454,7 @@ function ResultActions({
               ? 'Result copied.'
               : message === 'Link copied.'
                 ? 'Link copied.'
-                : message === 'Share link copied.'
-                  ? 'Share unavailable. Link copied instead.'
-                  : message === 'Shared.'
+                : message === 'Shared.'
                   ? 'Shared.'
                   : message === 'Calendar file created.'
                     ? 'Calendar ready.'
@@ -19186,11 +19164,8 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                   setInvoiceDate(event.currentTarget.value)
                 }}
                 onChange={(event) => {
-                  setInvoiceDate(event.currentTarget.value)
-                  trackWhenIsDueEvent('date_changed', {
-                    context: 'invoice_due_date',
-                    value: event.currentTarget.value,
-                  })
+                  setInvoiceDate(event.target.value)
+                  trackWhenIsDueEvent('date_changed', { context: 'invoice_due_date', value: event.target.value })
                 }}
               />
             </label>
@@ -19212,9 +19187,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
               ))}
             </div>
 
-            <p className="invoice-term-rule-cue">
-              Net 7–90 use calendar days · EOM = end of month
-            </p>
+            <p className="invoice-term-rule">Net terms use calendar days · EOM = end of month</p>
 
             <p
               className={`form-message invoice-answer-validation ${
@@ -19227,63 +19200,62 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         </form>
       </section>
 
-      <section
-        className={`invoice-answer-support ${
-          invoiceDueDate && parsedInvoiceDate ? '' : 'is-reserved'
-        }`}
-        aria-label="Invoice due date actions and details"
-        aria-hidden={invoiceDueDate && parsedInvoiceDate ? undefined : true}
-      >
-        {invoiceDueDate && parsedInvoiceDate ? (
-          <>
-            <ResultActions
-              title="Invoice due date"
-              date={invoiceDueDate}
-              details={invoiceTermLabels[invoiceTerm]}
-            />
+      {invoiceDueDate && parsedInvoiceDate ? (
+        <section className="invoice-answer-support" aria-label="Invoice due date actions and details">
+          <ResultActions
+            title="Invoice due date"
+            date={invoiceDueDate}
+            details={invoiceTermLabels[invoiceTerm]}
+          />
 
-            <details className="invoice-answer-detail-card">
-              <summary>Why this date?</summary>
-              <div className="invoice-answer-detail-body">
-                <p>{formatInvoiceTermExplanation(parsedInvoiceDate, invoiceTerm, invoiceDueDate)}</p>
-                <CalculationReceipt
-                  analyticsContext="invoice_due_date"
-                  rows={[
-                    { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate)}, ${formatPlainDate(parsedInvoiceDate)}` },
-                    { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
-                    {
-                      label: 'Counting rule',
-                      value: invoiceTerm === 'eom'
-                        ? 'Last calendar day of the invoice month'
-                        : `${calendarDaysFromInvoice} calendar ${calendarDaysFromInvoice === 1 ? 'day' : 'days'} after invoice date`,
-                    },
-                    { label: 'Due date', value: `${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}` },
-                  ]}
+          <details className="invoice-answer-detail-card">
+            <summary>Why this date?</summary>
+            <div className="invoice-answer-detail-body">
+              <p>{formatInvoiceTermExplanation(parsedInvoiceDate, invoiceTerm, invoiceDueDate)}</p>
+              <CalculationReceipt
+                analyticsContext="invoice_due_date"
+                rows={[
+                  { label: 'Invoice date', value: `${formatWeekday(parsedInvoiceDate)}, ${formatPlainDate(parsedInvoiceDate)}` },
+                  { label: 'Payment terms', value: invoiceTermLabels[invoiceTerm] },
+                  {
+                    label: 'Counting rule',
+                    value: invoiceTerm === 'eom'
+                      ? 'Last calendar day of the invoice month'
+                      : `${calendarDaysFromInvoice} calendar ${calendarDaysFromInvoice === 1 ? 'day' : 'days'} after invoice date`,
+                  },
+                  { label: 'Due date', value: `${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}` },
+                ]}
+              />
+            </div>
+          </details>
+
+          <details className="invoice-answer-detail-card">
+            <summary>Save this date</summary>
+            <div className="invoice-answer-detail-body business-save">
+              <label className="field title-field">
+                <span>Title</span>
+                <input
+                  maxLength={titleMaxLength}
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
                 />
-              </div>
-            </details>
-
-            <details className="invoice-answer-detail-card">
-              <summary>Save this date</summary>
-              <div className="invoice-answer-detail-body business-save">
-                <label className="field title-field">
-                  <span>Title</span>
-                  <input
-                    maxLength={titleMaxLength}
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                  />
-                  {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
-                </label>
-                <button className="primary-button" type="button" disabled={!canSave} onClick={saveInvoiceDeadline}>
-                  Save to My due dates
-                </button>
-                {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
-              </div>
-            </details>
-          </>
-        ) : null}
-      </section>
+                {titleValidationMessage ? <span className="field-error">{titleValidationMessage}</span> : null}
+              </label>
+              <button className="primary-button" type="button" disabled={!canSave} onClick={saveInvoiceDeadline}>
+                Save to My due dates
+              </button>
+              {storageMessage ? <p className="form-message">{storageMessage}</p> : null}
+            </div>
+          </details>
+        </section>
+      ) : (
+        <section
+          className="invoice-answer-support is-reserved"
+          aria-hidden="true"
+        >
+          <div className="invoice-answer-support-placeholder" />
+        </section>
+      )}
 
       <section className="invoice-term-links" aria-label="Exact invoice term pages">
         <div>
@@ -20135,7 +20107,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         }
 
         .invoice-answer-hero {
-          height: 430px;
+          height: 432px;
           box-sizing: border-box;
           overflow: hidden;
           margin-top: 22px;
@@ -20270,11 +20242,11 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           font-size: 0.78rem;
         }
 
-        .invoice-term-rule-cue {
+        .invoice-term-rule {
           grid-column: 1 / -1;
           margin: 0;
-          color: #64798d;
-          font-size: 0.8rem;
+          color: #65758a;
+          font-size: 0.82rem;
           font-weight: 750;
           line-height: 1.35;
         }
@@ -20290,15 +20262,19 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         }
 
         .invoice-answer-support {
-          min-height: 154px;
           display: grid;
           gap: 10px;
           margin-top: 18px;
         }
 
         .invoice-answer-support.is-reserved {
+          min-height: 164px;
           visibility: hidden;
           pointer-events: none;
+        }
+
+        .invoice-answer-support-placeholder {
+          min-height: 164px;
         }
 
         .invoice-answer-support .result-actions {
@@ -20365,7 +20341,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-answer-hero {
-            height: 348px;
+            height: 340px;
             margin-top: 14px;
             padding: 28px 18px 22px;
             border-radius: 24px 24px 0 0;
@@ -20394,7 +20370,7 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             align-items: baseline;
             gap: 0 0.1em;
             margin-top: 0;
-            font-size: clamp(2.55rem, 11.2vw, 3.55rem);
+            font-size: clamp(2.45rem, 10.5vw, 3.35rem);
             line-height: 0.92;
             white-space: normal;
           }
@@ -20435,13 +20411,17 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             font-size: 0.74rem;
           }
 
-          .invoice-answer-support {
-            min-height: 206px;
-            margin-top: 14px;
+          .invoice-term-rule {
+            font-size: 0.78rem;
           }
 
-          .invoice-term-rule-cue {
-            font-size: 0.76rem;
+          .invoice-answer-support.is-reserved,
+          .invoice-answer-support-placeholder {
+            min-height: 142px;
+          }
+
+          .invoice-answer-support {
+            margin-top: 14px;
           }
 
           .invoice-answer-support .result-actions {
