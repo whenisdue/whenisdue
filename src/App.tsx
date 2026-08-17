@@ -15186,6 +15186,7 @@ function ResultActions({
     if (
       message !== 'Copied.' &&
       message !== 'Link copied.' &&
+      message !== 'Share link copied.' &&
       message !== 'Shared.' &&
       message !== 'Calendar file created.'
     ) {
@@ -15199,15 +15200,18 @@ function ResultActions({
     return () => window.clearTimeout(timeoutId)
   }, [message])
 
-  async function copyExactLink() {
+  async function copyExactLinkWithMessage(
+    successMessage: 'Link copied.' | 'Share link copied.',
+  ) {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      setMessage('Link copied.')
+      setMessage(successMessage)
       recordRecentCalculation(title, date, details)
       trackWhenIsDueEvent('copy_exact_link', {
         title,
         result_date: toDateKey(date),
         status: 'success',
+        context: successMessage === 'Share link copied.' ? 'share_fallback' : 'copy_link',
       })
     } catch {
       setMessage('Link copy is not available in this browser.')
@@ -15217,6 +15221,10 @@ function ResultActions({
         status: 'failed',
       })
     }
+  }
+
+  async function copyExactLink() {
+    await copyExactLinkWithMessage('Link copied.')
   }
 
   async function copyAnswer() {
@@ -15233,7 +15241,7 @@ function ResultActions({
 
   async function shareAnswer() {
     if (!navigator.share) {
-      await copyExactLink()
+      await copyExactLinkWithMessage('Share link copied.')
       return
     }
 
@@ -15262,7 +15270,7 @@ function ResultActions({
         result_date: toDateKey(date),
         status: 'fallback_to_link',
       })
-      await copyExactLink()
+      await copyExactLinkWithMessage('Share link copied.')
     }
   }
 
@@ -15383,10 +15391,18 @@ function ResultActions({
                 </button>
                 <button
                   type="button"
-                  className={message === 'Shared.' ? 'is-action-confirmed' : ''}
+                  className={
+                    message === 'Shared.' || message === 'Share link copied.'
+                      ? 'is-action-confirmed'
+                      : ''
+                  }
                   onClick={shareAnswer}
                 >
-                  {message === 'Shared.' ? 'Shared ✓' : 'Share'}
+                  {message === 'Shared.'
+                    ? 'Shared ✓'
+                    : message === 'Share link copied.'
+                      ? 'Link copied ✓'
+                      : 'Share'}
                 </button>
               </div>
             </details>
@@ -15418,10 +15434,18 @@ function ResultActions({
             </button>
             <button
               type="button"
-              className={message === 'Shared.' ? 'is-action-confirmed' : ''}
+              className={
+                message === 'Shared.' || message === 'Share link copied.'
+                  ? 'is-action-confirmed'
+                  : ''
+              }
               onClick={shareAnswer}
             >
-              {message === 'Shared.' ? 'Shared ✓' : 'Share'}
+              {message === 'Shared.'
+                ? 'Shared ✓'
+                : message === 'Share link copied.'
+                  ? 'Link copied ✓'
+                  : 'Share'}
             </button>
             <button
               type="button"
@@ -15440,6 +15464,7 @@ function ResultActions({
         {message &&
         message !== 'Copied.' &&
         message !== 'Link copied.' &&
+        message !== 'Share link copied.' &&
         message !== 'Shared.' &&
         message !== 'Calendar file created.' ? (
           <span aria-live="polite">{message}</span>
@@ -15449,7 +15474,9 @@ function ResultActions({
               ? 'Result copied.'
               : message === 'Link copied.'
                 ? 'Link copied.'
-                : message === 'Shared.'
+                : message === 'Share link copied.'
+                  ? 'Share unavailable. Link copied instead.'
+                  : message === 'Shared.'
                   ? 'Shared.'
                   : message === 'Calendar file created.'
                     ? 'Calendar ready.'
