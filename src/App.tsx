@@ -18229,9 +18229,7 @@ function formatReturnWindowExplanation(
   windowDays: number,
   deadline: PlainDate,
 ) {
-  const dayWord = windowDays === 1 ? 'day' : 'days'
-
-  return `A ${windowDays}-${dayWord} return window starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(deadline)}. This calculator counts calendar days and does not automatically extend the deadline for weekends or public holidays unless the retailer's policy says otherwise.`
+  return `A ${windowDays}-day return window starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(deadline)}. This calculator counts calendar days and does not automatically extend the deadline for weekends or public holidays unless the retailer's policy says otherwise.`
 }
 
 function formatFreeTrialExplanation(
@@ -18239,9 +18237,7 @@ function formatFreeTrialExplanation(
   trialDays: number,
   endDate: PlainDate,
 ) {
-  const dayWord = trialDays === 1 ? 'day' : 'days'
-
-  return `A ${trialDays}-${dayWord} trial starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(endDate)} using calendar-day counting. The actual cancellation cutoff can depend on the service's billing terms, time zone, and whether the start date counts as day one.`
+  return `A ${trialDays}-day trial starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(endDate)} using calendar-day counting. The actual cancellation cutoff can depend on the service's billing terms, time zone, and whether the start date counts as day one.`
 }
 
 function formatPaydayExplanation(
