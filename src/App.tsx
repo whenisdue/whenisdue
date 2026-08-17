@@ -15483,10 +15483,14 @@ function ResultActions({
               </button>
               <button
                 type="button"
-                className="result-action-secondary"
+                className={`result-action-secondary ${
+                  message === 'Calendar file created.' ? 'is-action-confirmed' : ''
+                }`}
                 onClick={addToCalendar}
               >
-                Add to calendar
+                {message === 'Calendar file created.'
+                  ? 'Calendar ready ✓'
+                  : 'Add to calendar'}
               </button>
             </div>
 
@@ -15508,7 +15512,13 @@ function ResultActions({
                 >
                   {message === 'Link copied.' ? 'Link copied ✓' : 'Copy link'}
                 </button>
-                <button type="button" onClick={shareAnswer}>Share</button>
+                <button
+                  type="button"
+                  className={message === 'Shared.' ? 'is-action-confirmed' : ''}
+                  onClick={shareAnswer}
+                >
+                  {message === 'Shared.' ? 'Shared ✓' : 'Share'}
+                </button>
               </div>
             </details>
           </>
@@ -15520,7 +15530,7 @@ function ResultActions({
               onClick={toggleFavorite}
               aria-pressed={isFavorite}
             >
-              {isFavorite ? 'Favorited' : 'Favorite'}
+              {isFavorite ? 'Favorited ✓' : 'Favorite'}
             </button>
             <button
               type="button"
@@ -15537,16 +15547,44 @@ function ResultActions({
             >
               {message === 'Link copied.' ? 'Link copied ✓' : 'Copy link'}
             </button>
-            <button type="button" onClick={shareAnswer}>Share</button>
-            <button type="button" onClick={addToCalendar}>Add to calendar</button>
+            <button
+              type="button"
+              className={message === 'Shared.' ? 'is-action-confirmed' : ''}
+              onClick={shareAnswer}
+            >
+              {message === 'Shared.' ? 'Shared ✓' : 'Share'}
+            </button>
+            <button
+              type="button"
+              className={
+                message === 'Calendar file created.' ? 'is-action-confirmed' : ''
+              }
+              onClick={addToCalendar}
+            >
+              {message === 'Calendar file created.'
+                ? 'Calendar ready ✓'
+                : 'Add to calendar'}
+            </button>
           </>
         )}
 
-        {message && message !== 'Copied.' ? (
+        {message &&
+        message !== 'Copied.' &&
+        message !== 'Link copied.' &&
+        message !== 'Shared.' &&
+        message !== 'Calendar file created.' ? (
           <span aria-live="polite">{message}</span>
         ) : (
           <span className="sr-only" aria-live="polite">
-            {message === 'Copied.' ? 'Result copied.' : ''}
+            {message === 'Copied.'
+              ? 'Result copied.'
+              : message === 'Link copied.'
+                ? 'Link copied.'
+                : message === 'Shared.'
+                  ? 'Shared.'
+                  : message === 'Calendar file created.'
+                    ? 'Calendar ready.'
+                    : ''}
           </span>
         )}
       </div>
