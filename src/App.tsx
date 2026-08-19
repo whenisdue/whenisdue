@@ -96,6 +96,7 @@ type RouteName =
   | 'start-date-count-guide'
   | 'weekends-business-days-guide'
   | 'public-holidays-business-days-guide'
+  | 'how-long-business-days-guide'
   | 'shipping-delivery-range'
   | 'two-ten-net-30'
   | 'notice-period'
@@ -195,6 +196,10 @@ function App() {
 
   if (route === 'public-holidays-business-days-guide') {
     return <PublicHolidaysBusinessDaysGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'how-long-business-days-guide') {
+    return <HowLongBusinessDaysGuidePage onNavigate={navigate} />
   }
 
   if (route === 'shipping-delivery-range') {
@@ -3128,6 +3133,584 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
     </main>
   )
 }
+
+function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
+  const quickReference = [
+    ['1', '1–3 calendar days'],
+    ['2', '2–4 calendar days'],
+    ['3', '3–5 calendar days'],
+    ['5', 'About 1 week'],
+    ['7', 'About 1½ weeks'],
+    ['10', 'About 2 weeks'],
+    ['15', 'About 3 weeks'],
+    ['20', 'About 4 weeks'],
+    ['30', 'About 6 weeks'],
+  ] as const
+
+  return (
+    <main className="page-shell business-length-page">
+      <header className="business-length-header" aria-label="WhenIsDue navigation">
+        <a
+          className="business-length-brand"
+          href="/"
+          aria-label="WhenIsDue home"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/')
+          }}
+        >
+          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
+        </a>
+      </header>
+
+      <article className="business-length-shell">
+        <section className="business-length-hero">
+          <p className="business-length-eyebrow">Business-day guide</p>
+          <h1>How long are business days?</h1>
+
+          <strong className="business-length-answer">
+            Business days usually mean Monday through Friday.
+          </strong>
+
+          <p className="business-length-summary">
+            Weekends are skipped. Public holidays may also be excluded,
+            depending on the rule, company, or country.
+          </p>
+
+          <div className="business-length-bam" aria-label="Common business-day lengths">
+            <span><b>5 business days</b> is usually one workweek.</span>
+            <span><b>10 business days</b> is usually two workweeks.</span>
+          </div>
+        </section>
+
+        <section
+          className="business-length-reference"
+          aria-labelledby="business-length-reference-title"
+        >
+          <div className="business-length-reference-heading">
+            <p className="business-length-section-eyebrow">Quick reference</p>
+            <h2 id="business-length-reference-title">
+              1 to 30 business days
+            </h2>
+          </div>
+
+          <div className="business-length-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Business days</th>
+                  <th scope="col">Rough calendar time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quickReference.map(([days, roughTime]) => (
+                  <tr key={days}>
+                    <th scope="row">{days}</th>
+                    <td>{roughTime}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="business-length-note">
+            These are rough estimates for a Monday–Friday workweek. The exact
+            date depends on the start date, weekends, holidays, and whether the
+            starting day counts.
+          </p>
+
+          <a
+            className="business-length-cta"
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('authority_guide_calculator_click', {
+                guide: 'how_long_business_days',
+              })
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            Need the exact date? Use the Business Days Calculator
+          </a>
+        </section>
+
+        <section className="business-length-explainers" aria-label="Common business-day questions">
+          <article>
+            <h2>How long is 3 business days?</h2>
+            <p>
+              Three business days means three qualifying weekdays. For example,
+              if the count starts after Friday, Monday is day 1, Tuesday is day
+              2, and Wednesday is day 3.
+            </p>
+          </article>
+
+          <article>
+            <h2>How long is 5 business days?</h2>
+            <p>
+              Five business days is one full workweek of qualifying weekdays.
+              The elapsed calendar wait can be longer when a weekend falls
+              between the start date and the result.
+            </p>
+          </article>
+
+          <article>
+            <h2>How long is 10 business days?</h2>
+            <p>
+              Ten business days is usually about two workweeks. Holidays can
+              extend the calendar wait if the rule says those holidays do not
+              count as business days.
+            </p>
+          </article>
+
+          <article>
+            <h2>Do weekends count as business days?</h2>
+            <p>
+              Usually no. Under WhenIsDue’s standard business-day schedule,
+              Saturday and Sunday are skipped.
+            </p>
+            <a
+              href="/do-weekends-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-weekends-count-as-business-days')
+              }}
+            >
+              See the weekend rule
+            </a>
+          </article>
+
+          <article>
+            <h2>Do public holidays count?</h2>
+            <p>
+              It depends on the rule you are following. Weekends and holidays
+              are separate rules, so a weekday holiday can still count unless
+              the applicable calendar says to exclude it.
+            </p>
+            <a
+              href="/do-public-holidays-count-as-business-days"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/do-public-holidays-count-as-business-days')
+              }}
+            >
+              See how holidays affect business days
+            </a>
+          </article>
+
+          <article>
+            <h2>Does the starting day count?</h2>
+            <p>
+              It depends on the wording. “5 business days after” normally
+              treats the starting date as the reference date. Other rules can
+              explicitly count it as day 1.
+            </p>
+            <a
+              href="/does-the-start-date-count"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/does-the-start-date-count')
+              }}
+            >
+              Compare day 0 vs day 1
+            </a>
+          </article>
+        </section>
+
+        <section className="business-length-bottom">
+          <div>
+            <p className="business-length-section-eyebrow">Exact date</p>
+            <h2>Know the start date?</h2>
+            <p>
+              Enter it once and WhenIsDue will skip weekends automatically.
+              Add a supported holiday calendar only when your rule requires it.
+            </p>
+          </div>
+
+          <a
+            href="/business-days-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              trackWhenIsDueEvent('authority_guide_calculator_click', {
+                guide: 'how_long_business_days_bottom',
+              })
+              onNavigate('/business-days-calculator')
+            }}
+          >
+            Open Business Days Calculator
+          </a>
+        </section>
+      </article>
+
+      <SiteFooter
+        onNavigate={onNavigate}
+        planningNote="Business-day definitions can vary. Use the schedule and holiday rules that actually apply to your deadline."
+      />
+
+      <style>{`
+        .business-length-page {
+          --length-ink: #153654;
+          --length-muted: #667b8e;
+          --length-accent: #2d7b64;
+          --length-field: #e8eee0;
+          --length-field-soft: #f3f5ed;
+          min-height: 100vh;
+          background: #fffaf2;
+        }
+
+        .business-length-header {
+          width: min(100% - 32px, 1080px);
+          min-height: 82px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.12);
+        }
+
+        .business-length-brand {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+        }
+
+        .business-length-brand img {
+          display: block;
+          width: 176px;
+          height: auto;
+        }
+
+        .business-length-shell {
+          width: min(100% - 32px, 1080px);
+          margin: 22px auto 0;
+          padding-bottom: 64px;
+        }
+
+        .business-length-hero {
+          padding: clamp(38px, 5vw, 60px) clamp(24px, 6vw, 68px) 36px;
+          border: 1px solid rgba(71, 91, 51, 0.12);
+          border-radius: 28px;
+          background: var(--length-field);
+          text-align: center;
+        }
+
+        .business-length-eyebrow,
+        .business-length-section-eyebrow {
+          margin: 0;
+          color: var(--length-accent);
+          font-size: 0.8rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .business-length-hero h1 {
+          max-width: 900px;
+          margin: 10px auto 0;
+          color: var(--length-ink);
+          font-size: clamp(3rem, 6vw, 5.3rem);
+          line-height: 0.97;
+          letter-spacing: -0.05em;
+          text-wrap: balance;
+        }
+
+        .business-length-answer {
+          display: block;
+          max-width: 850px;
+          margin: 28px auto 0;
+          color: var(--length-ink);
+          font-size: clamp(2rem, 4vw, 3.45rem);
+          line-height: 1.04;
+          letter-spacing: -0.04em;
+          text-wrap: balance;
+        }
+
+        .business-length-summary {
+          max-width: 760px;
+          margin: 16px auto 0;
+          color: #46677b;
+          font-size: clamp(1.08rem, 2vw, 1.35rem);
+          line-height: 1.45;
+        }
+
+        .business-length-bam {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          max-width: 780px;
+          margin: 22px auto 0;
+        }
+
+        .business-length-bam span {
+          padding: 14px 16px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.68);
+          color: #5d7387;
+          font-size: 0.95rem;
+          line-height: 1.4;
+        }
+
+        .business-length-bam b {
+          color: var(--length-ink);
+        }
+
+        .business-length-reference {
+          margin-top: 16px;
+          padding: 22px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 22px;
+          background: var(--length-field-soft);
+        }
+
+        .business-length-reference-heading {
+          text-align: center;
+        }
+
+        .business-length-reference-heading h2,
+        .business-length-bottom h2 {
+          margin: 6px 0 0;
+          color: var(--length-ink);
+          font-size: clamp(1.6rem, 3vw, 2.35rem);
+          letter-spacing: -0.03em;
+        }
+
+        .business-length-table-wrap {
+          max-width: 720px;
+          margin: 18px auto 0;
+          overflow: hidden;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 16px;
+          background: #fff;
+        }
+
+        .business-length-table-wrap table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .business-length-table-wrap th,
+        .business-length-table-wrap td {
+          padding: 13px 16px;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.07);
+          text-align: left;
+        }
+
+        .business-length-table-wrap thead th {
+          background: #eef3e8;
+          color: #49657b;
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        .business-length-table-wrap tbody th {
+          width: 40%;
+          color: var(--length-ink);
+          font-size: 1rem;
+          font-weight: 950;
+        }
+
+        .business-length-table-wrap tbody td {
+          color: #5f7488;
+        }
+
+        .business-length-table-wrap tr:last-child th,
+        .business-length-table-wrap tr:last-child td {
+          border-bottom: 0;
+        }
+
+        .business-length-note {
+          max-width: 720px;
+          margin: 13px auto 0;
+          color: var(--length-muted);
+          font-size: 0.88rem;
+          line-height: 1.5;
+          text-align: center;
+        }
+
+        .business-length-cta {
+          width: fit-content;
+          min-height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 18px auto 0;
+          padding: 10px 18px;
+          border-radius: 11px;
+          background: #267357;
+          color: #fff;
+          font-weight: 900;
+          text-align: center;
+          text-decoration: none;
+        }
+
+        .business-length-explainers {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 24px;
+        }
+
+        .business-length-explainers article {
+          padding: 20px;
+          border: 1px solid rgba(21, 54, 84, 0.08);
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .business-length-explainers h2 {
+          margin: 0;
+          color: var(--length-ink);
+          font-size: 1.12rem;
+        }
+
+        .business-length-explainers p {
+          margin: 8px 0 0;
+          color: #62778c;
+          font-size: 0.95rem;
+          line-height: 1.58;
+        }
+
+        .business-length-explainers a {
+          display: inline-flex;
+          margin-top: 10px;
+          color: #2d6d5a;
+          font-size: 0.9rem;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        .business-length-bottom {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 20px;
+          align-items: center;
+          margin-top: 26px;
+          padding: 22px 24px;
+          border: 1px solid rgba(21, 54, 84, 0.1);
+          border-radius: 22px;
+          background: #edf2e8;
+        }
+
+        .business-length-bottom p:not(.business-length-section-eyebrow) {
+          max-width: 650px;
+          margin: 8px 0 0;
+          color: #61768a;
+          line-height: 1.5;
+        }
+
+        .business-length-bottom > a {
+          min-height: 48px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 16px;
+          border-radius: 11px;
+          background: #fff;
+          color: #2c5f50;
+          font-weight: 900;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        @media (max-width: 720px) {
+          .business-length-header {
+            width: min(100% - 24px, 680px);
+            min-height: 76px;
+          }
+
+          .business-length-brand img {
+            width: 154px;
+          }
+
+          .business-length-shell {
+            width: min(100% - 24px, 680px);
+            margin-top: 12px;
+          }
+
+          .business-length-hero {
+            padding: 24px 20px 22px;
+            border-radius: 24px;
+            text-align: left;
+          }
+
+          .business-length-hero h1 {
+            margin-top: 8px;
+            font-size: clamp(2.35rem, 10.5vw, 3.45rem);
+          }
+
+          .business-length-answer {
+            margin: 20px 0 0;
+            font-size: clamp(1.8rem, 8.1vw, 2.6rem);
+            line-height: 1.04;
+          }
+
+          .business-length-summary {
+            margin: 13px 0 0;
+            font-size: 1rem;
+          }
+
+          .business-length-bam {
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 16px;
+          }
+
+          .business-length-bam span {
+            padding: 11px 13px;
+            font-size: 0.9rem;
+          }
+
+          .business-length-reference {
+            padding: 16px;
+            border-radius: 20px;
+          }
+
+          .business-length-reference-heading {
+            text-align: left;
+          }
+
+          .business-length-table-wrap th,
+          .business-length-table-wrap td {
+            padding: 11px 12px;
+          }
+
+          .business-length-note {
+            text-align: left;
+          }
+
+          .business-length-cta {
+            width: 100%;
+          }
+
+          .business-length-explainers {
+            grid-template-columns: 1fr;
+            gap: 9px;
+            margin-top: 18px;
+          }
+
+          .business-length-explainers article {
+            padding: 18px;
+          }
+
+          .business-length-bottom {
+            grid-template-columns: 1fr;
+            gap: 14px;
+            padding: 18px;
+          }
+
+          .business-length-bottom > a {
+            width: 100%;
+            white-space: normal;
+            text-align: center;
+          }
+        }
+      `}</style>
+    </main>
+  )
+}
+
+
 function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
   const [startDate, setStartDate] = useState(() =>
     getInitialDateQueryParam('start', todayInputValue()),
@@ -22980,6 +23563,10 @@ function getRouteFromPath(pathname: string): RouteName {
     return 'public-holidays-business-days-guide'
   }
 
+  if (pathname === '/how-long-are-business-days') {
+    return 'how-long-business-days-guide'
+  }
+
   if (pathname === '/shipping-delivery-range-calculator') {
     return 'shipping-delivery-range'
   }
@@ -23245,6 +23832,16 @@ function getRouteMetadata(route: RouteName): RouteMetadata {
       openGraphDescription: 'Learn how public holidays affect business-day deadlines with a clear US Labor Day example.',
       twitterDescription: 'Do public holidays count as business days? See when they count, when they are skipped, and why the calendar matters.',
       path: '/do-public-holidays-count-as-business-days',
+    }
+  }
+
+  if (route === 'how-long-business-days-guide') {
+    return {
+      title: 'How Long Are Business Days? 1–30 Business Days Explained | WhenIsDue',
+      description: 'See how long 1, 3, 5, 10, 20 or 30 business days usually take in calendar time, why weekends change the wait, and when holidays can extend it.',
+      openGraphDescription: 'See how long common business-day periods usually take and use the Business Days Calculator for the exact date.',
+      twitterDescription: 'How long are 3, 5, 10 or 30 business days? See the quick answer and calculate the exact date.',
+      path: '/how-long-are-business-days',
     }
   }
 
@@ -23685,6 +24282,24 @@ function getRouteStructuredData(
           '@type': 'Thing',
           name: 'Deadline counting',
         },
+      ],
+    }
+  }
+
+  if (route === 'how-long-business-days-guide') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      name: 'How Long Are Business Days?',
+      url: canonicalUrl,
+      description: metadata.description,
+      isPartOf: websiteReference,
+      publisher: organizationReference,
+      about: [
+        { '@type': 'Thing', name: 'Business days' },
+        { '@type': 'Thing', name: 'Working days' },
+        { '@type': 'Thing', name: 'Calendar days' },
       ],
     }
   }
