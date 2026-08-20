@@ -2674,25 +2674,20 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
   )
 }
 function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
-  const friday = parsePlainDate('2026-09-04')!
-  const noHolidayCalendar = calculateDeadlineByRule({
-    triggerDate: friday,
-    duration: 1,
-    direction: 'after',
-    unit: 'business-days',
-    startDayConvention: 'exclude-trigger',
-    holidayCalendar: 'none',
-    endDayAdjustment: 'none',
-  })
-  const usHolidayCalendar = calculateDeadlineByRule({
-    triggerDate: friday,
-    duration: 1,
-    direction: 'after',
-    unit: 'business-days',
-    startDayConvention: 'exclude-trigger',
-    holidayCalendar: 'us',
-    endDayAdjustment: 'none',
-  })
+  // Keep this authority-page example deterministic and render-safe.
+  // Starting Friday, September 4, 2026:
+  // - with no holiday calendar, Monday, September 7 is the next business day;
+  // - with US federal holidays excluded, Labor Day is skipped and Tuesday,
+  //   September 8 is the next business day.
+  //
+  // The interactive calculators remain the source for user-specific
+  // calculations. This guide only needs a fixed, trustworthy example.
+  const noHolidayCalendar = {
+    answerDate: parsePlainDate('2026-09-07')!,
+  }
+  const usHolidayCalendar = {
+    answerDate: parsePlainDate('2026-09-08')!,
+  }
 
   return (
     <main className="page-shell holidays-zero-page">
