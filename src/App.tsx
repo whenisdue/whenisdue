@@ -11085,8 +11085,8 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .date-home-intent-query {
           display: -webkit-box;
-          height: 76px;
-          min-height: 76px;
+          height: 118px;
+          min-height: 118px;
           margin-top: 12px;
           overflow: hidden;
           -webkit-box-orient: vertical;
@@ -11315,8 +11315,8 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-intent-panel {
-            min-height: 272px;
-            height: 272px;
+            min-height: 300px;
+            height: 300px;
             place-items: start stretch;
             padding: 12px 15px 14px;
             overflow: hidden;
@@ -11343,10 +11343,10 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-intent-query {
-            height: 50px;
-            min-height: 50px;
+            height: 64px;
+            min-height: 64px;
             margin-top: 7px;
-            font-size: clamp(1.6rem, 7.5vw, 2.2rem);
+            font-size: clamp(1.55rem, 7vw, 1.95rem);
             line-height: 1;
             -webkit-line-clamp: 2;
           }
