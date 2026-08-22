@@ -2,11 +2,21 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.whenisdue.com/</loc>
-    <lastmod>2026-08-07</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/calculators</loc>
-    <lastmod>2026-08-06</lastmod>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/business-days-calculator</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/business-days-between-dates</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/business-hours-deadline-calculator</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/next-payday-calculator</loc>
   </url>
   <url>
     <loc>https://www.whenisdue.com/deadline-calculator</loc>
@@ -18,127 +28,93 @@
     <loc>https://www.whenisdue.com/do-weekends-count-as-business-days</loc>
   </url>
   <url>
-    <loc>https://www.whenisdue.com/business-days-calculator</loc>
-    <lastmod>2026-08-07</lastmod>
+    <loc>https://www.whenisdue.com/do-public-holidays-count-as-business-days</loc>
   </url>
   <url>
-    <loc>https://www.whenisdue.com/business-days-between-dates</loc>
-    <lastmod>2026-08-08</lastmod>
+    <loc>https://www.whenisdue.com/how-long-are-business-days</loc>
   </url>
   <url>
-    <loc>https://www.whenisdue.com/business-hours-deadline-calculator</loc>
-    <lastmod>2026-08-08</lastmod>
+    <loc>https://www.whenisdue.com/shipping-delivery-range-calculator</loc>
   </url>
   <url>
-    <loc>https://www.whenisdue.com/next-payday-calculator</loc>
-    <lastmod>2026-08-08</lastmod>
+    <loc>https://www.whenisdue.com/2-10-net-30-calculator</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/notice-period-calculator</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/subscription-renewal-calculator</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/what-does-within-days-mean</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/net-30-vs-30-days</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/what-if-a-deadline-falls-on-a-weekend</loc>
   </url>
   <url>
     <loc>https://www.whenisdue.com/3-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
-  </url>
-  <url>
-    <loc>https://www.whenisdue.com/5-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
-  </url>
-  <url>
-    <loc>https://www.whenisdue.com/7-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
-  </url>
-  <url>
-    <loc>https://www.whenisdue.com/10-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/4-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/5-business-days-from-today</loc>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/7-business-days-from-today</loc>
   </url>
   <url>
     <loc>https://www.whenisdue.com/8-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
+  </url>
+  <url>
+    <loc>https://www.whenisdue.com/10-business-days-from-today</loc>
   </url>
   <url>
     <loc>https://www.whenisdue.com/20-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/30-business-days-from-today</loc>
-    <lastmod>2026-08-07</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/free-trial-calculator</loc>
-    <lastmod>2026-08-06</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/return-window-calculator</loc>
-    <lastmod>2026-08-06</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/invoice-due-date-calculator</loc>
-    <lastmod>2026-08-06</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/net-7-due-date</loc>
-    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/net-15-due-date</loc>
-    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/net-30-due-date</loc>
-    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/net-45-due-date</loc>
-    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/net-60-due-date</loc>
-    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/net-90-due-date</loc>
-    <lastmod>2026-08-08</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/about</loc>
-    <lastmod>2026-08-06</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/privacy</loc>
-    <lastmod>2026-08-06</lastmod>
   </url>
   <url>
-  <loc>https://www.whenisdue.com/do-public-holidays-count-as-business-days</loc>
-</url>
-<url>
-  <loc>https://www.whenisdue.com/notice-period-calculator</loc>
-</url>
-<url>
-  <loc>https://www.whenisdue.com/shipping-delivery-range-calculator</loc>
-</url>
-<url>
-  <loc>https://www.whenisdue.com/subscription-renewal-calculator</loc>
-</url>
-<url>
-  <loc>https://www.whenisdue.com/2-10-net-30-calculator</loc>
-</url>
-<url>
-  <loc>https://www.whenisdue.com/what-does-within-days-mean</loc>
-</url>
-<url>
-  <loc>https://www.whenisdue.com/what-if-a-deadline-falls-on-a-weekend</loc>
-</url>
-<url>
-  <loc>https://www.whenisdue.com/net-30-vs-30-days</loc>
-</url>
-  <url>
     <loc>https://www.whenisdue.com/terms</loc>
-    <lastmod>2026-08-06</lastmod>
   </url>
   <url>
     <loc>https://www.whenisdue.com/contact</loc>
-    <lastmod>2026-08-06</lastmod>
   </url>
 </urlset>
