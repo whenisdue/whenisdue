@@ -68,7 +68,7 @@ for (const [routePath, route] of Object.entries(ROUTE_PATH_TO_NAME)) {
   const expectedCanonical = `${SITE_ORIGIN}${metadata.path}`
   const title = decodeHtml(getTag(html, /<title>([\s\S]*?)<\/title>/i))
   const description = decodeHtml(
-    getTag(html, /<meta\s+name=["']description["']\s+content=["']([^"']*)["'][^>]*>/i),
+    getTag(html, /<meta\s+name=["\']description["\']\s+content="([^"]*)"[^>]*>/i),
   )
   const canonical = getTag(
     html,
