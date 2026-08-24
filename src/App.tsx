@@ -23949,32 +23949,40 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         {
           title: 'What WhenIsDue does',
           paragraphs: [
-            'WhenIsDue is a daily client-action workspace for virtual assistants. It organizes tasks, deadlines, waiting items, and follow-ups into one clear queue. Free deadline calculators remain available as supporting tools.',
+            'WhenIsDue helps answer date and deadline questions quickly and clearly: when an invoice is due, what date falls a certain number of business days away, when a return window ends, when a trial expires, and other common time-based questions.',
+            'The goal is simple: show the answer first, then make the rules and assumptions behind that answer easy to understand.',
           ],
         },
         {
-          title: 'Two different storage models',
+          title: 'How the answers are calculated',
           paragraphs: [
-            'The public calculators can be used without an account. Dates saved from the calculators remain in the browser on that device.',
-            'The VA Workspace requires an account. Its client and task records are stored in a private cloud workspace so they can be accessed after signing in on another supported device or browser.',
+            'WhenIsDue uses deterministic date calculations rather than guessing a date. The same inputs and rules are intended to produce the same result every time.',
+            'When wording or counting rules can change the answer, WhenIsDue aims to make that uncertainty visible instead of silently choosing an interpretation for you.',
+          ],
+        },
+        {
+          title: 'Built for clarity',
+          paragraphs: [
+            'Many date questions sound simple but depend on details such as whether the start date counts, whether weekends are skipped, which public holidays apply, or whether a final date should move to another business day.',
+            'WhenIsDue is designed to keep those details explicit while keeping the main answer fast and easy to reach.',
           ],
         },
         {
           title: 'Independent service',
           paragraphs: [
-            'WhenIsDue is operated independently under the name WhenIsDue. It is not affiliated with Supabase or with any government, legal, financial, medical, school, employer, retailer, or service provider.',
+            'WhenIsDue is a small independent project. It is not affiliated with the governments, courts, employers, retailers, financial institutions, carriers, service providers, or other organizations whose dates or deadlines you may be calculating.',
           ],
         },
         {
           title: 'Important reminder',
           paragraphs: [
-            'Calculations and workspace information are provided for organization and planning. Verify important deadlines, appointments, policies, and obligations with the original or official source.',
+            'WhenIsDue is provided for general information and planning. For important legal, financial, employment, contractual, medical, school, or other official deadlines, verify the applicable rule and final date with the original or authoritative source.',
           ],
         },
         {
           title: 'Contact',
           paragraphs: [
-            `Questions, support requests, privacy requests, and account-deletion requests can be sent to ${contactEmail}.`,
+            `Questions, corrections, support requests, privacy requests, and account-deletion requests can be sent to ${contactEmail}.`,
           ],
         },
       ],
@@ -24002,8 +24010,8 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         {
           title: 'Optional answer feedback',
           paragraphs: [
-            'Some answer pages offer an optional Yes or Not quite feedback control. If you respond, WhenIsDue stores the page path, whether the answer satisfied your query, and one preset reason when you choose Not quite.',
-            'Answer-feedback records do not intentionally include calculator inputs, URL query parameters, account identifiers, or free-text notes. A small browser-storage marker may be used to avoid repeatedly asking for feedback on the same page for a limited period.',
+            'Some answer pages offer an optional Yes or Not quite feedback control. If you respond, WhenIsDue stores the page path, whether the answer satisfied your query, one preset reason when you choose Not quite, and the time the response was recorded.',
+            'Answer-feedback records do not intentionally include calculator inputs, URL query parameters, account identifiers, email addresses, or free-text notes. A small browser-storage marker may be used to avoid repeatedly asking for feedback on the same page for a limited period.',
           ],
         },
         {

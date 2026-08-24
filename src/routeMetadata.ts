@@ -418,8 +418,8 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
 
   if (route === 'about') {
     return {
-      title: 'About - WhenIsDue',
-      description: 'Learn what WhenIsDue does and how its simple due date calculators work.',
+      title: 'About WhenIsDue - Date & Deadline Answer Engine',
+      description: 'Learn how WhenIsDue gives clear, deterministic date and deadline answers while making important counting rules and assumptions visible.',
       path: '/about',
     }
   }
