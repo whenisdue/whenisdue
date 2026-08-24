@@ -65,6 +65,7 @@ import {
 } from './deadlineRuleProfileExperiment.ts'
 import { getWorkingSchedule } from './workingSchedules.ts'
 import { DeadlineProvenanceDetails } from './DeadlineProvenanceDetails.tsx'
+import AnswerFeedback from './AnswerFeedback.tsx'
 import {
   getRouteFromPath,
   getRouteMetadata,
@@ -893,6 +894,8 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           </section>
         ) : null}
 
+        <AnswerFeedback />
+
         <details className="deadline-rule-saved">
           <summary>Save or reuse this setup</summary>
           <div className="deadline-rule-saved-body">
@@ -1616,6 +1619,8 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
           </p>
         </section>
 
+        <AnswerFeedback />
+
         <section
           className="start-date-answer-example"
           aria-labelledby="start-date-answer-example-title"
@@ -2148,6 +2153,8 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
           </p>
         </header>
 
+        <AnswerFeedback />
+
         <section
           className="weekends-zero-example"
           aria-labelledby="weekends-zero-example-title"
@@ -2677,6 +2684,8 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
           </p>
         </header>
 
+        <AnswerFeedback />
+
         <section className="holidays-zero-example" aria-labelledby="holidays-example-title">
           <div className="holidays-zero-example-heading">
             <p className="holidays-zero-section-eyebrow">Quick example</p>
@@ -3138,6 +3147,8 @@ function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             <span><b>10 business days</b> is usually two workweeks.</span>
           </div>
         </section>
+
+        <AnswerFeedback />
 
         <section
           className="business-length-reference"
@@ -6320,6 +6331,8 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
           </p>
         </header>
 
+        <AnswerFeedback />
+
         <section className="within-zero-example" aria-labelledby="within-zero-example-title">
           <div className="within-zero-example-heading">
             <p className="within-zero-section-eyebrow">Same wording, two results</p>
@@ -6843,6 +6856,8 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
             tells you what it applies to.
           </p>
         </header>
+
+        <AnswerFeedback />
 
         <section className="net30-zero-compare" aria-labelledby="net30-zero-compare-title">
           <div className="net30-zero-compare-heading">
@@ -7394,6 +7409,8 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
             But only if the rule that created the deadline says it should.
           </p>
         </section>
+
+        <AnswerFeedback />
 
         <section className="weekend-zero-check" aria-label="Check a weekend deadline">
           <div className="weekend-zero-result" aria-live="polite">
@@ -16012,6 +16029,8 @@ function ResultActions({
         )}
       </div>
 
+      <AnswerFeedback />
+
       <style>{`
         .result-actions {
           display: flex;
@@ -16450,6 +16469,8 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           >
             {copyMessage ?? 'Copy result'}
           </button>
+
+          <AnswerFeedback />
 
           <details className="between-answer-details">
             <summary>Why this number?</summary>
@@ -23968,7 +23989,7 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         {
           title: 'Effective date',
           paragraphs: [
-            'This Privacy Policy is effective July 30, 2026. It explains how WhenIsDue handles information used by the public calculators and the VA Workspace.',
+            'This Privacy Policy is effective August 23, 2026. It explains how WhenIsDue handles information used by the public calculators, optional answer feedback, and the VA Workspace.',
           ],
         },
         {
@@ -23976,6 +23997,13 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
           paragraphs: [
             'The public due-date calculators do not require an account. Dates and labels that you choose to save through those calculators are stored in your browser on that device.',
             'Clearing browser data, using private browsing, changing browsers, or switching devices may remove or hide calculator records. These calculator records are separate from VA Workspace cloud records.',
+          ],
+        },
+        {
+          title: 'Optional answer feedback',
+          paragraphs: [
+            'Some answer pages offer an optional Yes or Not quite feedback control. If you respond, WhenIsDue stores the page path, whether the answer satisfied your query, and one preset reason when you choose Not quite.',
+            'Answer-feedback records do not intentionally include calculator inputs, URL query parameters, account identifiers, or free-text notes. A small browser-storage marker may be used to avoid repeatedly asking for feedback on the same page for a limited period.',
           ],
         },
         {
