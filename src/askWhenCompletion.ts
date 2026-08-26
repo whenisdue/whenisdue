@@ -187,6 +187,39 @@ function extractBusinessDays(query: string) {
   return match ? Number(match[1]) : null
 }
 
+type BusinessDayContext = {
+  direction: 'before' | 'after'
+  startDay: 'exclude-trigger' | 'unspecified'
+  holidayCalendar: 'none' | 'us'
+}
+
+function extractBusinessDayContext(query: string): BusinessDayContext {
+  const normalized = normalize(query)
+
+  const explicitBefore = /\bbefore\b/.test(normalized)
+  const explicitAfter = /\bafter\b/.test(normalized)
+
+  const hasUnresolvedStartWording =
+    !explicitBefore &&
+    !explicitAfter &&
+    (
+      /\bwithin\b/.test(normalized) ||
+      /\b(received|receipt|got this|got it|served|delivered|delivery)\b/.test(normalized)
+    )
+
+  const holidayCalendar =
+    /\b(?:us|u s|united states)\s+(?:federal\s+)?holidays?\b/.test(normalized) ||
+    /\bfederal holidays?\b/.test(normalized)
+      ? 'us'
+      : 'none'
+
+  return {
+    direction: explicitBefore ? 'before' : 'after',
+    startDay: hasUnresolvedStartWording ? 'unspecified' : 'exclude-trigger',
+    holidayCalendar,
+  }
+}
+
 function extractCalendarDays(query: string) {
   const normalized = normalize(query)
   const matches = [
@@ -346,6 +379,7 @@ export function resolveAskWhenCompletion(
 
   if (intent === 'business-days') {
     const days = extractBusinessDays(original)
+    const context = extractBusinessDayContext(original)
 
     if (!days) {
       return missing(
@@ -371,14 +405,41 @@ export function resolveAskWhenCompletion(
       )
     }
 
+    // The dedicated Business Days calculator is forward-only and assumes the
+    // start date is excluded. Route to the general deadline calculator when
+    // the user's wording requires a different direction or leaves start-day
+    // inclusion unresolved, so explicit input is never silently discarded.
+    if (context.direction === 'before' || context.startDay === 'unspecified') {
+      return {
+        kind: 'navigate',
+        path: buildPath('/deadline-calculator', {
+          date: dateKey,
+          days,
+          unit: 'business-days',
+          direction: context.direction,
+          startday: context.startDay,
+          calendar: context.holidayCalendar,
+        }),
+        label: `${days} business ${days === 1 ? 'day' : 'days'}`,
+        description:
+          context.startDay === 'unspecified'
+            ? 'Known details carried over; start-day counting remains explicitly unresolved.'
+            : 'Direction, start date, and day count carried over.',
+      }
+    }
+
     return {
       kind: 'navigate',
       path: buildPath('/business-days-calculator', {
         start: dateKey,
         days,
+        calendar: context.holidayCalendar === 'none' ? null : context.holidayCalendar,
       }),
       label: `${days} business ${days === 1 ? 'day' : 'days'}`,
-      description: 'Start date and day count carried over.',
+      description:
+        context.holidayCalendar === 'us'
+          ? 'Start date, day count, and US federal holiday calendar carried over.'
+          : 'Start date and day count carried over.',
     }
   }
 

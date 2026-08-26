@@ -188,4 +188,47 @@ export const completionQaCorpus = [
     "expectedKind": "navigate",
     "expectedPathContains": "/shipping-delivery-range-calculator"
   }
+,
+  {
+    "category": "business-days-direction-before",
+    "query": "30 business days before December 1",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/deadline-calculator?date=2026-12-01&days=30&unit=business-days&direction=before&startday=exclude-trigger&calendar=none"
+  },
+  {
+    "category": "business-days-startday-ambiguity",
+    "query": "got this aug 14 says reply within 7 business days when due",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/deadline-calculator?date=2026-08-14&days=7&unit=business-days&direction=after&startday=unspecified&calendar=none"
+  },
+  {
+    "category": "business-days-holiday-context",
+    "query": "10 business days after Aug 24 excluding US federal holidays",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/business-days-calculator?start=2026-08-24&days=10&calendar=us"
+  },
+  {
+    "category": "regression-control",
+    "query": "30 business days after December 1",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/business-days-calculator?start=2026-12-01&days=30"
+  },
+  {
+    "category": "regression-control",
+    "query": "7 business days from today",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/business-days-calculator?start=2026-08-26&days=7"
+  },
+  {
+    "category": "regression-control",
+    "query": "invoice aug 5 net30?",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/invoice-due-date-calculator?date=2026-08-05&term=net30"
+  },
+  {
+    "category": "regression-control",
+    "query": "3-5 business days shipping from August 10",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/shipping-delivery-range-calculator?start=2026-08-10&min=3&max=5&mode=business"
+  }
 ];

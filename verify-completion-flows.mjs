@@ -19,7 +19,7 @@ try {
 }
 
 const { resolveAskWhenCompletion } = mod
-const todayKey = '2026-08-17'
+const todayKey = '2026-08-26'
 
 let passed = 0
 const failures = []
@@ -47,6 +47,18 @@ for (const test of completionQaCorpus) {
     ok = false
     reasons.push(
       `path expected to include ${test.expectedPathContains}, got ${
+        result.kind === 'navigate' ? result.path : '(none)'
+      }`,
+    )
+  }
+
+  if (
+    test.expectedPathEquals &&
+    (result.kind !== 'navigate' || result.path !== test.expectedPathEquals)
+  ) {
+    ok = false
+    reasons.push(
+      `path expected exactly ${test.expectedPathEquals}, got ${
         result.kind === 'navigate' ? result.path : '(none)'
       }`,
     )
