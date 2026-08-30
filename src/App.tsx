@@ -15713,6 +15713,7 @@ type ResultActionsProps = {
   details?: string
   time?: string
   variant?: 'default' | 'return-window'
+  portableText?: string
 }
 
 function ResultActions({
@@ -15721,6 +15722,7 @@ function ResultActions({
   details,
   time,
   variant = 'default',
+  portableText,
 }: ResultActionsProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(() =>
@@ -15730,7 +15732,8 @@ function ResultActions({
     ),
   )
   const dateText = formatPlainDate(date)
-  const shareText = `${title}: ${dateText}${details ? ` — ${details}` : ''}`
+  const shareText =
+    portableText ?? `${title}: ${dateText}${details ? ` — ${details}` : ''}`
 
   useEffect(() => {
     const refreshFavoriteState = () => {
@@ -18814,19 +18817,63 @@ function formatNetTermExplanation(
   return `A Net ${dayCount} invoice dated ${formatPlainDate(invoiceDate)} is due ${dayCount} calendar days later, on ${formatPlainDate(dueDate)}. Weekends and public holidays do not automatically move the due date unless the invoice or contract says otherwise.`
 }
 
+type InvoiceAnswerStackCopy = {
+  understand: string
+  verify: string
+  portableCounting: string
+}
+
+function getInvoiceNetDayCount(term: InvoiceTerm): number | null {
+  if (term === 'eom') return null
+
+  const match = /^net(\d+)$/.exec(term)
+  if (!match) return null
+
+  const dayCount = Number(match[1])
+  return Number.isFinite(dayCount) && Number.isInteger(dayCount)
+    ? dayCount
+    : null
+}
+
+function getInvoiceAnswerStackCopy(
+  term: InvoiceTerm,
+): InvoiceAnswerStackCopy {
+  if (term === 'eom') {
+    return {
+      understand:
+        'EOM here means payment is due on the last calendar day of the invoice month.',
+      verify:
+        'No days are added. WhenIsDue does not automatically move that date for weekends or holidays.',
+      portableCounting: 'Last calendar day of the invoice month',
+    }
+  }
+
+  const dayCount = getInvoiceNetDayCount(term)
+
+  if (dayCount === null) {
+    return {
+      understand:
+        'This payment term is calculated from the invoice date.',
+      verify:
+        'Check the written invoice or agreement if it defines a different counting rule.',
+      portableCounting: 'Invoice-term calculation',
+    }
+  }
+
+  return {
+    understand: `${invoiceTermLabels[term]} is commonly used to mean payment is due ${dayCount} calendar ${dayCount === 1 ? 'day' : 'days'} after the invoice date.`,
+    verify: 'The invoice date is Day 0. Weekends and holidays count. No automatic weekend adjustment.',
+    portableCounting: `${dayCount} calendar ${dayCount === 1 ? 'day' : 'days'} after the invoice date (invoice date = day 0)`,
+  }
+}
+
 function formatInvoiceTermExplanation(
-  invoiceDate: PlainDate,
   term: InvoiceTerm,
   dueDate: PlainDate,
 ) {
-  if (term === 'eom') {
-    return `For an end-of-month term, an invoice dated ${formatPlainDate(invoiceDate)} is due on ${formatPlainDate(dueDate)}, the last calendar day of that invoice month. Weekend or holiday adjustments depend on the invoice or contract.`
-  }
+  const answerStack = getInvoiceAnswerStackCopy(term)
 
-  const match = /^net(\d+)$/.exec(term)
-  const dayCount = match ? Number(match[1]) : 0
-
-  return formatNetTermExplanation(invoiceDate, dayCount, dueDate)
+  return `${answerStack.understand} For this invoice, that produces ${formatPlainDate(dueDate)}. ${answerStack.verify}`
 }
 
 function formatReturnWindowExplanation(
@@ -19644,6 +19691,19 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
     ? daysBetween(parsedInvoiceDate, invoiceDueDate)
     : 0
   const canSave = Boolean(invoiceDueDate && parsedInvoiceDate && !validationMessage && !titleValidationMessage)
+  const answerStackCopy = parsedInvoiceDate
+    ? getInvoiceAnswerStackCopy(invoiceTerm)
+    : null
+  const portableInvoiceText =
+    invoiceDueDate && parsedInvoiceDate && answerStackCopy
+      ? [
+          `Invoice due: ${formatWeekday(invoiceDueDate)}, ${formatPlainDate(invoiceDueDate)}`,
+          `Terms: ${invoiceTermLabels[invoiceTerm]}`,
+          `Invoice date: ${formatPlainDate(parsedInvoiceDate)}`,
+          `Counting: ${answerStackCopy.portableCounting}`,
+          'whenisdue.com',
+        ].join('\n')
+      : undefined
 
   useEffect(() => {
     syncShareableQueryParams({ date: invoiceDate, term: invoiceTerm })
@@ -19712,9 +19772,16 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
                 <span className="invoice-answer-year">{invoiceDueDate.year}</span>
               </span>
             </strong>
-            <p className="invoice-answer-context">
-              {invoiceTermLabels[invoiceTerm]} · Invoice dated {formatPlainDate(parsedInvoiceDate)}
-            </p>
+            {answerStackCopy ? (
+              <div className="invoice-answer-stack" aria-label="Invoice term explanation">
+                <p className="invoice-answer-understand">
+                  <strong>What this means:</strong> {answerStackCopy.understand}
+                </p>
+                <p className="invoice-answer-verify">
+                  <strong>Rule used:</strong> {answerStackCopy.verify}
+                </p>
+              </div>
+            ) : null}
           </>
         ) : (
           <p className="invoice-answer-error">{validationMessage ?? 'Enter a valid invoice date.'}</p>
@@ -19776,12 +19843,13 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
             title="Invoice due date"
             date={invoiceDueDate}
             details={invoiceTermLabels[invoiceTerm]}
+            portableText={portableInvoiceText}
           />
 
           <details className="invoice-answer-detail-card">
             <summary>Why this date?</summary>
             <div className="invoice-answer-detail-body">
-              <p>{formatInvoiceTermExplanation(parsedInvoiceDate, invoiceTerm, invoiceDueDate)}</p>
+              <p>{formatInvoiceTermExplanation(invoiceTerm, invoiceDueDate)}</p>
               <CalculationReceipt
                 analyticsContext="invoice_due_date"
                 rows={[
@@ -20677,11 +20745,11 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
         }
 
         .invoice-answer-hero {
-          height: 432px;
+          height: 486px;
           box-sizing: border-box;
           overflow: hidden;
           margin-top: 22px;
-          padding: clamp(42px, 7vw, 72px) clamp(24px, 5vw, 58px) 34px;
+          padding: clamp(34px, 5vw, 52px) clamp(24px, 5vw, 58px) 28px;
           border: 1px solid rgba(112, 82, 42, 0.12);
           border-radius: 28px 28px 0 0;
           background: var(--invoice-answer-field);
@@ -20758,6 +20826,42 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
 
         .invoice-answer-error {
           color: #7b4a28;
+        }
+
+        .invoice-answer-stack {
+          display: grid;
+          align-content: start;
+          gap: 6px;
+          max-width: 760px;
+          min-height: 88px;
+          margin: 16px auto 0;
+          text-align: center;
+        }
+
+        .invoice-answer-stack p {
+          margin: 0;
+        }
+
+        .invoice-answer-understand {
+          color: #4f647a;
+          font-size: 0.9rem;
+          line-height: 1.45;
+        }
+
+        .invoice-answer-understand strong {
+          color: #27435f;
+          font-weight: 900;
+        }
+
+        .invoice-answer-verify {
+          color: #64788d;
+          font-size: 0.84rem;
+          line-height: 1.45;
+        }
+
+        .invoice-answer-verify strong {
+          color: #405d77;
+          font-weight: 900;
         }
 
         .invoice-answer-controls {
@@ -20911,9 +21015,9 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           }
 
           .invoice-answer-hero {
-            height: 340px;
+            height: 420px;
             margin-top: 14px;
-            padding: 28px 18px 22px;
+            padding: 24px 18px 20px;
             border-radius: 24px 24px 0 0;
             text-align: left;
           }
@@ -20959,6 +21063,22 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           .invoice-answer-context {
             margin-top: 16px;
             font-size: 0.9rem;
+          }
+
+          .invoice-answer-stack {
+            min-height: 104px;
+            margin: 14px 0 0;
+            text-align: left;
+          }
+
+          .invoice-answer-understand {
+            font-size: 0.84rem;
+            line-height: 1.4;
+          }
+
+          .invoice-answer-verify {
+            font-size: 0.8rem;
+            line-height: 1.4;
           }
 
           .invoice-answer-controls {
