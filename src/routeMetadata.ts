@@ -285,9 +285,9 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
   if (route === 'within-days-guide') {
     return {
       title: 'What Does “Within X Days” Mean? | WhenIsDue',
-      description: 'See why “within X days” can be ambiguous, compare before-versus-after interpretations, and calculate both possible dates.',
-      openGraphDescription: 'Understand “within X days” wording and compare both possible directions before relying on it as a deadline.',
-      twitterDescription: 'What does “within X days” mean? Compare the common interpretations and calculate both dates.',
+      description: 'What does “within X days” mean? See whether Day X is included, how Day 0 versus Day 1 changes the date, and how to calculate the exact deadline.',
+      openGraphDescription: 'See why Day X is usually the last day of the window, why the start date can change the calendar date, and how to compare both interpretations.',
+      twitterDescription: 'Does within 14 days include Day 14? See how the start-date rule changes the exact deadline.',
       path: '/what-does-within-days-mean',
     }
   }

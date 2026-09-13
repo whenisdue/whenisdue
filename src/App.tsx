@@ -6310,11 +6310,14 @@ function SubscriptionRenewalCalculatorPage({
   )
 }
 function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
-  const startDate = parsePlainDate('2026-08-10')!
+  const startDate = parsePlainDate('2026-09-01')!
 
-  const fiveCalendarDays = calculateDeadlineByRule({
+  const calculatorPath =
+    '/deadline-calculator?date=2026-09-01&days=14&unit=calendar-days&direction=after&startday=unspecified&source=within'
+
+  const fourteenCalendarDays = calculateDeadlineByRule({
     triggerDate: startDate,
-    duration: 5,
+    duration: 14,
     direction: 'after',
     unit: 'calendar-days',
     startDayConvention: 'exclude-trigger',
@@ -6322,9 +6325,9 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
     endDayAdjustment: 'none',
   })
 
-  const fiveCalendarDaysIncludingStart = calculateDeadlineByRule({
+  const fourteenCalendarDaysIncludingStart = calculateDeadlineByRule({
     triggerDate: startDate,
-    duration: 5,
+    duration: 14,
     direction: 'after',
     unit: 'calendar-days',
     startDayConvention: 'include-if-qualifying',
@@ -6351,14 +6354,18 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
       <article className="within-zero-shell">
         <header className="within-zero-hero">
           <p className="within-zero-eyebrow">Deadline wording guide</p>
-          <h1>What does “within 5 days” mean?</h1>
-          <strong className="within-zero-answer">It depends.</strong>
+          <h1>What does “within X days” mean?</h1>
+          <strong className="within-zero-answer">By the end of the X-day window.</strong>
           <p className="within-zero-summary">
-            Does the start date count as day one? That changes the answer.
+            If the window is 14 days, Day 14 is normally the final day you can
+            act. The calendar date of Day 14 depends on how the rule counts the
+            start date.
           </p>
           <p className="within-zero-caveat">
-            Use the wording in the contract, policy, law, or message that created
-            the deadline.
+            Check whether the source uses calendar or business days, what event
+            starts the clock, and whether a weekend or holiday changes the
+            deadline. If the wording is unclear, the source that created the
+            deadline controls.
           </p>
         </header>
 
@@ -6366,75 +6373,116 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 
         <section className="within-zero-example" aria-labelledby="within-zero-example-title">
           <div className="within-zero-example-heading">
-            <p className="within-zero-section-eyebrow">Same wording, two results</p>
+            <p className="within-zero-section-eyebrow">Day 14 is included; the start date is the variable</p>
             <h2 id="within-zero-example-title">
-              “Within 5 days of August 10, 2026”
+              “Within 14 days of September 1, 2026”
             </h2>
+            <p className="within-zero-example-note">
+              Calendar days · Day 14 is the final day of the defined window.
+            </p>
           </div>
 
           <div className="within-zero-example-grid">
             <article>
-              <span>Start date does not count</span>
+              <span>Start date is Day 0</span>
               <strong>
-                {fiveCalendarDays
-                  ? `${formatWeekday(fiveCalendarDays.answerDate)}, ${formatPlainDate(
-                      fiveCalendarDays.answerDate,
+                {fourteenCalendarDays
+                  ? `${formatWeekday(fourteenCalendarDays.answerDate)}, ${formatPlainDate(
+                      fourteenCalendarDays.answerDate,
                     )}`
                   : '—'}
               </strong>
-              <p>Counting starts on August 11.</p>
+              <p>Day 1 is September 2. Day 14 is September 15.</p>
             </article>
 
             <article className="is-including-start">
-              <span>Start date counts as day 1</span>
+              <span>Start date is Day 1</span>
               <strong>
-                {fiveCalendarDaysIncludingStart
+                {fourteenCalendarDaysIncludingStart
                   ? `${formatWeekday(
-                      fiveCalendarDaysIncludingStart.answerDate,
+                      fourteenCalendarDaysIncludingStart.answerDate,
                     )}, ${formatPlainDate(
-                      fiveCalendarDaysIncludingStart.answerDate,
+                      fourteenCalendarDaysIncludingStart.answerDate,
                     )}`
                   : '—'}
               </strong>
-              <p>August 10 is day one.</p>
+              <p>September 1 is Day 1. Day 14 is September 14.</p>
             </article>
           </div>
 
           <a
             className="within-zero-cta"
-            href="/deadline-calculator?date=2026-08-10&days=5&unit=calendar-days&direction=after"
+            href={calculatorPath}
             onClick={(event) => {
               event.preventDefault()
               trackWhenIsDueEvent('authority_guide_calculator_click', {
                 guide: 'within_days',
               })
-              onNavigate(
-                '/deadline-calculator?date=2026-08-10&days=5&unit=calendar-days&direction=after',
-              )
+              onNavigate(calculatorPath)
             }}
           >
-            Check your exact deadline
+            Compare both possible dates
           </a>
         </section>
 
         <section className="within-zero-details">
           <details>
-            <summary>Does “within” include the start date?</summary>
+            <summary>Does “within 14 days” include Day 14?</summary>
             <div>
               <p>
-                Not always. Some rules treat the triggering date as day zero;
-                others count it as day one. The original wording controls.
+                Usually, yes: Day 14 is the final day of a 14-day window, so
+                completing the action on Day 14 is different from completing it
+                on Day 15. The start-day rule still determines which calendar
+                date is Day 14.
               </p>
             </div>
           </details>
 
           <details>
-            <summary>Does “within 5 days” mean calendar or business days?</summary>
+            <summary>Does the start date count as Day 1?</summary>
             <div>
               <p>
-                If the wording only says “days,” it may mean calendar days, but
-                that is not universal. If it says “business days,” weekends are
-                normally skipped.
+                Sometimes. If the source says the event date is Day 1, count it.
+                If it treats the trigger as Day 0 or says to count after the
+                event, Day 1 is the next qualifying day. “Within” alone does not
+                settle that in every context.
+              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Are these calendar days or business days?</summary>
+            <div>
+              <p>
+                “Days” may mean calendar days, but the wording or governing
+                definition controls. Calendar days include weekends. “Business
+                days” use qualifying workdays, and holidays may also matter.
+                Use business days only when the source says so or defines them.
+              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>What event starts the clock?</summary>
+            <div>
+              <p>
+                Look for the event named in the rule, such as receipt, delivery,
+                notice, purchase, filing, or acceptance. If the source does not
+                clearly identify the trigger, do not guess which date starts the
+                window.
+              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>How are “within,” “from,” and “after” different?</summary>
+            <div>
+              <p>
+                “Within” sets a latest point inside a time window. “From” or
+                “after” identifies the reference date or event, but those words
+                alone may not settle whether that date is Day 0 or Day 1. Use
+                the definitions and counting rule in the source that created the
+                deadline.
               </p>
             </div>
           </details>
@@ -6449,23 +6497,12 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
               </p>
             </div>
           </details>
-
-          <details>
-            <summary>Why can one day change the answer?</summary>
-            <div>
-              <p>
-                Because counting the start date as day one shifts every later
-                day in the sequence. On short deadlines, that one-day difference
-                can materially change the result.
-              </p>
-            </div>
-          </details>
         </section>
 
         <section className="within-zero-related" aria-label="Related deadline wording guides">
           <div>
             <p className="within-zero-section-eyebrow">Related answers</p>
-            <h2>Need another counting rule?</h2>
+            <h2>Need to check another rule?</h2>
           </div>
 
           <nav>
@@ -6480,6 +6517,16 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
             </a>
 
             <a
+              href="/business-days-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/business-days-calculator')
+              }}
+            >
+              Business days calculator
+            </a>
+
+            <a
               href="/what-if-a-deadline-falls-on-a-weekend"
               onClick={(event) => {
                 event.preventDefault()
@@ -6490,13 +6537,13 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
             </a>
 
             <a
-              href="/deadline-calculator"
+              href={calculatorPath}
               onClick={(event) => {
                 event.preventDefault()
-                onNavigate('/deadline-calculator')
+                onNavigate(calculatorPath)
               }}
             >
-              Deadline calculator
+              Calculate an exact deadline
             </a>
           </nav>
         </section>
