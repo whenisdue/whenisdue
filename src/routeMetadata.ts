@@ -204,8 +204,8 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
 
   if (route === 'start-date-count-guide') {
     return {
-      title: 'Does the Start Date Count? Day 0 vs Day 1 Explained | WhenIsDue',
-      description: 'Learn when a deadline start date counts as day 1, when counting starts after it, and how ambiguous wording can produce two different due dates.',
+      title: 'Does the Start Date Count? First Day & Day 1 Explained | WhenIsDue',
+      description: 'Does the first day count in a deadline? Learn when the start date is Day 1, when counting begins after it, and how “from” or “within” wording changes the date.',
       openGraphDescription: 'See how day-zero and day-one deadline counting can produce different dates, with a clear worked example.',
       twitterDescription: 'Does the start date count? Compare day-zero and day-one deadline counting.',
       path: '/does-the-start-date-count',

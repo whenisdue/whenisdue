@@ -1664,7 +1664,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
               onNavigate(calculatorPath)
             }}
           >
-            Check your exact deadline
+            Compare both deadline dates
           </a>
         </section>
 
@@ -1701,6 +1701,19 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
               Including the start date can shift a calendar-day result by one
               day. With business days, weekends and selected holidays can make
               the difference look larger on the calendar.
+            </p>
+          </div>
+        </details>
+
+        <details className="start-date-answer-details">
+          <summary>What do “inclusive” and “exclusive” mean?</summary>
+          <div className="start-date-answer-detail-body">
+            <p>
+              <b>Inclusive</b> counting treats the start date as part of the
+              count, so it can be day 1. <b>Exclusive</b> counting leaves the
+              start date out and begins with the next qualifying day. These
+              labels describe the method; the wording of the rule still
+              controls which method applies.
             </p>
           </div>
         </details>
@@ -1756,6 +1769,15 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
               }}
             >
               Return window calculator
+            </a>
+            <a
+              href="/what-does-within-days-mean"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/what-does-within-days-mean')
+              }}
+            >
+              What does “within X days” mean?
             </a>
           </nav>
         </section>
