@@ -353,8 +353,8 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
 
   if (route === 'return-window') {
     return {
-      title: '30 Day Return Policy Calculator & Return Window Calculator | WhenIsDue',
-      description: 'Calculate the last day of a 30-day return policy or any custom return window from the purchase or delivery date. Supports 7, 14, 30, 60 and 90-day windows.',
+      title: '30 Day Return Policy Calculator | Find Your Last Return Date',
+      description: 'Find the last day to return an item under a 30-day return policy or custom return window. Use the purchase or delivery date and see the exact return deadline.',
       openGraphDescription: 'Calculate the last day of a 30-day return policy or any custom return window from the purchase or delivery date.',
       twitterDescription: 'Calculate the last day of a 30-day return policy or custom return window.',
       path: '/return-window-calculator',

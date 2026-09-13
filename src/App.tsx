@@ -1748,6 +1748,15 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
             >
               Business days calculator
             </a>
+            <a
+              href="/return-window-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/return-window-calculator')
+              }}
+            >
+              Return window calculator
+            </a>
           </nav>
         </section>
       </article>
@@ -7505,6 +7514,16 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
             }}
           >
             Do weekends count as business days?
+          </a>
+
+          <a
+            href="/return-window-calculator"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/return-window-calculator')
+            }}
+          >
+            Return window calculator
           </a>
         </nav>
       </section>
@@ -17911,6 +17930,18 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 {parsedReturnWindow}-day window · Starts{' '}
                 {formatPlainDate(parsedPurchaseDate)}
               </p>
+              <div className="return-answer-stack" aria-label="Return window explanation">
+                <p>
+                  <strong>What this means:</strong> A {parsedReturnWindow}-day
+                  return window starting {formatPlainDate(parsedPurchaseDate)}{' '}
+                  ends on {formatPlainDate(returnDeadline)}.
+                </p>
+                <p>
+                  <strong>Rule used:</strong> The start date counts as day 1.
+                  Calendar days count, including weekends and public holidays;
+                  the date is not moved automatically.
+                </p>
+              </div>
             </>
           ) : (
             <p className="return-answer-error">
@@ -18084,6 +18115,97 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         </p>
       </section>
 
+      <section
+        className="return-window-guide"
+        aria-labelledby="return-window-guide-title"
+      >
+        <header className="return-window-guide-heading">
+          <p>Return window basics</p>
+          <h2 id="return-window-guide-title">
+            How to find the last day to return an item
+          </h2>
+          <p className="return-window-guide-intro">
+            Use the date and counting rule named in the retailer&apos;s written
+            policy, then use the calculator above for the exact date.
+          </p>
+        </header>
+
+        <div className="return-window-guide-grid">
+          <article>
+            <h3>Does the purchase date count as day 1?</h3>
+            <p>
+              This calculator treats the selected start date as day 1. For
+              example, a 30-day return window beginning September 4, 2026 ends
+              October 3, 2026. If a policy says “30 days after purchase” or
+              starts counting the day after purchase, the retailer&apos;s result
+              may be one day later. Check the wording when that difference
+              matters. <a href="/does-the-start-date-count" onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/does-the-start-date-count')
+              }}>Read the day-one counting guide.</a>
+            </p>
+          </article>
+
+          <article>
+            <h3>Should I use the purchase date or delivery date?</h3>
+            <p>
+              Enter the date that the policy uses to start the return period.
+              Some stores start at purchase; shipped orders may start at
+              delivery or receipt. If you use the purchase date when the policy
+              starts at delivery, the calculated last day will be too early.
+            </p>
+          </article>
+
+          <article>
+            <h3>Do weekends count in a 30-day return period?</h3>
+            <p>
+              This page counts calendar days, so Saturdays, Sundays, and
+              public holidays count. It also leaves a weekend result in place;
+              it does not automatically extend the deadline to Monday. If the
+              policy includes a business-day or next-business-day rule, follow
+              that rule instead. <a href="/what-if-a-deadline-falls-on-a-weekend" onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/what-if-a-deadline-falls-on-a-weekend')
+              }}>See what a weekend deadline means.</a>
+            </p>
+          </article>
+
+          <article>
+            <h3>What if the policy says business days?</h3>
+            <p>
+              A 30-day calendar window and a 30-business-day window end on
+              different dates. This calculator uses calendar days, where every
+              date counts. A policy that says business days normally skips
+              non-working days, so do not substitute one rule for the other.
+              If the policy does not name the unit, ask the retailer before
+              relying on the date.
+            </p>
+          </article>
+
+          <article>
+            <h3>What must happen by the deadline?</h3>
+            <p>
+              A return policy may require you to start the return online,
+              postmark or hand over the package, or make sure the store
+              receives it. This calculator finds the date from the start date
+              and window you enter; the retailer&apos;s policy controls which
+              action completes the return.
+            </p>
+          </article>
+
+          <article>
+            <h3>Why does the retailer&apos;s policy still control?</h3>
+            <p>
+              The date alone does not decide whether an item is eligible for a
+              return. Final-sale, clearance, personalized-item, condition,
+              holiday-extension, or membership rules may change the policy.
+              Use the retailer&apos;s current written terms or the return-by date
+              shown in your order account when one is available.
+            </p>
+          </article>
+        </div>
+      </section>
+
       <nav className="return-answer-bottom-nav" aria-label="More WhenIsDue tools">
         <a
           href="/calculators"
@@ -18230,6 +18352,29 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           color: var(--return-muted);
           font-size: 1rem;
           font-weight: 700;
+        }
+
+        .return-answer-stack {
+          max-width: 760px;
+          margin-top: 18px;
+          padding-top: 14px;
+          border-top: 1px solid rgba(17, 51, 86, 0.1);
+        }
+
+        .return-answer-stack p {
+          margin: 0;
+          color: #587086;
+          font-size: 0.93rem;
+          line-height: 1.5;
+        }
+
+        .return-answer-stack p + p {
+          margin-top: 5px;
+        }
+
+        .return-answer-stack strong {
+          color: var(--return-ink);
+          font-weight: 900;
         }
 
         .return-answer-error {
@@ -18405,6 +18550,73 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           color: #6f4d16;
         }
 
+        .return-window-guide {
+          width: min(100% - 32px, 900px);
+          margin: 46px auto 0;
+          padding-top: 30px;
+          border-top: 1px solid rgba(17, 51, 86, 0.1);
+        }
+
+        .return-window-guide-heading > p:first-child {
+          margin: 0;
+          color: var(--return-accent);
+          font-size: 0.76rem;
+          font-weight: 950;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .return-window-guide-heading h2 {
+          margin: 8px 0 0;
+          color: var(--return-ink);
+          font-size: clamp(1.6rem, 3vw, 2.15rem);
+          line-height: 1.08;
+          letter-spacing: -0.035em;
+        }
+
+        .return-window-guide-intro {
+          display: block;
+          max-width: 700px;
+          margin-top: 10px;
+          color: var(--return-muted);
+          font-size: 0.96rem;
+          line-height: 1.55;
+        }
+
+        .return-window-guide-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 1px 28px;
+          margin-top: 22px;
+        }
+
+        .return-window-guide-grid article {
+          padding: 20px 0 18px;
+          border-top: 1px solid rgba(17, 51, 86, 0.1);
+        }
+
+        .return-window-guide-grid h3 {
+          margin: 0;
+          color: #36536d;
+          font-size: 1rem;
+          line-height: 1.25;
+        }
+
+        .return-window-guide-grid p {
+          margin: 8px 0 0;
+          color: #63798f;
+          font-size: 0.93rem;
+          line-height: 1.58;
+        }
+
+        .return-window-guide-grid a {
+          color: #286b59;
+          font-weight: 800;
+          text-decoration: underline;
+          text-decoration-color: rgba(40, 107, 89, 0.35);
+          text-underline-offset: 2px;
+        }
+
         .return-answer-bottom-nav {
           width: min(100% - 32px, 930px);
           margin: 18px auto 0;
@@ -18569,7 +18781,8 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           }
 
           .return-answer-details,
-          .return-policy-note {
+          .return-policy-note,
+          .return-window-guide {
             width: calc(100% - 24px);
           }
 
@@ -18587,6 +18800,17 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
           .return-answer-save .primary-button {
             width: 100%;
+          }
+
+          .return-window-guide {
+            margin-top: 34px;
+            padding-top: 24px;
+          }
+
+          .return-window-guide-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+            margin-top: 18px;
           }
         }
 
