@@ -7383,22 +7383,22 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
       ).date
     : null
 
-  const nextBusinessDayMonth = nextBusinessDay
-    ? [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ][nextBusinessDay.month - 1]
-    : ''
+  const deadlineCalculatorQuery = new URLSearchParams({
+    date: deadlineDate,
+    days: '1',
+    unit: 'business-days',
+    direction: 'after',
+    startday: 'exclude-trigger',
+    endrule: 'none',
+  })
+  const calendarQueryValue = holidayCalendarQueryValue(holidayCalendar)
+
+  if (calendarQueryValue) {
+    deadlineCalculatorQuery.set('calendar', calendarQueryValue)
+  }
+
+  const deadlineCalculatorHref =
+    `/deadline-calculator?${deadlineCalculatorQuery.toString()}`
 
   useEffect(() => {
     saveHolidayCalendar(holidayCalendar)
@@ -7433,11 +7433,12 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
           <h1>What if a deadline falls on a weekend?</h1>
 
           <strong className="weekend-zero-answer">
-            Often, it moves to the next business day.
+            Not automatically.
           </strong>
 
           <p className="weekend-zero-caveat">
-            But only if the rule that created the deadline says it should.
+            A Saturday or Sunday deadline moves only when the governing rule
+            says to use the next business day or otherwise extends the deadline.
           </p>
         </section>
 
@@ -7447,11 +7448,18 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
           <div className="weekend-zero-result" aria-live="polite">
             {parsedDeadlineDate && nextBusinessDay ? (
               <>
-                <span>If your rule says “next business day”</span>
-                <strong>{formatWeekday(nextBusinessDay)},</strong>
-                <b>
-                  {nextBusinessDayMonth} {nextBusinessDay.day}, {nextBusinessDay.year}
-                </b>
+                <div className="weekend-zero-result-calculated">
+                  <span>Calculated deadline date</span>
+                  <strong>
+                    {formatWeekday(parsedDeadlineDate)}, {formatPlainDate(parsedDeadlineDate)}
+                  </strong>
+                </div>
+
+                <div className="weekend-zero-result-adjusted">
+                  <span>If your rule says “next business day”</span>
+                  <strong>{formatWeekday(nextBusinessDay)},</strong>
+                  <b>{formatPlainDate(nextBusinessDay)}</b>
+                </div>
               </>
             ) : (
               <strong>Enter a valid deadline date.</strong>
@@ -7485,12 +7493,12 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
         </section>
 
         <details className="weekend-zero-details">
-          <summary>When does it move?</summary>
+          <summary>Does a Saturday or Sunday deadline move to Monday?</summary>
           <div>
             <p>
-              A weekend deadline usually moves when the governing rule says the
-              final day must be a business day, working day, or non-holiday, or
-              when it specifically provides a next-business-day adjustment.
+              Not automatically. It moves when the governing rule says the final
+              day must be a business day, working day, or non-holiday, or when it
+              specifically provides a next-business-day adjustment.
             </p>
           </div>
         </details>
@@ -7512,20 +7520,33 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
             <p>
               The same principle applies. Some rules move a deadline that lands
               on a recognized holiday and some do not. The applicable holiday
-              calendar can also change the next qualifying business day.
+              calendar can also change the next qualifying business day. If
+              Monday is a holiday, the next qualifying day may be later.
+            </p>
+          </div>
+        </details>
+
+        <details className="weekend-zero-details">
+          <summary>What does “next business day” mean?</summary>
+          <div>
+            <p>
+              It means the next day that qualifies under the rule’s business-day
+              definition. That may skip weekends, public holidays, or other
+              closure days. The applicable contract, policy, law, or court rule
+              decides which definition and holiday calendar apply.
             </p>
           </div>
         </details>
 
         <nav className="weekend-zero-related" aria-label="Related deadline guides">
           <a
-            href="/deadline-calculator"
+            href={deadlineCalculatorHref}
             onClick={(event) => {
               event.preventDefault()
-              onNavigate('/deadline-calculator')
+              onNavigate(deadlineCalculatorHref)
             }}
           >
-            Check your exact deadline
+            Calculate the next business day
           </a>
 
           <a
@@ -7546,6 +7567,16 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
             }}
           >
             Return window calculator
+          </a>
+
+          <a
+            href="/do-public-holidays-count-as-business-days"
+            onClick={(event) => {
+              event.preventDefault()
+              onNavigate('/do-public-holidays-count-as-business-days')
+            }}
+          >
+            Do public holidays count as business days?
           </a>
         </nav>
       </section>
@@ -7659,6 +7690,25 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
           font-size: 0.82rem;
           font-weight: 850;
           letter-spacing: 0.03em;
+        }
+
+        .weekend-zero-result-calculated {
+          display: grid;
+          gap: 4px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(21, 54, 84, 0.10);
+        }
+
+        .weekend-zero-result-calculated > strong {
+          color: #153654;
+          font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+          line-height: 1.15;
+        }
+
+        .weekend-zero-result-adjusted {
+          display: flex;
+          flex-direction: column;
+          padding-top: 16px;
         }
 
         .weekend-zero-result > strong {

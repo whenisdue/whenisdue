@@ -305,7 +305,7 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
   if (route === 'deadline-weekend-extension-guide') {
     return {
       title: 'What If a Deadline Falls on a Weekend? | WhenIsDue',
-      description: 'See when a Saturday or Sunday deadline may move to the next business day, when it may stay put, and how holidays can affect the final date.',
+      description: 'Does a Saturday or Sunday deadline move to Monday? Learn when it stays put, moves to the next business day, or may shift again for a holiday.',
       openGraphDescription: 'Does a weekend deadline automatically move to Monday? See why the governing rule controls the final-day adjustment.',
       twitterDescription: 'What happens when a deadline falls on a weekend? See when it may move to the next business day.',
       path: '/what-if-a-deadline-falls-on-a-weekend',
