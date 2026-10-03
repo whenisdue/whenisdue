@@ -1041,10 +1041,10 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
           --deadline-ink: #153557;
           --deadline-muted: #64798d;
           --deadline-accent: #2d7b64;
-          --deadline-field: #eadfd8;
-          --deadline-field-soft: #f3ebe6;
+          --deadline-field: var(--wid-result-surface);
+          --deadline-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .deadline-answer-header {
@@ -1793,10 +1793,10 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
           --start-ink: #173353;
           --start-muted: #65778d;
           --start-accent: #2f7862;
-          --start-field: #ece7f1;
-          --start-field-soft: #f4f0f6;
+          --start-field: var(--wid-result-surface);
+          --start-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .start-date-answer-header {
@@ -2351,12 +2351,12 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .weekends-zero-page {
-          --weekends-ink: #153654;
-          --weekends-muted: #667b8e;
-          --weekends-accent: #2d7b64;
-          --weekends-field: #edf0df;
+          --weekends-ink: var(--wid-ink-page);
+          --weekends-muted: var(--wid-muted-page);
+          --weekends-accent: var(--wid-accent-page);
+          --weekends-field: var(--wid-result-surface);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .weekends-zero-header {
@@ -2842,12 +2842,12 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .holidays-zero-page {
-          --holidays-ink: #153654;
-          --holidays-muted: #667b8e;
-          --holidays-accent: #2d7b64;
-          --holidays-field: #f2ead8;
+          --holidays-ink: var(--wid-ink-page);
+          --holidays-muted: var(--wid-muted-page);
+          --holidays-accent: var(--wid-accent-page);
+          --holidays-field: var(--wid-result-surface);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .holidays-zero-header {
@@ -3346,13 +3346,13 @@ function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .business-length-page {
-          --length-ink: #153654;
-          --length-muted: #667b8e;
-          --length-accent: #2d7b64;
-          --length-field: #e8eee0;
-          --length-field-soft: #f3f5ed;
+          --length-ink: var(--wid-ink-page);
+          --length-muted: var(--wid-muted-page);
+          --length-accent: var(--wid-accent-page);
+          --length-field: var(--wid-result-surface);
+          --length-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .business-length-header {
@@ -3819,7 +3819,11 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
 
           {earliest && latest && parsedStart && parsedMin !== null && parsedMax !== null ? (
             <>
-              <h1 id="shipping-answer-title">Estimated delivery</h1>
+              <h1 id="shipping-answer-title">How long is {rangeSummary}?</h1>
+
+              <p className="shipping-answer-context shipping-answer-prompt">
+                {rangeSummary} from {formatShippingDate(parsedStart)} is
+              </p>
 
               <div className="shipping-answer-range" aria-live="polite">
                 <div className="shipping-answer-range-card is-earliest">
@@ -3840,18 +3844,14 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
                 ) : null}
               </div>
 
-              <p className="shipping-answer-context">
-                {rangeSummary} after {formatShippingDate(parsedStart)}
-              </p>
-
               <p className="shipping-answer-rule">
                 {countMode === 'business'
                   ? holidayCalendar === 'none'
-                    ? 'Weekends skipped · Public holidays still count'
-                    : `Weekends + ${
+                    ? 'Start date is day zero · Weekends skipped · Public holidays still count'
+                    : `Start date is day zero · Weekends + ${
                         getHolidayCalendarOption(holidayCalendar).shortLabel
                       } holidays skipped`
-                  : 'Calendar days counted · Weekends included'}
+                  : 'Start date is day zero · Calendar days counted · Weekends included'}
               </p>
             </>
           ) : (
@@ -3878,7 +3878,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
           </label>
 
           <label>
-            <span>Earliest</span>
+            <span>Minimum days</span>
             <input
               type="number"
               inputMode="numeric"
@@ -3890,7 +3890,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
           </label>
 
           <label>
-            <span>Latest</span>
+            <span>Maximum days</span>
             <input
               type="number"
               inputMode="numeric"
@@ -3916,30 +3916,32 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
 
           <div
             className="shipping-answer-quick-picks"
-            aria-label="Common delivery windows"
+            aria-label={`Common ${countMode}-day ranges`}
           >
             {[
-              ['3–5 days', '3', '5'],
-              ['5–7 days', '5', '7'],
-              ['7–10 days', '7', '10'],
+              ['3–5', '3', '5'],
+              ['3–7', '3', '7'],
+              ['5–10', '5', '10'],
             ].map(([label, min, max]) => {
+              const rangeLabel = `${label} ${countMode} days`
               const active = minimumDays === min && maximumDays === max
               return (
                 <button
                   className={active ? 'is-active' : ''}
                   type="button"
-                  key={label}
+                  key={rangeLabel}
                   aria-pressed={active}
+                  aria-label={rangeLabel}
                   onClick={() => {
                     setMinimumDays(min)
                     setMaximumDays(max)
                     trackWhenIsDueEvent('quick_pick', {
                       context: 'shipping_delivery_range',
-                      value: label,
+                      value: rangeLabel,
                     })
                   }}
                 >
-                  {label}
+                  {rangeLabel}
                 </button>
               )
             })}
@@ -4082,9 +4084,9 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
           <h2>What does 3–5 business days mean?</h2>
           <p>
             It means the delivery estimate is a range, not one exact date.
-            The earliest date is three qualifying business days after the order
-            or ship date, and the latest date is five qualifying business days
-            after it.
+            This calculator treats the order or ship date as day zero, then
+            finds the third qualifying business day for the earliest date and
+            the fifth for the latest.
           </p>
         </article>
 
@@ -4124,13 +4126,13 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .shipping-answer-page {
-          --shipping-ink: #153654;
-          --shipping-muted: #667b8e;
-          --shipping-accent: #2d7b64;
-          --shipping-field: #dfecef;
-          --shipping-field-soft: #edf4f5;
+          --shipping-ink: var(--wid-ink-page);
+          --shipping-muted: var(--wid-muted-page);
+          --shipping-accent: var(--wid-accent-page);
+          --shipping-field: var(--wid-result-surface);
+          --shipping-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .shipping-answer-header {
@@ -4268,6 +4270,12 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         .shipping-answer-rule {
           margin-top: 7px;
           font-size: 0.86rem;
+        }
+
+        .shipping-answer-prompt {
+          color: var(--shipping-ink);
+          font-size: clamp(1.02rem, 2vw, 1.24rem);
+          font-weight: 850;
         }
 
         .shipping-answer-controls {
@@ -5018,10 +5026,10 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
           --notice-ink: #153655;
           --notice-muted: #667a8d;
           --notice-accent: #2d7b64;
-          --notice-field: #e8efe4;
-          --notice-field-soft: #f1f5ee;
+          --notice-field: var(--wid-result-surface);
+          --notice-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .notice-answer-header {
@@ -5865,10 +5873,10 @@ function SubscriptionRenewalCalculatorPage({
           --subscription-ink: #153553;
           --subscription-muted: #667a8d;
           --subscription-accent: #2d7b64;
-          --subscription-field: #eee5f2;
-          --subscription-field-soft: #f6f0f7;
+          --subscription-field: var(--wid-result-surface);
+          --subscription-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .subscription-answer-header {
@@ -6310,10 +6318,10 @@ function SubscriptionRenewalCalculatorPage({
   )
 }
 function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
-  const startDate = parsePlainDate('2026-09-01')!
+  const startDate = parsePlainDate('2026-10-01')!
 
   const calculatorPath =
-    '/deadline-calculator?date=2026-09-01&days=14&unit=calendar-days&direction=after&startday=unspecified&source=within'
+    '/deadline-calculator?date=2026-10-01&days=14&unit=calendar-days&direction=after&startday=unspecified&source=within'
 
   const fourteenCalendarDays = calculateDeadlineByRule({
     triggerDate: startDate,
@@ -6355,16 +6363,18 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
         <header className="within-zero-hero">
           <p className="within-zero-eyebrow">Deadline wording guide</p>
           <h1>What does “within X days” mean?</h1>
-          <strong className="within-zero-answer">Yes. Day 14 is included.</strong>
+          <strong className="within-zero-answer">
+            Yes. Day 14 is included.
+          </strong>
           <p className="within-zero-summary">
             The exact calendar date depends on whether the starting date counts
             as Day 1.
           </p>
           <p className="within-zero-caveat">
-            Check whether the source uses calendar or business days, what event
-            starts the clock, and whether a weekend or holiday changes the
-            deadline. If the wording is unclear, the source that created the
-            deadline controls.
+            “Within” alone may not say whether the trigger date is Day 1. Check
+            whether the source uses calendar or business days, what event starts
+            the clock, and whether a weekend or holiday changes the deadline.
+            The policy, contract, regulation, or other rule controls.
           </p>
         </header>
 
@@ -6372,30 +6382,20 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 
         <section className="within-zero-example" aria-labelledby="within-zero-example-title">
           <div className="within-zero-example-heading">
-            <p className="within-zero-section-eyebrow">Day 14 is included; the start date is the variable</p>
+            <p className="within-zero-section-eyebrow">
+              Same 14-day window, two start-day rules
+            </p>
             <h2 id="within-zero-example-title">
-              “Within 14 days of September 1, 2026”
+              “Within 14 days of October 1, 2026”
             </h2>
             <p className="within-zero-example-note">
-              Calendar days · Day 14 is the final day of the defined window.
+              Calendar days · Day 14 is the last day of the window.
             </p>
           </div>
 
           <div className="within-zero-example-grid">
-            <article>
-              <span>Start date is Day 0</span>
-              <strong>
-                {fourteenCalendarDays
-                  ? `${formatWeekday(fourteenCalendarDays.answerDate)}, ${formatPlainDate(
-                      fourteenCalendarDays.answerDate,
-                    )}`
-                  : '—'}
-              </strong>
-              <p>Day 1 is September 2. Day 14 is September 15.</p>
-            </article>
-
             <article className="is-including-start">
-              <span>Start date is Day 1</span>
+              <span>If October 1 is Day 1</span>
               <strong>
                 {fourteenCalendarDaysIncludingStart
                   ? `${formatWeekday(
@@ -6405,7 +6405,19 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
                     )}`
                   : '—'}
               </strong>
-              <p>September 1 is Day 1. Day 14 is September 14.</p>
+              <p>October 1 is Day 1. Day 14 is October 14.</p>
+            </article>
+
+            <article>
+              <span>If counting begins the next day</span>
+              <strong>
+                {fourteenCalendarDays
+                  ? `${formatWeekday(fourteenCalendarDays.answerDate)}, ${formatPlainDate(
+                      fourteenCalendarDays.answerDate,
+                    )}`
+                  : '—'}
+              </strong>
+              <p>Day 1 is October 2. Day 14 is October 15.</p>
             </article>
           </div>
 
@@ -6429,10 +6441,10 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
             <summary>Does “within 14 days” include Day 14?</summary>
             <div>
               <p>
-                Usually, yes: Day 14 is the final day of a 14-day window, so
-                completing the action on Day 14 is different from completing it
-                on Day 15. The start-day rule still determines which calendar
-                date is Day 14.
+                Usually, yes. Day 14 is the last day in a 14-day window, just
+                as Day 10 is the last day in a 10-day window. Day 15 or Day 11
+                is after that window. The start-day rule determines which
+                calendar date each day falls on.
               </p>
             </div>
           </details>
@@ -6555,12 +6567,12 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .within-zero-page {
-          --within-ink: #153654;
-          --within-muted: #667b8e;
-          --within-accent: #2d7b64;
-          --within-field: #ece5f0;
+          --within-ink: var(--wid-ink-page);
+          --within-muted: var(--wid-muted-page);
+          --within-accent: var(--wid-accent-page);
+          --within-field: var(--wid-result-surface);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .within-zero-header {
@@ -6812,7 +6824,7 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 
           .within-zero-answer {
             margin-top: 20px;
-            font-size: clamp(3.4rem, 16vw, 5.4rem);
+            font-size: clamp(2.1rem, 9vw, 3rem);
             line-height: 0.92;
           }
 
@@ -7071,12 +7083,12 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .net30-zero-page {
-          --net30-ink: #153654;
-          --net30-muted: #667b8e;
-          --net30-accent: #2d7b64;
-          --net30-field: #f1e4d7;
+          --net30-ink: var(--wid-ink-page);
+          --net30-muted: var(--wid-muted-page);
+          --net30-accent: var(--wid-accent-page);
+          --net30-field: var(--wid-result-surface);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .net30-zero-header {
@@ -7635,7 +7647,7 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
       <style>{`
         .weekend-zero-page {
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .weekend-zero-header {
@@ -7669,7 +7681,7 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
           padding: clamp(34px, 6vw, 66px);
           border: 1px solid rgba(21, 54, 84, 0.10);
           border-radius: 26px;
-          background: #f3ecdc;
+          background: var(--wid-result-surface);
           text-align: center;
         }
 
@@ -8233,10 +8245,10 @@ function NextPaydayPage({ onNavigate }: NavigationProps) {
           --payday-ink: #173651;
           --payday-muted: #687b8e;
           --payday-accent: #2d7b64;
-          --payday-field: #e8ebd8;
-          --payday-field-soft: #f2f3e7;
+          --payday-field: var(--wid-result-surface);
+          --payday-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .payday-answer-header {
@@ -11021,7 +11033,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           overflow-anchor: none;
           border: 1px solid rgba(19, 38, 70, 0.1);
           border-radius: 26px;
-          background: #17304d;
+          background: var(--wid-ink);
           box-shadow: 0 24px 64px rgba(19, 38, 70, 0.1);
         }
 
@@ -11033,7 +11045,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           padding: clamp(34px, 4.4vw, 58px);
           background:
             linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0)),
-            #17304d;
+            var(--wid-ink);
         }
 
         .date-home-editorial-today {
@@ -11150,7 +11162,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           place-items: center;
           overflow: hidden;
           padding: clamp(34px, 5vw, 62px);
-          background: #e5ddd0;
+          background: var(--wid-surface);
           color: #102f52;
         }
 
@@ -14212,6 +14224,24 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
       'December',
     ][date.month - 1]} ${date.day}, ${date.year}`
 
+  const exampleThursday = parsePlainDate('2026-09-17')!
+  const exampleFriday = parsePlainDate('2026-09-18')!
+  const fiveBusinessDaysFromThursday = calculateBusinessDaysWithCalendar(
+    exampleThursday,
+    5,
+    'none',
+  ).date
+  const threeBusinessDaysFromFriday = calculateBusinessDaysWithCalendar(
+    exampleFriday,
+    3,
+    'none',
+  ).date
+
+  const businessRuleLabel =
+    holidayCalendar === 'none'
+      ? 'Start date is day zero · Weekends skipped · Public holidays still count'
+      : `Start date is day zero · Weekends + ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`
+
   useEffect(() => {
     syncShareableQueryParams({
       start: startDate,
@@ -14299,11 +14329,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
                 </span>
               </strong>
 
-              <p className="business-answer-rule">
-                {holidayCalendar === 'none'
-                  ? 'Weekends skipped · Public holidays still count'
-                  : `Weekends + ${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays skipped`}
-              </p>
+              <p className="business-answer-rule">{businessRuleLabel}</p>
             </>
           ) : (
             <>
@@ -14442,7 +14468,12 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         </details>
 
         <details>
-          <summary>Holiday settings</summary>
+          <summary>
+            Holiday settings ·{' '}
+            {holidayCalendar === 'none'
+              ? 'weekends only'
+              : `${getHolidayCalendarOption(holidayCalendar).shortLabel} holidays`}
+          </summary>
           <div className="business-answer-detail-body">
             <HolidayCalendarSelect
               value={holidayCalendar}
@@ -14554,12 +14585,21 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
         <article>
           <h2>Business day examples</h2>
+          <p>
+            Assuming Monday through Friday counting, the start date is day zero,
+            and no holiday calendar is selected:
+          </p>
           <ul>
-            <li>Start Friday + 1 business day = Monday</li>
-            <li>Start Thursday + 2 business days = Monday</li>
-            <li>Start Monday + 3 business days = Thursday</li>
-            <li>Start Monday + 5 business days = next Monday</li>
-            <li>Start Monday + 10 business days = Monday two weeks later</li>
+            <li>
+              5 business days from {formatWeekday(exampleThursday)},{' '}
+              {formatBusinessAnswerDate(exampleThursday)} → {formatWeekday(fiveBusinessDaysFromThursday)},{' '}
+              {formatBusinessAnswerDate(fiveBusinessDaysFromThursday)}
+            </li>
+            <li>
+              3 business days from {formatWeekday(exampleFriday)},{' '}
+              {formatBusinessAnswerDate(exampleFriday)} → {formatWeekday(threeBusinessDaysFromFriday)},{' '}
+              {formatBusinessAnswerDate(threeBusinessDaysFromFriday)}
+            </li>
           </ul>
         </article>
 
@@ -14589,7 +14629,17 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
         <article>
           <h2>When to use this calculator</h2>
           <p>
-            Use it when a deadline is measured in business days instead of calendar days. Common examples include work tasks, invoice follow-ups, shipping estimates, application timelines, school forms, and administrative deadlines.
+            Use it when a deadline is measured in business days instead of calendar days. Common examples include work tasks, invoice follow-ups, application timelines, school forms, and administrative deadlines. For a delivery window such as 3–5 business days, use the{' '}
+            <a
+              href="/shipping-delivery-range-calculator"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/shipping-delivery-range-calculator')
+              }}
+            >
+              shipping and delivery range calculator
+            </a>{' '}
+            instead.
           </p>
         </article>
 
@@ -14659,13 +14709,13 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .business-answer-first-page {
-          --business-paper: #e8f0f4;
-          --business-paper-soft: #f2f6f8;
+          --business-paper: var(--wid-result-surface);
+          --business-paper-soft: var(--wid-surface-soft);
           --business-navy: #12365d;
           --business-muted: #637b92;
           --business-green: #23785d;
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .business-answer-header {
@@ -15506,12 +15556,12 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
 
       <style>{`
         .exact-business-page {
-          --exact-ink: #153654;
-          --exact-muted: #667b8e;
-          --exact-accent: #2d7b64;
-          --exact-field: #e4eef4;
+          --exact-ink: var(--wid-ink-page);
+          --exact-muted: var(--wid-muted-page);
+          --exact-accent: var(--wid-accent-page);
+          --exact-field: var(--wid-result-surface);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .exact-business-header {
@@ -16730,13 +16780,13 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
 
       <style>{`
         .between-answer-page {
-          --between-ink: #153654;
-          --between-muted: #667b8e;
-          --between-accent: #2d7b64;
-          --between-field: #e8e8f2;
-          --between-field-soft: #f2f2f8;
+          --between-ink: var(--wid-ink-page);
+          --between-muted: var(--wid-muted-page);
+          --between-accent: var(--wid-accent-page);
+          --between-field: var(--wid-result-surface);
+          --between-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .between-answer-header {
@@ -17166,7 +17216,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 
           {trialEndDate && parsedStartDate && parsedTrialLength !== null ? (
             <>
-              <h1 id="free-trial-title">Your free trial ends</h1>
+              <h1 id="free-trial-title">Your free trial ends on</h1>
               <strong
                 className="free-trial-answer-date"
                 aria-label={`${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}`}
@@ -17209,7 +17259,8 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
 
               {cancelByDate ? (
                 <p className="free-trial-answer-reminder">
-                  Suggested reminder: <strong>{formatWeekday(cancelByDate)}, {formatFreeTrialDate(cancelByDate)}</strong>
+                  Suggested cancellation reminder:{' '}
+                  <strong>{formatWeekday(cancelByDate)}, {formatFreeTrialDate(cancelByDate)}</strong>
                 </p>
               ) : null}
             </>
@@ -17298,7 +17349,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           <ResultActions
             title="Free trial ends"
             date={trialEndDate}
-            details={`Suggested reminder: ${formatFreeTrialDate(cancelByDate)}`}
+            details={`Suggested cancellation reminder: ${formatFreeTrialDate(cancelByDate)}`}
             variant="return-window"
           />
 
@@ -17335,7 +17386,7 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
                     value: `${formatWeekday(trialEndDate)}, ${formatPlainDate(trialEndDate)}`,
                   },
                   {
-                    label: 'Suggested reminder',
+                    label: 'Suggested cancellation reminder',
                     value: `${formatWeekday(cancelByDate)}, ${formatPlainDate(cancelByDate)}`,
                   },
                 ]}
@@ -17490,10 +17541,10 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           --trial-ink: #143454;
           --trial-muted: #65798d;
           --trial-accent: #2e7a63;
-          --trial-field: #e8edf7;
-          --trial-field-soft: #f1f4fa;
+          --trial-field: var(--wid-result-surface);
+          --trial-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .free-trial-answer-header {
@@ -18355,10 +18406,10 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           --return-ink: #113356;
           --return-muted: #657a8f;
           --return-accent: #2d7461;
-          --return-panel: #e8f2ec;
-          --return-panel-deep: #dcebe3;
+          --return-panel: var(--wid-result-surface);
+          --return-panel-deep: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .return-answer-header {
@@ -19593,10 +19644,10 @@ function TwoTenNetThirtyPage({ onNavigate }: NavigationProps) {
           --two-ten-ink: #153553;
           --two-ten-muted: #687b8e;
           --two-ten-accent: #2d7b64;
-          --two-ten-field: #f2e3d7;
-          --two-ten-field-soft: #f8eee7;
+          --two-ten-field: var(--wid-result-surface);
+          --two-ten-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .two-ten-answer-header {
@@ -21050,11 +21101,11 @@ function InvoiceDueDatePage({ onNavigate }: NavigationProps) {
           --invoice-ink: #112c4d;
           --invoice-muted: #63778b;
           --invoice-accent: #2d7c67;
-          --invoice-paper: #f1e4cf;
-          --invoice-answer-field: #ead9bb;
-          --invoice-answer-field-soft: #f3e7d4;
+          --invoice-paper: var(--wid-result-surface);
+          --invoice-answer-field: var(--wid-result-surface);
+          --invoice-answer-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .invoice-answer-header,
@@ -22397,10 +22448,10 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
           --sla-ink: #173453;
           --sla-muted: #687b8e;
           --sla-accent: #2d7b64;
-          --sla-field: #efe2c8;
-          --sla-field-soft: #f6eddc;
+          --sla-field: var(--wid-result-surface);
+          --sla-field-soft: var(--wid-surface-soft);
           min-height: 100vh;
-          background: #fffaf2;
+          background: var(--wid-bg);
         }
 
         .sla-answer-header {
@@ -24240,7 +24291,7 @@ function getRouteStructuredData(
       '@context': 'https://schema.org',
       '@type': 'WebPage',
       '@id': `${canonicalUrl}#webpage`,
-      name: 'What Does “Within X Days” Mean?',
+      name: metadata.title,
       url: canonicalUrl,
       description: metadata.description,
       isPartOf: websiteReference,

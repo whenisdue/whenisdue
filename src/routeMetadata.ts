@@ -146,10 +146,10 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
 
   if (route === 'business-days') {
     return {
-      title: 'Business Days Calculator - What Date Is 3, 5, 7 or 10 Business Days From Today? | WhenIsDue',
-      description: 'See the exact date 3, 5, 7, 10 or any number of business days from today or another date. Weekends are skipped, with optional supported holiday calendars.',
-      openGraphDescription: 'See the exact date 3, 5, 7 or 10 business days from today or calculate from any start date.',
-      twitterDescription: 'Find the exact date 3, 5, 7 or 10 business days from today.',
+      title: 'Business Days Calculator: What Date Is X Business Days From a Date? | WhenIsDue',
+      description: 'Calculate the exact date X business days from today or any start date. Weekends are skipped, and optional supported holiday calendars can be applied.',
+      openGraphDescription: 'Find the exact date X business days from today or another date, with clear weekend and optional holiday rules.',
+      twitterDescription: 'What date is X business days from today or a start date? Calculate it with weekends and optional holidays.',
       path: '/business-days-calculator',
     }
   }
@@ -284,10 +284,10 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
 
   if (route === 'within-days-guide') {
     return {
-      title: 'What Does “Within X Days” Mean? | WhenIsDue',
-      description: 'What does “within X days” mean? See whether Day X is included, how Day 0 versus Day 1 changes the date, and how to calculate the exact deadline.',
-      openGraphDescription: 'See why Day X is usually the last day of the window, why the start date can change the calendar date, and how to compare both interpretations.',
-      twitterDescription: 'Does within 14 days include Day 14? See how the start-date rule changes the exact deadline.',
+      title: 'Within X Days: Does the Last Day Count? | WhenIsDue',
+      description: 'Does “within 14 days” include Day 14? Usually, yes. See how the start-day rule changes the date; the governing wording controls.',
+      openGraphDescription: 'Usually, yes: Day 14 is the last day in a 14-day window. The start-day rule determines the calendar date, and the governing wording controls.',
+      twitterDescription: 'Does “within 14 days” include Day 14? Usually, yes. See how the start-day rule changes the date.',
       path: '/what-does-within-days-mean',
     }
   }
@@ -345,8 +345,8 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
 
   if (route === 'free-trial') {
     return {
-      title: 'Free Trial Calculator - WhenIsDue',
-      description: 'Estimate when a free trial ends and see a suggested one-day-before reminder.',
+      title: 'When Does My Free Trial End? | Free Trial Calculator | WhenIsDue',
+      description: 'Enter your trial start date and length to calculate the exact free trial end date, with a suggested reminder to review cancellation before renewal.',
       path: '/free-trial-calculator',
     }
   }
