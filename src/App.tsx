@@ -6355,11 +6355,10 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
         <header className="within-zero-hero">
           <p className="within-zero-eyebrow">Deadline wording guide</p>
           <h1>What does “within X days” mean?</h1>
-          <strong className="within-zero-answer">By the end of the X-day window.</strong>
+          <strong className="within-zero-answer">Yes. Day 14 is included.</strong>
           <p className="within-zero-summary">
-            If the window is 14 days, Day 14 is normally the final day you can
-            act. The calendar date of Day 14 depends on how the rule counts the
-            start date.
+            The exact calendar date depends on whether the starting date counts
+            as Day 1.
           </p>
           <p className="within-zero-caveat">
             Check whether the source uses calendar or business days, what event
