@@ -346,7 +346,7 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
   if (route === 'free-trial') {
     return {
       title: 'When Does My Free Trial End? | Free Trial Calculator | WhenIsDue',
-      description: 'Enter your trial start date and length to calculate the exact free trial end date, with a suggested reminder to review cancellation before renewal.',
+      description: 'Find when your free trial ends. Enter the start date and length to see the exact end date and a suggested reminder one day before.',
       path: '/free-trial-calculator',
     }
   }

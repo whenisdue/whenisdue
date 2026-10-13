@@ -17256,6 +17256,9 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
               <p className="free-trial-answer-context">
                 {parsedTrialLength}-day trial · Starts {formatFreeTrialDate(parsedStartDate)}
               </p>
+              <p className="free-trial-answer-counting">
+                Day 1 begins the day after the trial starts.
+              </p>
 
               {cancelByDate ? (
                 <p className="free-trial-answer-reminder">
@@ -17652,6 +17655,13 @@ function FreeTrialPage({ onNavigate }: NavigationProps) {
           color: var(--trial-muted);
           font-size: 0.98rem;
           line-height: 1.5;
+        }
+
+        .free-trial-answer-counting {
+          margin: 3px 0 0;
+          color: var(--trial-muted);
+          font-size: 0.88rem;
+          line-height: 1.4;
         }
 
         .free-trial-answer-reminder {
