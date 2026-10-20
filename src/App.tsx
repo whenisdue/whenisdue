@@ -3177,6 +3177,36 @@ function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             <span><b>5 business days</b> is usually one workweek.</span>
             <span><b>10 business days</b> is usually two workweeks.</span>
           </div>
+
+          <section className="business-length-range-answer" aria-labelledby="business-length-range-title">
+            <h2 id="business-length-range-title">What does 3–7 business days mean?</h2>
+            <p>
+              It is a window from the third through the seventh counted business
+              day after the stated starting event. Saturdays and Sundays are
+              commonly skipped, but the applicable working week and holiday
+              rules determine which days count. The calendar dates depend on the
+              starting date and counting convention; shipping, processing, and
+              other deadlines may use different start events or cut-off rules.
+            </p>
+            <p className="business-length-range-example">
+              <b>Example assumptions:</b> Tuesday, October 20, 2026 is Day 0;
+              count Monday–Friday with no holidays excluded. Day 3 is Friday,
+              October 23, and day 7 is Thursday, October 29. A retailer may use
+              different processing or cut-off rules.
+            </p>
+            <a
+              href="/shipping-delivery-range-calculator?min=3&max=7&mode=business"
+              onClick={(event) => {
+                event.preventDefault()
+                trackWhenIsDueEvent('authority_guide_calculator_click', {
+                  guide: 'how_long_business_days_range',
+                })
+                onNavigate('/shipping-delivery-range-calculator?min=3&max=7&mode=business')
+              }}
+            >
+              Calculate a 3–7 business-day date range
+            </a>
+          </section>
         </section>
 
         <AnswerFeedback />
@@ -3451,6 +3481,45 @@ function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
           color: var(--length-ink);
         }
 
+        .business-length-range-answer {
+          max-width: 780px;
+          margin: 20px auto 0;
+          padding: 16px 18px;
+          border: 1px solid rgba(21, 54, 84, 0.09);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.68);
+          text-align: left;
+        }
+
+        .business-length-range-answer h2 {
+          margin: 0;
+          color: var(--length-ink);
+          font-size: 1.08rem;
+          line-height: 1.3;
+        }
+
+        .business-length-range-answer p {
+          margin: 8px 0 0;
+          color: #5d7387;
+          font-size: 0.94rem;
+          line-height: 1.5;
+        }
+
+        .business-length-range-answer .business-length-range-example {
+          color: #46677b;
+        }
+
+        .business-length-range-answer > a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          margin-top: 8px;
+          color: #2c5f50;
+          font-weight: 850;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+
         .business-length-reference {
           margin-top: 16px;
           padding: 22px;
@@ -3656,6 +3725,15 @@ function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
           .business-length-bam span {
             padding: 11px 13px;
+            font-size: 0.9rem;
+          }
+
+          .business-length-range-answer {
+            margin-top: 14px;
+            padding: 14px;
+          }
+
+          .business-length-range-answer p {
             font-size: 0.9rem;
           }
 
@@ -4081,13 +4159,30 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         </div>
 
         <article>
-          <h2>What does 3–5 business days mean?</h2>
-          <p>
-            It means the delivery estimate is a range, not one exact date.
-            This calculator treats the order or ship date as day zero, then
-            finds the third qualifying business day for the earliest date and
-            the fifth for the latest.
-          </p>
+          {rangeSummary && parsedStart && parsedMin !== null && parsedMax !== null ? (
+            <>
+              <h2>What does {rangeSummary} mean?</h2>
+              <p>
+                This window runs from day {parsedMin} through day {parsedMax}
+                {' '}after {formatShippingDate(parsedStart)}, with the start date
+                treated as Day 0. {countMode === 'business'
+                  ? holidayCalendar === 'none'
+                    ? 'The calculator skips Saturdays and Sundays; public holidays still count as weekdays.'
+                    : `The calculator skips weekends and holidays in the ${getHolidayCalendarOption(holidayCalendar).shortLabel} calendar.`
+                  : 'The calculator counts every calendar day, including weekends and holidays.'}{' '}
+                A seller or carrier may use a different start event, order
+                cut-off time, or processing rule.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>How is the delivery window counted?</h2>
+              <p>
+                Enter a valid start date and day range to see how the earliest
+                and latest dates are counted.
+              </p>
+            </>
+          )}
         </article>
 
         <article>
@@ -4111,10 +4206,10 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
         <article>
           <h2>Is this a carrier tracking estimate?</h2>
           <p>
-            No. This calculator only translates a stated delivery window such as
-            “3–5 business days” into dates. Carrier delays, cut-off times,
-            handling time, weather, and local delivery rules can change the real
-            arrival date.
+            No. This calculator translates a stated business- or calendar-day
+            window into dates; it does not guarantee delivery. Carrier delays,
+            cut-off times, handling time, weather, and local delivery rules can
+            change the actual arrival date.
           </p>
         </article>
       </section>
