@@ -17,6 +17,7 @@ export type RouteName =
   | 'subscription-renewal'
   | 'within-days-guide'
   | 'net-30-vs-30-days-guide'
+  | 'thirty-days-vs-one-month-guide'
   | 'deadline-weekend-extension-guide'
   | 'three-business-days'
   | 'four-business-days'
@@ -70,6 +71,7 @@ export const ROUTE_PATH_TO_NAME = {
   "/subscription-renewal-calculator": 'subscription-renewal',
   "/what-does-within-days-mean": 'within-days-guide',
   "/net-30-vs-30-days": 'net-30-vs-30-days-guide',
+  "/30-days-vs-one-month": 'thirty-days-vs-one-month-guide',
   "/what-if-a-deadline-falls-on-a-weekend": 'deadline-weekend-extension-guide',
   "/3-business-days-from-today": 'three-business-days',
   "/4-business-days-from-today": 'four-business-days',
@@ -299,6 +301,16 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
       openGraphDescription: 'Compare Net 30 with a simple 30-day duration and see when payment-term wording can change the result.',
       twitterDescription: 'Is Net 30 the same as 30 days? Compare the dates and understand why the payment-term wording matters.',
       path: '/net-30-vs-30-days',
+    }
+  }
+
+  if (route === 'thirty-days-vs-one-month-guide') {
+    return {
+      title: '30 Days vs One Month: Why the Dates Differ | WhenIsDue',
+      description: 'Compare 30 calendar days with one calendar month using verified month-end and leap-year examples. Learn why date arithmetic and actual contract or legal deadlines can follow different rules.',
+      openGraphDescription: 'Thirty days is a fixed count. One calendar month follows the calendar. Compare verified dates and see why the applicable wording matters.',
+      twitterDescription: 'Compare 30 calendar days with one calendar month, including month-end and leap-year examples.',
+      path: '/30-days-vs-one-month',
     }
   }
 

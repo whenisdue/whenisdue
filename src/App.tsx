@@ -66,6 +66,7 @@ import {
 import { getWorkingSchedule } from './workingSchedules.ts'
 import { DeadlineProvenanceDetails } from './DeadlineProvenanceDetails.tsx'
 import AnswerFeedback from './AnswerFeedback.tsx'
+import ThirtyDaysVsOneMonthGuidePage from './ThirtyDaysVsOneMonthGuidePage.tsx'
 import {
   getRouteFromPath,
   getRouteMetadata,
@@ -186,6 +187,10 @@ function App() {
 
   if (route === 'net-30-vs-30-days-guide') {
     return <NetThirtyVsThirtyDaysGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'thirty-days-vs-one-month-guide') {
+    return <ThirtyDaysVsOneMonthGuidePage onNavigate={navigate} />
   }
 
   if (route === 'deadline-weekend-extension-guide') {
