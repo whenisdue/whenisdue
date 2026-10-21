@@ -525,7 +525,7 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
         ? 'unspecified'
         : startDayConvention,
       endrule: endDayAdjustment,
-      calendar: holidayCalendarQueryValue(holidayCalendar),
+      calendar: holidayCalendar,
       trigger: triggerKind,
       source: cameFromWithinPhrase ? 'within' : null,
     })
@@ -3860,7 +3860,7 @@ function ShippingDeliveryRangePage({ onNavigate }: NavigationProps) {
       mode: countMode,
       calendar:
         countMode === 'business'
-          ? holidayCalendarQueryValue(holidayCalendar)
+          ? holidayCalendar
           : null,
     })
   }, [startDate, minimumDays, maximumDays, countMode, holidayCalendar])
@@ -4748,7 +4748,7 @@ function NoticePeriodCalculatorPage({ onNavigate }: NavigationProps) {
       unit: noticeUnit,
       calendar:
         noticeUnit === 'business-days'
-          ? holidayCalendarQueryValue(holidayCalendar)
+          ? holidayCalendar
           : null,
     })
   }, [eventDate, noticeAmount, noticeUnit, holidayCalendar])
@@ -7565,7 +7565,7 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
   useEffect(() => {
     syncShareableQueryParams({
       date: deadlineDate,
-      calendar: holidayCalendarQueryValue(holidayCalendar),
+      calendar: holidayCalendar,
     })
   }, [deadlineDate, holidayCalendar])
 
@@ -14346,7 +14346,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
     syncShareableQueryParams({
       start: startDate,
       days: businessDays,
-      calendar: holidayCalendarQueryValue(holidayCalendar),
+      calendar: holidayCalendar,
     })
   }, [startDate, businessDays, holidayCalendar])
 
@@ -15413,7 +15413,7 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
 
   useEffect(() => {
     syncShareableQueryParams({
-      calendar: holidayCalendarQueryValue(holidayCalendar),
+      calendar: holidayCalendar,
     })
   }, [holidayCalendar])
 
@@ -16616,7 +16616,7 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
     syncShareableQueryParams({
       start: startDate,
       end: endDate,
-      calendar: holidayCalendarQueryValue(holidayCalendar),
+      calendar: holidayCalendar,
     })
   }, [startDate, endDate, holidayCalendar])
 
@@ -22179,7 +22179,7 @@ function BusinessHoursDeadlinePage({ onNavigate }: NavigationProps) {
       hours,
       workstart: workdayStart,
       workend: workdayEnd,
-      calendar: holidayCalendarQueryValue(holidayCalendar),
+      calendar: holidayCalendar,
     })
   }, [startDate, startTime, hours, workdayStart, workdayEnd, holidayCalendar])
 

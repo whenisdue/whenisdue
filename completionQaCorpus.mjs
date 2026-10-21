@@ -1,3 +1,8 @@
+export const completionQaReference = {
+  date: '2026-08-26',
+  timeZone: 'Asia/Manila',
+}
+
 export const completionQaCorpus = [
   {
     "category": "business-days-complete",
@@ -187,48 +192,201 @@ export const completionQaCorpus = [
     "query": "shipped yesterday should arrive in 5 business days",
     "expectedKind": "navigate",
     "expectedPathContains": "/shipping-delivery-range-calculator"
-  }
-,
+  },
   {
     "category": "business-days-direction-before",
     "query": "30 business days before December 1",
     "expectedKind": "navigate",
-    "expectedPathEquals": "/deadline-calculator?date=2026-12-01&days=30&unit=business-days&direction=before&startday=exclude-trigger&calendar=none"
+    "expectedPathEquals": "/deadline-calculator?date=2026-12-01&days=30&unit=business-days&direction=before&startday=exclude-trigger&calendar=none",
+    "expectedDestinationState": {
+      "date": "2026-12-01",
+      "days": 30,
+      "unit": "business-days",
+      "direction": "before",
+      "startday": "exclude-trigger",
+      "calendar": "none",
+      "endrule": "none"
+    },
+    "expectedAnswer": "2026-10-20",
+    "expectedWeekday": "Tuesday",
+    "forbiddenPathPrefix": "/business-days-calculator",
+    "forbiddenDirection": "after"
   },
   {
     "category": "business-days-startday-ambiguity",
     "query": "got this aug 14 says reply within 7 business days when due",
     "expectedKind": "navigate",
-    "expectedPathEquals": "/deadline-calculator?date=2026-08-14&days=7&unit=business-days&direction=after&startday=unspecified&calendar=none"
+    "expectedPathEquals": "/deadline-calculator?date=2026-08-14&days=7&unit=business-days&direction=after&startday=unspecified&calendar=none",
+    "expectedDestinationState": {
+      "date": "2026-08-14",
+      "days": 7,
+      "unit": "business-days",
+      "direction": "after",
+      "startday": "unspecified",
+      "calendar": "none",
+      "endrule": "none"
+    },
+    "expectedAlternatives": {
+      "excluded": "2026-08-25",
+      "included": "2026-08-24"
+    },
+    "expectedAlternativeWeekdays": {
+      "excluded": "Tuesday",
+      "included": "Monday"
+    },
+    "forbiddenPathPrefix": "/business-days-calculator",
+    "forbiddenStartday": "exclude-trigger"
   },
   {
     "category": "business-days-holiday-context",
-    "query": "10 business days after Aug 24 excluding US federal holidays",
+    "query": "10 business days after August 24, 2026, excluding US federal holidays",
     "expectedKind": "navigate",
-    "expectedPathEquals": "/business-days-calculator?start=2026-08-24&days=10&calendar=us"
+    "expectedPathEquals": "/business-days-calculator?start=2026-08-24&days=10&calendar=us",
+    "expectedDestinationState": {
+      "start": "2026-08-24",
+      "days": 10,
+      "calendar": "us",
+      "direction": "after",
+      "startday": "exclude-trigger"
+    },
+    "expectedAnswer": "2026-09-08",
+    "expectedWeekday": "Tuesday",
+    "expectedSkippedHoliday": "2026-09-07",
+    "forbiddenCalendar": "none"
   },
   {
     "category": "regression-control",
     "query": "30 business days after December 1",
     "expectedKind": "navigate",
-    "expectedPathEquals": "/business-days-calculator?start=2026-12-01&days=30"
+    "expectedPathEquals": "/business-days-calculator?start=2026-12-01&days=30",
+    "expectedDestinationState": {
+      "start": "2026-12-01",
+      "days": 30,
+      "calendar": "none",
+      "direction": "after",
+      "startday": "exclude-trigger"
+    },
+    "expectedAnswer": "2027-01-12",
+    "expectedWeekday": "Tuesday"
   },
   {
     "category": "regression-control",
     "query": "7 business days from today",
     "expectedKind": "navigate",
-    "expectedPathEquals": "/business-days-calculator?start=2026-08-26&days=7"
+    "expectedPathEquals": "/business-days-calculator?start=2026-08-26&days=7",
+    "expectedDestinationState": {
+      "start": "2026-08-26",
+      "days": 7,
+      "calendar": "none",
+      "direction": "after",
+      "startday": "exclude-trigger"
+    },
+    "expectedAnswer": "2026-09-04",
+    "expectedWeekday": "Friday"
   },
   {
     "category": "regression-control",
     "query": "invoice aug 5 net30?",
     "expectedKind": "navigate",
-    "expectedPathEquals": "/invoice-due-date-calculator?date=2026-08-05&term=net30"
+    "expectedPathEquals": "/invoice-due-date-calculator?date=2026-08-05&term=net30",
+    "expectedDestinationState": {
+      "date": "2026-08-05",
+      "term": "net30"
+    },
+    "expectedAnswer": "2026-09-04",
+    "expectedWeekday": "Friday",
+    "forbiddenPathPrefix": "/business-days-calculator"
   },
   {
     "category": "regression-control",
     "query": "3-5 business days shipping from August 10",
     "expectedKind": "navigate",
-    "expectedPathEquals": "/shipping-delivery-range-calculator?start=2026-08-10&min=3&max=5&mode=business"
+    "expectedPathEquals": "/shipping-delivery-range-calculator?start=2026-08-10&min=3&max=5&mode=business",
+    "expectedDestinationState": {
+      "start": "2026-08-10",
+      "min": 3,
+      "max": 5,
+      "mode": "business",
+      "calendar": "none"
+    },
+    "expectedAlternatives": {
+      "earliest": "2026-08-13",
+      "latest": "2026-08-17"
+    },
+    "expectedAlternativeWeekdays": {
+      "earliest": "Thursday",
+      "latest": "Monday"
+    },
+    "forbiddenPathPrefix": "/business-days-calculator"
+  },
+  {
+    "category": "business-days-explicit-startday",
+    "query": "got this Aug 14 within 7 business days count receipt day",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/deadline-calculator?date=2026-08-14&days=7&unit=business-days&direction=after&startday=include-if-qualifying&calendar=none",
+    "expectedDestinationState": {
+      "date": "2026-08-14",
+      "days": 7,
+      "unit": "business-days",
+      "direction": "after",
+      "startday": "include-if-qualifying",
+      "calendar": "none",
+      "endrule": "none"
+    },
+    "expectedAnswer": "2026-08-24",
+    "expectedWeekday": "Monday"
+  },
+  {
+    "category": "business-days-explicit-startday",
+    "query": "got this Aug 14 within 7 business days don't count receipt day",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/deadline-calculator?date=2026-08-14&days=7&unit=business-days&direction=after&startday=exclude-trigger&calendar=none",
+    "expectedDestinationState": {
+      "date": "2026-08-14",
+      "days": 7,
+      "unit": "business-days",
+      "direction": "after",
+      "startday": "exclude-trigger",
+      "calendar": "none",
+      "endrule": "none"
+    },
+    "expectedAnswer": "2026-08-25",
+    "expectedWeekday": "Tuesday"
+  },
+  {
+    "category": "business-days-holiday-context",
+    "query": "10 business days after Aug 24 excluding federal holidays",
+    "expectedKind": "missing",
+    "expectedPromptContains": "Which holiday calendar"
+  },
+  {
+    "category": "business-days-holiday-context",
+    "query": "10 business days after Aug 24 including US federal holidays",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/business-days-calculator?start=2026-08-24&days=10&calendar=none",
+    "expectedDestinationState": {
+      "start": "2026-08-24",
+      "days": 10,
+      "calendar": "none",
+      "direction": "after",
+      "startday": "exclude-trigger"
+    },
+    "expectedAnswer": "2026-09-07",
+    "expectedWeekday": "Monday"
+  },
+  {
+    "category": "business-days-holiday-context",
+    "query": "10 business days after Aug 24",
+    "expectedKind": "navigate",
+    "expectedPathEquals": "/business-days-calculator?start=2026-08-24&days=10",
+    "expectedDestinationState": {
+      "start": "2026-08-24",
+      "days": 10,
+      "calendar": "none",
+      "direction": "after",
+      "startday": "exclude-trigger"
+    },
+    "expectedAnswer": "2026-09-07",
+    "expectedWeekday": "Monday"
   }
 ];

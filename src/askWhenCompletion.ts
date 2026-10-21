@@ -189,8 +189,11 @@ function extractBusinessDays(query: string) {
 
 type BusinessDayContext = {
   direction: 'before' | 'after'
-  startDay: 'exclude-trigger' | 'unspecified'
+  startDay: 'exclude-trigger' | 'include-if-qualifying' | 'unspecified'
+  explicitStartDay: boolean
   holidayCalendar: 'none' | 'us'
+  explicitHolidayCalendar: boolean
+  holidayCalendarMissing: boolean
 }
 
 function extractBusinessDayContext(query: string): BusinessDayContext {
@@ -198,8 +201,19 @@ function extractBusinessDayContext(query: string): BusinessDayContext {
 
   const explicitBefore = /\bbefore\b/.test(normalized)
   const explicitAfter = /\bafter\b/.test(normalized)
+  const explicitExcludeStart =
+    /\b(?:exclude|excluding|skip|do not count|dont count|don t count|not count|not include|not including)\s+(?:the\s+)?(?:start|receipt|received|trigger)\s+(?:day|date)\b/.test(normalized) ||
+    /\b(?:start|receipt|received|trigger)\s+(?:day|date)\s+(?:does not count|is day zero)\b/.test(normalized)
+  const explicitIncludeStart =
+    !explicitExcludeStart &&
+    (
+      /\b(?:include|including|count|counting)\s+(?:the\s+)?(?:start|receipt|received|trigger)\s+(?:day|date)\b/.test(normalized) ||
+      /\b(?:start|receipt|received|trigger)\s+(?:day|date)\s+(?:counts|is\s+day\s+(?:1|one))\b/.test(normalized)
+    )
 
   const hasUnresolvedStartWording =
+    !explicitIncludeStart &&
+    !explicitExcludeStart &&
     !explicitBefore &&
     !explicitAfter &&
     (
@@ -207,16 +221,26 @@ function extractBusinessDayContext(query: string): BusinessDayContext {
       /\b(received|receipt|got this|got it|served|delivered|delivery)\b/.test(normalized)
     )
 
-  const holidayCalendar =
-    /\b(?:us|u s|united states)\s+(?:federal\s+)?holidays?\b/.test(normalized) ||
-    /\bfederal holidays?\b/.test(normalized)
-      ? 'us'
-      : 'none'
+  const usHolidays = /\b(?:us|u s|united states)\s+(?:federal\s+)?holidays?\b/.test(normalized)
+  const skipUsHolidays =
+    /\b(?:exclude|excluding|skip|skipping|without)\s+(?:us|u s|united states)\s+(?:federal\s+)?holidays?\b/.test(normalized) ||
+    /\b(?:us|u s|united states)\s+(?:federal\s+)?holidays?\s+(?:excluded|skipped)\b/.test(normalized)
+  const includeUsHolidays =
+    /\b(?:include|including|count|counting)\s+(?:us|u s|united states)\s+(?:federal\s+)?holidays?\b/.test(normalized)
 
   return {
     direction: explicitBefore ? 'before' : 'after',
-    startDay: hasUnresolvedStartWording ? 'unspecified' : 'exclude-trigger',
-    holidayCalendar,
+    startDay: explicitIncludeStart
+      ? 'include-if-qualifying'
+      : hasUnresolvedStartWording
+        ? 'unspecified'
+        : 'exclude-trigger',
+    explicitStartDay: explicitIncludeStart || explicitExcludeStart,
+    holidayCalendar: skipUsHolidays ? 'us' : 'none',
+    explicitHolidayCalendar: skipUsHolidays || includeUsHolidays,
+    holidayCalendarMissing:
+      /\bholidays?\b/.test(normalized) &&
+      (!usHolidays || (!skipUsHolidays && !includeUsHolidays)),
   }
 }
 
@@ -397,6 +421,14 @@ export function resolveAskWhenCompletion(
       )
     }
 
+    if (context.holidayCalendarMissing) {
+      return missing(
+        'Which holiday calendar and counting rule should I use?',
+        'Name a supported holiday calendar and say whether its holidays should be skipped.',
+        original,
+      )
+    }
+
     if (!dateKey) {
       return missing(
         'What date should I start from?',
@@ -409,7 +441,11 @@ export function resolveAskWhenCompletion(
     // start date is excluded. Route to the general deadline calculator when
     // the user's wording requires a different direction or leaves start-day
     // inclusion unresolved, so explicit input is never silently discarded.
-    if (context.direction === 'before' || context.startDay === 'unspecified') {
+    if (
+      context.direction === 'before' ||
+      context.startDay !== 'exclude-trigger' ||
+      context.explicitStartDay
+    ) {
       return {
         kind: 'navigate',
         path: buildPath('/deadline-calculator', {
@@ -433,7 +469,7 @@ export function resolveAskWhenCompletion(
       path: buildPath('/business-days-calculator', {
         start: dateKey,
         days,
-        calendar: context.holidayCalendar === 'none' ? null : context.holidayCalendar,
+        calendar: context.explicitHolidayCalendar ? context.holidayCalendar : null,
       }),
       label: `${days} business ${days === 1 ? 'day' : 'days'}`,
       description:
