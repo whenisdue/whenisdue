@@ -18,6 +18,7 @@ export type RouteName =
   | 'within-days-guide'
   | 'net-30-vs-30-days-guide'
   | 'thirty-days-vs-one-month-guide'
+  | 'by-friday-guide'
   | 'deadline-weekend-extension-guide'
   | 'three-business-days'
   | 'four-business-days'
@@ -72,6 +73,7 @@ export const ROUTE_PATH_TO_NAME = {
   "/what-does-within-days-mean": 'within-days-guide',
   "/net-30-vs-30-days": 'net-30-vs-30-days-guide',
   "/30-days-vs-one-month": 'thirty-days-vs-one-month-guide',
+  "/does-by-date-include-date": 'by-friday-guide',
   "/what-if-a-deadline-falls-on-a-weekend": 'deadline-weekend-extension-guide',
   "/3-business-days-from-today": 'three-business-days',
   "/4-business-days-from-today": 'four-business-days',
@@ -311,6 +313,14 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
       openGraphDescription: 'Thirty days is a fixed count. One calendar month follows the calendar. Compare verified dates and see why the applicable wording matters.',
       twitterDescription: 'Compare 30 calendar days with one calendar month, including month-end and leap-year examples.',
       path: '/30-days-vs-one-month',
+    }
+  }
+
+  if (route === 'by-friday-guide') {
+    return {
+      title: 'Does “By Friday” Include Friday? | WhenIsDue',
+      description: 'Usually, yes: “by Friday” includes Friday. Learn what the phrase does—and does not—say about the hour, time zone, or rule behind a deadline.',
+      path: '/does-by-date-include-date',
     }
   }
 

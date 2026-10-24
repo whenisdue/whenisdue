@@ -67,6 +67,7 @@ import { getWorkingSchedule } from './workingSchedules.ts'
 import { DeadlineProvenanceDetails } from './DeadlineProvenanceDetails.tsx'
 import AnswerFeedback from './AnswerFeedback.tsx'
 import ThirtyDaysVsOneMonthGuidePage from './ThirtyDaysVsOneMonthGuidePage.tsx'
+import ByFridayGuidePage from './ByFridayGuidePage.tsx'
 import {
   getRouteFromPath,
   getRouteMetadata,
@@ -191,6 +192,10 @@ function App() {
 
   if (route === 'thirty-days-vs-one-month-guide') {
     return <ThirtyDaysVsOneMonthGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'by-friday-guide') {
+    return <ByFridayGuidePage onNavigate={navigate} />
   }
 
   if (route === 'deadline-weekend-extension-guide') {
@@ -6625,6 +6630,16 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
               }}
             >
               Does the start date count?
+            </a>
+
+            <a
+              href="/does-by-date-include-date"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/does-by-date-include-date')
+              }}
+            >
+              Does “by Friday” include Friday?
             </a>
 
             <a
