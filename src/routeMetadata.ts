@@ -19,6 +19,7 @@ export type RouteName =
   | 'net-30-vs-30-days-guide'
   | 'thirty-days-vs-one-month-guide'
   | 'by-friday-guide'
+  | 'stop-automatic-debit-guide'
   | 'deadline-weekend-extension-guide'
   | 'three-business-days'
   | 'four-business-days'
@@ -74,6 +75,7 @@ export const ROUTE_PATH_TO_NAME = {
   "/net-30-vs-30-days": 'net-30-vs-30-days-guide',
   "/30-days-vs-one-month": 'thirty-days-vs-one-month-guide',
   "/does-by-date-include-date": 'by-friday-guide',
+  "/stop-automatic-debit-3-business-days": 'stop-automatic-debit-guide',
   "/what-if-a-deadline-falls-on-a-weekend": 'deadline-weekend-extension-guide',
   "/3-business-days-from-today": 'three-business-days',
   "/4-business-days-from-today": 'four-business-days',
@@ -321,6 +323,14 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
       title: 'Does “By Friday” Include Friday? | WhenIsDue',
       description: 'Usually, yes: “by Friday” includes Friday. Learn what the phrase does—and does not—say about the hour, time zone, or rule behind a deadline.',
       path: '/does-by-date-include-date',
+    }
+  }
+
+  if (route === 'stop-automatic-debit-guide') {
+    return {
+      title: 'Stop an Automatic Debit: Notify Your Bank 3 Business Days Before | WhenIsDue',
+      description: 'For a covered preauthorized debit, notify your bank at least three business days before the transfer. The institution’s Regulation E business-day calendar controls.',
+      path: '/stop-automatic-debit-3-business-days',
     }
   }
 

@@ -68,6 +68,7 @@ import { DeadlineProvenanceDetails } from './DeadlineProvenanceDetails.tsx'
 import AnswerFeedback from './AnswerFeedback.tsx'
 import ThirtyDaysVsOneMonthGuidePage from './ThirtyDaysVsOneMonthGuidePage.tsx'
 import ByFridayGuidePage from './ByFridayGuidePage.tsx'
+import StopAutomaticDebitGuidePage from './StopAutomaticDebitGuidePage.tsx'
 import {
   getRouteFromPath,
   getRouteMetadata,
@@ -196,6 +197,10 @@ function App() {
 
   if (route === 'by-friday-guide') {
     return <ByFridayGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'stop-automatic-debit-guide') {
+    return <StopAutomaticDebitGuidePage onNavigate={navigate} />
   }
 
   if (route === 'deadline-weekend-extension-guide') {
