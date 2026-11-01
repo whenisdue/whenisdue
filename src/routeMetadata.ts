@@ -20,6 +20,7 @@ export type RouteName =
   | 'thirty-days-vs-one-month-guide'
   | 'by-friday-guide'
   | 'stop-automatic-debit-guide'
+  | 'postmarked-vs-received-guide'
   | 'deadline-weekend-extension-guide'
   | 'three-business-days'
   | 'four-business-days'
@@ -76,6 +77,7 @@ export const ROUTE_PATH_TO_NAME = {
   "/30-days-vs-one-month": 'thirty-days-vs-one-month-guide',
   "/does-by-date-include-date": 'by-friday-guide',
   "/stop-automatic-debit-3-business-days": 'stop-automatic-debit-guide',
+  "/postmarked-by-vs-received-by": 'postmarked-vs-received-guide',
   "/what-if-a-deadline-falls-on-a-weekend": 'deadline-weekend-extension-guide',
   "/3-business-days-from-today": 'three-business-days',
   "/4-business-days-from-today": 'four-business-days',
@@ -331,6 +333,14 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
       title: 'Stop an Automatic Debit: Notify Your Bank 3 Business Days Before | WhenIsDue',
       description: 'For a covered preauthorized debit, notify your bank at least three business days before the transfer. The institution’s Regulation E business-day calendar controls.',
       path: '/stop-automatic-debit-3-business-days',
+    }
+  }
+
+  if (route === 'postmarked-vs-received-guide') {
+    return {
+      title: 'Postmarked By vs. Received By: Which Date Counts? | WhenIsDue',
+      description: 'Will mailing it on the deadline count? Learn how postmark and received-by rules differ, what USPS marks, and how to document acceptance.',
+      path: '/postmarked-by-vs-received-by',
     }
   }
 

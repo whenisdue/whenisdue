@@ -117,6 +117,17 @@ export default function ByFridayGuidePage({
                 What does “within days” mean?
               </a>
             </li>
+            <li>
+              <a
+                href="/postmarked-by-vs-received-by"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onNavigate('/postmarked-by-vs-received-by')
+                }}
+              >
+                Postmarked by vs. received by
+              </a>
+            </li>
           </ul>
         </section>
 

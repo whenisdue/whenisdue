@@ -69,6 +69,7 @@ import AnswerFeedback from './AnswerFeedback.tsx'
 import ThirtyDaysVsOneMonthGuidePage from './ThirtyDaysVsOneMonthGuidePage.tsx'
 import ByFridayGuidePage from './ByFridayGuidePage.tsx'
 import StopAutomaticDebitGuidePage from './StopAutomaticDebitGuidePage.tsx'
+import PostmarkedVsReceivedGuidePage from './PostmarkedVsReceivedGuidePage.tsx'
 import {
   getRouteFromPath,
   getRouteMetadata,
@@ -201,6 +202,10 @@ function App() {
 
   if (route === 'stop-automatic-debit-guide') {
     return <StopAutomaticDebitGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'postmarked-vs-received-guide') {
+    return <PostmarkedVsReceivedGuidePage onNavigate={navigate} />
   }
 
   if (route === 'deadline-weekend-extension-guide') {
