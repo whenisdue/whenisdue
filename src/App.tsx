@@ -18236,14 +18236,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
               </p>
               <div className="return-answer-stack" aria-label="Return window explanation">
                 <p>
-                  <strong>What this means:</strong> A {parsedReturnWindow}-day
-                  return window starting {formatPlainDate(parsedPurchaseDate)}{' '}
-                  ends on {formatPlainDate(returnDeadline)}.
-                </p>
-                <p>
-                  <strong>Rule used:</strong> The start date counts as day 1.
+                  <strong>Rule used:</strong> The start date counts as Day 1.
                   Calendar days count, including weekends and public holidays;
-                  the date is not moved automatically.
+                  the deadline is not moved automatically.
                 </p>
               </div>
             </>
@@ -18997,41 +18992,30 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
           .return-answer-weekday {
             display: block;
-            margin: 0 0 10px;
-            font-size: clamp(1.85rem, 8.8vw, 2.6rem);
-            line-height: 0.98;
+            margin: 0 0 4px;
+            font-size: clamp(1.35rem, 5.8vw, 1.7rem);
+            line-height: 1.05;
           }
 
           .return-answer-date-main {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0;
-            font-size: clamp(3.55rem, 17vw, 5rem);
-            line-height: 0.82;
-            letter-spacing: -0.06em;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0 0.12em;
+            font-size: clamp(1.8rem, 8.4vw, 2.2rem);
+            line-height: 1.02;
+            letter-spacing: -0.045em;
           }
 
           .return-answer-month,
           .return-answer-day,
           .return-answer-year {
-            display: block;
+            display: inline;
           }
 
           .return-answer-comma {
-            display: none;
-          }
-
-          .return-answer-month {
-            font-size: 0.92em;
-          }
-
-          .return-answer-day {
-            font-size: 1.08em;
-          }
-
-          .return-answer-year {
-            font-size: 0.96em;
+            display: inline;
           }
 
           .return-answer-context {
@@ -19052,10 +19036,11 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           .return-answer-quick-picks {
             grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 5px;
+            grid-column: 1 / -1;
           }
 
           .return-answer-quick-picks button {
-            min-height: 42px;
+            min-height: 44px;
             padding: 6px 3px;
             border-radius: 9px;
             font-size: 0.72rem;
@@ -19132,19 +19117,30 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           }
 
           .return-answer-date-main {
-            font-size: clamp(3.25rem, 16.5vw, 4.6rem);
+            font-size: clamp(1.8rem, 8.4vw, 2.2rem);
           }
 
           .return-answer-weekday {
-            font-size: clamp(1.7rem, 8vw, 2.3rem);
+            font-size: clamp(1.35rem, 5.8vw, 1.7rem);
+          }
+
+          .return-answer-controls {
+            grid-template-columns: minmax(0, 1.25fr) minmax(6.75rem, 0.75fr);
+          }
+        }
+
+        @media (max-width: 360px) {
+          .return-answer-first-page .calculator-page-header {
+            gap: 8px;
+          }
+
+          .return-answer-first-page .calculator-page-brand img {
+            width: 150px;
+            max-width: 100%;
           }
 
           .return-answer-controls {
             grid-template-columns: 1fr;
-          }
-
-          .return-answer-quick-picks {
-            grid-column: auto;
           }
         }
       `}</style>
