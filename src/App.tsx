@@ -1989,7 +1989,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
         .start-date-answer-results small {
           display: block;
           margin-top: 6px;
-          color: #64798f;
+          color: #536b80;
           font-size: 0.96rem;
           font-weight: 800;
         }
@@ -2521,7 +2521,7 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
         .weekends-zero-example-grid p {
           margin: 8px 0 0;
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.9rem;
           line-height: 1.45;
         }
@@ -2986,7 +2986,7 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
         .holidays-zero-example-grid p {
           margin: 8px 0 0;
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.9rem;
           line-height: 1.45;
         }
@@ -6800,7 +6800,7 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 
         .within-zero-example-grid p {
           margin: 8px 0 0;
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.9rem;
           line-height: 1.45;
         }
@@ -9795,6 +9795,7 @@ type AskWhenSuggestionRequest = {
 type AskWhenBoxProps = NavigationProps & {
   holidayCalendar: HolidayCalendarId
   today: PlainDate
+  headingLevel?: 'h1' | 'h2'
   onAssistChange?: (state: AskWhenAssistState) => void
   suggestionRequest?: AskWhenSuggestionRequest | null
   onSuggestionApplied?: () => void
@@ -9804,10 +9805,12 @@ function AskWhenBox({
   onNavigate,
   holidayCalendar,
   today,
+  headingLevel = 'h2',
   onAssistChange,
   suggestionRequest,
   onSuggestionApplied,
 }: AskWhenBoxProps) {
+  const Heading = headingLevel
   const [query, setQuery] = useState(
     () => new URLSearchParams(window.location.search).get('q') ?? '',
   )
@@ -10150,9 +10153,9 @@ function AskWhenBox({
     <section className="ask-when-box" aria-labelledby="ask-when-title">
       <div className={`ask-when-heading ${completionPrompt ? 'is-missing-fact' : ''}`}>
         <span>{completionPrompt ? 'One more thing' : 'Ask WhenIsDue'}</span>
-        <h2 id="ask-when-title">
+        <Heading id="ask-when-title">
           {completionPrompt ? completionPrompt.label : 'What do you need to know?'}
-        </h2>
+        </Heading>
         <p>
           {completionPrompt
             ? completionPrompt.description
@@ -10302,7 +10305,7 @@ function AskWhenBox({
           text-transform: uppercase;
         }
 
-        .ask-when-heading h2 {
+        .ask-when-heading :is(h1, h2) {
           margin: 0;
           color: #10213b;
           font-size: clamp(2rem, 4.2vw, 3.15rem);
@@ -10326,7 +10329,7 @@ function AskWhenBox({
           margin-bottom: 7px;
         }
 
-        .ask-when-heading.is-missing-fact h2 {
+        .ask-when-heading.is-missing-fact :is(h1, h2) {
           max-width: 680px;
           font-size: clamp(2rem, 3.8vw, 3rem);
           line-height: 0.98;
@@ -10743,7 +10746,7 @@ function DeadlineCountingGuideLinks({
         }
 
         .deadline-guide-links-heading > span {
-          color: #7a8da1;
+          color: #566b82;
           font-size: 0.78rem;
           font-weight: 900;
           letter-spacing: 0.06em;
@@ -10803,7 +10806,7 @@ function DeadlineCountingGuideLinks({
         }
 
         .deadline-guide-links-grid span {
-          color: #6b8095;
+          color: #566b82;
           font-size: 0.88rem;
           line-height: 1.45;
         }
@@ -11021,6 +11024,7 @@ function HomePage({ onNavigate }: NavigationProps) {
               onNavigate={onNavigate}
               holidayCalendar={holidayCalendar}
               today={today}
+              headingLevel="h1"
               onAssistChange={setAskAssist}
               suggestionRequest={askSuggestionRequest}
               onSuggestionApplied={() => setAskSuggestionRequest(null)}
@@ -11186,7 +11190,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           color: #9bc8b2;
         }
 
-        .date-home-editorial-hero .ask-when-heading h2 {
+        .date-home-editorial-hero .ask-when-heading :is(h1, h2) {
           max-width: 520px;
           color: #fffaf2;
           font-size: clamp(3.25rem, 5vw, 5rem);
@@ -11442,7 +11446,7 @@ function HomePage({ onNavigate }: NavigationProps) {
             font-size: 0.68rem;
           }
 
-          .date-home-editorial-hero .ask-when-heading h2 {
+          .date-home-editorial-hero .ask-when-heading :is(h1, h2) {
             max-width: 330px;
             font-size: clamp(2.18rem, 10vw, 2.9rem);
             line-height: 0.94;
@@ -11497,13 +11501,13 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-editorial-hero:has(.ask-when-form input:focus)
-            .ask-when-heading h2 {
+            .ask-when-heading :is(h1, h2) {
             max-width: 310px;
             font-size: clamp(1.9rem, 8.8vw, 2.45rem);
             line-height: 0.94;
           }
 
-          .ask-when-heading.is-missing-fact h2 {
+          .ask-when-heading.is-missing-fact :is(h1, h2) {
             max-width: 100%;
             font-size: clamp(1.8rem, 8.2vw, 2.35rem);
             line-height: 0.98;
@@ -12087,7 +12091,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           min-height: 40px;
           display: inline-flex;
           align-items: center;
-          color: #617992;
+          color: #52687e;
           font-size: 0.9rem;
           font-weight: 800;
           text-decoration: none;
@@ -12684,7 +12688,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-business-answer span {
-          color: #637a94;
+          color: #586b80;
           font-size: 0.78rem;
           font-weight: 800;
         }
@@ -12698,12 +12702,12 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .date-home-business-answer small {
           margin-top: 3px;
-          color: #7a899b;
+          color: #586b80;
         }
 
         .date-home-rule {
           margin: 9px 2px 0;
-          color: #667b91;
+          color: #586b80;
           font-size: 0.84rem;
           line-height: 1.45;
         }
@@ -12754,7 +12758,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         .date-home-tools-heading p {
           max-width: 600px;
           margin: 7px 0 0;
-          color: #667b91;
+          color: #586b80;
           font-size: 0.92rem;
           line-height: 1.45;
         }
@@ -14329,7 +14333,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             grid-column: 2;
             grid-row: 2;
             margin: 0;
-            color: #6f8192;
+            color: #596f82;
             font-size: 0.74rem;
             font-weight: 650;
             line-height: 1.32;
@@ -14888,7 +14892,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           --business-paper: var(--wid-result-surface);
           --business-paper-soft: var(--wid-surface-soft);
           --business-navy: #12365d;
-          --business-muted: #637b92;
+          --business-muted: #526a80;
           --business-green: #23785d;
           min-height: 100vh;
           background: var(--wid-bg);
@@ -15235,7 +15239,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
         .business-answer-quick-grid small {
           margin-top: 6px;
-          color: #6f8192;
+          color: #596f82;
           font-size: 0.85rem;
         }
 
@@ -16495,7 +16499,7 @@ function ResultActions({
           align-items: center;
           justify-content: center;
           padding: 4px 8px;
-          color: #64798f;
+          color: #536b80;
           font-size: 0.76rem;
           font-weight: 850;
           cursor: pointer;
@@ -18677,7 +18681,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       <style>{`
         .return-answer-first-page {
           --return-ink: #113356;
-          --return-muted: #657a8f;
+          --return-muted: #4f687f;
           --return-accent: #2d7461;
           --return-panel: var(--wid-result-surface);
           --return-panel-deep: var(--wid-surface-soft);
@@ -18907,7 +18911,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-window-start-date-hint {
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.74rem;
           font-weight: 550;
           line-height: 1.32;
@@ -18995,7 +18999,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         .return-answer-detail-body > p {
           max-width: 720px;
           margin: 0;
-          color: #63798f;
+          color: #4f687f;
           font-size: 0.95rem;
           line-height: 1.58;
         }
@@ -19112,7 +19116,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         .return-window-guide-grid p {
           margin: 8px 0 0;
-          color: #63798f;
+          color: #4f687f;
           font-size: 0.93rem;
           line-height: 1.58;
         }
@@ -19136,7 +19140,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-answer-bottom-nav a {
-          color: #667b8f;
+          color: #52687e;
           font-size: 0.88rem;
           font-weight: 800;
           text-decoration: none;

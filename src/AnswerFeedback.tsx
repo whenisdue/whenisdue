@@ -206,7 +206,7 @@ export default function AnswerFeedback() {
         .answer-feedback {
           width: min(100%, 620px);
           margin: 12px auto 0;
-          color: #66798d;
+          color: #566b82;
           font-size: 0.78rem;
           line-height: 1.4;
           text-align: center;
