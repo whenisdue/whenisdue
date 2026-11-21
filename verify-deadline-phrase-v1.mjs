@@ -62,16 +62,19 @@ function date(value) {
   assert.equal(toDateKey(result.answer.answerDate), '2026-08-10')
 }
 
-// "within" is supported but explicitly flagged as ambiguous wording.
+// "within" is supported as a forward deadline, with the default counting
+// convention surfaced as an assumption when the caller does not specify it.
 {
   const result = interpretDeadlinePhrase(
     'within 5 business days after 2026-08-10',
   )
 
   assert(result)
+  assert.equal(result.classification, 'resolved')
+  assert.equal(toDateKey(result.answer.answerDate), '2026-08-17')
   assert(
-    result.ambiguities.includes('within-wording'),
-    'Expected "within" wording to be flagged',
+    result.ambiguities.includes('start-day-rule-defaulted'),
+    'Expected the default start-day convention to be disclosed',
   )
 }
 
@@ -80,7 +83,10 @@ function date(value) {
   const withoutToday = interpretDeadlinePhrase(
     '5 business days from today',
   )
-  assert.equal(withoutToday, null)
+  assert(withoutToday)
+  assert.equal(withoutToday.classification, 'underspecified')
+  assert.equal(withoutToday.answer, null)
+  assert(withoutToday.missing.includes('trigger-date'))
 
   const withToday = interpretDeadlinePhrase(
     '5 business days from today',
@@ -147,7 +153,10 @@ function date(value) {
 
   const summary = summarizeDeadlineInterpretation(result)
   assert.deepEqual(summary, {
+    classification: 'resolved',
     trigger: '2026-08-10',
+    triggerEvent: null,
+    triggerEventText: null,
     direction: 'after',
     duration: 5,
     unit: 'business days',
@@ -162,6 +171,7 @@ function date(value) {
       'start-day-rule-defaulted',
       'end-day-adjustment-defaulted',
     ],
+    missing: [],
   })
 }
 
