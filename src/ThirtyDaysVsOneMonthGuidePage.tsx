@@ -1,4 +1,6 @@
 import AnswerFeedback from './AnswerFeedback.tsx'
+import PublicSiteFooter from './PublicSiteFooter.tsx'
+import PublicSiteHeader from './PublicSiteHeader.tsx'
 
 type ThirtyDaysVsOneMonthGuidePageProps = {
   onNavigate: (path: string) => void
@@ -35,30 +37,7 @@ export default function ThirtyDaysVsOneMonthGuidePage({
 }: ThirtyDaysVsOneMonthGuidePageProps) {
   return (
     <main className="page-shell thirty-month-page">
-      <header className="calculator-page-header" aria-label="WhenIsDue navigation">
-        <a
-          className="calculator-page-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-
-        <a
-          className="calculator-page-all-link"
-          href="/calculators"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/calculators')
-          }}
-        >
-          All calculators
-        </a>
-      </header>
+      <PublicSiteHeader onNavigate={onNavigate} />
 
       <article className="thirty-month-shell">
         <header className="thirty-month-hero">
@@ -594,6 +573,10 @@ export default function ThirtyDaysVsOneMonthGuidePage({
           }
         }
       `}</style>
+      <PublicSiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. The document or rule that sets the period controls."
+      />
     </main>
   )
 }

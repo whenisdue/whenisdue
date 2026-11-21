@@ -24,67 +24,36 @@ function assertIncludes(haystack, needle, message) {
 }
 
 const app = read('src/App.tsx')
+const routeMetadata = read('src/routeMetadata.ts')
+const crawlGenerator = read('scripts/generate-crawl-pages.mjs')
 const robots = read('public/robots.txt')
 const sitemap = read('public/sitemap.xml')
 
-const publicRoutes = [
+const routeMapMatch = routeMetadata.match(
+  /export const ROUTE_PATH_TO_NAME = \{([\s\S]*?)\} as const/,
+)
+assert(routeMapMatch, 'Route path-to-name map is missing.')
+const routeEntries = [...routeMapMatch[1].matchAll(/^\s*"([^"]+)":\s*'([^']+)'/gm)]
+  .map((match) => ({ path: match[1], route: match[2] }))
+const noindexMatch = routeMetadata.match(
+  /const NOINDEX_ROUTES = new Set<RouteName>\(\[([^\]]+)\]\)/,
+)
+assert(noindexMatch, 'Noindex route declarations are missing.')
+const noindexNames = new Set([...noindexMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1]))
+const publicRoutes = routeEntries.filter((entry) => !noindexNames.has(entry.route)).map((entry) => entry.path)
+const noindexRoutes = routeEntries.filter((entry) => noindexNames.has(entry.route)).map((entry) => entry.path)
+const requiredPublicRoutes = [
   '/',
   '/calculators',
+  '/guides',
+  '/net-30-and-2-10-net-30',
+  '/return-window-deadline-guide',
   '/business-days-calculator',
-  '/business-days-between-dates',
-  '/business-hours-deadline-calculator',
-  '/next-payday-calculator',
   '/deadline-calculator',
-  '/invoice-due-date-calculator',
-  '/return-window-calculator',
-  '/free-trial-calculator',
-  '/shipping-delivery-range-calculator',
-  '/2-10-net-30-calculator',
-  '/notice-period-calculator',
-  '/subscription-renewal-calculator',
-  '/3-business-days-from-today',
-  '/4-business-days-from-today',
-  '/5-business-days-from-today',
-  '/7-business-days-from-today',
-  '/8-business-days-from-today',
-  '/10-business-days-from-today',
-  '/20-business-days-from-today',
-  '/30-business-days-from-today',
-  '/net-7-due-date',
-  '/net-15-due-date',
-  '/net-30-due-date',
-  '/net-45-due-date',
-  '/net-60-due-date',
-  '/net-90-due-date',
-  '/does-the-start-date-count',
-  '/do-weekends-count-as-business-days',
-  '/do-public-holidays-count-as-business-days',
-  '/what-does-within-days-mean',
-  '/net-30-vs-30-days',
-  '/what-if-a-deadline-falls-on-a-weekend',
-]
-
-const dynamicMetadataRoutes = new Set([
-  '/3-business-days-from-today',
-  '/4-business-days-from-today',
-  '/5-business-days-from-today',
-  '/7-business-days-from-today',
-  '/8-business-days-from-today',
-  '/10-business-days-from-today',
-  '/20-business-days-from-today',
-  '/30-business-days-from-today',
-  '/net-7-due-date',
-  '/net-15-due-date',
-  '/net-30-due-date',
-  '/net-45-due-date',
-  '/net-60-due-date',
-  '/net-90-due-date',
-])
-
-const noindexRoutes = [
-  '/workspace',
-  '/typing',
-  '/saved-calculations',
+  '/about',
+  '/privacy',
+  '/terms',
+  '/contact',
 ]
 
 const base = 'https://www.whenisdue.com'
@@ -108,8 +77,8 @@ assertIncludes(
 )
 
 assertIncludes(
-  app,
-  "route === 'saved-calculations'",
+  routeMetadata,
+  "'saved-calculations'",
   'Saved Calculations must remain in the noindex route group.',
 )
 
@@ -126,26 +95,26 @@ assertIncludes(
 )
 
 assertIncludes(
-  app,
-  "https://www.whenisdue.com/#organization",
+  crawlGenerator,
+  "${SITE_ORIGIN}/#organization",
   'Stable Organization structured-data ID is missing.',
 )
 
 assertIncludes(
-  app,
-  "https://www.whenisdue.com/#website",
+  crawlGenerator,
+  "${SITE_ORIGIN}/#website",
   'Stable WebSite structured-data ID is missing.',
 )
 
 assertIncludes(
-  app,
+  routeMetadata,
   "path: '/deadline-calculator'",
   'Deadline calculator metadata path is missing.',
 )
 
 assertIncludes(
-  app,
-  "pathname === '/deadline-calculator'",
+  routeMetadata,
+  'ROUTE_PATH_TO_NAME[pathname as keyof typeof ROUTE_PATH_TO_NAME]',
   'Deadline calculator route resolver is missing.',
 )
 
@@ -182,43 +151,35 @@ for (const route of publicRoutes) {
     `Public route missing from sitemap: ${route}`,
   )
 
-  if (route !== '/') {
-    if (!dynamicMetadataRoutes.has(route)) {
-      assertIncludes(
-        app,
-        `path: '${route}'`,
-        `Route metadata path missing from App.tsx: ${route}`,
-      )
-    }
+}
 
-    assertIncludes(
-      app,
-      `pathname === '${route}'`,
-      `Route resolver missing from App.tsx: ${route}`,
-    )
-  }
+for (const route of requiredPublicRoutes) {
+  assert(
+    publicRoutes.includes(route),
+    `Required public route missing from route metadata: ${route}`,
+  )
 }
 
 assertIncludes(
-  app,
+  routeMetadata,
   "path: `/${dayCount}-business-days-from-today`",
   'Dynamic business-days metadata path template is missing.',
 )
 
 assertIncludes(
-  app,
+  routeMetadata,
   "path: `/net-${dayCount}-due-date`",
   'Dynamic Net-term metadata path template is missing.',
 )
 
 assertIncludes(
-  app,
+  routeMetadata,
   "'four-business-days': 4",
   'Business-day route-to-day-count metadata map is incomplete.',
 )
 
 assertIncludes(
-  app,
+  routeMetadata,
   "'net-30': 30",
   'Net-term route-to-day-count metadata map is incomplete.',
 )

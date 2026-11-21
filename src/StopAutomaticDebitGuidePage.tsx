@@ -1,4 +1,6 @@
 import AnswerFeedback from './AnswerFeedback.tsx'
+import PublicSiteFooter from './PublicSiteFooter.tsx'
+import PublicSiteHeader from './PublicSiteHeader.tsx'
 
 type StopAutomaticDebitGuidePageProps = {
   onNavigate: (path: string) => void
@@ -9,30 +11,7 @@ export default function StopAutomaticDebitGuidePage({
 }: StopAutomaticDebitGuidePageProps) {
   return (
     <main className="page-shell stop-debit-page">
-      <header className="calculator-page-header" aria-label="WhenIsDue navigation">
-        <a
-          className="calculator-page-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-
-        <a
-          className="calculator-page-all-link"
-          href="/calculators"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/calculators')
-          }}
-        >
-          All calculators
-        </a>
-      </header>
+      <PublicSiteHeader onNavigate={onNavigate} />
 
       <article className="stop-debit-shell">
         <header className="stop-debit-hero">
@@ -496,6 +475,10 @@ export default function StopAutomaticDebitGuidePage({
           }
         }
       `}</style>
+      <PublicSiteFooter
+        onNavigate={onNavigate}
+        planningNote="For general information only. Confirm the stop-payment process and business-day calendar with your financial institution."
+      />
     </main>
   )
 }

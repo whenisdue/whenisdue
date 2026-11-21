@@ -1,0 +1,144 @@
+.guide-article-page {
+  color: #212850;
+}
+
+.guide-article {
+  width: min(100%, 860px);
+  margin: 28px auto 0;
+}
+
+.guide-article-hero {
+  padding: clamp(22px, 4vw, 40px);
+  border: 1px solid rgba(33, 40, 80, 0.12);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.guide-article-eyebrow {
+  margin: 0 0 8px;
+  color: #167f78;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guide-article-hero h1 {
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(2rem, 5.1vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.guide-article-lede {
+  max-width: 720px;
+  margin: 13px 0 0;
+  color: #5f7086;
+  font-size: 1.08rem;
+  line-height: 1.6;
+}
+
+.guide-article-section,
+.guide-article-related,
+.guide-article-sources {
+  margin-top: 25px;
+  padding: 0 clamp(2px, 2vw, 14px);
+}
+
+.guide-article-section h2,
+.guide-article-related h2,
+.guide-article-sources h2 {
+  margin: 0 0 9px;
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.guide-article-section p,
+.guide-article-section li,
+.guide-article-related li,
+.guide-article-sources li {
+  color: #485b72;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.guide-article-section p {
+  margin: 0 0 12px;
+}
+
+.guide-article-section ul,
+.guide-article-related ul,
+.guide-article-sources ul {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 13px;
+  padding-left: 1.25rem;
+}
+
+.guide-article-section li strong {
+  color: #212850;
+}
+
+.guide-article-example {
+  padding: 20px 22px 14px;
+  border: 1px solid rgba(23, 127, 120, 0.16);
+  border-radius: 16px;
+  background: #f3f8f7;
+}
+
+.guide-article-example .guide-article-eyebrow {
+  margin-bottom: 6px;
+}
+
+.guide-article-related,
+.guide-article-sources {
+  padding-top: 17px;
+  border-top: 1px solid rgba(33, 40, 80, 0.1);
+}
+
+.guide-article-related a,
+.guide-article-sources a {
+  color: #146c69;
+  font-weight: 720;
+  text-underline-offset: 0.18em;
+}
+
+.guide-article-page .site-footer {
+  margin-top: 26px;
+}
+
+@media (max-width: 640px) {
+  .guide-article {
+    margin-top: 18px;
+  }
+
+  .guide-article-hero {
+    padding: 22px 17px;
+    border-radius: 16px;
+  }
+
+  .guide-article-lede {
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .guide-article-section,
+  .guide-article-related,
+  .guide-article-sources {
+    margin-top: 21px;
+  }
+
+  .guide-article-section p,
+  .guide-article-section li,
+  .guide-article-related li,
+  .guide-article-sources li {
+    font-size: 0.96rem;
+    line-height: 1.62;
+  }
+
+  .guide-article-example {
+    padding: 16px 15px 10px;
+  }
+}

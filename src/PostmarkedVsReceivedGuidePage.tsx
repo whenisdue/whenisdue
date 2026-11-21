@@ -1,4 +1,6 @@
 import AnswerFeedback from './AnswerFeedback.tsx'
+import PublicSiteFooter from './PublicSiteFooter.tsx'
+import PublicSiteHeader from './PublicSiteHeader.tsx'
 
 type PostmarkedVsReceivedGuidePageProps = {
   onNavigate: (path: string) => void
@@ -9,30 +11,7 @@ export default function PostmarkedVsReceivedGuidePage({
 }: PostmarkedVsReceivedGuidePageProps) {
   return (
     <main className="page-shell postmark-guide-page">
-      <header className="calculator-page-header" aria-label="WhenIsDue navigation">
-        <a
-          className="calculator-page-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-
-        <a
-          className="calculator-page-all-link"
-          href="/calculators"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/calculators')
-          }}
-        >
-          All calculators
-        </a>
-      </header>
+      <PublicSiteHeader onNavigate={onNavigate} />
 
       <article className="postmark-guide-shell">
         <header className="postmark-guide-hero">
@@ -502,6 +481,10 @@ export default function PostmarkedVsReceivedGuidePage({
           }
         }
       `}</style>
+      <PublicSiteFooter
+        onNavigate={onNavigate}
+        planningNote="For planning only. The recipient’s instructions and applicable rules control."
+      />
     </main>
   )
 }
