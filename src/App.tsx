@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { analyzeAskWhenSuggestions } from './askWhenIntentLibrary'
 import { resolveAskWhenCompletion } from './askWhenCompletion'
 import './App.css'
@@ -65,6 +65,13 @@ import {
 } from './deadlineRuleProfileExperiment.ts'
 import { getWorkingSchedule } from './workingSchedules.ts'
 import { DeadlineProvenanceDetails } from './DeadlineProvenanceDetails.tsx'
+import {
+  buildReturnWindowShareUrl,
+  calculateReturnWindowDeadline,
+  isReturnWindowCountingRule,
+  parseReturnWindowCountingRule,
+  type ReturnWindowCountingRule,
+} from './returnWindowCalculation.ts'
 import AnswerFeedback from './AnswerFeedback.tsx'
 import ThirtyDaysVsOneMonthGuidePage from './ThirtyDaysVsOneMonthGuidePage.tsx'
 import ByFridayGuidePage from './ByFridayGuidePage.tsx'
@@ -83,6 +90,7 @@ type SavedDeadline = {
   category: CalculatorMode
   dueDate: string
   startDate?: string
+  returnWindowRule?: ReturnWindowCountingRule
   done: boolean
   createdAt: string
 }
@@ -16026,6 +16034,7 @@ type ResultActionsProps = {
   time?: string
   variant?: 'default' | 'return-window'
   portableText?: string
+  shareUrl?: string
 }
 
 function ResultActions({
@@ -16035,13 +16044,13 @@ function ResultActions({
   time,
   variant = 'default',
   portableText,
+  shareUrl,
 }: ResultActionsProps) {
   const [message, setMessage] = useState<string | null>(null)
+  const actionUrl = shareUrl ?? window.location.href
+  const savedCalculationUrl = shareUrl ?? `${window.location.pathname}${window.location.search}`
   const [isFavorite, setIsFavorite] = useState(() =>
-    isFavoriteCalculation(
-      title,
-      `${window.location.pathname}${window.location.search}`,
-    ),
+    isFavoriteCalculation(title, savedCalculationUrl),
   )
   const dateText = formatPlainDate(date)
   const shareText =
@@ -16052,7 +16061,7 @@ function ResultActions({
       setIsFavorite(
         isFavoriteCalculation(
           title,
-          `${window.location.pathname}${window.location.search}`,
+          savedCalculationUrl,
         ),
       )
     }
@@ -16061,7 +16070,7 @@ function ResultActions({
     return () => {
       window.removeEventListener(SAVED_CALCULATIONS_EVENT, refreshFavoriteState)
     }
-  }, [title])
+  }, [savedCalculationUrl, title])
 
   useEffect(() => {
     if (
@@ -16082,9 +16091,9 @@ function ResultActions({
 
   async function copyExactLink() {
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      await navigator.clipboard.writeText(actionUrl)
       setMessage('Link copied.')
-      recordRecentCalculation(title, date, details)
+      recordRecentCalculation(title, date, details, savedCalculationUrl)
       trackWhenIsDueEvent('copy_exact_link', {
         title,
         result_date: toDateKey(date),
@@ -16104,7 +16113,7 @@ function ResultActions({
     try {
       await navigator.clipboard.writeText(shareText)
       setMessage('Copied.')
-      recordRecentCalculation(title, date, details)
+      recordRecentCalculation(title, date, details, savedCalculationUrl)
       trackWhenIsDueEvent('copy_result', { title, result_date: toDateKey(date), status: 'success' })
     } catch {
       setMessage('Copy is not available in this browser.')
@@ -16127,10 +16136,10 @@ function ResultActions({
       await navigator.share({
         title,
         text: shareText,
-        url: window.location.href,
+        url: actionUrl,
       })
       setMessage('Shared.')
-      recordRecentCalculation(title, date, details)
+      recordRecentCalculation(title, date, details, savedCalculationUrl)
       trackWhenIsDueEvent('share_result', { title, result_date: toDateKey(date), status: 'success' })
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
@@ -16194,7 +16203,7 @@ function ResultActions({
     link.remove()
     URL.revokeObjectURL(url)
     setMessage('Calendar file created.')
-    recordRecentCalculation(title, date, details)
+    recordRecentCalculation(title, date, details, savedCalculationUrl)
     trackWhenIsDueEvent('calendar_export', {
       title,
       result_date: toDateKey(date),
@@ -16205,9 +16214,9 @@ function ResultActions({
   }
 
   function toggleFavorite() {
-    const nextFavoriteState = toggleFavoriteCalculation(title, date, details)
+    const nextFavoriteState = toggleFavoriteCalculation(title, date, details, savedCalculationUrl)
     setIsFavorite(nextFavoriteState)
-    recordRecentCalculation(title, date, details)
+    recordRecentCalculation(title, date, details, savedCalculationUrl)
     setMessage(nextFavoriteState ? 'Saved to favorites.' : 'Removed from favorites.')
     trackWhenIsDueEvent(
       nextFavoriteState ? 'favorite_added' : 'favorite_removed',
@@ -18132,11 +18141,15 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       getAmountLimit('return'),
     ),
   )
+  const [countingRule, setCountingRule] = useState<ReturnWindowCountingRule>(() =>
+    parseReturnWindowCountingRule(new URLSearchParams(window.location.search).get('rule')),
+  )
   const [title, setTitle] = useState(getDefaultTitle('return'))
   const [savedDeadlines, setSavedDeadlines] = useState<SavedDeadline[]>(() =>
     loadSavedDeadlines(),
   )
   const [storageMessage, setStorageMessage] = useState<string | null>(null)
+  const [liveAnnouncement, setLiveAnnouncement] = useState('')
 
   const parsedPurchaseDate = parsePlainDate(purchaseDate)
   const parsedReturnWindow = parseInteger(returnWindow)
@@ -18147,11 +18160,21 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
   const titleValidationMessage = getSaveTitleValidationMessage(title)
   const returnDeadline =
     parsedPurchaseDate && parsedReturnWindow !== null && !validationMessage
-      ? addCalendarDays(
+      ? calculateReturnWindowDeadline(
           parsedPurchaseDate,
-          Math.max(parsedReturnWindow - 1, 0),
+          parsedReturnWindow,
+          countingRule,
         )
       : null
+  const returnWindowShareUrl = buildReturnWindowShareUrl(window.location.href, {
+    start: purchaseDate,
+    days: returnWindow,
+    rule: countingRule,
+  })
+  const resultAnnouncementKey = returnDeadline
+    ? `${toDateKey(returnDeadline)}:${countingRule}`
+    : `invalid:${validationMessage ?? ''}:${countingRule}`
+  const previousAnnouncementKey = useRef(resultAnnouncementKey)
   const canSave = Boolean(
     returnDeadline &&
       parsedPurchaseDate &&
@@ -18159,9 +18182,58 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       !titleValidationMessage,
   )
 
+  useLayoutEffect(() => {
+    const url = new URL(returnWindowShareUrl)
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    )
+  }, [returnWindowShareUrl])
+
   useEffect(() => {
-    syncShareableQueryParams({ start: purchaseDate, days: returnWindow })
-  }, [purchaseDate, returnWindow])
+    function syncFromBrowserHistory() {
+      if (window.location.pathname !== '/return-window-calculator') {
+        return
+      }
+
+      const params = new URLSearchParams(window.location.search)
+      const nextDate = params.get('start')
+      const nextDays = params.get('days')
+      setPurchaseDate(
+        nextDate && parsePlainDate(nextDate) ? nextDate : todayInputValue(),
+      )
+      const parsedDays = nextDays ? parseInteger(nextDays) : null
+      setReturnWindow(
+        parsedDays !== null && parsedDays > 0 && parsedDays <= getAmountLimit('return')
+          ? String(parsedDays)
+          : '30',
+      )
+      setCountingRule(parseReturnWindowCountingRule(params.get('rule')))
+    }
+
+    window.addEventListener('popstate', syncFromBrowserHistory)
+    return () => window.removeEventListener('popstate', syncFromBrowserHistory)
+  }, [])
+
+  useEffect(() => {
+    if (previousAnnouncementKey.current === resultAnnouncementKey) {
+      return
+    }
+
+    previousAnnouncementKey.current = resultAnnouncementKey
+    if (!returnDeadline) {
+      setLiveAnnouncement('')
+      return
+    }
+
+    const ruleAnnouncement = countingRule === 'next-day'
+      ? 'Counting begins the next day.'
+      : 'The start date counts as day one.'
+    setLiveAnnouncement(
+      `${formatWeekday(returnDeadline)}, ${formatPlainDate(returnDeadline)}. ${ruleAnnouncement}`,
+    )
+  }, [countingRule, resultAnnouncementKey, returnDeadline])
 
   function saveReturnDeadline() {
     if (!returnDeadline || !parsedPurchaseDate || titleValidationMessage) {
@@ -18174,6 +18246,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       category: 'return',
       dueDate: toDateKey(returnDeadline),
       startDate: toDateKey(parsedPurchaseDate),
+      returnWindowRule: countingRule,
       done: false,
       createdAt: new Date().toISOString(),
     }
@@ -18202,7 +18275,6 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       <section
         className="return-answer-hero"
         aria-labelledby="return-window-title"
-        aria-live="polite"
       >
         <div className="return-answer-copy">
           <p className="return-answer-eyebrow">Return window calculator</p>
@@ -18218,27 +18290,56 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                   {formatWeekday(returnDeadline)},
                 </span>
                 <span className="return-answer-date-main" aria-hidden="true">
-                  <span className="return-answer-month">
-                    {new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(returnDeadline.year, returnDeadline.month - 1, returnDeadline.day)))}
-                  </span>
-                  <span className="return-answer-day">
-                    {returnDeadline.day}
-                  </span>
-                  <span className="return-answer-comma">,</span>
-                  <span className="return-answer-year">
-                    {returnDeadline.year}
-                  </span>
+                  {new Intl.DateTimeFormat('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                    timeZone: 'UTC',
+                  }).format(new Date(Date.UTC(
+                    returnDeadline.year,
+                    returnDeadline.month - 1,
+                    returnDeadline.day,
+                  )))}
                 </span>
               </strong>
               <p className="return-answer-context">
                 {parsedReturnWindow}-day window · Starts{' '}
                 {formatPlainDate(parsedPurchaseDate)}
               </p>
-              <div className="return-answer-stack" aria-label="Return window explanation">
-                <p>
-                  <strong>Rule used:</strong> The start date counts as Day 1.
-                  Calendar days count, including weekends and public holidays;
-                  the deadline is not moved automatically.
+              <div className="return-answer-stack">
+                <fieldset className="return-window-counting-rule">
+                  <legend>When does counting begin?</legend>
+                  <div className="return-window-counting-options">
+                    <label className={countingRule === 'start-date' ? 'is-selected' : ''}>
+                      <input
+                        type="radio"
+                        name="return-window-counting-rule"
+                        value="start-date"
+                        checked={countingRule === 'start-date'}
+                        onChange={() => setCountingRule('start-date')}
+                      />
+                      <span>On the start date</span>
+                      {countingRule === 'start-date' ? (
+                        <span className="return-window-counting-check" aria-hidden="true">✓</span>
+                      ) : null}
+                    </label>
+                    <label className={countingRule === 'next-day' ? 'is-selected' : ''}>
+                      <input
+                        type="radio"
+                        name="return-window-counting-rule"
+                        value="next-day"
+                        checked={countingRule === 'next-day'}
+                        onChange={() => setCountingRule('next-day')}
+                      />
+                      <span>The next day</span>
+                      {countingRule === 'next-day' ? (
+                        <span className="return-window-counting-check" aria-hidden="true">✓</span>
+                      ) : null}
+                    </label>
+                  </div>
+                </fieldset>
+                <p className="return-window-counting-note">
+                  Calendar days count, including weekends and holidays. The date is not moved automatically. Check your retailer&apos;s policy.
                 </p>
               </div>
             </>
@@ -18255,12 +18356,13 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           aria-label="Change return window"
         >
           <label>
-            <span>Return period starts</span>
+            <span className="return-window-field-label">Return period starts</span>
             <input
               type="date"
               min="1900-01-01"
               max="2100-12-31"
               value={purchaseDate}
+              aria-describedby="return-window-start-date-hint"
               onChange={(event) => {
                 setPurchaseDate(event.target.value)
                 trackWhenIsDueEvent('date_changed', {
@@ -18269,10 +18371,13 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                 })
               }}
             />
+            <span id="return-window-start-date-hint" className="return-window-start-date-hint">
+              Use the date your retailer names, such as purchase or delivery.
+            </span>
           </label>
 
           <label>
-            <span>Days to return</span>
+            <span className="return-window-field-label">Days to return</span>
             <input
               type="number"
               inputMode="numeric"
@@ -18323,11 +18428,16 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           <ResultActions
             title="Return deadline"
             date={returnDeadline}
-            details={`${parsedReturnWindow}-day return window`}
+            details={`${parsedReturnWindow}-day return window · ${countingRule === 'next-day' ? 'Counting begins the next day' : 'Start date counts as day 1'}`}
             variant="return-window"
+            shareUrl={returnWindowShareUrl}
           />
         </section>
       ) : null}
+
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {liveAnnouncement}
+      </p>
 
       <section className="return-answer-details" aria-label="Return calculation details">
         <details className="return-answer-detail-card">
@@ -18339,6 +18449,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                   parsedPurchaseDate,
                   parsedReturnWindow,
                   returnDeadline,
+                  countingRule,
                 )}
               </p>
               <CalculationReceipt
@@ -18354,7 +18465,9 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
                   },
                   {
                     label: 'Counting rule',
-                    value: 'Start date counts as day 1',
+                    value: countingRule === 'next-day'
+                      ? 'Counting begins the next day'
+                      : 'Start date counts as day 1',
                   },
                   {
                     label: 'Last day to return',
@@ -18431,14 +18544,13 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         <div className="return-window-guide-grid">
           <article>
-            <h3>Does the purchase date count as day 1?</h3>
+            <h3>When does counting begin?</h3>
             <p>
-              This calculator treats the selected start date as day 1. For
-              example, a 30-day return window beginning September 4, 2026 ends
-              October 3, 2026. If a policy says “30 days after purchase” or
-              starts counting the day after purchase, the retailer&apos;s result
-              may be one day later. Check the wording when that difference
-              matters. <a href="/does-the-start-date-count" onClick={(event) => {
+              Choose the counting rule in the calculator that matches the
+              retailer&apos;s written policy. For a 30-day window beginning
+              September 4, 2026, counting the start date gives October 3;
+              beginning the next day gives October 4. The retailer&apos;s terms
+              determine which date applies. <a href="/does-the-start-date-count" onClick={(event) => {
                 event.preventDefault()
                 onNavigate('/does-the-start-date-count')
               }}>Read the day-one counting guide.</a>
@@ -18616,7 +18728,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           color: var(--return-ink);
           font-weight: 900;
           line-height: 0.9;
-          letter-spacing: -0.055em;
+          letter-spacing: -0.04em;
         }
 
         .return-answer-weekday {
@@ -18630,13 +18742,12 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-answer-date-main {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          gap: 0.08em;
+          display: block;
           max-width: 100%;
           font-size: clamp(3.45rem, 6.1vw, 5.85rem);
-          line-height: 0.9;
+          line-height: 1;
+          letter-spacing: -0.02em;
+          overflow-wrap: normal;
         }
 
         .return-answer-month,
@@ -18660,20 +18771,80 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           border-top: 1px solid rgba(17, 51, 86, 0.1);
         }
 
-        .return-answer-stack p {
+        .return-window-counting-rule {
+          min-width: 0;
+          margin: 0;
+          padding: 0;
+          border: 0;
+        }
+
+        .return-window-counting-rule legend {
+          padding: 0;
+          color: var(--return-ink);
+          font-size: 0.93rem;
+          font-weight: 900;
+        }
+
+        .return-window-counting-options {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 8px;
+        }
+
+        .return-window-counting-options label {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          min-width: 0;
+          min-height: 48px;
+          padding: 7px 10px;
+          border: 1px solid rgba(17, 51, 86, 0.18);
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.72);
+          color: #405a72;
+          font-size: 0.86rem;
+          line-height: 1.25;
+          cursor: pointer;
+        }
+
+        .return-window-counting-options label.is-selected {
+          border-color: #2d7461;
+          background: #f4fbf7;
+          color: #173f35;
+          font-weight: 900;
+          box-shadow: inset 0 0 0 1px rgba(45, 116, 97, 0.2);
+        }
+
+        .return-window-counting-options input {
+          flex: 0 0 auto;
+          width: 18px;
+          height: 18px;
+          min-height: 0;
+          margin: 0;
+          padding: 0;
+          accent-color: #2d7461;
+        }
+
+        .return-window-counting-options input:focus-visible {
+          outline: 3px solid #17304d;
+          outline-offset: 3px;
+        }
+
+        .return-window-counting-check {
+          flex: 0 0 auto;
+          margin-left: auto;
+          font-size: 0.95rem;
+          font-weight: 950;
+        }
+
+        .return-window-counting-note {
           margin: 0;
           color: #587086;
-          font-size: 0.93rem;
-          line-height: 1.5;
-        }
-
-        .return-answer-stack p + p {
-          margin-top: 5px;
-        }
-
-        .return-answer-stack strong {
-          color: var(--return-ink);
-          font-weight: 900;
+          font-size: 0.82rem;
+          line-height: 1.4;
+          margin-top: 8px;
         }
 
         .return-answer-error {
@@ -18687,7 +18858,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           display: grid;
           grid-template-columns: minmax(220px, 1.15fr) minmax(150px, 0.65fr) minmax(380px, 1.7fr);
           gap: 12px;
-          align-items: end;
+          align-items: start;
           padding: 22px clamp(28px, 5vw, 64px);
           border-top: 1px solid rgba(17, 51, 86, 0.08);
           background: rgba(255, 255, 255, 0.42);
@@ -18698,10 +18869,17 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           gap: 7px;
         }
 
-        .return-answer-controls label > span {
+        .return-answer-controls label > .return-window-field-label {
           color: #536b80;
           font-size: 0.82rem;
           font-weight: 900;
+        }
+
+        .return-window-start-date-hint {
+          color: #667b8e;
+          font-size: 0.74rem;
+          font-weight: 550;
+          line-height: 1.32;
         }
 
         .return-answer-controls input {
@@ -18987,7 +19165,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           .return-answer-date {
             display: block;
             margin-top: 18px;
-            line-height: 0.9;
+            line-height: 1;
           }
 
           .return-answer-weekday {
@@ -18998,24 +19176,40 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
           }
 
           .return-answer-date-main {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-items: baseline;
-            gap: 0 0.12em;
+            display: block;
             font-size: clamp(1.8rem, 8.4vw, 2.2rem);
-            line-height: 1.02;
-            letter-spacing: -0.045em;
+            line-height: 1.08;
+            letter-spacing: -0.02em;
+            overflow-wrap: normal;
           }
 
-          .return-answer-month,
-          .return-answer-day,
-          .return-answer-year {
-            display: inline;
+          .return-answer-stack {
+            margin-top: 14px;
+            padding-top: 10px;
           }
 
-          .return-answer-comma {
-            display: inline;
+          .return-window-counting-options {
+            gap: 6px;
+          }
+
+          .return-window-counting-options label {
+            min-height: 48px;
+            gap: 5px;
+            padding: 7px;
+            font-size: 0.78rem;
+          }
+
+          .return-window-counting-options input {
+            width: 16px;
+            height: 16px;
+          }
+
+          .return-window-counting-note {
+            font-size: 0.76rem;
+          }
+
+          .return-window-start-date-hint {
+            font-size: 0.72rem;
           }
 
           .return-answer-context {
@@ -19120,6 +19314,10 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
             font-size: clamp(1.8rem, 8.4vw, 2.2rem);
           }
 
+          .return-window-counting-options label {
+            font-size: 0.74rem;
+          }
+
           .return-answer-weekday {
             font-size: clamp(1.35rem, 5.8vw, 1.7rem);
           }
@@ -19201,8 +19399,9 @@ function buildSavedCalculation(
   title: string,
   date: PlainDate,
   details?: string,
+  shareUrl?: string,
 ): SavedCalculation {
-  const url = `${window.location.pathname}${window.location.search}`
+  const url = shareUrl ?? `${window.location.pathname}${window.location.search}`
 
   return {
     id: calculationId(title, url),
@@ -19218,8 +19417,9 @@ function recordRecentCalculation(
   title: string,
   date: PlainDate,
   details?: string,
+  shareUrl?: string,
 ) {
-  const next = buildSavedCalculation(title, date, details)
+  const next = buildSavedCalculation(title, date, details, shareUrl)
   const existing = readSavedCalculations(RECENT_CALCULATIONS_STORAGE_KEY)
     .filter((item) => item.id !== next.id)
 
@@ -19239,8 +19439,9 @@ function toggleFavoriteCalculation(
   title: string,
   date: PlainDate,
   details?: string,
+  shareUrl?: string,
 ) {
-  const next = buildSavedCalculation(title, date, details)
+  const next = buildSavedCalculation(title, date, details, shareUrl)
   const favorites = readSavedCalculations(FAVORITE_CALCULATIONS_STORAGE_KEY)
   const exists = favorites.some((item) => item.id === next.id)
 
@@ -19404,8 +19605,13 @@ function formatReturnWindowExplanation(
   startDate: PlainDate,
   windowDays: number,
   deadline: PlainDate,
+  countingRule: ReturnWindowCountingRule,
 ) {
-  return `A ${windowDays}-day return window starting on ${formatPlainDate(startDate)} ends on ${formatPlainDate(deadline)}. This calculator counts calendar days and does not automatically extend the deadline for weekends or public holidays unless the retailer's policy says otherwise.`
+  const countingExplanation = countingRule === 'next-day'
+    ? `Counting begins on the day after ${formatPlainDate(startDate)}.`
+    : `${formatPlainDate(startDate)} counts as day 1.`
+
+  return `${countingExplanation} A ${windowDays}-day calendar return window ends on ${formatPlainDate(deadline)}. Weekends and public holidays count, and this calculator does not automatically move the date. Follow the retailer's policy if it specifies a different rule.`
 }
 
 function formatFreeTrialExplanation(
@@ -23706,6 +23912,13 @@ function NextDueSpotlight({ deadline, onToggleDone }: NextDueSpotlightProps) {
         <p className="next-due-meta">
           <span className={`category-pill ${categoryClass}`}>{modeLabels[deadline.category]}</span>
           <span>{formatPlainDate(deadline.dueDate)}</span>
+          {deadline.category === 'return' ? (
+            <span>
+              {deadline.returnWindowRule === 'next-day'
+                ? 'Counting begins the next day'
+                : 'Start date counts as Day 1'}
+            </span>
+          ) : null}
         </p>
       </div>
       <div className="next-due-footer">
@@ -23808,6 +24021,13 @@ function SavedDeadlineItem({
         <p>
           <span className={`category-pill ${categoryClass}`}>{modeLabels[deadline.category]}</span>
           <span>{dueDate ? formatPlainDate(dueDate) : 'Invalid date'}</span>
+          {deadline.category === 'return' ? (
+            <span>
+              {deadline.returnWindowRule === 'next-day'
+                ? 'Counting begins the next day'
+                : 'Start date counts as day 1'}
+            </span>
+          ) : null}
         </p>
         <span className={`status-badge ${urgencyClass}`}>{status}</span>
       </div>
@@ -24918,7 +25138,15 @@ function isDuplicateSavedDeadline(deadlines: SavedDeadline[], nextDeadline: Save
     (deadline) =>
       deadline.title === nextDeadline.title &&
       deadline.category === nextDeadline.category &&
-      deadline.dueDate === nextDeadline.dueDate,
+      deadline.dueDate === nextDeadline.dueDate &&
+      (
+        nextDeadline.category !== 'return' ||
+        (
+          deadline.startDate === nextDeadline.startDate &&
+          (deadline.returnWindowRule ?? 'start-date') ===
+            (nextDeadline.returnWindowRule ?? 'start-date')
+        )
+      ),
   )
 }
 
@@ -25108,6 +25336,13 @@ function isSavedDeadline(value: unknown): value is SavedDeadline {
         typeof deadline.startDate === 'string' &&
         startDate !== null &&
         isDateInSupportedRange(startDate)
+      )
+    ) &&
+    (
+      deadline.returnWindowRule === undefined ||
+      (
+        deadline.category === 'return' &&
+        isReturnWindowCountingRule(deadline.returnWindowRule)
       )
     ) &&
     typeof deadline.done === 'boolean' &&
