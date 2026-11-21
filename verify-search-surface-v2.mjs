@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { getRouteFromPath } from './src/routeMetadata.ts'
 
 const root = process.cwd()
 
@@ -24,6 +25,7 @@ function assertIncludes(haystack, needle, message) {
 }
 
 const app = read('src/App.tsx')
+const routeMetadata = read('src/routeMetadata.ts')
 const robots = read('public/robots.txt')
 const sitemap = read('public/sitemap.xml')
 
@@ -111,14 +113,13 @@ assertIncludes(
 )
 
 assertIncludes(
-  app,
-  "path: '/deadline-calculator'",
-  'Deadline calculator metadata path is missing.',
+  routeMetadata,
+  `"/deadline-calculator": 'deadline-calculator'`,
+  'Deadline calculator route metadata is missing.',
 )
 
-assertIncludes(
-  app,
-  "pathname === '/deadline-calculator'",
+assert(
+  getRouteFromPath('/deadline-calculator') === 'deadline-calculator',
   'Deadline calculator route resolver is missing.',
 )
 
@@ -153,6 +154,11 @@ for (const route of publicRoutes) {
     sitemap,
     `<loc>${url}</loc>`,
     `Public route missing from sitemap: ${route}`,
+  )
+
+  assert(
+    getRouteFromPath(route) !== 'not-found',
+    `Public route missing from route metadata: ${route}`,
   )
 }
 

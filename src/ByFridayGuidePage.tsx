@@ -1,4 +1,6 @@
 import AnswerFeedback from './AnswerFeedback.tsx'
+import PublicSiteFooter from './PublicSiteFooter.tsx'
+import PublicSiteHeader from './PublicSiteHeader.tsx'
 
 type ByFridayGuidePageProps = {
   onNavigate: (path: string) => void
@@ -9,30 +11,7 @@ export default function ByFridayGuidePage({
 }: ByFridayGuidePageProps) {
   return (
     <main className="page-shell by-friday-page">
-      <header className="calculator-page-header" aria-label="WhenIsDue navigation">
-        <a
-          className="calculator-page-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-
-        <a
-          className="calculator-page-all-link"
-          href="/calculators"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/calculators')
-          }}
-        >
-          All calculators
-        </a>
-      </header>
+      <PublicSiteHeader onNavigate={onNavigate} />
 
       <article className="by-friday-shell">
         <header className="by-friday-hero">
@@ -320,6 +299,7 @@ export default function ByFridayGuidePage({
           }
         }
       `}</style>
+      <PublicSiteFooter onNavigate={onNavigate} />
     </main>
   )
 }

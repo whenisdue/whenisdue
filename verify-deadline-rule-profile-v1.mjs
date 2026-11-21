@@ -28,6 +28,8 @@ assert.deepEqual(summarizeDeadlineRuleProfile(profile), {
   startDayConvention: 'exclude-trigger',
   holidayCalendar: 'none',
   endDayAdjustment: 'none',
+  workingScheduleId: 'standard_mon_fri',
+  schemaVersion: 2,
   ruleVersion: 'deadline-rule-profile-v1',
 })
 

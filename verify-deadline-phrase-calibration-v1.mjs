@@ -62,7 +62,7 @@ expectUnderspecified('5 calendar days')
 // UNSUPPORTED: open prose stays unsupported.
 assert.equal(interpretDeadlinePhrase('respond sometime next week'), null)
 assert.equal(interpretDeadlinePhrase('five business days after 2026-08-10'), null)
-assert.equal(interpretDeadlinePhrase('5 business days after delivery'), null)
+expectUnderspecified('5 business days after delivery')
 
 console.log('✓ Deadline phrase calibration corpus v1 passed')
 console.log('  Resolved, ambiguous, underspecified, and unsupported cases checked')

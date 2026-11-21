@@ -68,7 +68,7 @@ for (const [routePath, route] of Object.entries(ROUTE_PATH_TO_NAME)) {
   const expectedCanonical = `${SITE_ORIGIN}${metadata.path}`
   const title = decodeHtml(getTag(html, /<title>([\s\S]*?)<\/title>/i))
   const description = decodeHtml(
-    getTag(html, /<meta\s+name=["\']description["\']\s+content="([^"]*)"[^>]*>/i),
+    getTag(html, /<meta\s+name=["']description["']\s+content="([^"]*)"[^>]*>/i),
   )
   const canonical = getTag(
     html,
@@ -90,6 +90,24 @@ for (const [routePath, route] of Object.entries(ROUTE_PATH_TO_NAME)) {
 
   const expectedRobots = isRouteIndexable(route) ? 'index, follow' : 'noindex, follow'
   if (robots !== expectedRobots) errors.push(`${routePath}: robots mismatch (${robots})`)
+
+  const rootContent = html.match(/<div\s+id=["']root["']\s*>([\s\S]*?)<\/div>/i)?.[1] ?? ''
+  if (isRouteIndexable(route)) {
+    if (!rootContent.includes('data-crawl-page="true"')) {
+      errors.push(`${routePath}: missing crawl-facing body content`)
+    }
+    if (!/<h1\b[^>]*>[^<]+<\/h1>/i.test(rootContent)) {
+      errors.push(`${routePath}: missing crawl-facing h1`)
+    }
+    if (!rootContent.includes('class="crawl-description"')) {
+      errors.push(`${routePath}: missing crawl-facing page description`)
+    }
+    if (!rootContent.includes('aria-label="Main navigation"')) {
+      errors.push(`${routePath}: missing crawl-facing primary navigation`)
+    }
+  } else if (rootContent.includes('data-crawl-page="true"')) {
+    errors.push(`${routePath}: noindex route unexpectedly has crawl-facing body content`)
+  }
 
   const schemaMatch = html.match(
     /<script\s+id=["']whenisdue-route-structured-data["'][^>]*>([\s\S]*?)<\/script>/i,
@@ -138,6 +156,22 @@ for (const sitemapPathname of sitemapPaths) {
 
 if (sitemapUrls.length !== new Set(sitemapUrls).size) {
   errors.push('sitemap: duplicate URLs found')
+}
+
+const privacyHtml = await fs.readFile(path.join(DIST, 'privacy.html'), 'utf8')
+const requiredPrivacyDisclosures = [
+  'third-party advertising vendors may use cookies, web beacons, IP addresses',
+  'https://adssettings.google.com/',
+  'https://www.aboutads.info/',
+  'https://policies.google.com/technologies/partner-sites',
+  'https://support.google.com/adsense/answer/9012903?hl=en',
+  'Google-certified consent management platform',
+]
+
+for (const disclosure of requiredPrivacyDisclosures) {
+  if (!privacyHtml.includes(disclosure)) {
+    errors.push(`privacy: missing advertising disclosure or resource (${disclosure})`)
+  }
 }
 
 if (errors.length > 0) {

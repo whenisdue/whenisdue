@@ -29,16 +29,16 @@ assert.deepEqual(
   buildDeadlineProvenanceRows(businessAnswer),
   [
     {
-      label: 'Deadline rules',
-      value: 'deadline-rule-v1',
+      label: 'Calculation method',
+      value: 'Deadline counting rules',
     },
     {
       label: 'Working schedule',
       value: 'Monday–Friday',
     },
     {
-      label: 'Holiday rules',
-      value: 'US federal holidays · us-federal-v1',
+      label: 'Holiday calendar',
+      value: 'US federal holidays',
     },
   ],
 )
@@ -69,8 +69,8 @@ assert.deepEqual(
   buildDeadlineProvenanceRows(calendarAnswer),
   [
     {
-      label: 'Deadline rules',
-      value: 'deadline-rule-v1',
+      label: 'Calculation method',
+      value: 'Deadline counting rules',
     },
   ],
 )

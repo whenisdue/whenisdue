@@ -77,6 +77,11 @@ import ThirtyDaysVsOneMonthGuidePage from './ThirtyDaysVsOneMonthGuidePage.tsx'
 import ByFridayGuidePage from './ByFridayGuidePage.tsx'
 import StopAutomaticDebitGuidePage from './StopAutomaticDebitGuidePage.tsx'
 import PostmarkedVsReceivedGuidePage from './PostmarkedVsReceivedGuidePage.tsx'
+import PublicSiteHeader from './PublicSiteHeader.tsx'
+import GuidesPage from './GuidesPage.tsx'
+import NetTermsGuidePage from './NetTermsGuidePage.tsx'
+import ReturnWindowGuidePage from './ReturnWindowGuidePage.tsx'
+import PublicSiteFooter from './PublicSiteFooter.tsx'
 import {
   getRouteFromPath,
   getRouteMetadata,
@@ -138,6 +143,18 @@ function App() {
 
   if (route === 'calculators') {
     return <CalculatorHubPage onNavigate={navigate} />
+  }
+
+  if (route === 'guides') {
+    return <GuidesPage onNavigate={navigate} />
+  }
+
+  if (route === 'net-terms-guide') {
+    return <NetTermsGuidePage onNavigate={navigate} />
+  }
+
+  if (route === 'return-window-guide') {
+    return <ReturnWindowGuidePage onNavigate={navigate} />
   }
 
   if (route === 'business-days') {
@@ -1613,19 +1630,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell start-date-answer-page">
-      <header className="start-date-answer-header" aria-label="WhenIsDue navigation">
-        <a
-          className="start-date-answer-brand"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-          aria-label="WhenIsDue home"
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <article className="start-date-answer-shell">
         <section className="start-date-answer-hero" aria-labelledby="start-date-count-title">
@@ -1984,7 +1989,7 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
         .start-date-answer-results small {
           display: block;
           margin-top: 6px;
-          color: #64798f;
+          color: #536b80;
           font-size: 0.96rem;
           font-weight: 800;
         }
@@ -2179,19 +2184,7 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell weekends-zero-page">
-      <header className="weekends-zero-header" aria-label="WhenIsDue navigation">
-        <a
-          className="weekends-zero-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <article className="weekends-zero-shell">
         <header className="weekends-zero-hero">
@@ -2528,7 +2521,7 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
         .weekends-zero-example-grid p {
           margin: 8px 0 0;
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.9rem;
           line-height: 1.45;
         }
@@ -2718,19 +2711,7 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell holidays-zero-page">
-      <header className="holidays-zero-header" aria-label="WhenIsDue navigation">
-        <a
-          className="holidays-zero-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <article className="holidays-zero-shell">
         <header className="holidays-zero-hero">
@@ -3005,7 +2986,7 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
         .holidays-zero-example-grid p {
           margin: 8px 0 0;
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.9rem;
           line-height: 1.45;
         }
@@ -3173,19 +3154,7 @@ function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell business-length-page">
-      <header className="business-length-header" aria-label="WhenIsDue navigation">
-        <a
-          className="business-length-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <article className="business-length-shell">
         <section className="business-length-hero">
@@ -6468,19 +6437,7 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell within-zero-page">
-      <header className="within-zero-header" aria-label="WhenIsDue navigation">
-        <a
-          className="within-zero-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <article className="within-zero-shell">
         <header className="within-zero-hero">
@@ -6843,7 +6800,7 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
 
         .within-zero-example-grid p {
           margin: 8px 0 0;
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.9rem;
           line-height: 1.45;
         }
@@ -7045,19 +7002,7 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell net30-zero-page">
-      <header className="net30-zero-header" aria-label="WhenIsDue navigation">
-        <a
-          className="net30-zero-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <article className="net30-zero-shell">
         <header className="net30-zero-hero">
@@ -7604,19 +7549,7 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell weekend-zero-page">
-      <header className="weekend-zero-header" aria-label="WhenIsDue navigation">
-        <a
-          className="weekend-zero-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="weekend-zero-shell">
         <section className="weekend-zero-hero">
@@ -8876,7 +8809,7 @@ function SavedCalculationsPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell saved-calculations-page">
-      <IdentityRow onNavigate={onNavigate} showHomeLink />
+      <IdentityRow onNavigate={onNavigate} />
 
       <section className="saved-calculations-hero">
         <p className="friendly-eyebrow">
@@ -9862,6 +9795,7 @@ type AskWhenSuggestionRequest = {
 type AskWhenBoxProps = NavigationProps & {
   holidayCalendar: HolidayCalendarId
   today: PlainDate
+  headingLevel?: 'h1' | 'h2'
   onAssistChange?: (state: AskWhenAssistState) => void
   suggestionRequest?: AskWhenSuggestionRequest | null
   onSuggestionApplied?: () => void
@@ -9871,10 +9805,12 @@ function AskWhenBox({
   onNavigate,
   holidayCalendar,
   today,
+  headingLevel = 'h2',
   onAssistChange,
   suggestionRequest,
   onSuggestionApplied,
 }: AskWhenBoxProps) {
+  const Heading = headingLevel
   const [query, setQuery] = useState(
     () => new URLSearchParams(window.location.search).get('q') ?? '',
   )
@@ -10217,9 +10153,9 @@ function AskWhenBox({
     <section className="ask-when-box" aria-labelledby="ask-when-title">
       <div className={`ask-when-heading ${completionPrompt ? 'is-missing-fact' : ''}`}>
         <span>{completionPrompt ? 'One more thing' : 'Ask WhenIsDue'}</span>
-        <h2 id="ask-when-title">
+        <Heading id="ask-when-title">
           {completionPrompt ? completionPrompt.label : 'What do you need to know?'}
-        </h2>
+        </Heading>
         <p>
           {completionPrompt
             ? completionPrompt.description
@@ -10369,7 +10305,7 @@ function AskWhenBox({
           text-transform: uppercase;
         }
 
-        .ask-when-heading h2 {
+        .ask-when-heading :is(h1, h2) {
           margin: 0;
           color: #10213b;
           font-size: clamp(2rem, 4.2vw, 3.15rem);
@@ -10393,7 +10329,7 @@ function AskWhenBox({
           margin-bottom: 7px;
         }
 
-        .ask-when-heading.is-missing-fact h2 {
+        .ask-when-heading.is-missing-fact :is(h1, h2) {
           max-width: 680px;
           font-size: clamp(2rem, 3.8vw, 3rem);
           line-height: 0.98;
@@ -10810,7 +10746,7 @@ function DeadlineCountingGuideLinks({
         }
 
         .deadline-guide-links-heading > span {
-          color: #7a8da1;
+          color: #566b82;
           font-size: 0.78rem;
           font-weight: 900;
           letter-spacing: 0.06em;
@@ -10870,7 +10806,7 @@ function DeadlineCountingGuideLinks({
         }
 
         .deadline-guide-links-grid span {
-          color: #6b8095;
+          color: #566b82;
           font-size: 0.88rem;
           line-height: 1.45;
         }
@@ -11033,6 +10969,16 @@ function HomePage({ onNavigate }: NavigationProps) {
 
           <nav className="date-home-nav" aria-label="Main navigation">
             <a
+              href="/"
+              aria-current={window.location.pathname === '/' ? 'page' : undefined}
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/')
+              }}
+            >
+              Home
+            </a>
+            <a
               href="/calculators"
               onClick={(event) => {
                 event.preventDefault()
@@ -11040,6 +10986,24 @@ function HomePage({ onNavigate }: NavigationProps) {
               }}
             >
               Calculators
+            </a>
+            <a
+              href="/guides"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/guides')
+              }}
+            >
+              Guides
+            </a>
+            <a
+              href="/about"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate('/about')
+              }}
+            >
+              About
             </a>
           </nav>
         </header>
@@ -11060,6 +11024,7 @@ function HomePage({ onNavigate }: NavigationProps) {
               onNavigate={onNavigate}
               holidayCalendar={holidayCalendar}
               today={today}
+              headingLevel="h1"
               onAssistChange={setAskAssist}
               suggestionRequest={askSuggestionRequest}
               onSuggestionApplied={() => setAskSuggestionRequest(null)}
@@ -11225,7 +11190,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           color: #9bc8b2;
         }
 
-        .date-home-editorial-hero .ask-when-heading h2 {
+        .date-home-editorial-hero .ask-when-heading :is(h1, h2) {
           max-width: 520px;
           color: #fffaf2;
           font-size: clamp(3.25rem, 5vw, 5rem);
@@ -11481,7 +11446,7 @@ function HomePage({ onNavigate }: NavigationProps) {
             font-size: 0.68rem;
           }
 
-          .date-home-editorial-hero .ask-when-heading h2 {
+          .date-home-editorial-hero .ask-when-heading :is(h1, h2) {
             max-width: 330px;
             font-size: clamp(2.18rem, 10vw, 2.9rem);
             line-height: 0.94;
@@ -11536,13 +11501,13 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-editorial-hero:has(.ask-when-form input:focus)
-            .ask-when-heading h2 {
+            .ask-when-heading :is(h1, h2) {
             max-width: 310px;
             font-size: clamp(1.9rem, 8.8vw, 2.45rem);
             line-height: 0.94;
           }
 
-          .ask-when-heading.is-missing-fact h2 {
+          .ask-when-heading.is-missing-fact :is(h1, h2) {
             max-width: 100%;
             font-size: clamp(1.8rem, 8.2vw, 2.35rem);
             line-height: 0.98;
@@ -12049,6 +12014,34 @@ function HomePage({ onNavigate }: NavigationProps) {
         </section>
       ) : null}
 
+      <section className="date-home-method" aria-labelledby="date-home-method-title">
+        <div>
+          <p className="date-home-chapter-label">Clear rules, clear answers</p>
+          <h2 id="date-home-method-title">How WhenIsDue counts dates</h2>
+          <p>
+            Calendar-day counts include weekends. Business-day calculations skip
+            weekends, and holiday-aware results depend on the calendar selected
+            in the tool. Some calculators let you choose whether the starting
+            date counts; the result explains the convention it used.
+          </p>
+          <p>
+            An invoice, receipt, return policy, contract, or official notice may
+            set a different starting event, cutoff time, or weekend rule. Use
+            the calculation as a planning aid, then compare it with the source
+            that governs your deadline.
+          </p>
+        </div>
+        <a
+          href="/guides"
+          onClick={(event) => {
+            event.preventDefault()
+            onNavigate('/guides')
+          }}
+        >
+          Read the date and deadline guides
+        </a>
+      </section>
+
       <SiteFooter onNavigate={onNavigate} />
 
       <style>{`
@@ -12098,7 +12091,7 @@ function HomePage({ onNavigate }: NavigationProps) {
           min-height: 40px;
           display: inline-flex;
           align-items: center;
-          color: #617992;
+          color: #52687e;
           font-size: 0.9rem;
           font-weight: 800;
           text-decoration: none;
@@ -12695,7 +12688,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         }
 
         .date-home-business-answer span {
-          color: #637a94;
+          color: #586b80;
           font-size: 0.78rem;
           font-weight: 800;
         }
@@ -12709,12 +12702,12 @@ function HomePage({ onNavigate }: NavigationProps) {
 
         .date-home-business-answer small {
           margin-top: 3px;
-          color: #7a899b;
+          color: #586b80;
         }
 
         .date-home-rule {
           margin: 9px 2px 0;
-          color: #667b91;
+          color: #586b80;
           font-size: 0.84rem;
           line-height: 1.45;
         }
@@ -12765,7 +12758,7 @@ function HomePage({ onNavigate }: NavigationProps) {
         .date-home-tools-heading p {
           max-width: 600px;
           margin: 7px 0 0;
-          color: #667b91;
+          color: #586b80;
           font-size: 0.92rem;
           line-height: 1.45;
         }
@@ -12918,6 +12911,53 @@ function HomePage({ onNavigate }: NavigationProps) {
           outline-offset: 2px;
         }
 
+        .date-home-method {
+          width: min(100% - 32px, 1080px);
+          margin: 26px auto 30px;
+          padding: 22px 24px;
+          border: 1px solid rgba(19, 38, 70, 0.09);
+          border-radius: 16px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 20px;
+          background: rgba(255, 255, 255, 0.72);
+        }
+
+        .date-home-method h2 {
+          margin: 0;
+          color: #18304c;
+          font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+          line-height: 1.15;
+        }
+
+        .date-home-method p:not(.date-home-chapter-label) {
+          max-width: 760px;
+          margin: 8px 0 0;
+          color: #5f7489;
+          font-size: 0.94rem;
+          line-height: 1.55;
+        }
+
+        .date-home-method > a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 9px 14px;
+          border-radius: 999px;
+          background: #212850;
+          color: #fff;
+          font-size: 0.9rem;
+          font-weight: 800;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .date-home-method > a:hover {
+          background: #313b70;
+        }
+
         @media (max-width: 760px) {
           .date-home-hero {
             width: min(100% - 24px, 1240px);
@@ -12925,7 +12965,10 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-header {
+            flex-wrap: wrap;
             min-height: 56px;
+            gap: 0 12px;
+            padding: 4px 0;
           }
 
           .date-home-brand img {
@@ -12934,12 +12977,28 @@ function HomePage({ onNavigate }: NavigationProps) {
           }
 
           .date-home-nav {
+            flex-wrap: wrap;
+            justify-content: flex-end;
             gap: 10px;
           }
 
           .date-home-nav a {
             min-height: 40px;
             font-size: 0.78rem;
+          }
+
+          .date-home-method {
+            width: min(100% - 24px, 1080px);
+            grid-template-columns: 1fr;
+            gap: 11px;
+            margin: 22px auto 24px;
+            padding: 16px 14px;
+            border-radius: 14px;
+          }
+
+          .date-home-method > a {
+            justify-self: start;
+            white-space: normal;
           }
 
           .date-home-answer {
@@ -13422,19 +13481,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
     <main className="page-shell home-page friendly-home calculator-hub-page">
       <a className="skip-to-calculator" href="#calculator" onClick={(event) => { event.preventDefault(); focusHomeSection('calculator', 'calculator-heading') }}>Skip to calculator</a>
       <section className="dual-intent-hero" aria-labelledby="homepage-title">
-        <header className="calculator-directory-header" aria-label="WhenIsDue navigation">
-          <a
-            className="calculator-directory-brand"
-            href="/"
-            aria-label="WhenIsDue home"
-            onClick={(event) => {
-              event.preventDefault()
-              onNavigate('/')
-            }}
-          >
-            <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-          </a>
-        </header>
+        <PublicSiteHeader onNavigate={onNavigate} />
 
         <div className="dual-intent-grid utility-hub-hero">
           <div className="dual-intent-copy">
@@ -14286,7 +14333,7 @@ function CalculatorHubPage({ onNavigate }: NavigationProps) {
             grid-column: 2;
             grid-row: 2;
             margin: 0;
-            color: #6f8192;
+            color: #596f82;
             font-size: 0.74rem;
             font-weight: 650;
             line-height: 1.32;
@@ -14845,7 +14892,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
           --business-paper: var(--wid-result-surface);
           --business-paper-soft: var(--wid-surface-soft);
           --business-navy: #12365d;
-          --business-muted: #637b92;
+          --business-muted: #526a80;
           --business-green: #23785d;
           min-height: 100vh;
           background: var(--wid-bg);
@@ -15192,7 +15239,7 @@ function BusinessDaysPage({ onNavigate }: NavigationProps) {
 
         .business-answer-quick-grid small {
           margin-top: 6px;
-          color: #6f8192;
+          color: #596f82;
           font-size: 0.85rem;
         }
 
@@ -15496,19 +15543,7 @@ function BusinessDaysFromTodayPage({ dayCount, onNavigate }: BusinessDaysFromTod
 
   return (
     <main className="page-shell exact-business-page">
-      <header className="exact-business-header" aria-label="WhenIsDue navigation">
-        <a
-          className="exact-business-brand"
-          href="/"
-          aria-label="WhenIsDue home"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-        </a>
-      </header>
+      <CalculatorPageHeader onNavigate={onNavigate} />
 
       <section className="exact-business-shell" aria-labelledby="business-days-from-today-title">
         <div className="exact-business-hero">
@@ -16464,7 +16499,7 @@ function ResultActions({
           align-items: center;
           justify-content: center;
           padding: 4px 8px;
-          color: #64798f;
+          color: #536b80;
           font-size: 0.76rem;
           font-weight: 850;
           cursor: pointer;
@@ -18646,7 +18681,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
       <style>{`
         .return-answer-first-page {
           --return-ink: #113356;
-          --return-muted: #657a8f;
+          --return-muted: #4f687f;
           --return-accent: #2d7461;
           --return-panel: var(--wid-result-surface);
           --return-panel-deep: var(--wid-surface-soft);
@@ -18876,7 +18911,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-window-start-date-hint {
-          color: #667b8e;
+          color: #586e82;
           font-size: 0.74rem;
           font-weight: 550;
           line-height: 1.32;
@@ -18964,7 +18999,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         .return-answer-detail-body > p {
           max-width: 720px;
           margin: 0;
-          color: #63798f;
+          color: #4f687f;
           font-size: 0.95rem;
           line-height: 1.58;
         }
@@ -19081,7 +19116,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
 
         .return-window-guide-grid p {
           margin: 8px 0 0;
-          color: #63798f;
+          color: #4f687f;
           font-size: 0.93rem;
           line-height: 1.58;
         }
@@ -19105,7 +19140,7 @@ function ReturnWindowPage({ onNavigate }: NavigationProps) {
         }
 
         .return-answer-bottom-nav a {
-          color: #667b8f;
+          color: #52687e;
           font-size: 0.88rem;
           font-weight: 800;
           text-decoration: none;
@@ -23273,18 +23308,8 @@ function StaticPage({ route, onNavigate }: StaticPageProps) {
 
   return (
     <main className="page-shell static-page">
+      <PublicSiteHeader onNavigate={onNavigate} />
       <section className="intro" aria-labelledby={`${route}-title`}>
-        <IdentityRow onNavigate={onNavigate} showHomeLink />
-        <a
-          className="back-link"
-          href="/"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/')
-          }}
-        >
-          Home
-        </a>
         <h1 id={`${route}-title`}>{page.title}</h1>
       </section>
 
@@ -23294,6 +23319,11 @@ function StaticPage({ route, onNavigate }: StaticPageProps) {
             <h2>{section.title}</h2>
             {section.paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
+            ))}
+            {section.links?.map((link) => (
+              <p key={link.href}>
+                <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+              </p>
             ))}
           </article>
         ))}
@@ -23313,8 +23343,8 @@ function NotFoundPage({ onNavigate }: NavigationProps) {
 
   return (
     <main className="page-shell static-page">
+      <PublicSiteHeader onNavigate={onNavigate} />
       <section className="intro" aria-labelledby="not-found-title">
-        <IdentityRow onNavigate={onNavigate} showHomeLink />
         <h1 id="not-found-title">Page not found</h1>
         <p className="subtitle">
           That page does not exist yet. You can go back home or choose one of the calculators below.
@@ -23387,65 +23417,14 @@ function NotFoundPage({ onNavigate }: NavigationProps) {
 }
 
 function CalculatorPageHeader({ onNavigate }: NavigationProps) {
-  return (
-    <header className="calculator-page-header" aria-label="WhenIsDue navigation">
-      <a
-        className="calculator-page-brand"
-        href="/"
-        onClick={(event) => {
-          event.preventDefault()
-          onNavigate('/')
-        }}
-        aria-label="WhenIsDue home"
-      >
-        <img src="/whenisdue-logo.png" alt="WhenIsDue" />
-      </a>
-
-      <a
-        className="calculator-page-all-link"
-        href="/calculators"
-        onClick={(event) => {
-          event.preventDefault()
-          onNavigate('/calculators')
-        }}
-      >
-        All calculators
-      </a>
-    </header>
-  )
+  return <PublicSiteHeader onNavigate={onNavigate} />
 }
 
 type IdentityRowProps = {
-  onNavigate?: (path: string) => void
-  showHomeLink?: boolean
+  onNavigate: (path: string) => void
 }
 
 function IdentityRow({ onNavigate }: IdentityRowProps) {
-  const siteMark = onNavigate ? (
-    <a
-      className="site-mark site-mark-link"
-      href="/"
-      onClick={(event) => {
-        event.preventDefault()
-        onNavigate('/')
-      }}
-    >
-      <span className="brand-calendar" aria-hidden="true">
-        <span />
-        <strong>✓</strong>
-      </span>
-      <span>WhenIsDue</span>
-    </a>
-  ) : (
-    <p className="site-mark">
-      <span className="brand-calendar" aria-hidden="true">
-        <span />
-        <strong>✓</strong>
-      </span>
-      <span>WhenIsDue</span>
-    </p>
-  )
-
   return (
     <>
       <style>{`
@@ -23769,43 +23748,7 @@ function IdentityRow({ onNavigate }: IdentityRowProps) {
         }
 `}</style>
 
-      <header className="site-header friendly-site-header">
-      <div className="identity-row">
-        {siteMark}
-        {onNavigate ? (
-          <nav className="top-nav friendly-top-nav" aria-label="Main navigation">
-            <a
-              href="/"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/')
-              }}
-            >
-              Home
-            </a>
-            <a
-              href="/calculators"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/calculators')
-              }}
-            >
-              Calculators
-            </a>
-            <a
-              className="workspace-nav-link"
-              href="/workspace"
-              onClick={(event) => {
-                event.preventDefault()
-                onNavigate('/workspace')
-              }}
-            >
-              VA Workspace
-            </a>
-          </nav>
-        ) : null}
-      </div>
-      </header>
+      <PublicSiteHeader onNavigate={onNavigate} showWorkspaceLink />
     </>
   )
 }
@@ -23820,54 +23763,7 @@ function SiteFooter({
   onNavigate,
   planningNote = 'For planning only. Always check the original terms on your invoice, receipt, order, or trial.',
 }: SiteFooterProps) {
-  return (
-    <footer className="site-footer">
-      <div className="footer-links">
-        <a
-          href="/about"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/about')
-          }}
-        >
-          About
-        </a>
-        <a
-          href="/privacy"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/privacy')
-          }}
-        >
-          Privacy
-        </a>
-        <a
-          href="/terms"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/terms')
-          }}
-        >
-          Terms
-        </a>
-        <a
-          href="/contact"
-          onClick={(event) => {
-            event.preventDefault()
-            onNavigate('/contact')
-          }}
-        >
-          Contact
-        </a>
-      </div>
-      <p>
-        Calculator dates are saved in this browser only.
-      </p>
-      <p>
-        {planningNote}
-      </p>
-    </footer>
-  )
+  return <PublicSiteFooter onNavigate={onNavigate} planningNote={planningNote} />
 }
 
 function useCurrentMinute(): Date {
@@ -24799,6 +24695,7 @@ type StaticPageContent = {
   sections: Array<{
     title: string
     paragraphs: string[]
+    links?: Array<{ label: string; href: string }>
   }>
   email?: string
 }
@@ -24822,6 +24719,13 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
           paragraphs: [
             'WhenIsDue uses deterministic date calculations rather than guessing a date. The same inputs and rules are intended to produce the same result every time.',
             'When wording or counting rules can change the answer, WhenIsDue aims to make that uncertainty visible instead of silently choosing an interpretation for you.',
+          ],
+        },
+        {
+          title: 'Editorial approach and corrections',
+          paragraphs: [
+            'Calculators show the date produced by the selected rules. Guides separate an arithmetic example from a rule that applies to a particular contract, retailer, service, or jurisdiction, and link to source material when a formal rule is discussed.',
+            `If you spot a wrong calculation or unclear explanation, email ${contactEmail} with the page address, the wording or source that should be checked, and the result you expected. Please leave out passwords and confidential client information.`,
           ],
         },
         {
@@ -24861,7 +24765,7 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         {
           title: 'Effective date',
           paragraphs: [
-            'This Privacy Policy is effective August 23, 2026. It explains how WhenIsDue handles information used by the public calculators, optional answer feedback, and the VA Workspace.',
+            'This Privacy Policy is effective November 21, 2026. It explains how WhenIsDue handles information used by the public calculators, optional answer feedback, and the VA Workspace.',
           ],
         },
         {
@@ -24876,6 +24780,20 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
           paragraphs: [
             'Some answer pages offer an optional Yes or Not quite feedback control. If you respond, WhenIsDue stores the page path, whether the answer satisfied your query, one preset reason when you choose Not quite, and the time the response was recorded.',
             'Answer-feedback records do not intentionally include calculator inputs, URL query parameters, account identifiers, email addresses, or free-text notes. A small browser-storage marker may be used to avoid repeatedly asking for feedback on the same page for a limited period.',
+          ],
+        },
+        {
+          title: 'Advertising cookies and preferences',
+          paragraphs: [
+            'If Google ads are displayed on WhenIsDue, Google and third-party advertising vendors may use cookies, web beacons, IP addresses, or similar identifiers to serve and measure ads, including ads based on a visitor’s previous activity on this or other sites. Which vendors and ad networks can serve ads depends on the settings selected for the site; Google publishes provider names and data-use information in its current AdSense ad technology partner list.',
+            'Visitors can manage personalized advertising through Google Ads Settings or use AboutAds.info to opt out of some participating companies’ interest-based ads. If personalized ads are served to visitors in the EEA, the United Kingdom, or Switzerland, WhenIsDue will use a Google-certified consent management platform integrated with the IAB Transparency and Consent Framework.',
+          ],
+          links: [
+            { label: 'Google Ads Settings', href: 'https://adssettings.google.com/' },
+            { label: 'AboutAds.info choices', href: 'https://www.aboutads.info/' },
+            { label: 'How Google uses data on partner sites and apps', href: 'https://policies.google.com/technologies/partner-sites' },
+            { label: 'Google AdSense ad technology partner list', href: 'https://support.google.com/adsense/answer/9012903?hl=en' },
+            { label: 'Google’s publisher consent requirements for the EEA, UK, and Switzerland', href: 'https://support.google.com/adsense/answer/13554116?hl=en' },
           ],
         },
         {
@@ -25060,22 +24978,23 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
     title: 'Contact WhenIsDue',
     sections: [
       {
-        title: 'Support and feedback',
+        title: 'Calculation questions and corrections',
         paragraphs: [
-          'Use the email below for technical problems, corrections, feature feedback, privacy questions, and general support.',
+          'Email the page address and describe what happened. For a calculation issue, include the dates and rule choices you entered, the result you expected, and the wording or source that should be checked.',
+          'When reporting a content issue, quote only the relevant sentence or link to a public source. Do not send passwords, authentication codes, or confidential client information.',
         ],
       },
       {
-        title: 'Account deletion and privacy requests',
+        title: 'Privacy and account requests',
         paragraphs: [
-          'Send the request from the email address associated with your VA Workspace account. Include a clear request such as “Delete my WhenIsDue account.”',
-          'Do not send your password, authentication code, Supabase key, or confidential client records by email.',
+          'For a VA Workspace privacy or account-deletion request, email from the address associated with the account and state what you want changed or deleted. WhenIsDue may ask for reasonable verification before acting.',
+          'Do not include your password, authentication code, Supabase key, or confidential client records in the message.',
         ],
       },
       {
-        title: 'Response expectations',
+        title: 'Contact method',
         paragraphs: [
-          'WhenIsDue currently provides email support only. Response times are not guaranteed, but verified account-deletion requests are generally processed within 30 days.',
+          'WhenIsDue currently accepts support requests by email. Response timing can vary. Verified account-deletion requests are generally processed within 30 days.',
         ],
       },
     ],

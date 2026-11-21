@@ -1,6 +1,9 @@
 export type RouteName =
   | 'home'
   | 'calculators'
+  | 'guides'
+  | 'net-terms-guide'
+  | 'return-window-guide'
   | 'business-days'
   | 'business-days-between'
   | 'business-hours-deadline'
@@ -58,6 +61,9 @@ export type RouteMetadata = {
 export const ROUTE_PATH_TO_NAME = {
   "/": 'home',
   "/calculators": 'calculators',
+  "/guides": 'guides',
+  "/net-30-and-2-10-net-30": 'net-terms-guide',
+  "/return-window-deadline-guide": 'return-window-guide',
   "/business-days-calculator": 'business-days',
   "/business-days-between-dates": 'business-days-between',
   "/business-hours-deadline-calculator": 'business-hours-deadline',
@@ -144,6 +150,33 @@ export function getRouteSchemaKind(route: RouteName): 'WebApplication' | 'WebPag
 }
 
 export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMetadata {
+  if (route === 'guides') {
+    return {
+      title: 'Date and Deadline Guides - Counting Rules, Invoices & Returns | WhenIsDue',
+      description: 'Practical guides to counting calendar and business days, reading deadline wording, understanding invoice terms, and calculating return windows.',
+      openGraphDescription: 'Learn how starting events, Day 1, weekends, holidays, and cutoff rules affect a date deadline.',
+      path: '/guides',
+    }
+  }
+
+  if (route === 'net-terms-guide') {
+    return {
+      title: 'Net 30 and 2/10 Net 30: Worked Date Examples | WhenIsDue',
+      description: 'See how Net 30 and 2/10 Net 30 dates are calculated, compare an early-payment discount with the full due date, and check which invoice rule starts the count.',
+      openGraphDescription: 'A worked invoice example separating the 2% discount calculation from the payment-date rules in the written terms.',
+      path: '/net-30-and-2-10-net-30',
+    }
+  }
+
+  if (route === 'return-window-guide') {
+    return {
+      title: 'How to Calculate a Return-Window Deadline | WhenIsDue',
+      description: 'Compare purchase and delivery dates, Day 1 counting, calendar days, weekend adjustments, and return cutoffs with a worked return-window example.',
+      openGraphDescription: 'A practical checklist and worked example for reading a retailer return window and calculating its final date.',
+      path: '/return-window-deadline-guide',
+    }
+  }
+
   if (route === 'calculators') {
     return {
       title: 'Date & Deadline Calculators - Business Days, Invoices, Returns & More | WhenIsDue',
@@ -461,7 +494,7 @@ export function getRouteMetadata(route: RouteName, currentPath = '/'): RouteMeta
   if (route === 'about') {
     return {
       title: 'About WhenIsDue - Date & Deadline Answer Engine',
-      description: 'Learn how WhenIsDue gives clear, deterministic date and deadline answers while making important counting rules and assumptions visible.',
+      description: 'Learn how WhenIsDue calculates dates, explains counting assumptions, handles source uncertainty, and accepts corrections.',
       path: '/about',
     }
   }
