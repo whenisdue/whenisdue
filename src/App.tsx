@@ -24734,7 +24734,7 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
         {
           title: 'Effective date',
           paragraphs: [
-            'This Privacy Policy is effective November 21, 2026. It explains how WhenIsDue handles information used by the public calculators, optional answer feedback, and the VA Workspace.',
+            'This Privacy Policy is effective November 21, 2026. It explains how WhenIsDue handles information used by the public calculators and the VA Workspace.',
           ],
         },
         {
@@ -24745,10 +24745,10 @@ function getStaticPageContent(route: StaticPageRoute): StaticPageContent {
           ],
         },
         {
-          title: 'Optional answer feedback',
+          title: 'Discontinued answer feedback',
           paragraphs: [
-            'Some answer pages offer an optional Yes or Not quite feedback control. If you respond, WhenIsDue stores the page path, whether the answer satisfied your query, one preset reason when you choose Not quite, and the time the response was recorded.',
-            'Answer-feedback records do not intentionally include calculator inputs, URL query parameters, account identifiers, email addresses, or free-text notes. A small browser-storage marker may be used to avoid repeatedly asking for feedback on the same page for a limited period.',
+            'Public pages no longer display or submit answer feedback. While the feature was available, a response could include the page path, whether the answer satisfied your query, one preset reason if you chose “Not quite,” and the time recorded.',
+            'The feature did not intentionally include calculator inputs, URL query parameters, account identifiers, email addresses, or free-text notes. Its browser-storage marker for limiting repeat prompts is no longer used. Historical feedback records may remain in backend storage; discontinuing the feature did not delete them. For privacy-related requests, contact WhenIsDue using the method listed below.',
           ],
         },
         {
