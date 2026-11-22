@@ -1,5 +1,4 @@
 import type { MouseEvent } from 'react'
-import AnswerFeedback from './AnswerFeedback.tsx'
 import PublicSiteFooter from './PublicSiteFooter.tsx'
 import PublicSiteHeader from './PublicSiteHeader.tsx'
 import './GuideArticlePage.css'
@@ -30,9 +29,6 @@ export default function ReturnWindowGuidePage({ onNavigate }: ReturnWindowGuideP
             to answer those questions before relying on a calculated date.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section className="guide-article-section">
           <h2>1. Find the date that starts the window</h2>
           <p>

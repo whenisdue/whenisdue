@@ -184,13 +184,13 @@ function pageContent(route, metadata, routes, guideCategories) {
   } else if (route === 'privacy') {
     sections.push(
       section('Effective date', [
-        'This Privacy Policy is effective November 21, 2026. It explains how WhenIsDue handles information used by public calculators, optional answer feedback, and the VA Workspace.',
+        'This Privacy Policy is effective November 21, 2026. It explains how WhenIsDue handles information used by public calculators and the VA Workspace.',
       ]),
       section('Public calculators and saved dates', [
         'The public due-date calculators do not require an account. Dates and labels that a visitor chooses to save through those calculators are stored in the browser on that device. Clearing browser data, using private browsing, changing browsers, or switching devices may remove or hide those records. Calculator records are separate from VA Workspace cloud records.',
       ]),
-      section('Optional answer feedback', [
-        'Some answer pages offer an optional Yes or Not quite feedback control. A response may store the page path, whether the answer satisfied the query, one preset reason selected with Not quite, and the time recorded. Feedback does not intentionally include calculator inputs, URL query parameters, account identifiers, email addresses, or free-text notes. A small browser-storage marker may limit repeated feedback prompts for a period.',
+      section('Discontinued answer feedback', [
+        'Public pages no longer display or submit answer feedback. While the feature was available, a response could include the page path, whether the answer satisfied your query, one preset reason if you chose “Not quite,” and the time recorded. The feature did not intentionally include calculator inputs, URL query parameters, account identifiers, email addresses, or free-text notes. Its browser-storage marker for limiting repeat prompts is no longer used. Historical feedback records may remain in backend storage; discontinuing the feature did not delete them. For privacy-related requests, contact WhenIsDue using the method listed below.',
       ]),
       section('Advertising cookies and preferences', [
         'If Google ads are displayed on WhenIsDue, Google and third-party advertising vendors may use cookies, web beacons, IP addresses, or similar identifiers to serve and measure ads, including ads based on a visitor’s previous activity on this or other sites. Which vendors and ad networks can serve ads depends on the settings selected for the site; Google publishes provider names and data-use information in its current AdSense ad technology partner list.',

@@ -1,4 +1,3 @@
-import AnswerFeedback from './AnswerFeedback.tsx'
 import PublicSiteFooter from './PublicSiteFooter.tsx'
 import PublicSiteHeader from './PublicSiteHeader.tsx'
 
@@ -23,9 +22,6 @@ export default function ByFridayGuidePage({
             “Before Friday” means earlier than Friday.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section className="by-friday-section by-friday-meaning">
           <table className="by-friday-table">
             <thead>

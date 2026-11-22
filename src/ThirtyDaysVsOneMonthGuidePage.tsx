@@ -1,4 +1,3 @@
-import AnswerFeedback from './AnswerFeedback.tsx'
 import PublicSiteFooter from './PublicSiteFooter.tsx'
 import PublicSiteHeader from './PublicSiteHeader.tsx'
 
@@ -89,9 +88,6 @@ export default function ThirtyDaysVsOneMonthGuidePage({
             deadline rule.
           </p>
         </section>
-
-        <AnswerFeedback />
-
         <section className="thirty-month-section">
           <h2>Why do the dates differ?</h2>
           <p>

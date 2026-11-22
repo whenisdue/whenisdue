@@ -1,4 +1,3 @@
-import AnswerFeedback from './AnswerFeedback.tsx'
 import PublicSiteFooter from './PublicSiteFooter.tsx'
 import PublicSiteHeader from './PublicSiteHeader.tsx'
 
@@ -34,9 +33,6 @@ export default function StopAutomaticDebitGuidePage({
             designated way to submit and verify a stop-payment notice.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section className="stop-debit-section">
           <h2>Which automatic debits does the rule cover?</h2>
           <p>
