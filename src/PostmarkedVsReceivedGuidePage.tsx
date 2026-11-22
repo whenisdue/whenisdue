@@ -1,4 +1,3 @@
-import AnswerFeedback from './AnswerFeedback.tsx'
 import PublicSiteFooter from './PublicSiteFooter.tsx'
 import PublicSiteHeader from './PublicSiteHeader.tsx'
 
@@ -27,9 +26,6 @@ export default function PostmarkedVsReceivedGuidePage({
             </strong>
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section
           className="postmark-guide-section"
           aria-labelledby="postmark-guide-tests-title"

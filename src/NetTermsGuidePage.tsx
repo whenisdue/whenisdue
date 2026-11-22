@@ -1,5 +1,4 @@
 import type { MouseEvent } from 'react'
-import AnswerFeedback from './AnswerFeedback.tsx'
 import PublicSiteFooter from './PublicSiteFooter.tsx'
 import PublicSiteHeader from './PublicSiteHeader.tsx'
 import './GuideArticlePage.css'
@@ -30,9 +29,6 @@ export default function NetTermsGuidePage({ onNavigate }: NetTermsGuidePageProps
             is a clear way to separate the arithmetic from the written terms.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section className="guide-article-section">
           <h2>What “2/10 Net 30” commonly describes</h2>
           <p>

@@ -72,7 +72,6 @@ import {
   parseReturnWindowCountingRule,
   type ReturnWindowCountingRule,
 } from './returnWindowCalculation.ts'
-import AnswerFeedback from './AnswerFeedback.tsx'
 import ThirtyDaysVsOneMonthGuidePage from './ThirtyDaysVsOneMonthGuidePage.tsx'
 import ByFridayGuidePage from './ByFridayGuidePage.tsx'
 import StopAutomaticDebitGuidePage from './StopAutomaticDebitGuidePage.tsx'
@@ -938,9 +937,6 @@ function DeadlineCalculatorPage({ onNavigate }: NavigationProps) {
             )}
           </section>
         ) : null}
-
-        <AnswerFeedback />
-
         <details className="deadline-rule-saved">
           <summary>Save or reuse this setup</summary>
           <div className="deadline-rule-saved-body">
@@ -1651,9 +1647,6 @@ function StartDateCountGuidePage({ onNavigate }: NavigationProps) {
             wording is unclear, check the original rule.
           </p>
         </section>
-
-        <AnswerFeedback />
-
         <section
           className="start-date-answer-example"
           aria-labelledby="start-date-answer-example-title"
@@ -2204,9 +2197,6 @@ function WeekendsBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             “business day” differently, use that definition.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section
           className="weekends-zero-example"
           aria-labelledby="weekends-zero-example-title"
@@ -2723,9 +2713,6 @@ function PublicHolidaysBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             using says to exclude it.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section className="holidays-zero-example" aria-labelledby="holidays-example-title">
           <div className="holidays-zero-example-heading">
             <p className="holidays-zero-section-eyebrow">Quick example</p>
@@ -3205,9 +3192,6 @@ function HowLongBusinessDaysGuidePage({ onNavigate }: NavigationProps) {
             </a>
           </section>
         </section>
-
-        <AnswerFeedback />
-
         <section
           className="business-length-reference"
           aria-labelledby="business-length-reference-title"
@@ -6457,9 +6441,6 @@ function WithinDaysGuidePage({ onNavigate }: NavigationProps) {
             The policy, contract, regulation, or other rule controls.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section className="within-zero-example" aria-labelledby="within-zero-example-title">
           <div className="within-zero-example-heading">
             <p className="within-zero-section-eyebrow">
@@ -7023,9 +7004,6 @@ function NetThirtyVsThirtyDaysGuidePage({ onNavigate }: NavigationProps) {
             tells you what it applies to.
           </p>
         </header>
-
-        <AnswerFeedback />
-
         <section className="net30-zero-compare" aria-labelledby="net30-zero-compare-title">
           <div className="net30-zero-compare-heading">
             <p className="net30-zero-section-eyebrow">Quick check</p>
@@ -7565,9 +7543,6 @@ function DeadlineWeekendExtensionGuidePage({ onNavigate }: NavigationProps) {
             says to use the next business day or otherwise extends the deadline.
           </p>
         </section>
-
-        <AnswerFeedback />
-
         <section className="weekend-zero-check" aria-label="Check a weekend deadline">
           <div className="weekend-zero-result" aria-live="polite">
             {parsedDeadlineDate && nextBusinessDay ? (
@@ -16387,9 +16362,6 @@ function ResultActions({
           </span>
         )}
       </div>
-
-      <AnswerFeedback />
-
       <style>{`
         .result-actions {
           display: flex;
@@ -16828,9 +16800,6 @@ function BusinessDaysBetweenPage({ onNavigate }: NavigationProps) {
           >
             {copyMessage ?? 'Copy result'}
           </button>
-
-          <AnswerFeedback />
-
           <details className="between-answer-details">
             <summary>Why this number?</summary>
             <div className="between-answer-detail-body">
